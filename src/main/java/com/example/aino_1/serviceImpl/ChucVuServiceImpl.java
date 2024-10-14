@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-
+//dựa trên cách quản lý bean của spring thì service phải đặt annotation ở tầng implements
 @Service
 public class ChucVuServiceImpl implements ChucVuServiceInter {
     @Autowired

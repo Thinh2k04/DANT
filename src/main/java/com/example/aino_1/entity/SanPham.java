@@ -32,14 +32,8 @@ public class SanPham {
     private Integer id;
     @Column(name = "ten_san_pham")
     private String tenSanPham;
-    @Column(name = "don_gia", precision = 19, scale = 4)
-    private BigDecimal donGia;
     @Column(name = "hang_san_xuat")
     private String hangSanXuat;
-    @Column(name = "so_luong")
-    private Integer soLuong;
-    @Column(name = "trang_thai")
-    private String trangThai;
     @Column(name = "nam_san_xuat")
     private Integer namSanXuat;
     @Column(name = "trong_luong", precision = 3, scale = 2)
@@ -60,17 +54,10 @@ public class SanPham {
     @JoinColumn(name = "ma_loai")
     private LoaiSanPham loaiSanPham;
     @ManyToOne
-    @JoinColumn(name = "id_gio_hang")
-    private GioHang gioHang;
-
-    @ManyToOne
     @JoinColumn(name = "ma_nha_cung_ung")
     private NguonNhap nguonNhap;
     //jsonignore để tránh vòng lặp vô hạn khi mapping 2 chiều
     @JsonIgnore
     @OneToMany(mappedBy = "sanPham")
-    List<Ram> ram;
-    @JsonIgnore
-    @OneToMany(mappedBy = "sanPham")
-    List<OLuuTru> oLuuTru;
+    List<SanPhamChiTiet> spct;
 }

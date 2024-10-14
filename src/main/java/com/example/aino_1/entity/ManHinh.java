@@ -1,11 +1,13 @@
 package com.example.aino_1.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -13,6 +15,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -40,9 +43,8 @@ public class ManHinh {
     private String tyLeManHinh;
     @Column(name = "do_phu_mau", precision = 3, scale = 1)
     private BigDecimal doPhuMau;
-    /*nếu chỉ truy vấn bảng sp từ bảng linh kiện phục vụ cho chức năng tìm kiếm dựa trên cầu hình sau này
-    thì chỉ cần đặt liên kết ở bảng linh kiện (mapping 1 chiều)*/
-    @OneToOne
-    @JoinColumn(name = "ma_so")
-    private SanPham sanPham;
+    //jsonignore để tránh vòng lặp vô hạn khi mapping 2 chiều
+    @JsonIgnore
+    @OneToMany(mappedBy = "manHinh")
+    List<SanPhamChiTiet> spct;
 }

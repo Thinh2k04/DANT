@@ -39,5 +39,5 @@ public class GioHang {
     //jsonignore để tránh vòng lặp vô hạn khi mapping 2 chiều
     @JsonIgnore
     @OneToMany(mappedBy = "gioHang")
-    List<SanPham> sanPham;
+    List<SanPhamChiTiet> spct;
 }

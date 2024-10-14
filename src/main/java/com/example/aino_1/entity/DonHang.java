@@ -48,9 +48,9 @@ public class DonHang {
     private TaiKhoanNguoiDung taiKhoanNguoiDung;
     //jsonignore để tránh vòng lặp vô hạn khi mapping 2 chiều
     @JsonIgnore
-    @OneToMany(mappedBy = "taiKhoanNguoiDung")
+    @OneToMany(mappedBy = "donHang")
     List<GioHang> gioHang;
     @JsonIgnore
-    @OneToMany(mappedBy = "taiKhoanNguoiDung")
+    @OneToMany(mappedBy = "donHang")
     List<Voucher> voucher;
 }

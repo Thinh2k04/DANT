@@ -32,8 +32,9 @@ public class TaiKhoanNguoiDung {
     private String tenTaiKhoan;
     @Column(name = "mat_khau")
     private String matKhau;
-    @Column(name = "vai_tro")
-    private String vaiTro;
+//    cột này thừa thãi nên bỏ đi
+//    @Column(name = "vai_tro")
+//    private String vaiTro;
     @Column(name = "email")
     private String email;
     @ManyToOne

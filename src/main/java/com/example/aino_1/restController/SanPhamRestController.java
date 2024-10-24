@@ -44,18 +44,14 @@ public class SanPhamRestController {
             //tạo đường dẫn đến file hình ảnh
             Path imagePath = Paths.get(imageDir).resolve(fileName).normalize();
             File imageFile = imagePath.toFile();
-
             //kiểm tra xem file có tồn tại không
             if (!imageFile.exists()) {
                 return ResponseEntity.notFound().build();
             }
-
             //tạo UrlResource từ file
             Resource resource = new UrlResource(imagePath.toUri());
-
-            //các định loại nội dung của file hình ảnh
+            //xác định loại nội dung của file hình ảnh
             String contentType = "image/jpeg"; //thay đổi nếu cần, có thể dựa trên đuôi file
-
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_TYPE, contentType)
                     .body(resource);

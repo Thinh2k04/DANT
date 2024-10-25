@@ -36,30 +36,6 @@ public class SanPhamRestController {
         return spsi.read();
     }
 
-    private final String imageDir = "src/main/resources/static/asset/image"; //đường dẫn đến thư mục chứa hình ảnh
-
-    @GetMapping("/getImage/{fileName:.+}")
-    public ResponseEntity<Resource> getImage(@PathVariable String fileName) {
-        try {
-            //tạo đường dẫn đến file hình ảnh
-            Path imagePath = Paths.get(imageDir).resolve(fileName).normalize();
-            File imageFile = imagePath.toFile();
-            //kiểm tra xem file có tồn tại không
-            if (!imageFile.exists()) {
-                return ResponseEntity.notFound().build();
-            }
-            //tạo UrlResource từ file
-            Resource resource = new UrlResource(imagePath.toUri());
-            //xác định loại nội dung của file hình ảnh
-            String contentType = "image/jpeg"; //thay đổi nếu cần, có thể dựa trên đuôi file
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_TYPE, contentType)
-                    .body(resource);
-        } catch (MalformedURLException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
-
     @PostMapping("/add")
     public SanPham create(@RequestBody SanPham sanPham) {
         return spsi.create(sanPham);

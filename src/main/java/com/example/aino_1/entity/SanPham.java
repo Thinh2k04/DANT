@@ -60,4 +60,7 @@ public class SanPham {
     @JsonIgnore
     @OneToMany(mappedBy = "sanPham")
     List<SanPhamChiTiet> spct;
+    @JsonIgnore
+    @OneToMany(mappedBy = "sanPham")
+    List<HinhAnh> ha;
 }

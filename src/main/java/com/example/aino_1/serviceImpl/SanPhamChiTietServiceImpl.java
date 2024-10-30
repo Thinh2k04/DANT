@@ -30,12 +30,12 @@ public class SanPhamChiTietServiceImpl implements SanPhamChiTietServiceInter {
     }
 
     @Override
-    public void delete(String maDinhDanh) {
-        spcti.deleteById(maDinhDanh);
+    public void delete(Integer id) {
+        spcti.deleteById(id);
     }
 
     @Override
-    public SanPhamChiTiet detail(String maDinhDanh) {
-        return spcti.findById(maDinhDanh).get();
+    public SanPhamChiTiet detail(Integer id) {
+        return spcti.findById(id).get();
     }
 }

@@ -26,9 +26,10 @@ public class SanPhamChiTietRestController {
     public List<SanPhamChiTiet> getAll() {
         return spctsi.read();
     }
-    @GetMapping("/getById/{maDinhDanh}")
-    public SanPhamChiTiet getById(@PathVariable String maDinhDanh) {
-        return spctsi.detail(maDinhDanh);
+
+    @GetMapping("/getById/{id}")
+    public SanPhamChiTiet getById(@PathVariable Integer id) {
+        return spctsi.detail(id);
     }
 
     @PostMapping("/add")
@@ -36,13 +37,13 @@ public class SanPhamChiTietRestController {
         return spctsi.create(spct);
     }
 
-    @PutMapping("/update/{maDinhDanh}")
+    @PutMapping("/update/{id}")
     public SanPhamChiTiet update(@RequestBody SanPhamChiTiet spct) {
         return spctsi.update(spct);
     }
 
-    @DeleteMapping("/del/{maDinhDanh}")
-    public void delete(@PathVariable String maDinhDanh) {
-        spctsi.delete(maDinhDanh);
+    @DeleteMapping("/del/{id}")
+    public void delete(@PathVariable Integer id) {
+        spctsi.delete(id);
     }
 }

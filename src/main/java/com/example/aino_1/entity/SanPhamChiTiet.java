@@ -2,6 +2,8 @@ package com.example.aino_1.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -19,8 +21,11 @@ import java.math.BigDecimal;
 @Entity
 public class SanPhamChiTiet {
     @Id
-    @Column(name = "ma_dinh_danh")
-    private String maDinhDanh;
+    /*trường id cứ là số thì tự động tăng hết kẻo gặp lỗi phải đặt id trước khi persist
+    /còn ko thì hoặc là đặt thủ công hoặc gọi ra từ api*/
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Integer id;
     @Column(name = "so_luong")
     private Integer soLuong;
     @Column(name = "trang_thai")

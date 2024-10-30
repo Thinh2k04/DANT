@@ -26,6 +26,10 @@ public class SanPhamChiTietRestController {
     public List<SanPhamChiTiet> getAll() {
         return spctsi.read();
     }
+    @GetMapping("/getById/{maDinhDanh}")
+    public SanPhamChiTiet getById(@PathVariable String maDinhDanh) {
+        return spctsi.detail(maDinhDanh);
+    }
 
     @PostMapping("/add")
     public SanPhamChiTiet create(@RequestBody SanPhamChiTiet spct) {

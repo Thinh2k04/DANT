@@ -33,4 +33,9 @@ public class SanPhamChiTietServiceImpl implements SanPhamChiTietServiceInter {
     public void delete(String maDinhDanh) {
         spcti.deleteById(maDinhDanh);
     }
+
+    @Override
+    public SanPhamChiTiet detail(String maDinhDanh) {
+        return spcti.findById(maDinhDanh).get();
+    }
 }

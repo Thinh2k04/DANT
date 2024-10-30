@@ -12,4 +12,5 @@ public interface SanPhamChiTietServiceInter {
     SanPhamChiTiet update(SanPhamChiTiet spct);
 
     void delete(String maDinhDanh);
+    SanPhamChiTiet detail(String maDinhDanh);
 }

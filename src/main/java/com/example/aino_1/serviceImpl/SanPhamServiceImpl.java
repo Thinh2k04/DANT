@@ -32,4 +32,9 @@ public class SanPhamServiceImpl implements SanPhamServiceInter {
     public void delete(Integer id) {
         spi.deleteById(id);
     }
+
+    @Override
+    public SanPham detail(Integer id) {
+        return spi.findById(id).get();
+    }
 }

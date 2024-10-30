@@ -35,6 +35,10 @@ public class SanPhamRestController {
     public List<SanPham> getAll() {
         return spsi.read();
     }
+    @GetMapping("/getById/{id}")
+    public SanPham getById(@PathVariable Integer id) {
+        return spsi.detail(id);
+    }
 
     @PostMapping("/add")
     public SanPham create(@RequestBody SanPham sanPham) {

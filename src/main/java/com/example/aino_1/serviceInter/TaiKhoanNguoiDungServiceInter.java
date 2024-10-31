@@ -12,4 +12,6 @@ public interface TaiKhoanNguoiDungServiceInter {
     TaiKhoanNguoiDung update(TaiKhoanNguoiDung taiKhoanNguoiDung);
 
     void delete(Integer id);
+
+    TaiKhoanNguoiDung detail(String username);
 }

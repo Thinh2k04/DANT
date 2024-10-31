@@ -26,6 +26,10 @@ public class TaiKhoanNguoiDungRestController {
     public List<TaiKhoanNguoiDung> getAll() {
         return tkndsi.read();
     }
+    @GetMapping("/getByUsername/{username}")
+    public TaiKhoanNguoiDung getByUsername(@PathVariable String username) {
+        return tkndsi.detail(username);
+    }
 
     @PostMapping("/add")
     public TaiKhoanNguoiDung create(@RequestBody TaiKhoanNguoiDung taiKhoanNguoiDung) {

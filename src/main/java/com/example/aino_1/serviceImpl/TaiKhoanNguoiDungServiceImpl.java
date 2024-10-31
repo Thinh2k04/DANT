@@ -32,4 +32,9 @@ public class TaiKhoanNguoiDungServiceImpl implements TaiKhoanNguoiDungServiceInt
     public void delete(Integer id) {
         tkndi.deleteById(id);
     }
+
+    @Override
+    public TaiKhoanNguoiDung detail(String username) {
+        return tkndi.findByUsername(username);
+    }
 }

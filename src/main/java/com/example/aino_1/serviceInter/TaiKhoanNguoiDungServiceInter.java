@@ -13,5 +13,5 @@ public interface TaiKhoanNguoiDungServiceInter {
 
     void delete(Integer id);
 
-    TaiKhoanNguoiDung detail(String username);
+    String verify(TaiKhoanNguoiDung tknd);
 }

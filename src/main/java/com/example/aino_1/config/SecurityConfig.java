@@ -40,7 +40,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(r -> r
                         /*ko yêu cầu xác thực cho 2 request này (ko chỉ phục vụ cho mục đích test, mà còn vì trong thực tế
                         yêu cầu xác thực mới cho đăng ký hay đăng nhập là ngu*/
-                        .requestMatchers("/rest/tai_khoan_nguoi_dung/register", "/rest/tai_khoan_nguoi_dung/login", "/rest/account/username").permitAll()
+                        .requestMatchers("/rest/tai_khoan_nguoi_dung/register", "/rest/tai_khoan_nguoi_dung/login").permitAll()
                         //hiển thị trang chủ thì ko yêu cầu xác thực nên cần permit cho đống dưới
                         //còn lại request nào cũng cần xác thực mới cho phép
                         .anyRequest().authenticated())

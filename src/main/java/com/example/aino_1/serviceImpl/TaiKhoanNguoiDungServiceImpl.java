@@ -1,6 +1,6 @@
 package com.example.aino_1.serviceImpl;
 
-import com.example.aino_1.config.TaiKhoanNguoiDungDetail;
+import com.example.aino_1.entity.TaiKhoanNguoiDungDetail;
 import com.example.aino_1.entity.TaiKhoanNguoiDung;
 import com.example.aino_1.repository.TaiKhoanNguoiDungInterface;
 import com.example.aino_1.serviceInter.JWTServiceInter;

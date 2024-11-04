@@ -1,4 +1,4 @@
-package com.example.aino_1.config;
+package com.example.aino_1.entity;
 
 import com.example.aino_1.entity.TaiKhoanNguoiDung;
 import org.springframework.security.core.GrantedAuthority;
@@ -19,7 +19,7 @@ public class TaiKhoanNguoiDungDetail implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singleton(new SimpleGrantedAuthority("USER"));
+        return Collections.singleton(new SimpleGrantedAuthority("ROLE_USER"));
     }
 
     @Override

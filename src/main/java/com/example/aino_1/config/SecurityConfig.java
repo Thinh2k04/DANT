@@ -44,7 +44,7 @@ public class SecurityConfig {
                         .permitAll()
                         //hiển thị trang chủ thì ko yêu cầu xác thực nên cần permit cho đống dưới
                         //còn lại request nào cũng cần xác thực mới cho phép
-                        .anyRequest().authenticated())
+                        .anyRequest().permitAll())
                 //http.formLogin(Customizer.withDefaults()); //xác thực bằng gửi biểu mẫu yêu cầu đăng nhập
                 //xác thực mặc định, gửi thông tin đăng nhập được mã hóa đi kèm với request (để có thể test trên postman)
                 .httpBasic(Customizer.withDefaults())

@@ -1,10 +1,11 @@
 package com.example.aino_1.config;
 
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.core.Ordered;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -14,11 +15,8 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -36,14 +34,17 @@ public class SecurityConfig {
     //bộ lọc áp dụng cho http request được spring container quản lý
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         //csrf token là đoạn mã đi kèm xác thực cho post put delete
-        return http.csrf(c -> c.disable()) //tắt csrf protection
+        return http
+                .csrf(cs -> cs.disable()) //tắt csrf protection
                 .authorizeHttpRequests(r -> r
                         /*ko yêu cầu xác thực cho 2 request này (ko chỉ phục vụ cho mục đích test, mà còn vì trong thực tế
                         yêu cầu xác thực mới cho đăng ký hay đăng nhập là ngu*/
-                        .requestMatchers("/rest/tai_khoan_nguoi_dung/register", "/rest/tai_khoan_nguoi_dung/login").permitAll()
+                        .requestMatchers("/rest/tai_khoan_nguoi_dung/register",
+                                "/rest/tai_khoan_nguoi_dung/login")
+                        .permitAll()
                         //hiển thị trang chủ thì ko yêu cầu xác thực nên cần permit cho đống dưới
                         //còn lại request nào cũng cần xác thực mới cho phép
-                        .anyRequest().permitAll())
+                        .anyRequest().authenticated())
                 //http.formLogin(Customizer.withDefaults()); //xác thực bằng gửi biểu mẫu yêu cầu đăng nhập
                 //xác thực mặc định, gửi thông tin đăng nhập được mã hóa đi kèm với request (để có thể test trên postman)
                 .httpBasic(Customizer.withDefaults())
@@ -55,6 +56,7 @@ public class SecurityConfig {
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build(); //chạy phương thức bảo mật
     }
+
     @Bean
     //định nghĩa phương thức kiểm tra xác thực người dùng có hợp lệ hay ko dựa trên tk mk
     public AuthenticationProvider authenticationProvider() {
@@ -75,5 +77,12 @@ public class SecurityConfig {
     //khi khởi động spring tạo ra 1 instance của AuthenticationManager
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
+    }
+
+    @Bean
+    public FilterRegistrationBean corsFilter() {
+        FilterRegistrationBean bean = new FilterRegistrationBean(new CORSFilter());
+        bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
+        return bean;
     }
 }

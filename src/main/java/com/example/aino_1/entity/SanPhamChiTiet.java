@@ -32,6 +32,8 @@ public class SanPhamChiTiet {
     private String trangThai;
     @Column(name = "don_gia", precision = 19, scale = 4)
     private BigDecimal donGia;
+    @Column(name = "ten_spct")
+    private String tenSpct;
     @ManyToOne
     @JoinColumn(name = "id_gio_hang")
     private GioHang gioHang;

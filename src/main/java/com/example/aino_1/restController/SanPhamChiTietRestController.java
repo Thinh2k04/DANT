@@ -1,5 +1,6 @@
 package com.example.aino_1.restController;
 
+import com.example.aino_1.dto.SanPhamChiTietDto;
 import com.example.aino_1.entity.SanPhamChiTiet;
 import com.example.aino_1.serviceInter.SanPhamChiTietServiceInter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,5 +46,33 @@ public class SanPhamChiTietRestController {
     @DeleteMapping("/del/{id}")
     public void delete(@PathVariable Integer id) {
         spctsi.delete(id);
+    }
+    @GetMapping("/tim_kiem/{tuKhoaTimKiem}")
+    public List<SanPhamChiTietDto> search(@PathVariable String tuKhoaTimKiem) {
+        return spctsi.sreach(tuKhoaTimKiem);
+    }
+    @GetMapping("/locTheoGia/{minPrice}&{maxPrice}")
+    public List<SanPhamChiTietDto> locTheoGia(@PathVariable Double minPrice,@PathVariable Double maxPrice) {
+        return spctsi.locTheoGia(minPrice,maxPrice);
+    }
+    @GetMapping("/locTheoDungLuongRam/{dungLuongRam}")
+    public List<SanPhamChiTietDto> locTheoDungLuongRam(@PathVariable Integer dungLuongRam) {
+        return spctsi.locTheoDungLuongRam(dungLuongRam);
+    }
+    @GetMapping("/locTheoHangSanXuat/{hangSanXuat}")
+    public List<SanPhamChiTietDto> locTheoHangSanXuat(@PathVariable String hangSanXuat) {
+        return spctsi.locTheoHangSanXuat(hangSanXuat);
+    }
+    @GetMapping("/locTheoTamNen/{tamNen}")
+    public List<SanPhamChiTietDto> locTheoTamNen(@PathVariable String tamNen) {
+        return spctsi.locTheoTamNen(tamNen);
+    }
+    @GetMapping("/locTheoCongNgheCPU/{congNgheCPU}")
+    public List<SanPhamChiTietDto> locTheoCongNgheCPU(@PathVariable String congNgheCPU) {
+        return spctsi.locTheoCongNgheCPU(congNgheCPU);
+    }
+    @GetMapping("/locTheoKichThuoc/{kichThuoc}")
+    public List<SanPhamChiTietDto> locTheoKichThuoc(@PathVariable Double kichThuoc) {
+        return spctsi.locTheoKichThuoc(kichThuoc);
     }
 }

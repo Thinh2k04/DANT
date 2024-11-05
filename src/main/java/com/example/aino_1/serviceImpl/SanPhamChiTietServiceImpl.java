@@ -1,5 +1,6 @@
 package com.example.aino_1.serviceImpl;
 
+import com.example.aino_1.dto.SanPhamChiTietDto;
 import com.example.aino_1.entity.SanPhamChiTiet;
 import com.example.aino_1.repository.SanPhamChiTietInterface;
 import com.example.aino_1.serviceInter.SanPhamChiTietServiceInter;
@@ -37,5 +38,33 @@ public class SanPhamChiTietServiceImpl implements SanPhamChiTietServiceInter {
     @Override
     public SanPhamChiTiet detail(Integer id) {
         return spcti.findById(id).get();
+    }
+    @Override
+    public List<SanPhamChiTietDto> sreach(String tuKhoaTimKiem) {
+        return spcti.timSanPhamTheoTuKhoa(tuKhoaTimKiem);
+    }
+    @Override
+    public List<SanPhamChiTietDto> locTheoGia(Double minPrice, Double maxPrice) {
+        return spcti.locTheoGia(minPrice,maxPrice);
+    }
+    @Override
+    public List<SanPhamChiTietDto> locTheoDungLuongRam(Integer dungLuongRam) {
+        return spcti.locTheoDungLuongRam(dungLuongRam);
+    }
+    @Override
+    public List<SanPhamChiTietDto> locTheoHangSanXuat(String hangSanXuat) {
+        return spcti.locTheoHangSanXuat(hangSanXuat);
+    }
+    @Override
+    public List<SanPhamChiTietDto> locTheoTamNen(String tamNen) {
+        return spcti.locTheoTamNen(tamNen);
+    }
+    @Override
+    public List<SanPhamChiTietDto> locTheoCongNgheCPU(String congNgheCPU) {
+        return spcti.locTheoCongNgheCPU(congNgheCPU);
+    }
+    @Override
+    public List<SanPhamChiTietDto> locTheoKichThuoc(Double kichThuoc) {
+        return spcti.locTheoKichThuoc(kichThuoc);
     }
 }

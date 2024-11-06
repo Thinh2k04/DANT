@@ -38,6 +38,8 @@ public class DonHang {
     private String hinhThucThanhToan;
     @Column(name = "dia_chi_nhan_hang")
     private String diaChiNhanHang;
+    @Column(name = "trang_thai")
+    private String trangThai;
     @Column(name = "sdt")
     private String sdt;
     //gửi đơn vị vận chuyển xong được biên lai có chứa mã vận đơn, cập nhật mã này vào hđ cho người dùng xem

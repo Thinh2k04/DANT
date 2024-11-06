@@ -40,11 +40,14 @@ public class SecurityConfig {
                         /*ko yêu cầu xác thực cho 2 request này (ko chỉ phục vụ cho mục đích test, mà còn vì trong thực tế
                         yêu cầu xác thực mới cho đăng ký hay đăng nhập là ngu*/
                         .requestMatchers("/rest/tai_khoan_nguoi_dung/register",
-                                "/rest/tai_khoan_nguoi_dung/login")
+                                "/rest/tai_khoan_nguoi_dung/login",
+                                "/rest/san_pham_chi_tiet/getAll",
+                                "/rest/san_pham_chi_tiet/getById/{id}"
+                                )
                         .permitAll()
                         //hiển thị trang chủ thì ko yêu cầu xác thực nên cần permit cho đống dưới
                         //còn lại request nào cũng cần xác thực mới cho phép
-                        .anyRequest().permitAll())
+                        .anyRequest().authenticated())
                 //http.formLogin(Customizer.withDefaults()); //xác thực bằng gửi biểu mẫu yêu cầu đăng nhập
                 //xác thực mặc định, gửi thông tin đăng nhập được mã hóa đi kèm với request (để có thể test trên postman)
                 .httpBasic(Customizer.withDefaults())

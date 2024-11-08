@@ -10,4 +10,7 @@ import org.springframework.stereotype.Repository;
 public interface TaiKhoanNguoiDungInterface extends JpaRepository<TaiKhoanNguoiDung, Integer> {
     @Query("SELECT tknd FROM TaiKhoanNguoiDung tknd WHERE tknd.tenTaiKhoan = :tenTaiKhoan")
     TaiKhoanNguoiDung findByUsername(@Param("tenTaiKhoan") String tenTaiKhoan);
+
+    @Query("select c.vaiTro from TaiKhoanNguoiDung tknd join ChucVu c on tknd.chucVu.maChucVu = c.maChucVu where tknd.tenTaiKhoan = :tenTaiKhoan")
+    String getRoleByUsername(@Param("tenTaiKhoan") String tenTaiKhoan);
 }

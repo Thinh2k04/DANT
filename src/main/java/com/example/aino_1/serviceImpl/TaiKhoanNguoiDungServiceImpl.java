@@ -46,6 +46,11 @@ public class TaiKhoanNguoiDungServiceImpl implements TaiKhoanNguoiDungServiceInt
         }
     }
 
+    @Override
+    public String getRoleByUsername(String username) {
+        return tkndi.getRoleByUsername(username);
+    }
+
     //ghi đè phương thức từ UserDetailsService
     //UserDetailsService được dùng trong AuthenticationProvider trong SecurityConfig
     @Override

@@ -1,10 +1,12 @@
 package com.example.aino_1.serviceImpl;
 
 import com.example.aino_1.serviceInter.JWTServiceInter;
+import com.example.aino_1.serviceInter.TaiKhoanNguoiDungServiceInter;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +21,8 @@ import java.util.function.Function;
 
 @Service
 public class JWTServiceImpl implements JWTServiceInter {
+    @Autowired
+    TaiKhoanNguoiDungServiceInter tkndsi;
     //biến key sẽ chứa signature đã mã hóa
     private String key = "";
 
@@ -40,12 +44,14 @@ public class JWTServiceImpl implements JWTServiceInter {
     @Override
     public String generateToken(String username) {
         Map<String, Object> claims = new HashMap<>();
+        String role = tkndsi.getRoleByUsername(username);
+        claims.put("roles", role);
         return Jwts.builder()
                 .claims()//bản đồ chứa các cấu hình payload tùy chỉnh của jwt
                 .add(claims)
                 .subject(username) //đặt subject là username
                 .issuedAt(new Date(System.currentTimeMillis())) //thời gian phát hành và có hiệu lực là thời điểm được tạo
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 5)) //jwt sẽ hết hạn sau 60s từ thời điểm được tạo ra
+                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 3)) //jwt sẽ hết hạn sau 3h từ thời điểm được tạo ra
                 .and()
                 .signWith(getKey()) //ký jwt bằng phương thức đã tạo
                 .compact(); //tạo và trả về jwt dưới da23

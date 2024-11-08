@@ -14,4 +14,5 @@ public interface TaiKhoanNguoiDungServiceInter {
     void delete(Integer id);
 
     String verify(TaiKhoanNguoiDung tknd);
+    String getRoleByUsername(String username);
 }

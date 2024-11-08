@@ -42,7 +42,8 @@ public class SecurityConfig {
                         .requestMatchers("/rest/tai_khoan_nguoi_dung/register",
                                 "/rest/tai_khoan_nguoi_dung/login",
                                 "/rest/san_pham_chi_tiet/getAll",
-                                "/rest/san_pham_chi_tiet/getById/{id}"
+                                "/rest/san_pham_chi_tiet/getById/{id}",
+                                "/rest/san_pham_chi_tiet/tim_kiem/{tuKhoaTimKiem}"
                                 )
                         .permitAll()
                         //hiển thị trang chủ thì ko yêu cầu xác thực nên cần permit cho đống dưới

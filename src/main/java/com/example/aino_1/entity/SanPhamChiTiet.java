@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -35,9 +36,6 @@ public class SanPhamChiTiet {
     @Column(name = "ten_spct")
     private String tenSpct;
     @ManyToOne
-    @JoinColumn(name = "id_gio_hang")
-    private GioHang gioHang;
-    @ManyToOne
     @JoinColumn(name = "id_sp")
     private SanPham sanPham;
     @ManyToOne
@@ -55,4 +53,7 @@ public class SanPhamChiTiet {
     @ManyToOne
     @JoinColumn(name = "ma_so_gpu")
     private Gpu gpu;
+    @OneToOne
+    @JoinColumn(name = "id")
+    private GioHang gioHang;
 }

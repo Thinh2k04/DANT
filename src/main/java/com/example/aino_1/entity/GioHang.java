@@ -37,9 +37,8 @@ public class GioHang {
     @ManyToOne
     @JoinColumn(name = "id_don_hang")
     private DonHang donHang;
-    //jsonignore để tránh vòng lặp vô hạn khi mapping 2 chiều
 
-    @OneToOne
-    @JoinColumn(name = "id")
+    @ManyToOne
+    @JoinColumn(name = "id_spct")
     private SanPhamChiTiet sanPhamChiTiet;
 }

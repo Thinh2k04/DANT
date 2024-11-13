@@ -43,5 +43,5 @@ public class TaiKhoanNguoiDung {
     //jsonignore để tránh vòng lặp vô hạn khi mapping 2 chiều
     @JsonIgnore
     @OneToMany(mappedBy = "taiKhoanNguoiDung")
-    List<DonHang> donHang;
+    List<GioHang> gioHang;
 }

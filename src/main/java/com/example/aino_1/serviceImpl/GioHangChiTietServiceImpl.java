@@ -1,8 +1,9 @@
 package com.example.aino_1.serviceImpl;
 
-
-import com.example.aino_1.entity.GioHang;
+import com.example.aino_1.entity.GioHangChiTiet;
+import com.example.aino_1.repository.GioHangChiTietInterface;
 import com.example.aino_1.repository.GioHangInterface;
+import com.example.aino_1.serviceInter.GHCTServiceInter;
 import com.example.aino_1.serviceInter.GioHangServiceInter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,23 +11,23 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 //dựa trên cách quản lý bean của spring thì service phải đặt annotation ở tầng implements
 @Service
-public class GioHangServiceImpl implements GioHangServiceInter {
+public class GioHangChiTietServiceImpl implements GHCTServiceInter {
     @Autowired
-    GioHangInterface ghi;
+    GioHangChiTietInterface ghi;
 
     @Override
-    public List<GioHang> read() {
+    public List<GioHangChiTiet> read() {
         return ghi.findAll();
     }
 
     @Override
-    public GioHang create(GioHang gioHang) {
-        return ghi.save(gioHang);
+    public GioHangChiTiet create(GioHangChiTiet ghct) {
+        return ghi.save(ghct);
     }
 
     @Override
-    public GioHang update(GioHang gioHang) {
-        return ghi.save(gioHang);
+    public GioHangChiTiet update(GioHangChiTiet ghct) {
+        return ghi.save(ghct);
     }
 
     @Override

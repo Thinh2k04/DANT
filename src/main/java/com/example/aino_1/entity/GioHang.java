@@ -9,13 +9,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -30,15 +30,35 @@ public class GioHang {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Integer id;
-    @Column(name = "so_luong")
-    private Integer soLuong;
-    @Column(name = "thanh_tien", precision = 19, scale = 4)
-    private BigDecimal thanhTien;
+    @Column(name = "tong_tien", precision = 19, scale = 4)
+    private BigDecimal tongTien;
+    @Column(name = "thoi_gian_thanh_toan")
+    private LocalDateTime thoiGianThanhToan;
+    @Column(name = "hinh_thuc_thanh_toan")
+    private String hinhThucThanhToan;
+    @Column(name = "dia_chi_nhan_hang")
+    private String diaChiNhanHang;
+    @Column(name = "trang_thai")
+    private String trangThai;
+    @Column(name = "sdt")
+    private String sdt;
+    //gửi đơn vị vận chuyển xong được biên lai có chứa mã vận đơn, cập nhật mã này vào hđ cho người dùng xem
+    @Column(name = "ma_phieu_gui")
+    private String maPhieuGui;
     @ManyToOne
-    @JoinColumn(name = "id_don_hang")
-    private DonHang donHang;
-
+    @JoinColumn(name = "id_nguoi_dung")
+    private TaiKhoanNguoiDung taiKhoanNguoiDung;
     @ManyToOne
-    @JoinColumn(name = "id_spct")
-    private SanPhamChiTiet sanPhamChiTiet;
+    @JoinColumn(name = "id_cua_hang")
+    private CuaHang cuaHang;
+    @ManyToOne
+    @JoinColumn(name = "id_khach_hang")
+    private KhachHang khachHang;
+    //jsonignore để tránh vòng lặp vô hạn khi mapping 2 chiều
+    @JsonIgnore
+    @OneToMany(mappedBy = "gioHang")
+    List<GioHangChiTiet> gioHangChiTiet;
+    @JsonIgnore
+    @OneToMany(mappedBy = "gioHang")
+    List<Voucher> voucher;
 }

@@ -21,38 +21,26 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "don_hang")
+@Table(name = "khach_hang")
 @Entity
-public class DonHang {
+public class KhachHang {
     @Id
     /*trường id cứ là số thì tự động tăng hết kẻo gặp lỗi phải đặt id trước khi persist
     /còn ko thì hoặc là đặt thủ công hoặc gọi ra từ api*/
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Integer id;
-    @Column(name = "tong_tien", precision = 19, scale = 4)
-    private BigDecimal tongTien;
-    @Column(name = "thoi_gian_thanh_toan")
-    private LocalDateTime thoiGianThanhToan;
-    @Column(name = "hinh_thuc_thanh_toan")
-    private String hinhThucThanhToan;
-    @Column(name = "dia_chi_nhan_hang")
-    private String diaChiNhanHang;
-    @Column(name = "trang_thai")
-    private String trangThai;
+    @Column(name = "ho_ten")
+    private String hoTen;
+    @Column(name = "dia_chi")
+    private String diaChi;
+    @Column(name = "email")
+    private String email;
     @Column(name = "sdt")
     private String sdt;
-    //gửi đơn vị vận chuyển xong được biên lai có chứa mã vận đơn, cập nhật mã này vào hđ cho người dùng xem
-    @Column(name = "ma_phieu_gui")
-    private String maPhieuGui;
-    @ManyToOne
-    @JoinColumn(name = "id_nguoi_dung")
-    private TaiKhoanNguoiDung taiKhoanNguoiDung;
+
     //jsonignore để tránh vòng lặp vô hạn khi mapping 2 chiều
     @JsonIgnore
-    @OneToMany(mappedBy = "donHang")
+    @OneToMany(mappedBy = "khachHang")
     List<GioHang> gioHang;
-    @JsonIgnore
-    @OneToMany(mappedBy = "donHang")
-    List<Voucher> voucher;
 }

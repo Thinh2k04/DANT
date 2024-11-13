@@ -9,7 +9,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -59,5 +58,8 @@ public class SanPhamChiTiet {
     //jsonignore để tránh vòng lặp vô hạn khi mapping 2 chiều
     @JsonIgnore
     @OneToMany(mappedBy = "sanPhamChiTiet")
-    List<GioHang> gioHang;
+    List<GioHangChiTiet> gioHangChiTiet;
+    @JsonIgnore
+    @OneToMany(mappedBy = "sanPhamChiTiet")
+    List<HinhAnh> ha;
 }

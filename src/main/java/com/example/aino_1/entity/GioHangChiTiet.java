@@ -12,20 +12,28 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "hinh_anh")
+@Table(name = "gio_hang_chi_tiet")
 @Entity
-public class HinhAnh {
+public class GioHangChiTiet {
     @Id
     /*trường id cứ là số thì tự động tăng hết kẻo gặp lỗi phải đặt id trước khi persist
     /còn ko thì hoặc là đặt thủ công hoặc gọi ra từ api*/
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Integer id;
-    @Column(name = "link_hinh_anh")
-    private String linkHinhAnh;
+    @Column(name = "so_luong")
+    private Integer soLuong;
+    @Column(name = "thanh_tien", precision = 19, scale = 4)
+    private BigDecimal thanhTien;
+    @ManyToOne
+    @JoinColumn(name = "id_gio_hang")
+    private GioHang gioHang;
+
     @ManyToOne
     @JoinColumn(name = "id_spct")
     private SanPhamChiTiet sanPhamChiTiet;

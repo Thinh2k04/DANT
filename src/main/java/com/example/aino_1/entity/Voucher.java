@@ -39,6 +39,6 @@ public class Voucher {
     @Column(name = "thoi_gian_ap_dung")
     private LocalDateTime thoiGianApDung;
     @ManyToOne
-    @JoinColumn(name = "id_don_hang")
-    private DonHang donHang;
+    @JoinColumn(name = "id_gio_hang")
+    private GioHang gioHang;
 }

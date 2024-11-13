@@ -1,7 +1,8 @@
 package com.example.aino_1.restController;
 
-import com.example.aino_1.entity.DonHang;
-import com.example.aino_1.serviceInter.DonHangServiceInter;
+import com.example.aino_1.entity.GioHangChiTiet;
+import com.example.aino_1.entity.Gpu;
+import com.example.aino_1.serviceInter.GHCTServiceInter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,28 +18,29 @@ import java.util.List;
 
 @CrossOrigin("*") //cho phép tất cả các miền khác truy cập tài nguyên server (end point api)
 @RestController
-@RequestMapping("/rest/don_hang") //đường dẫn chung cho các phương thức http bên dưới
-public class DonHangRestController {
+@RequestMapping("/rest/ghct") //đường dẫn chung cho các phương thức http bên dưới
+public class GHCTRestController {
     @Autowired
-    DonHangServiceInter dhsi;
+    GHCTServiceInter gsi;
 
     @GetMapping("/getAll")
-    public List<DonHang> getAll() {
-        return dhsi.read();
+    public List<GioHangChiTiet> getAll() {
+        return gsi.read();
     }
 
     @PostMapping("/add")
-    public DonHang create(@RequestBody DonHang donHang) {
-        return dhsi.create(donHang);
+    public GioHangChiTiet create(@RequestBody GioHangChiTiet ghct) {
+        return gsi.create(ghct);
     }
 
     @PutMapping("/update/{id}")
-    public DonHang update(@RequestBody DonHang donHang) {
-        return dhsi.update(donHang);
+    public GioHangChiTiet update(@RequestBody GioHangChiTiet ghct) {
+        return gsi.update(ghct);
     }
 
     @DeleteMapping("/del/{id}")
     public void delete(@PathVariable Integer id) {
-        dhsi.delete(id);
+        gsi.delete(id);
     }
 }
+

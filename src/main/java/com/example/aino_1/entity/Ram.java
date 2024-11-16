@@ -12,13 +12,17 @@ import lombok.NoArgsConstructor;
 @Entity
 public class Ram {
 
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "dung_luong", nullable = true)
+    @Column(name = "dung_luong")
     private Integer dungLuong;
 
-    @Column(name = "toc_do", nullable = true)
+    @Column(name = "toc_do")
     private Integer tocDo;
+
+    @Column(name = "trang_thai")
+    private Integer trangThai;  // Cột trạng thái, mặc định là 1
 }

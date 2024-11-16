@@ -13,25 +13,24 @@ import java.time.LocalDate;
 @Table(name = "san_pham")
 @Entity
 public class SanPham {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "id_loai", nullable = false)
+    @JoinColumn(name = "id_loai", referencedColumnName = "id")
     private LoaiSanPham loaiSanPham;
 
     @ManyToOne
-    @JoinColumn(name = "id_nguon_nhap", nullable = false)
+    @JoinColumn(name = "id_nguon_nhap", referencedColumnName = "id")
     private NguonNhap nguonNhap;
 
     @ManyToOne
-    @JoinColumn(name = "id_chat_lieu", nullable = false)
+    @JoinColumn(name = "id_chat_lieu", referencedColumnName = "id")
     private ChatLieu chatLieu;
 
     @ManyToOne
-    @JoinColumn(name = "kich_thuoc_laptop_id", nullable = true)
+    @JoinColumn(name = "kich_thuoc_laptop_id", referencedColumnName = "id")
     private KichThuocLapTop kichThuocLaptop;
 
     @Column(name = "ten_san_pham", nullable = false, length = 50)
@@ -43,9 +42,19 @@ public class SanPham {
     @Column(name = "trong_luong", nullable = false)
     private Float trongLuong;
 
-    @Column(name = "gioi_thieu", nullable = true, length = 255)
+    @Column(name = "gioi_thieu", length = 255)
     private String gioiThieu;
 
-    @Column(name = "thoi_han_bao_hanh", nullable = true)
-    private LocalDate thoiHanBaoHanh;
+    @Column(name = "thoi_han_bao_hanh", length = 20)
+    private String thoiHanBaoHanh;
+
+    @ManyToOne
+    @JoinColumn(name = "id_card_do_hoa", referencedColumnName = "id")
+    private CardDoHoa cardDoHoa;
+
+    @Column(name = "pin")
+    private Integer pin;
+
+    @Column(name = "trang_thai")
+    private Integer trangThai;  // Cột trạng thái, mặc định là 1
 }

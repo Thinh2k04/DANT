@@ -28,6 +28,9 @@ public class NguonNhap {
     @Column(name = "dia_chi", nullable = false, length = 255)
     private String diaChi;
 
-    @Column(name = "ghi_chu", nullable = true, length = 255)
+    @Column(name = "ghi_chu", length = 255)
     private String ghiChu;
+
+    @Column(name = "trang_thai")
+    private Integer trangThai;  // Cột trạng thái, mặc định là 1
 }

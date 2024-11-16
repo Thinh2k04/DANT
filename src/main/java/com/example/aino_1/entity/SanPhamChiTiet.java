@@ -29,26 +29,29 @@ public class SanPhamChiTiet {
     private String maSpct;
 
     @ManyToOne
-    @JoinColumn(name = "id_sp")
-    private SanPham sanPham;
+    @JoinColumn(name = "id_sp", referencedColumnName = "id")
+    private SanPham sanPham;  // Liên kết với bảng san_pham
 
     @ManyToOne
-    @JoinColumn(name = "id_ram")
-    private Ram ram;
+    @JoinColumn(name = "id_ram", referencedColumnName = "id")
+    private Ram ram;  // Liên kết với bảng ram
 
     @ManyToOne
-    @JoinColumn(name = "id_o_luu_tru")
-    private OLuuTru oLuuTru;
+    @JoinColumn(name = "id_o_luu_tru", referencedColumnName = "id")
+    private OLuuTru oLuuTru;  // Liên kết với bảng o_luu_tru
 
     @ManyToOne
-    @JoinColumn(name = "id_man_hinh")
-    private ManHinh manHinh;
+    @JoinColumn(name = "id_man_hinh", referencedColumnName = "id")
+    private ManHinh manHinh;  // Liên kết với bảng man_hinh
 
     @ManyToOne
-    @JoinColumn(name = "id_cpu")
-    private Cpu cpu;
+    @JoinColumn(name = "id_cpu", referencedColumnName = "id")
+    private Cpu cpu;  // Liên kết với bảng cpu
 
     @ManyToOne
-    @JoinColumn(name = "id_gpu")
-    private Gpu gpu;
+    @JoinColumn(name = "id_gpu", referencedColumnName = "id")
+    private Gpu gpu;  // Liên kết với bảng gpu
+
+    @Column(name = "trang_thai_spct")
+    private Integer trangThaiSpct;  // Trạng thái sản phẩm chi tiết
 }

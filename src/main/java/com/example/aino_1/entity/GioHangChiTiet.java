@@ -17,16 +17,19 @@ public class GioHangChiTiet {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "id_gio_hang")
-    private GioHang gioHang;
+    @JoinColumn(name = "id_gio_hang", referencedColumnName = "id")
+    private GioHang gioHang;  // Liên kết với bảng gio_hang qua khóa ngoại
 
     @ManyToOne
-    @JoinColumn(name = "id_spct")
-    private SanPhamChiTiet sanPhamChiTiet;
+    @JoinColumn(name = "id_spct", referencedColumnName = "id")
+    private SanPhamChiTiet sanPhamChiTiet;  // Liên kết với bảng san_pham_chi_tiet qua khóa ngoại
 
-    @Column(nullable = false)
-    private Integer soLuong;
+    @Column(name = "so_luong", nullable = false)
+    private Integer soLuong;  // Số lượng của sản phẩm chi tiết trong giỏ hàng
 
-    @Column(nullable = false)
-    private Float donGia;
+    @Column(name = "don_gia", nullable = false)
+    private Float donGia;  // Đơn giá của sản phẩm chi tiết trong giỏ hàng
+
+    @Column(name = "trang_thai")
+    private Integer trangThai;  // Trạng thái của sản phẩm trong giỏ hàng
 }

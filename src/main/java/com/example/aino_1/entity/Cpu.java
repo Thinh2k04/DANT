@@ -19,24 +19,27 @@ public class Cpu {
     @Column(name = "hang_san_xuat", nullable = false, length = 20)
     private String hangSanXuat;
 
-    @Column(name = "kien_truc_cong_nghe", nullable = true, length = 30)
+    @Column(name = "kien_truc_cong_nghe", length = 30)
     private String kienTrucCongNghe;
 
-    @Column(name = "toc_do_toi_thieu", nullable = true)
+    @Column(name = "toc_do_toi_thieu")
     private Integer tocDoToiThieu;
 
-    @Column(name = "toc_do_toi_da", nullable = true)
+    @Column(name = "toc_do_toi_da")
     private Integer tocDoToiDa;
 
-    @Column(name = "so_nhan", nullable = true)
+    @Column(name = "so_nhan")
     private Integer soNhan;
 
-    @Column(name = "so_luong", nullable = true)
+    @Column(name = "so_luong")
     private Integer soLuong;
 
-    @Column(name = "bo_nho_dem", nullable = true)
+    @Column(name = "bo_nho_dem")
     private Integer boNhoDem;
 
     @Column(name = "ten", nullable = false, length = 20)
     private String ten;
+
+    @Column(name = "trang_thai", columnDefinition = "INT DEFAULT 1")
+    private Integer trangThai;
 }

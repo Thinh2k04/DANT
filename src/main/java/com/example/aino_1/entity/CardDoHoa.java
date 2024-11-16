@@ -8,16 +8,17 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "chuc_vu")
+@Table(name = "card_do_hoa")
 @Entity
-public class ChucVu {
+public class CardDoHoa {
+
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "vai_tro", nullable = false, length = 30)
-    private String vaiTro;
+    @Column(name = "ten_card", nullable = false, length = 255)
+    private String tenCard;
 
     @Column(name = "trang_thai")
     private Integer trangThai;  // Cột trạng thái, mặc định là 1

@@ -11,14 +11,16 @@ import lombok.NoArgsConstructor;
 @Table(name = "o_luu_tru")
 @Entity
 public class OLuuTru {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "dung_luong", nullable = true)
+    @Column(name = "dung_luong")
     private Integer dungLuong;
 
-    @Column(name = "loai_o_cung", nullable = true, length = 20)
+    @Column(name = "loai_o_cung", length = 20)
     private String loaiOCung;
+
+    @Column(name = "trang_thai")
+    private Integer trangThai;  // Cột trạng thái, mặc định là 1
 }

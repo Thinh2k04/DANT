@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "cua_hang")
 @Entity
 public class CuaHang {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -31,4 +32,7 @@ public class CuaHang {
 
     @Column(name = "thoi_gian_dong_cua", nullable = false, length = 5)
     private String thoiGianDongCua;
+
+    @Column(name = "trang_thai")
+    private Integer trangThai;
 }

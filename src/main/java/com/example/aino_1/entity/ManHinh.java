@@ -16,18 +16,21 @@ public class ManHinh {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "do_phan_giai", nullable = true, length = 20)
+    @Column(name = "do_phan_giai")
     private String doPhanGiai;
 
-    @Column(name = "tan_so_quet", nullable = true)
+    @Column(name = "tan_so_quet")
     private Integer tanSoQuet;
 
-    @Column(name = "do_sang", nullable = true)
+    @Column(name = "do_sang")
     private Integer doSang;
 
-    @Column(name = "do_phu_mau", nullable = true)
+    @Column(name = "do_phu_mau")
     private Float doPhuMau;
 
-    @Column(name = "tam_nen", nullable = true, length = 10)
+    @Column(name = "tam_nen")
     private String tamNen;
+
+    @Column(name = "trang_thai")
+    private Integer trangThai;  // Cột trạng thái, mặc định là 1
 }

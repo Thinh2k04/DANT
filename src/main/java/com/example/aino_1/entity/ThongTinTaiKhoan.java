@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 @Entity
 public class ThongTinTaiKhoan {
 
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -24,15 +25,18 @@ public class ThongTinTaiKhoan {
     private String diaChi;
 
     @Column(name = "so_cccd", length = 20)
-    private String soCccd;
+    private String soCCCD;
 
-    @Column(name = "so_dien_thoai", nullable = false, length = 11, unique = true)
+    @Column(name = "so_dien_thoai", length = 11)
     private String soDienThoai;
 
     @Column(name = "email", length = 50)
     private String email;
 
     @ManyToOne
-    @JoinColumn(name = "id_tai_khoan")
-    private TaiKhoanNguoiDung taiKhoanNguoiDung;
+    @JoinColumn(name = "id_tai_khoan", referencedColumnName = "id")
+    private TaiKhoanNguoiDung taiKhoanNguoiDung;  // Liên kết với bảng tai_khoan_nguoi_dung qua khóa ngoại
+
+    @Column(name = "trang_thai")
+    private Integer trangThai;  // Trạng thái của thông tin tài khoản
 }

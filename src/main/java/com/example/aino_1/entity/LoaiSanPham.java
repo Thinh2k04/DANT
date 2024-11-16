@@ -12,10 +12,14 @@ import lombok.NoArgsConstructor;
 @Entity
 public class LoaiSanPham {
 
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @Column(name = "ten_loai", nullable = false, length = 50)
     private String tenLoai;
+
+    @Column(name = "trang_thai")
+    private Integer trangThai;  // Cột trạng thái, mặc định là 1
 }

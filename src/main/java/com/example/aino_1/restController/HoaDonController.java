@@ -1,8 +1,6 @@
 package com.example.aino_1.restController;
 
-import com.example.aino_1.entity.HinhAnh;
 import com.example.aino_1.entity.HoaDon;
-import com.example.aino_1.repository.HinhAnhInterface;
 import com.example.aino_1.repository.HoaDonInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -33,5 +31,10 @@ public class HoaDonController {
     @DeleteMapping("/del/{id}")
     public void delete(@PathVariable Integer id) {
         hdsi.deleteById(id);
+    }
+
+    @GetMapping("/getById/{id}")
+    public HoaDon getByidHD(@PathVariable Integer id){
+        return hdsi.findById(id).get();
     }
 }

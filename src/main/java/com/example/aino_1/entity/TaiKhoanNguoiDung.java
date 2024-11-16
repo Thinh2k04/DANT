@@ -23,6 +23,9 @@ public class TaiKhoanNguoiDung {
     private String matKhau;
 
     @ManyToOne
-    @JoinColumn(name = "id_chuc_vu")
-    private ChucVu chucVu;
+    @JoinColumn(name = "id_chuc_vu", referencedColumnName = "id")
+    private ChucVu chucVu;  // Liên kết với bảng chuc_vu qua khóa ngoại
+
+    @Column(name = "trang_thai")
+    private Integer trangThai;  // Trạng thái tài khoản người dùng
 }

@@ -12,22 +12,23 @@ import lombok.NoArgsConstructor;
 @Table(name = "hoa_don_chi_tiet")
 public class HoaDonChiTiet {
 
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "id_hoa_don", referencedColumnName = "id", nullable = false)
-    private HoaDon hoaDon;
+    @JoinColumn(name = "id_hoa_don", nullable = false)
+    private HoaDon hoaDon;  // Liên kết với bảng hoa_don
 
     @ManyToOne
-    @JoinColumn(name = "id_san_pham_chi_tiet", referencedColumnName = "id", nullable = false)
-    private SanPhamChiTiet sanPhamChiTiet;
+    @JoinColumn(name = "id_san_pham_chi_tiet", nullable = false)
+    private SanPhamChiTiet sanPhamChiTiet;  // Liên kết với bảng san_pham_chi_tiet
 
     @Column(name = "so_luong", nullable = false)
-    private Integer soLuong;
+    private Integer soLuong;  // Số lượng sản phẩm
 
     @Column(name = "gia", nullable = false)
-    private Float gia;
+    private Float gia;  // Giá của sản phẩm trong chi tiết hóa đơn
 
 }

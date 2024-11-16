@@ -18,4 +18,7 @@ public class KichThuocLapTop {
     @Column(name = "kich_thuoc", nullable = false)
     private Float kichThuoc;
 
+    @Column(name = "trang_thai")
+    private Integer trangThai;  // Cột trạng thái, mặc định là 1
+
 }

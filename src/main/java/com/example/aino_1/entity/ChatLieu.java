@@ -18,4 +18,7 @@ public class ChatLieu {
 
     @Column(name = "ten_chat_lieu", nullable = false, length = 50)
     private String tenChatLieu;
+
+    @Column(name = "trang_thai")
+    private Integer trangThai;  // Cột trạng thái, mặc định là 1
 }

@@ -17,6 +17,9 @@ public class GioHang {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "id_tai_khoan", unique = true)
-    private TaiKhoanNguoiDung taiKhoanNguoiDung;
+    @JoinColumn(name = "id_tai_khoan", referencedColumnName = "id")
+    private TaiKhoanNguoiDung taiKhoanNguoiDung;  // Liên kết với bảng tai_khoan_nguoi_dung qua khóa ngoại
+
+    @Column(name = "trang_thai")
+    private Integer trangThai;  // Trạng thái của giỏ hàng
 }

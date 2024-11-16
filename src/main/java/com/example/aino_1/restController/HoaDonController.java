@@ -2,6 +2,7 @@ package com.example.aino_1.restController;
 
 import com.example.aino_1.entity.HinhAnh;
 import com.example.aino_1.entity.HoaDon;
+import com.example.aino_1.entity.SanPham;
 import com.example.aino_1.repository.HinhAnhInterface;
 import com.example.aino_1.repository.HoaDonInterface;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +20,10 @@ public class HoaDonController {
     public List<HoaDon> getAll() {
         return hdsi.findAll();
     }
-
+    @GetMapping("/getById/{id}")
+    public HoaDon getById(@PathVariable Integer id) {
+        return hdsi.findById(id).get();
+    }
     @PostMapping("/add")
     public HoaDon create(@RequestBody HoaDon HoaDon) {
         return hdsi.save(HoaDon);

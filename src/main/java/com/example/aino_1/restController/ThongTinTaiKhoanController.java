@@ -3,7 +3,6 @@ package com.example.aino_1.restController;
 import com.example.aino_1.dto.SanPhamChiTietDto;
 import com.example.aino_1.entity.HoaDon;
 
-import com.example.aino_1.entity.SanPham;
 import com.example.aino_1.entity.ThongTinTaiKhoan;
 import com.example.aino_1.repository.ThongTinTaiKhoaninterface;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,17 +25,5 @@ public class ThongTinTaiKhoanController {
     @GetMapping("/getById/{id}")
     public ThongTinTaiKhoan getById(@PathVariable Integer id) {
         return tttksi.findById(id).get();
-    }
-    @PostMapping("/add")
-    public ThongTinTaiKhoan getByid(@RequestBody ThongTinTaiKhoan ThongTinTaiKhoan) {
-        return tttksi.save(ThongTinTaiKhoan);
-    }
-    @PutMapping("/update/{id}")
-    public ThongTinTaiKhoan update(@RequestBody ThongTinTaiKhoan tttk) {
-        return tttksi.save(tttk);
-    }
-    @DeleteMapping("/del/{id}")
-    public void delete(@PathVariable Integer id) {
-        tttksi.deleteById(id);
     }
 }

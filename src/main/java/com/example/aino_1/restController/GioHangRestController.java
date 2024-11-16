@@ -1,9 +1,8 @@
 package com.example.aino_1.restController;
 
 import com.example.aino_1.entity.GioHang;
-import com.example.aino_1.entity.Gpu;
-import com.example.aino_1.serviceInter.GioHangServiceInter;
-import com.example.aino_1.serviceInter.GpuServiceInter;
+
+import com.example.aino_1.repository.GioHangInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,25 +21,25 @@ import java.util.List;
 @RequestMapping("/rest/gio_hang") //đường dẫn chung cho các phương thức http bên dưới
 public class GioHangRestController {
     @Autowired
-    GioHangServiceInter gsi;
+    GioHangInterface gsi;
 
     @GetMapping("/getAll")
     public List<GioHang> getAll() {
-        return gsi.read();
+        return gsi.findAll();
     }
 
     @PostMapping("/add")
     public GioHang create(@RequestBody GioHang gioHang) {
-        return gsi.create(gioHang);
+        return gsi.save(gioHang);
     }
 
     @PutMapping("/update/{id}")
     public GioHang update(@RequestBody GioHang gioHang) {
-        return gsi.update(gioHang);
+        return gsi.save(gioHang);
     }
 
     @DeleteMapping("/del/{id}")
     public void delete(@PathVariable Integer id) {
-        gsi.delete(id);
+        gsi.deleteById(id);
     }
 }

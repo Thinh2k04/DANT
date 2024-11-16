@@ -1,13 +1,6 @@
 package com.example.aino_1.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,15 +11,18 @@ import lombok.NoArgsConstructor;
 @Table(name = "hinh_anh")
 @Entity
 public class HinhAnh {
+
     @Id
-    /*trường id cứ là số thì tự động tăng hết kẻo gặp lỗi phải đặt id trước khi persist
-    /còn ko thì hoặc là đặt thủ công hoặc gọi ra từ api*/
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private Integer id;
-    @Column(name = "link_hinh_anh")
-    private String linkHinhAnh;
+
     @ManyToOne
-    @JoinColumn(name = "id_spct")
-    private SanPhamChiTiet sanPhamChiTiet;
+    @JoinColumn(name = "id_san_pham", nullable = false)
+    private SanPham sanPham;
+
+    @Column(name = "duong_dan_hinh_anh", nullable = false, length = 255)
+    private String duongDanHinhAnh;
+
+    @Column(name = "mo_ta", nullable = true, length = 255)
+    private String moTa;
 }

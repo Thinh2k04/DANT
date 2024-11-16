@@ -1,7 +1,8 @@
 package com.example.aino_1.restController;
 
+import com.example.aino_1.dto.SanPhamDTO;
 import com.example.aino_1.entity.SanPham;
-import com.example.aino_1.serviceInter.SanPhamServiceInter;
+import com.example.aino_1.repository.SanPhamInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -29,29 +30,35 @@ import java.util.List;
 @RequestMapping("/rest/san_pham") //đường dẫn chung cho các phương thức http bên dưới
 public class SanPhamRestController {
     @Autowired
-    SanPhamServiceInter spsi;
+    SanPhamInterface spsi;
 
     @GetMapping("/getAll")
     public List<SanPham> getAll() {
-        return spsi.read();
+        return spsi.findAll();
     }
+
+    @GetMapping("/getDTOADMIN")
+    public  List<SanPhamDTO> AdminSanPhamDTO(){
+        return spsi.findProductDetailsWithImageAndCategory();
+    }
+
     @GetMapping("/getById/{id}")
     public SanPham getById(@PathVariable Integer id) {
-        return spsi.detail(id);
+        return spsi.getById(id);
     }
 
     @PostMapping("/add")
     public SanPham create(@RequestBody SanPham sanPham) {
-        return spsi.create(sanPham);
+        return spsi.save(sanPham);
     }
 
     @PutMapping("/update/{id}")
     public SanPham update(@RequestBody SanPham sanPham) {
-        return spsi.update(sanPham);
+        return spsi.save(sanPham);
     }
 
     @DeleteMapping("/del/{id}")
     public void delete(@PathVariable Integer id) {
-        spsi.delete(id);
+        spsi.deleteById(id);
     }
 }

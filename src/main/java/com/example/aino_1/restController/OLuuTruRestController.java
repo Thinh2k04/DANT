@@ -1,7 +1,8 @@
 package com.example.aino_1.restController;
 
 import com.example.aino_1.entity.OLuuTru;
-import com.example.aino_1.serviceInter.OLuuTruServiceInter;
+
+import com.example.aino_1.repository.OLuuTruInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -20,25 +21,25 @@ import java.util.List;
 @RequestMapping("/rest/o_luu_tru") //đường dẫn chung cho các phương thức http bên dưới
 public class OLuuTruRestController {
     @Autowired
-    OLuuTruServiceInter oltsi;
+    OLuuTruInterface oltsi;
 
     @GetMapping("/getAll")
     public List<OLuuTru> getAll() {
-        return oltsi.read();
+        return oltsi.findAll();
     }
 
     @PostMapping("/add")
     public OLuuTru create(@RequestBody OLuuTru oLuuTru) {
-        return oltsi.create(oLuuTru);
+        return oltsi.save(oLuuTru);
     }
 
     @PutMapping("/update/{maSo}")
     public OLuuTru update(@RequestBody OLuuTru oLuuTru) {
-        return oltsi.update(oLuuTru);
+        return oltsi.save(oLuuTru);
     }
 
     @DeleteMapping("/del/{maSo}")
     public void delete(@PathVariable Integer maSo) {
-        oltsi.delete(maSo);
+        oltsi.deleteById(maSo);
     }
 }

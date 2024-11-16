@@ -1,7 +1,7 @@
 package com.example.aino_1.restController;
 
 import com.example.aino_1.entity.Ram;
-import com.example.aino_1.serviceInter.RamServiceInter;
+import com.example.aino_1.repository.RamInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -20,25 +20,25 @@ import java.util.List;
 @RequestMapping("/rest/ram") //đường dẫn chung cho các phương thức http bên dưới
 public class RamRestController {
     @Autowired
-    RamServiceInter rsi;
+    RamInterface rsi;
 
     @GetMapping("/getAll")
     public List<Ram> getAll() {
-        return rsi.read();
+        return rsi.findAll();
     }
 
     @PostMapping("/add")
     public Ram create(@RequestBody Ram ram) {
-        return rsi.create(ram);
+        return rsi.save(ram);
     }
 
     @PutMapping("/update/{maSo}")
     public Ram update(@RequestBody Ram ram) {
-        return rsi.update(ram);
+        return rsi.save(ram);
     }
 
     @DeleteMapping("/del/{maSo}")
     public void delete(@PathVariable Integer maSo) {
-        rsi.delete(maSo);
+        rsi.deleteById(maSo);
     }
 }

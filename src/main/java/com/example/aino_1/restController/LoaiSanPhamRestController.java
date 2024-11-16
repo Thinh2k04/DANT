@@ -1,7 +1,7 @@
 package com.example.aino_1.restController;
 
 import com.example.aino_1.entity.LoaiSanPham;
-import com.example.aino_1.serviceInter.LoaiSanPhamServiceInter;
+import com.example.aino_1.repository.LoaiSanPhamInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -20,25 +20,25 @@ import java.util.List;
 @RequestMapping("/rest/loai_san_pham") //đường dẫn chung cho các phương thức http bên dưới
 public class LoaiSanPhamRestController {
     @Autowired
-    LoaiSanPhamServiceInter lspsi;
+    LoaiSanPhamInterface lspsi;
 
     @GetMapping("/getAll")
     public List<LoaiSanPham> getAll() {
-        return lspsi.read();
+        return lspsi.findAll();
     }
 
     @PostMapping("/add")
     public LoaiSanPham create(@RequestBody LoaiSanPham loaiSanPham) {
-        return lspsi.create(loaiSanPham);
+        return lspsi.save(loaiSanPham);
     }
 
     @PutMapping("/update/{maLoai}")
     public LoaiSanPham update(@RequestBody LoaiSanPham loaiSanPham) {
-        return lspsi.update(loaiSanPham);
+        return lspsi.save(loaiSanPham);
     }
 
     @DeleteMapping("/del/{maLoai}")
     public void delete(@PathVariable String maLoai) {
-        lspsi.delete(maLoai);
+        lspsi.deleteById(maLoai);
     }
 }

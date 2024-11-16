@@ -8,17 +8,14 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "ram")
+@Table(name = "kich_thuoc_laptop")
 @Entity
-public class Ram {
-
+public class KichThuocLapTop {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "dung_luong", nullable = true)
-    private Integer dungLuong;
+    @Column(name = "kich_thuoc", nullable = false)
+    private Float kichThuoc;
 
-    @Column(name = "toc_do", nullable = true)
-    private Integer tocDo;
 }

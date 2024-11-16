@@ -1,7 +1,7 @@
 package com.example.aino_1.restController;
 
 import com.example.aino_1.entity.ChucVu;
-import com.example.aino_1.serviceInter.ChucVuServiceInter;
+import com.example.aino_1.repository.ChucVuInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -20,25 +20,25 @@ import java.util.List;
 @RequestMapping("/rest/chuc_vu") //đường dẫn chung cho các phương thức http bên dưới
 public class ChucVuRestController {
     @Autowired
-    ChucVuServiceInter cvsi;
+    ChucVuInterface cvsi;
 
     @GetMapping("/getAll")
     public List<ChucVu> getAll() {
-        return cvsi.read();
+        return cvsi.findAll();
     }
 
     @PostMapping("/add")
     public ChucVu create(@RequestBody ChucVu chucVu) {
-        return cvsi.create(chucVu);
+        return cvsi.save(chucVu);
     }
 
     @PutMapping("/update/{maChucVu}")
     public ChucVu update(@RequestBody ChucVu chucVu) {
-        return cvsi.update(chucVu);
+        return cvsi.save(chucVu);
     }
 
     @DeleteMapping("/del/{maChucVu}")
     public void delete(@PathVariable String maChucVu) {
-        cvsi.delete(maChucVu);
+        cvsi.deleteById(maChucVu);
     }
 }

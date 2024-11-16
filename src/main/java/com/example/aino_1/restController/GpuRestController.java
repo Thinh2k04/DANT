@@ -1,7 +1,8 @@
 package com.example.aino_1.restController;
 
 import com.example.aino_1.entity.Gpu;
-import com.example.aino_1.serviceInter.GpuServiceInter;
+
+import com.example.aino_1.repository.GpuInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -20,25 +21,25 @@ import java.util.List;
 @RequestMapping("/rest/gpu") //đường dẫn chung cho các phương thức http bên dưới
 public class GpuRestController {
     @Autowired
-    GpuServiceInter gsi;
+    GpuInterface gsi;
 
     @GetMapping("/getAll")
     public List<Gpu> getAll() {
-        return gsi.read();
+        return gsi.findAll();
     }
 
     @PostMapping("/add")
     public Gpu create(@RequestBody Gpu gpu) {
-        return gsi.create(gpu);
+        return gsi.save(gpu);
     }
 
     @PutMapping("/update/{maSo}")
     public Gpu update(@RequestBody Gpu gpu) {
-        return gsi.update(gpu);
+        return gsi.save(gpu);
     }
 
     @DeleteMapping("/del/{maSo}")
     public void delete(@PathVariable Integer maSo) {
-        gsi.delete(maSo);
+        gsi.deleteById(maSo);
     }
 }

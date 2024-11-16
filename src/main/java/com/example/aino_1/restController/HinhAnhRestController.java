@@ -1,7 +1,7 @@
 package com.example.aino_1.restController;
 
 import com.example.aino_1.entity.HinhAnh;
-import com.example.aino_1.serviceInter.HinhAnhServiceInter;
+import com.example.aino_1.repository.HinhAnhInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -20,24 +20,24 @@ import java.util.List;
 @RequestMapping("/rest/hinh_anh") //đường dẫn chung cho các phương thức http bên dưới
 public class HinhAnhRestController {
     @Autowired
-    HinhAnhServiceInter hasi;
+    HinhAnhInterface hasi;
     @GetMapping("/getAll")
     public List<HinhAnh> getAll() {
-        return hasi.read();
+        return hasi.findAll();
     }
 
     @PostMapping("/add")
     public HinhAnh create(@RequestBody HinhAnh hinhAnh) {
-        return hasi.create(hinhAnh);
+        return hasi.save(hinhAnh);
     }
 
     @PutMapping("/update/{id}")
     public HinhAnh update(@RequestBody HinhAnh hinhAnh) {
-        return hasi.update(hinhAnh);
+        return hasi.save(hinhAnh);
     }
 
     @DeleteMapping("/del/{id}")
     public void delete(@PathVariable Integer id) {
-        hasi.delete(id);
+        hasi.deleteById(id);
     }
 }

@@ -1,7 +1,7 @@
 package com.example.aino_1.restController;
 
 import com.example.aino_1.entity.NguonNhap;
-import com.example.aino_1.serviceInter.NguonNhapServiceInter;
+import com.example.aino_1.repository.NguonNhapInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -20,25 +20,25 @@ import java.util.List;
 @RequestMapping("/rest/nguon_nhap") //đường dẫn chung cho các phương thức http bên dưới
 public class NguonNhapRestController {
     @Autowired
-    NguonNhapServiceInter nnsi;
+    NguonNhapInterface nnsi;
 
     @GetMapping("/getAll")
     public List<NguonNhap> getAll() {
-        return nnsi.read();
+        return nnsi.findAll();
     }
 
     @PostMapping("/add")
     public NguonNhap create(@RequestBody NguonNhap nguonNhap) {
-        return nnsi.create(nguonNhap);
+        return nnsi.save(nguonNhap);
     }
 
     @PutMapping("/update/{maNhaCungUng}")
     public NguonNhap update(@RequestBody NguonNhap nguonNhap) {
-        return nnsi.update(nguonNhap);
+        return nnsi.save(nguonNhap);
     }
 
     @DeleteMapping("/del/{maNhaCungUng}")
     public void delete(@PathVariable String maNhaCungUng) {
-        nnsi.delete(maNhaCungUng);
+        nnsi.deleteById(maNhaCungUng);
     }
 }

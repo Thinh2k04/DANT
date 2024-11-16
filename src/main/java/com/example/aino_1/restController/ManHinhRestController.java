@@ -1,7 +1,7 @@
 package com.example.aino_1.restController;
 
 import com.example.aino_1.entity.ManHinh;
-import com.example.aino_1.serviceInter.ManHinhServiceInter;
+import com.example.aino_1.repository.ManHinhInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -20,25 +20,25 @@ import java.util.List;
 @RequestMapping("/rest/man_hinh") //đường dẫn chung cho các phương thức http bên dưới
 public class ManHinhRestController {
     @Autowired
-    ManHinhServiceInter mhsi;
+    ManHinhInterface mhsi;
 
     @GetMapping("/getAll")
     public List<ManHinh> getAll() {
-        return mhsi.read();
+        return mhsi.findAll();
     }
 
     @PostMapping("/add")
     public ManHinh create(@RequestBody ManHinh manHinh) {
-        return mhsi.create(manHinh);
+        return mhsi.save(manHinh);
     }
 
     @PutMapping("/update/{maSo}")
     public ManHinh update(@RequestBody ManHinh manHinh) {
-        return mhsi.update(manHinh);
+        return mhsi.save(manHinh);
     }
 
     @DeleteMapping("/del/{maSo}")
     public void delete(@PathVariable Integer maSo) {
-        mhsi.delete(maSo);
+        mhsi.deleteById(maSo);
     }
 }

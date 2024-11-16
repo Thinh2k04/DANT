@@ -1,19 +1,11 @@
 package com.example.aino_1.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.util.Date;
 
 @Data
 @NoArgsConstructor
@@ -21,24 +13,44 @@ import java.time.LocalDateTime;
 @Table(name = "voucher")
 @Entity
 public class Voucher {
+
     @Id
-    /*trường id cứ là số thì tự động tăng hết kẻo gặp lỗi phải đặt id trước khi persist
-    /còn ko thì hoặc là đặt thủ công hoặc gọi ra từ api*/
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private Integer id;
-    @Column(name = "ma_voucher")
+
+    @Column(name = "ma_voucher", nullable = false, length = 100)
     private String maVoucher;
-    //0.11 ~ 0.99 tương đương 1 ~ 99%
-    @Column(name = "giam_gia", precision = 3, scale = 2)
-    private BigDecimal giamGia;
-    //tổng gt hđ trước khi áp dụng bất cứ voucher nào khác và sau khi làm tròn >= con số này
-    @Column(name = "dieu_kien_ap_dung")
-    private Integer dieuKienApDung;
-    //ngày cuối cùng còn dùng được voucher
-    @Column(name = "thoi_gian_ap_dung")
-    private LocalDateTime thoiGianApDung;
-    @ManyToOne
-    @JoinColumn(name = "id_gio_hang")
-    private GioHang gioHang;
+
+    @Column(name = "so_luong", nullable = false)
+    private Integer soLuong;
+
+    @Column(name = "thoi_gian_hen_ket", nullable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date thoiGianHenKet;
+
+    @Column(name = "so_tien_toi_da")
+    private Float soTienToiDa;
+
+    @Column(name = "dieu_kien_ap_dung", nullable = false)
+    private Float dieuKienApDung;
+
+    @Column(name = "so_tien_ap_dung")
+    private Float soTienApDung;
+
+    @Column(name = "phan_tram_ap_dung")
+    private Float phanTramApDung;
+
+    @Column(name = "thoi_gian_ap_dung", nullable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date thoiGianApDung;
+
+    // Kiểm tra ràng buộc điều kiện áp dụng
+    @PrePersist
+    public void checkVoucherConditions() {
+        if ((soTienApDung != null && phanTramApDung == null) || (soTienApDung == null && phanTramApDung != null)) {
+            return;  // Điều kiện hợp lệ
+        } else {
+            throw new IllegalArgumentException("Voucher phải giảm giá theo một trong hai phương thức: số tiền hoặc phần trăm.");
+        }
+    }
 }

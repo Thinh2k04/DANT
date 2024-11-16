@@ -1,22 +1,8 @@
 package com.example.aino_1.entity;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -25,26 +11,24 @@ import java.util.List;
 @Entity
 public class CuaHang {
     @Id
-    /*trường id cứ là số thì tự động tăng hết kẻo gặp lỗi phải đặt id trước khi persist
-    /còn ko thì hoặc là đặt thủ công hoặc gọi ra từ api*/
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private Integer id;
-    @Column(name = "thoi_gian_mo_cua")
-    private LocalDateTime thoiGianMoCua;
-    @Column(name = "thoi_gian_dong_cua")
-    private LocalDateTime thoiGianDongCua;
-    @Column(name = "tinh")
+
+    @Column(name = "tinh", nullable = false, length = 20)
     private String tinh;
-    @Column(name = "huyen")
+
+    @Column(name = "huyen", nullable = false, length = 20)
     private String huyen;
-    @Column(name = "phuong")
+
+    @Column(name = "phuong", nullable = false, length = 20)
     private String phuong;
-    @Column(name = "so_nha")
+
+    @Column(name = "so_nha", nullable = false, length = 50)
     private String soNha;
 
-    //jsonignore để tránh vòng lặp vô hạn khi mapping 2 chiều
-    @JsonIgnore
-    @OneToMany(mappedBy = "cuaHang")
-    List<GioHang> gioHang;
+    @Column(name = "thoi_gian_mo_cua", nullable = false, length = 5)
+    private String thoiGianMoCua;
+
+    @Column(name = "thoi_gian_dong_cua", nullable = false, length = 5)
+    private String thoiGianDongCua;
 }

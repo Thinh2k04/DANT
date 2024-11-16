@@ -1,30 +1,41 @@
 package com.example.aino_1.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
-import java.math.BigDecimal;
 
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class SanPhamChiTietDto {
     private Integer id;
-    private BigDecimal donGia;
+    private Integer soLuong;
     private String tenSanPham;
-    private String hangSanXuat;
-    private String mauSac;
+    private String chatLieu;
     private String gioiThieu;
     private Integer dungLuongRam;
-    private Integer dungLuongO;
+    private Integer dungLuong;
     private String doPhanGiai;
-    private BigDecimal kichThuoc;
+    private Float kichThuocLaptop;
     private String tamNen;
     private Integer tanSoQuet;
     private Integer soNhan;
     private String kienTrucCongNghe;
-    private String tenCpu;
+    private String tenCPU;
+    private String maSpct; // Thêm trường mã sản phẩm chi tiết
+    private String hinhAnh;
+    private Float donGia;
+    private Integer idSanPham;
+
+    // Phương thức tạo tên sản phẩm chi tiết
+    public String getTenSanPhamChiTiet() {
+        return String.format(
+                "Laptop %s %s/%dGB/%dGB/%.1f\" %s/Win11",
+                this.tenSanPham,
+                this.tenCPU,
+                this.dungLuongRam,
+                this.dungLuong,
+                this.kichThuocLaptop,
+                this.doPhanGiai
+        );
+    }
 }

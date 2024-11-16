@@ -1,7 +1,7 @@
 package com.example.aino_1.restController;
 
 import com.example.aino_1.entity.Cpu;
-import com.example.aino_1.serviceInter.CpuServiceInter;
+import com.example.aino_1.repository.CpuInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -20,25 +20,25 @@ import java.util.List;
 @RequestMapping("/rest/cpu") //đường dẫn chung cho các phương thức http bên dưới
 public class CpuRestController {
     @Autowired
-    CpuServiceInter csi;
+    CpuInterface csi;
 
     @GetMapping("/getAll")
     public List<Cpu> getAll() {
-        return csi.read();
+        return csi.findAll();
     }
 
     @PostMapping("/add")
     public Cpu create(@RequestBody Cpu cpu) {
-        return csi.create(cpu);
+        return csi.save(cpu);
     }
 
     @PutMapping("/update/{maSo}")
     public Cpu update(@RequestBody Cpu cpu) {
-        return csi.update(cpu);
+        return csi.save(cpu);
     }
 
     @DeleteMapping("/del/{maSo}")
     public void delete(@PathVariable Integer maSo) {
-        csi.delete(maSo);
+        csi.deleteById(maSo);
     }
 }

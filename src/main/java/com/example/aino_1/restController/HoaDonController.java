@@ -1,6 +1,7 @@
 package com.example.aino_1.restController;
 
 import com.example.aino_1.entity.HoaDon;
+
 import com.example.aino_1.repository.HoaDonInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +18,10 @@ public class HoaDonController {
     public List<HoaDon> getAll() {
         return hdsi.findAll();
     }
-
+    @GetMapping("/getById/{id}")
+    public HoaDon getById(@PathVariable Integer id) {
+        return hdsi.findById(id).get();
+    }
     @PostMapping("/add")
     public HoaDon create(@RequestBody HoaDon HoaDon) {
         return hdsi.save(HoaDon);

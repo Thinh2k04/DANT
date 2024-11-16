@@ -1,20 +1,10 @@
 package com.example.aino_1.restController;
 
-import com.example.aino_1.entity.HinhAnh;
+import com.example.aino_1.entity.HoaDon;
 import com.example.aino_1.entity.HoaDonChiTiet;
 import com.example.aino_1.repository.HDCTInterFace;
-import com.example.aino_1.repository.HinhAnhInterface;
-import com.example.aino_1.repository.HoaDonInterface;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -29,5 +19,14 @@ public class HoaDonChiTietConTroller {
     @GetMapping("/getAll")
     public List<HoaDonChiTiet> getdata(){
         return hdctsi.findAll();
+    }
+    @GetMapping("/getById/{id}")
+    public HoaDonChiTiet getByidHDCT(@PathVariable Integer id){
+        return hdctsi.findById(id).get();
+    }
+
+    @GetMapping("/Byidhd/{id}")
+    public List<HoaDonChiTiet> getHDCT(@PathVariable Integer id){
+        return  hdctsi.findHoaDonWithDetailsById(id);
     }
 }

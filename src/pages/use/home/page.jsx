@@ -197,7 +197,7 @@ const HomePage = () => {
                 {currentItems.map((laptop) => (
                   <div key={laptop.id} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 cursor-pointer group" onClick={() => window.location.href = `/chitietsanpham/${laptop.id}`}>
                     <div className="relative">
-                      <img src={laptop.hinhAnh} alt={laptop.tenSanPhamChiTiet} className="w-full h-56 object-cover transform group-hover:scale-105 transition-transform duration-300" />
+                      <img src={laptop.hinhAnhMinhHoa} alt={laptop.tenSanPhamChiTiet} className="w-full h-56 object-cover transform group-hover:scale-105 transition-transform duration-300" />
                       <div className="absolute top-3 right-3 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold">-10%</div>
                     </div>
                     <div className="p-5">

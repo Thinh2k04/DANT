@@ -250,7 +250,7 @@ const ChiTietSanPham = () => {
                                 onClick={() => handleRelatedProductClick(relatedProduct)}
                             >
                                 <img 
-                                    src={relatedProduct.hinhAnh} 
+                                    src={relatedProduct.hinhAnhMinhHoa} 
                                     alt={relatedProduct.tenSanPham} 
                                     className="w-full h-48 object-cover"
                                 />

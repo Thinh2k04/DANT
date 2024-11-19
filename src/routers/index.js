@@ -7,6 +7,7 @@ import CustomerManagement from '../pages/admin/customers/page';
 import AttributeManagement from '../pages/admin/attributes/page';
 import ChiTietSanPham from '../pages/chitietsanpham[/id]/page';
 import CheckoutPage from '../pages/use/thanhtoan/page';
+import PaymentSuccess from '../pages/use/thanhtoan/page';
 
 // Public routes
 const publicRoutes = [
@@ -15,6 +16,7 @@ const publicRoutes = [
   { path: '/cart', component: CartPage },
   { path: '/chitietsanpham/:idSanPham', component: ChiTietSanPham },
   { path: '/checkout', component: CheckoutPage },
+  { path: '/payment-success', component: PaymentSuccess },
 ];
 
 // Private routes (Admin routes)

@@ -15,9 +15,9 @@ function PaymentMethod({ paymentMethod, setPaymentMethod, errors, setErrors }) {
         }}
         className={`border rounded p-2 w-full ${errors.payment ? "border-red-500" : ""}`}
       >
-        <option value="cod">Thanh toán khi nhận hàng</option>
-        <option value="momo">Thanh toán qua Momo</option>
-        <option value="vnpay">Thanh toán qua VNPay</option>
+        <option value="1">Thanh toán khi nhận hàng</option>
+        <option value="2">Thanh toán qua Momo</option>
+        <option value="3">Thanh toán qua VNPay</option>
       </select>
       {errors.payment && (
         <p className="text-red-500 text-sm mt-1">{errors.payment}</p>
@@ -26,4 +26,4 @@ function PaymentMethod({ paymentMethod, setPaymentMethod, errors, setErrors }) {
   );
 }
 
-export default PaymentMethod; 
+export default PaymentMethod;

@@ -3,6 +3,29 @@ import React from 'react';
 
 // Component OrderSummary nhận vào các props để hiển thị thông tin đơn hàng
 function OrderSummary({ cartItems, quantities, totalAmount, shippingFee, errors, loading, handleCheckout }) {
+  // Thêm hàm để tổng hợp dữ liệu đơn hàng
+  const prepareOrderData = () => {
+    const orderData = {
+      items: cartItems.map(item => ({
+        id: item.id,
+        tenSanPhamChiTiet: item.tenSanPhamChiTiet,
+        donGia: parseFloat(item.donGia),
+        soLuong: quantities[item.id] || item.soLuong || 1,
+        thanhTien: (quantities[item.id] || item.soLuong || 1) * parseFloat(item.donGia)
+      })),
+      tamTinh: totalAmount,
+      phiVanChuyen: shippingFee && !isNaN(shippingFee) ? Number(shippingFee) : 0,
+      tongCong: totalAmount + (shippingFee && !isNaN(shippingFee) ? Number(shippingFee) : 0)
+    };
+    return orderData;
+  };
+
+  // Sửa lại hàm xử lý checkout
+  const handleOrderSubmit = () => {
+    const orderData = prepareOrderData();
+    handleCheckout(orderData);
+  };
+
   return (
     // Container chính chứa toàn bộ thông tin đơn hàng
     <div className="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -17,7 +40,7 @@ function OrderSummary({ cartItems, quantities, totalAmount, shippingFee, errors,
         {/* Map qua từng sản phẩm trong giỏ hàng */}
         {cartItems.map((item) => (
           // Container cho mỗi sản phẩm
-          <div key={item.maDinhDanh} className="flex items-center border-b pb-4">
+          <div key={item.id} className="flex items-center border-b pb-4">
             {/* Phần hiển thị hình ảnh sản phẩm */}
             <div className="w-24 h-24 flex-shrink-0">
               <img
@@ -31,7 +54,7 @@ function OrderSummary({ cartItems, quantities, totalAmount, shippingFee, errors,
             <div className="flex-1 ml-4">
               {/* Tên sản phẩm */}
               <h3 className="font-semibold text-lg">
-                {item.tenSanPhamCh}
+                {item.tenSanPhamChiTiet}
               </h3>
               {/* Chi tiết giá và số lượng */}
               <div className="mt-2 text-gray-600">
@@ -49,14 +72,14 @@ function OrderSummary({ cartItems, quantities, totalAmount, shippingFee, errors,
                 <p>
                   Số lượng:{" "}
                   <span className="font-semibold">
-                    {quantities[item.maDinhDanh] || 1}
+                    {quantities[item.id] || item.soLuong || 1}
                   </span>
                 </p>
                 {/* Thành tiền cho sản phẩm */}
                 <p>
                   Thành tiền:{" "}
                   <span className="text-red-600 font-semibold">
-                    {((quantities[item.maDinhDanh] || 1) * parseFloat(item.donGia)).toLocaleString("vi-VN", {
+                    {((quantities[item.id] || item.soLuong || 1) * parseFloat(item.donGia)).toLocaleString("vi-VN", {
                       style: "currency",
                       currency: "VND",
                     })}
@@ -117,7 +140,7 @@ function OrderSummary({ cartItems, quantities, totalAmount, shippingFee, errors,
         )}
         {/* Nút xác nhận đơn hàng */}
         <button
-          onClick={handleCheckout}
+          onClick={handleOrderSubmit}
           disabled={loading}
           className={`w-full py-3 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors
             ${loading ? "opacity-50 cursor-not-allowed" : ""}`}

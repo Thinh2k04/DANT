@@ -12,12 +12,13 @@ import java.util.List;
 
 @Repository
 public interface SanPhamInterface extends JpaRepository<SanPham, Integer> {
-    @Transactional
-    @Modifying
-@Query(" select new com.example.aino_1.dto.SanPhamDTO(sp.tenSanPham,sp.namSanXuat,sp.trongLuong,ha.duongDanHinhAnh,lsp.tenLoai) " +
-            "FROM SanPham sp " +
-            "JOIN HinhAnh ha ON ha.sanPham = sp " +
-            "JOIN LoaiSanPham lsp ON lsp.id = sp.loaiSanPham.id")
-    List<SanPhamDTO> findProductDetailsWithImageAndCategory();
+
+//    @Transactional
+//    @Modifying
+//    @Query(" select new com.example.aino_1.dto.SanPhamDTO(sp.tenSanPham,sp.namSanXuat,sp.trongLuong,ha.duongDanHinhAnh,lsp.tenLoai) " +
+//            "FROM SanPham sp " +
+//            "JOIN HinhAnh ha ON ha.sanPham = sp " +
+//            "JOIN LoaiSanPham lsp ON lsp.id = sp.loaiSanPham.id")
+//    List<SanPhamDTO> findProductDetailsWithImageAndCategory();
 
 }

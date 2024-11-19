@@ -22,7 +22,7 @@ public class SanPhamChiTietDto {
     private String kienTrucCongNghe;
     private String tenCPU;
     private String maSpct; // Thêm trường mã sản phẩm chi tiết
-    private String hinhAnh;
+    private String hinhAnhMinhHoa;
     private Float donGia;
     private Integer idSanPham;
     private String gpu;

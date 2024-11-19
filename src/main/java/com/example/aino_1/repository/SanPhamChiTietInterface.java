@@ -15,12 +15,12 @@ public interface SanPhamChiTietInterface extends JpaRepository<SanPhamChiTiet, I
 
 
     @Query(
-            "SELECT DISTINCT new com.example.aino_1.dto.SanPhamChiTietDto(" +
+            "SELECT  new com.example.aino_1.dto.SanPhamChiTietDto(" +
                     "spct.id, spct.soLuong, sp.tenSanPham, cl.tenChatLieu, sp.gioiThieu, " +
                     "ram.dungLuong, olt.dungLuong, mh.doPhanGiai, ktlt.kichThuoc, " +
                     "mh.tamNen, mh.tanSoQuet, cpu.soNhan, gpu.kienTrucCongNghe, " +
                     "cpu.ten, spct.maSpct, " +
-                    "(SELECT MIN(ha.duongDanHinhAnh) FROM HinhAnh ha WHERE ha.sanPham.id = sp.id), " +
+                    "spct.hinhAnhMinhHoa, " +
                     "spct.donGia, sp.id, gpu.ten, sp.trongLuong" +
                     ") " +
                     "FROM SanPhamChiTiet spct " +
@@ -33,7 +33,7 @@ public interface SanPhamChiTietInterface extends JpaRepository<SanPhamChiTiet, I
                     "INNER JOIN Ram ram ON ram.id = spct.ram.id " +
                     "INNER JOIN OLuuTru olt ON olt.id = spct.oLuuTru.id " +
                     "INNER JOIN Cpu cpu ON cpu.id = spct.cpu.id " +
-                    "INNER JOIN Gpu gpu ON gpu.id = spct.gpu.id"
+                    "INNER JOIN Gpu gpu ON gpu.id = spct.gpu.id "
     )
     List<SanPhamChiTietDto> getAllDTO();
 
@@ -41,12 +41,12 @@ public interface SanPhamChiTietInterface extends JpaRepository<SanPhamChiTiet, I
 
 
     @Query(
-            "SELECT DISTINCT new com.example.aino_1.dto.SanPhamChiTietDto(" +
+            "SELECT  new com.example.aino_1.dto.SanPhamChiTietDto(" +
                     "spct.id, spct.soLuong, sp.tenSanPham, cl.tenChatLieu, sp.gioiThieu, " +
                     "ram.dungLuong, olt.dungLuong, mh.doPhanGiai, ktlt.kichThuoc, " +
                     "mh.tamNen, mh.tanSoQuet, cpu.soNhan, gpu.kienTrucCongNghe, " +
-                    "cpu.ten, spct.maSpct, " +
-                    "(SELECT ha.duongDanHinhAnh FROM HinhAnh ha WHERE ha.sanPham.id = sp.id ORDER BY ha.id ASC LIMIT 1), " +
+                    "cpu.ten, spct.maSpct,  " +
+                    "spct.hinhAnhMinhHoa, " +
                     "spct.donGia, sp.id, gpu.ten, sp.trongLuong" +
                     ") " +
                     "FROM SanPhamChiTiet spct " +
@@ -60,13 +60,13 @@ public interface SanPhamChiTietInterface extends JpaRepository<SanPhamChiTiet, I
                     "INNER JOIN OLuuTru olt ON olt.id = spct.oLuuTru.id " +
                     "INNER JOIN Cpu cpu ON cpu.id = spct.cpu.id " +
                     "INNER JOIN Gpu gpu ON gpu.id = spct.gpu.id " +
-                    "WHERE spct.id = :id"
+                    " where spct.id = :id"
     )
     SanPhamChiTietDto getSanPhamChiTietById(@Param("id") Integer id);
 
 
     @Query("SELECT ha.duongDanHinhAnh FROM SanPhamChiTiet spct " +
-            "JOIN SanPham sp on spct.sanPham.id = sp.id JOIN HinhAnh ha on ha.sanPham.id = sp.id  where spct.id = :id")
+            "JOIN HinhAnh ha on ha.sanPhamChiTiet.id = spct.id  where spct.id = :id")
     List<String> findImagePathsByProductDetailId(@Param("id") Integer id);
 
 

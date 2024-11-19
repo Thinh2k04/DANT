@@ -2,6 +2,7 @@ package com.example.aino_1.restController;
 
 import com.example.aino_1.dto.SanPhamDTO;
 import com.example.aino_1.entity.SanPham;
+import com.example.aino_1.entity.SanPhamChiTiet;
 import com.example.aino_1.repository.SanPhamInterface;
 import com.example.aino_1.service.SanPhamService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,6 +33,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/rest/san_pham") //đường dẫn chung cho các phương thức http bên dưới
 public class SanPhamRestController {
+
     @Autowired
     SanPhamInterface spsi;
     @Autowired
@@ -52,27 +54,7 @@ public class SanPhamRestController {
         return spsi.findById(id).get();
     }
 
-    @PostMapping("/add")
-    public void create(@RequestBody Map<String, Object> requestData) {
-        // Lấy thông tin sản phẩm từ JSON
-        SanPham sanPham = new ObjectMapper().convertValue(requestData.get("sanPham"), SanPham.class);
 
-        // Lấy danh sách URL ảnh từ JSON
-        List<String> imageUrls = (List<String>) requestData.get("imageUrls");
-
-        spsv.saveSanPhamWithImage(sanPham, imageUrls);
-    }
-
-    @PutMapping("/update/{id}")
-    public void update(@RequestBody Map<String, Object> requestData) {
-        // Lấy thông tin sản phẩm từ JSON
-        SanPham sanPham = new ObjectMapper().convertValue(requestData.get("sanPham"), SanPham.class);
-
-        // Lấy danh sách URL ảnh từ JSON
-        List<String> imageUrls = (List<String>) requestData.get("imageUrls");
-
-        spsv.updateSanPhamWithImage(sanPham, imageUrls);
-    }
 
     @DeleteMapping("/del/{id}")
     public void delete(@PathVariable Integer id) {

@@ -12,10 +12,10 @@ import java.util.List;
 @Repository
 public interface HinhAnhInterface extends JpaRepository<HinhAnh, Integer> {
     @Modifying
-    @Query("DELETE FROM HinhAnh h WHERE h.sanPham.id = :sanPhamId")
+    @Query("DELETE FROM HinhAnh ha WHERE ha.sanPhamChiTiet.id = :sanPhamId")
     void deleteBySanPhamId(@Param("sanPhamId") Integer sanPhamId);
 
 
-    @Query("SELECT ha FROM HinhAnh ha WHERE ha.sanPham.id = :idSanPham")
+    @Query("SELECT ha FROM HinhAnh ha WHERE ha.sanPhamChiTiet.id = :idSanPham")
     List<HinhAnh> findAllBySanPhamId(Integer idSanPham);
 }

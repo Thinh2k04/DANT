@@ -46,4 +46,6 @@ public class HoaDon {
     @Column(name = "trang_thai_thanh_toan", nullable = false)
     private Integer trangThaiThanhToan;  // Trạng thái thanh toán, mặc định là 0
 
+    @Column(name = "trang_thai", nullable = false)
+    private Integer trangThai;  // Trạng thái thanh toán, mặc định là 0
 }

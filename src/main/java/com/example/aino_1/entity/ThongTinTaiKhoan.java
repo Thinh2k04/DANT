@@ -34,8 +34,9 @@ public class ThongTinTaiKhoan {
     private String email;
 
     @ManyToOne
-    @JoinColumn(name = "id_tai_khoan", referencedColumnName = "id")
-    private TaiKhoanNguoiDung taiKhoanNguoiDung;  // Liên kết với bảng tai_khoan_nguoi_dung qua khóa ngoại
+    @JoinColumn(name = "id_tai_khoan", nullable = true)
+    private TaiKhoanNguoiDung taiKhoanNguoiDung;
+
 
     @Column(name = "trang_thai")
     private Integer trangThai;  // Trạng thái của thông tin tài khoản

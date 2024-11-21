@@ -32,7 +32,7 @@ public class HoaDon {
     @JoinColumn(name = "hinh_thuc_thanh_toan", nullable = false)
     private HinhThucThanhToan hinhThucThanhToan;  // Liên kết với bảng hinh_thuc_thanh_toan
 
-    @Column(name = "dia_chi_nhan_hang", nullable = false, length = 255)
+    @Column(name = "dia_chi_nhan_hang", nullable = true, length = 255)
     private String diaChiNhanHang;  // Địa chỉ nhận hàng
 
     @ManyToOne
@@ -40,7 +40,7 @@ public class HoaDon {
     private CuaHang cuaHang;  // Liên kết với bảng cua_hang
 
     @ManyToOne
-    @JoinColumn(name = "id_voucher")
+    @JoinColumn(name = "id_voucher", nullable = true)
     private Voucher voucher;  // Liên kết với bảng voucher, có thể NULL
 
     @Column(name = "trang_thai_thanh_toan", nullable = false)

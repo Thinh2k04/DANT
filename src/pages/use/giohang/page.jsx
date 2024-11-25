@@ -101,15 +101,30 @@ function CartPage() {
   const handleCheckout = () => {
     const itemsToCheckout = cartItems.filter(item => selectedItems[item.id]);
     if (itemsToCheckout.length === 0) {
-      alert('Vui lòng chọn ít nhất một sản phẩm để thanh toán');
-      return;
+        alert('Vui lòng chọn ít nhất một sản phẩm để thanh toán');
+        return;
     }
     
-    const checkoutData = itemsToCheckout.map(item => ({
-      ...item,
-      soLuong: quantities[item.id] || 1
-    }));
+    // Tạo object mới với số lượng chính xác
+    const checkoutData = itemsToCheckout.map(item => {
+        const quantity = quantities[item.id] || 1;
+        return {
+            ...item,
+            id: item.id,
+            maDinhDanh: item.id,
+            soLuong: quantity,
+            thanhTien: quantity * parseFloat(item.donGia)
+        };
+    });
+
+    // Lưu thông tin chi tiết về số lượng
+    const quantityData = {};
+    checkoutData.forEach(item => {
+        quantityData[item.id] = item.soLuong;
+    });
+
     localStorage.setItem('checkoutItems', JSON.stringify(checkoutData));
+    localStorage.setItem('checkoutQuantities', JSON.stringify(quantityData));
     navigate('/checkout');
   };
 
@@ -138,53 +153,61 @@ function CartPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
       <Navbar />
       <div className="container mx-auto py-8 px-4">
-        <h1 className="text-2xl font-bold mb-6">Giỏ hàng của bạn</h1>
+        <div className="flex items-center mb-6">
+          <Link 
+            to="/home"
+            className="mr-4 bg-blue-500 text-white px-6 py-2 rounded-full hover:bg-blue-600 transition duration-300 shadow-md"
+          >
+            ← Quay lại
+          </Link>
+          <h1 className="text-3xl font-bold text-gray-800">Giỏ hàng của bạn</h1>
+        </div>
         
         {cartItems.length === 0 ? (
-          <div className="bg-white p-6 rounded-lg shadow-md text-center">
-            <p className="text-gray-600">Giỏ hàng của bạn đang trống</p>
-            <Link to="/" className="text-blue-500 hover:text-blue-600 mt-4 inline-block">
+          <div className="bg-white p-8 rounded-2xl shadow-lg text-center transform transition-all hover:scale-105">
+            <p className="text-gray-600 text-lg">Giỏ hàng của bạn đang trống</p>
+            <Link to="/" className="text-blue-500 hover:text-blue-600 mt-4 inline-block font-semibold">
               Tiếp tục mua sắm
             </Link>
           </div>
         ) : (
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex items-center mb-4">
+          <div className="bg-white rounded-2xl shadow-lg p-8">
+            <div className="flex items-center mb-6">
               <input 
                 type="checkbox" 
                 checked={selectAll} 
                 onChange={handleSelectAll} 
-                className="mr-2"
+                className="mr-3 w-5 h-5 rounded-lg"
               />
-              <span>Chọn tất cả ({cartItems.length})</span>
+              <span className="text-lg font-medium">Chọn tất cả ({cartItems.length})</span>
             </div>
-            <div className="space-y-4">
+            <div className="space-y-6">
               {cartItems.map((item) => (
-                <div key={item.id} className="flex items-center border-b pb-4">
+                <div key={item.id} className="flex items-center border-b pb-6 hover:bg-gray-50 p-4 rounded-xl transition duration-300">
                   <input 
                     type="checkbox" 
                     checked={selectedItems[item.id] || false} 
                     onChange={() => handleSelectItem(item.id)} 
-                    className="mr-4"
+                    className="mr-4 w-5 h-5 rounded-lg"
                   />
                   <img 
-                    src={item.hinhAnh} 
+                    src={item.hinhAnhMinhHoa} 
                     alt={item.tenSanPham} 
-                    className="w-24 h-24 object-cover rounded"
+                    className="w-28 h-28 object-cover rounded-xl shadow-md"
                   />
-                  <div className="flex-1 ml-4">
-                    <h3 className="font-semibold">{item.tenSanPhamChiTiet}</h3>
-                    <p className="text-red-600 font-bold">
+                  <div className="flex-1 ml-6">
+                    <h3 className="font-semibold text-lg">{item.tenSanPhamChiTiet}</h3>
+                    <p className="text-red-600 font-bold text-xl mt-2">
                       {parseFloat(item.donGia).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
                     </p>
                   </div>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-3">
                     <button 
                       onClick={() => handleQuantityChange(item.id, (quantities[item.id] || 1) - 1)}
-                      className="px-2 py-1 border rounded hover:bg-gray-100"
+                      className="px-3 py-1 border rounded-lg hover:bg-gray-100 transition duration-200"
                     >
                       -
                     </button>
@@ -194,18 +217,18 @@ function CartPage() {
                       max={item.soLuong}
                       value={quantities[item.id] || 1}
                       onChange={(e) => handleQuantityChange(item.id, parseInt(e.target.value))}
-                      className="w-16 text-center border rounded p-1"
+                      className="w-20 text-center border rounded-lg p-2"
                     />
                     <button 
                       onClick={() => handleQuantityChange(item.id, (quantities[item.id] || 1) + 1)}
-                      className="px-2 py-1 border rounded hover:bg-gray-100"
+                      className="px-3 py-1 border rounded-lg hover:bg-gray-100 transition duration-200"
                     >
                       +
                     </button>
                   </div>
                   <button
                     onClick={() => handleRemoveFromCart(item.id)}
-                    className="ml-4 text-red-500 hover:text-red-700"
+                    className="ml-6 text-red-500 hover:text-red-700 transition duration-200"
                   >
                     Xóa
                   </button>
@@ -213,24 +236,24 @@ function CartPage() {
               ))}
             </div>
             
-            <div className="mt-6 border-t pt-4">
+            <div className="mt-8 border-t pt-6">
               <div className="flex justify-between items-center">
-                <span className="text-lg font-semibold">Tổng tiền:</span>
-                <span className="text-xl font-bold text-red-600">
+                <span className="text-xl font-semibold text-gray-800">Tổng tiền:</span>
+                <span className="text-2xl font-bold text-red-600">
                   {calculateTotal().toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
                 </span>
               </div>
               
-              <div className="mt-6 flex justify-end space-x-4">
+              <div className="mt-8 flex justify-end space-x-4">
                 <button 
                   onClick={handleRemoveSelectedItems}
-                  className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
+                  className="px-6 py-3 border border-gray-300 rounded-full hover:bg-gray-50 transition duration-300"
                 >
                   Xóa các mục đã chọn
                 </button>
                 <button
                   onClick={handleCheckout}
-                  className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                  className="px-8 py-3 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition duration-300 shadow-md"
                 >
                   Xác nhận
                 </button>

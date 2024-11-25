@@ -8,6 +8,9 @@ import ShippingInfo from '../../../components/GioHangComponenst/ShippingInfo';
 import PaymentMethod from '../../../components/GioHangComponenst/PaymentMethod';
 import OrderSummary from '../../../components/GioHangComponenst/OrderSummary';
 import { sonnet } from "@cloudinary/url-gen/qualifiers/artisticFilter";
+import { Link, useNavigate } from 'react-router-dom';
+import { FaCheckCircle, FaBox, FaHome, FaArrowLeft, FaShoppingCart } from 'react-icons/fa';
+import { BsReceiptCutoff } from 'react-icons/bs';
 
 // URL API lấy thông tin tỉnh/thành phố
 const host = "https://provinces.open-api.vn/api/";
@@ -43,28 +46,33 @@ function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState("cod"); // Phương thức thanh toán
   const [shippingFee, setShippingFee] = useState(0); // Phí vận chuyển
 
+  const navigate = useNavigate();
+
   // Effect hook để lấy thông tin giỏ hàng từ localStorage khi component mount
   useEffect(() => {
     const checkoutItems = JSON.parse(localStorage.getItem("checkoutItems")) || [];
+    const savedQuantities = JSON.parse(localStorage.getItem("checkoutQuantities")) || {};
     const savedShippingFee = localStorage.getItem('shippingFee') || '0';
+    
     const initialQuantities = {};
-    let weight = 0;
     let initialTotalAmount = 0;
+    let totalWeight = 0;
 
     checkoutItems.forEach((item) => {
-      initialQuantities[item.maDinhDanh] = item.soLuong;
-      initialTotalAmount += item.soLuong * parseFloat(item.donGia);
-    });
-
-    checkoutItems.forEach((item) => {
-      weight += item.soLuong * parseFloat(item.trongLuong);
+        // Sử dụng ID để lấy số lượng
+        const quantity = savedQuantities[item.id] || item.soLuong || 1;
+        initialQuantities[item.id] = quantity;
+        
+        // Tính toán tổng tiền và trọng lượng
+        initialTotalAmount += quantity * parseFloat(item.donGia);
+        totalWeight += quantity * parseFloat(item.trongLuong || 0);
     });
 
     setCartItems(checkoutItems);
     setQuantities(initialQuantities);
     setTotalAmount(initialTotalAmount);
+    setWeight(totalWeight);
     setShippingFee(parseFloat(savedShippingFee));
-    
   }, []);
 
   // Effect hook để lấy danh sách tỉnh/thành và khởi tạo danh sách cửa hàng
@@ -158,68 +166,34 @@ function CheckoutPage() {
   const validateFields = () => {
     const newErrors = {};
 
-    // Kiểm tra tên khách hàng
+    // Validate họ tên
     if (!customerName.trim()) {
-      newErrors.name = "Họ tên không được để trống";
-    } else if (customerName.length > 100) {
-      newErrors.name = "Họ tên không được vượt quá 100 ký tự";
+      newErrors.name = "Vui lòng nhập họ tên";
     } else if (!/^[a-zA-ZÀ-ỹ\s]+$/.test(customerName)) {
       newErrors.name = "Họ tên chỉ được chứa chữ cái và khoảng trắng";
     }
 
-    // Kiểm tra số điện thoại
+    // Validate số điện thoại  
     if (!phoneNumber) {
-      newErrors.phone = "Số điện thoại không được để trống";
-    } else if (!/^0\d{9}$/.test(phoneNumber)) {
-      newErrors.phone = "Số điện thoại phải có 10 số và bắt đầu bằng số 0";
+      newErrors.phone = "Vui lòng nhập số điện thoại";
+    } else if (!/^(0[3|5|7|8|9])+([0-9]{8})\b/.test(phoneNumber)) {
+      newErrors.phone = "Số điện thoại không hợp lệ";
     }
 
-    // Kiểm tra email (không bắt buộc)
-    if (email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      newErrors.email = "Email không hợp lệ";
-    } else if (email.length > 100) {
-      newErrors.email = "Email không được vượt quá 100 ký tự";
-    }
-
-    // Kiểm tra thông tin địa chỉ
-    if (deliveryMethod === "pickup") {
-      if (!selectedStore) {
-        newErrors.store = "Vui lòng chọn cửa hàng";
-      }
-      if (!pickupDate) {
-        newErrors.pickupDate = "Vui lòng chọn thời gian tới lấy hàng";
-      } else {
-        const today = new Date();
-        const selectedDate = new Date(pickupDate);
-        if (
-          selectedDate < today ||
-          selectedDate > new Date(today.setDate(today.getDate() + 7))
-        ) {
-          newErrors.pickupDate =
-            "Ngày nhận hàng phải từ ngày mai đến 7 ngày sau";
-        }
-      }
-    }
-    if (deliveryMethod === "shipping") {
+    // Validate địa chỉ giao hàng
+    if (deliveryMethod === "delivery") {
       if (!selectedProvince) {
-        newErrors.province = "Vui lòng chọn tỉnh/thành phố";
+        newErrors.province = "Vui lòng chọn tỉnh/thành";
       }
       if (!selectedDistrict) {
-        newErrors.district = "Vui lòng chọn quận/huyện";
+        newErrors.district = "Vui lòng chọn quận/huyện";  
       }
       if (!selectedWard) {
         newErrors.ward = "Vui lòng chọn phường/xã";
       }
       if (!specificAddress.trim()) {
         newErrors.address = "Vui lòng nhập địa chỉ cụ thể";
-      } else if (specificAddress.length > 250) {
-        newErrors.address = "Địa chỉ không được vượt quá 250 ký tự";
       }
-    }
-
-    // Kiểm tra giỏ hàng
-    if (!cartItems || cartItems.length === 0) {
-      newErrors.cart = "Giỏ hàng không được để trống";
     }
 
     setErrors(newErrors);
@@ -262,20 +236,17 @@ function CheckoutPage() {
           totalAmount: totalAmount + shippingFee
         };
 
-        console.log("Order data:", orderData);
+        // Lưu thông tin đơn hàng cuối cùng
+        localStorage.setItem('lastOrder', JSON.stringify(orderData));
 
-        // Xử lý thanh toán qua Momo
-        if (paymentMethod === "momo") {
-          const paymentUrl = `https://momo.vn/pay?amount=${totalAmount + shippingFee}&shippingFee=0`;
-          window.location.href = paymentUrl;
-        } else {
-        }
+        // Chuyển hướng đến trang thành công
+        navigate('/payment-success');
       }
     } catch (error) {
-      console.error("Checkout error:", error);
-      setErrors((prev) => ({
+      console.error('Error during checkout:', error);
+      setErrors(prev => ({
         ...prev,
-        submit: "Có lỗi xảy ra khi xử lý đơn hàng. Vui lòng thử lại.",
+        submit: 'Có lỗi xảy ra khi xử lý đơn hàng'
       }));
     } finally {
       setLoading(false);
@@ -287,7 +258,17 @@ function CheckoutPage() {
     <div className="min-h-screen bg-gray-100">
       <Navbar />
       <div className="container mx-auto py-8 px-4">
-        <h1 className="text-2xl font-bold mb-6">Thanh toán</h1>
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold">Thanh toán</h1>
+          <Link 
+            to="/cart" 
+            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-md"
+          >
+            <FaArrowLeft className="mr-2" />
+            <FaShoppingCart className="mr-2" />
+            Quay lại giỏ hàng
+          </Link>
+        </div>
 
         <div className="flex flex-wrap -mx-4">
           
@@ -364,10 +345,20 @@ function CheckoutPage() {
               cartItems={cartItems}
               quantities={quantities}
               totalAmount={totalAmount}
-              shippingFee={deliveryMethod === "shipping" ? shippingFee : 0}
+              shippingFee={shippingFee}
               errors={errors}
+              setErrors={setErrors}
               loading={loading}
-              handleCheckout={(e) => handleCheckout(shippingFee)}
+              handleCheckout={handleCheckout}
+              customerName={customerName}
+              phoneNumber={phoneNumber}
+              email={email}
+              deliveryMethod={deliveryMethod}
+              selectedProvince={selectedProvince}
+              selectedDistrict={selectedDistrict}
+              selectedWard={selectedWard}
+              specificAddress={specificAddress}
+              paymentMethod={paymentMethod}
             />
           </div>
         </div>

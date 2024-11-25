@@ -1,9 +1,15 @@
 export const addToCart = (item) => {
-    console.log(item.id + " đã thêm vào giỏ hàng");
+  try {
     const existingCart = JSON.parse(localStorage.getItem('cartItems')) || [];
     const updatedCart = [...existingCart, item];
     localStorage.setItem('cartItems', JSON.stringify(updatedCart));
-    const storedArray = JSON.parse(localStorage.getItem('cartItems'));
-    console.log(storedArray);
-    alert('Đã thêm sản phẩm vào giỏ hàng!');
+    return {
+      success: true,
+      productName: item.tenSanPhamChiTiet || item.tenSanPham,
+      price: parseFloat(item.donGia)
+    };
+  } catch (error) {
+    console.error('Error adding to cart:', error);
+    return { success: false };
+  }
 };

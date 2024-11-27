@@ -48,7 +48,7 @@ const ChiTietSanPham = () => {
                 setProductImages(formattedImages);
                 if (formattedImages.length > 0) {
                     setSelectedImage(formattedImages[0].imageUrl);
-                    setProduct(prev => ({ ...prev, hinhAnh: formattedImages[0].imageUrl }));
+                    setProduct(prev => prev ? { ...prev, hinhAnh: formattedImages[0].imageUrl } : null);
                 }
             } catch (error) {
                 console.error('Error fetching images:', error);
@@ -66,8 +66,10 @@ const ChiTietSanPham = () => {
                 if (!response.ok) throw new Error('Network response was not ok');
                 const data = await response.json();
                 setLaptops(data);
-                const related = data.filter(item => item.idSanPham === product?.idSanPham);
-                setRelatedProducts(related);
+                if (product) {
+                    const related = data.filter(item => item.idSanPham === product.idSanPham);
+                    setRelatedProducts(related);
+                }
             } catch (error) {
                 console.error('Error fetching laptops:', error);
                 toast.error('Không thể tải danh sách sản phẩm liên quan');
@@ -76,7 +78,7 @@ const ChiTietSanPham = () => {
         fetchLaptops();
     }, [product]);
 
-    if (!product) {
+    if (!product || !selectedConfig) {
         return (
             <div className="min-h-screen flex justify-center items-center bg-gray-50">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
@@ -85,23 +87,28 @@ const ChiTietSanPham = () => {
     }
 
     const handleAddToCart = (item) => {
+        if (!item) return;
         addToCart(item);
         toast.success('Đã thêm vào giỏ hàng');
     };
 
     const handleRelatedProductClick = (relatedProduct) => {
+        if (!relatedProduct) return;
         navigate(`/chitietsanpham/${relatedProduct.id}`);
     };
 
     const handleBuyNow = () => {
+        if (!selectedConfig) return;
         navigate(`/xacnhandonhang/${selectedConfig.id}`);
     };
 
     const handleThumbnailClick = (imageUrl) => {
+        if (!imageUrl) return;
         setSelectedImage(imageUrl);
     };
 
     const handleConfigSelect = (config) => {
+        if (!config) return;
         setSelectedConfig(config);
     };
 
@@ -169,15 +176,15 @@ const ChiTietSanPham = () => {
                     {/* Right Column - Product Info */}
                     <div className="space-y-6">
                         <div className="bg-white rounded-2xl shadow-sm p-6">
-                            <h1 className="text-3xl font-bold text-gray-900 mb-3">{selectedConfig.tenSanPhamChiTiet}</h1>
-                            <p className="text-gray-600 text-base mb-4">{selectedConfig.gioiThieu}</p>
+                            <h1 className="text-3xl font-bold text-gray-900 mb-3">{selectedConfig?.tenSanPhamChiTiet}</h1>
+                            <p className="text-gray-600 text-base mb-4">{selectedConfig?.gioiThieu}</p>
                             
                             <div className="flex items-center gap-4 mb-6">
                                 <span className="text-3xl font-bold text-red-600">
-                                    {formatPrice(selectedConfig.donGia)} VNĐ
+                                    {formatPrice(selectedConfig?.donGia)} VNĐ
                                 </span>
                                 <span className="text-sm text-gray-500 line-through">
-                                    {formatPrice(selectedConfig.donGia * 1.1)} VNĐ
+                                    {formatPrice(selectedConfig?.donGia * 1.1)} VNĐ
                                 </span>
                             </div>
 
@@ -198,15 +205,15 @@ const ChiTietSanPham = () => {
 
                             <div className="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-xl mb-6">
                                 {[
-                                    ['CPU', selectedConfig.tenCPU],
-                                    ['RAM', `${selectedConfig.dungLuongRam} GB`],
-                                    ['Ổ cứng', `${selectedConfig.dungLuong} GB`],
-                                    ['Màn hình', `${selectedConfig.kichThuocLaptop} inch`],
-                                    ['Card đồ họa', selectedConfig.gpu],
-                                    ['Card đồ họa rời', selectedConfig.cardDoHoaRoi || 'Không có'],
-                                    ['Pin', `${selectedConfig.pin} Wh`],
-                                    ['Trọng lượng', `${selectedConfig.trongLuong} kg`],
-                                    ['Bảo hành', selectedConfig.baoHanh]
+                                    ['CPU', selectedConfig?.tenCPU],
+                                    ['RAM', `${selectedConfig?.dungLuongRam} GB`],
+                                    ['Ổ cứng', `${selectedConfig?.dungLuong} GB`],
+                                    ['Màn hình', `${selectedConfig?.kichThuocLaptop} inch`],
+                                    ['Card đồ họa', selectedConfig?.gpu],
+                                    ['Card đồ họa rời', selectedConfig?.cardDoHoaRoi || 'Không có'],
+                                    ['Pin', `${selectedConfig?.pin} Wh`],
+                                    ['Trọng lượng', `${selectedConfig?.trongLuong} kg`],
+                                    ['Bảo hành', selectedConfig?.baoHanh]
                                 ].map(([label, value]) => (
                                     <div key={label} className="flex items-center gap-2">
                                         {specIcons[label]}
@@ -247,7 +254,7 @@ const ChiTietSanPham = () => {
                                     <div
                                         key={config.id}
                                         className={`border rounded-xl p-4 cursor-pointer transition-all
-                                            ${selectedConfig.id === config.id 
+                                            ${selectedConfig?.id === config.id 
                                                 ? 'border-blue-500 bg-blue-50' 
                                                 : 'border-gray-200 hover:border-blue-300'}`}
                                         onClick={() => handleConfigSelect(config)}

@@ -55,8 +55,15 @@ public class SanPhamChiTiet {
     @JoinColumn(name = "id_gpu", referencedColumnName = "id")
     private Gpu gpu;  // Liên kết với bảng gpu
 
+    @ManyToOne
+    @JoinColumn(name = "id_mausac", referencedColumnName = "id")
+    private MauSac mauSac;  // Liên kết với bảng gpu
+
     @Column(name = "trang_thai_spct")
     private Integer trangThaiSpct;  // Trạng thái sản phẩm chi tiết
+
+    @Column(name = "gioi_thieu", length = 300)
+    private String gioiThieu;
 
     @ManyToOne
     @JoinColumn(name = "id_card_do_hoa", referencedColumnName = "id")

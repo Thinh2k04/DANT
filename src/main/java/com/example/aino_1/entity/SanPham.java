@@ -42,8 +42,7 @@ public class SanPham {
     @Column(name = "trong_luong", nullable = false)
     private Float trongLuong;
 
-    @Column(name = "gioi_thieu", length = 255)
-    private String gioiThieu;
+
 
     @Column(name = "thoi_han_bao_hanh", length = 20)
     private String thoiHanBaoHanh;

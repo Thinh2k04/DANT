@@ -54,7 +54,10 @@ public class SanPhamRestController {
         return spsi.findById(id).get();
     }
 
-
+@PostMapping("/add")
+public void AddSanPham(@RequestBody SanPham sanPham){
+        spsi.save(sanPham);
+}
 
     @DeleteMapping("/del/{id}")
     public void delete(@PathVariable Integer id) {

@@ -1,100 +1,105 @@
 package com.example.aino_1.service;
 
-import org.springframework.http.*;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import vn.zalopay.crypto.HMACUtil;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import org.apache.commons.codec.binary.Hex;
-import java.util.UUID;
-
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TimeZone;
+import java.util.*;
 
 @Service
 public class ZaloPayService {
+    private static final Map<String, String> config = new HashMap<String, String>() {{
+        put("app_id", "2554");
+        put("key1", "sdngKKJmqEMzvh5QQcdD2A9XBSKUNaYn");
+        put("key2", "trMrHtvjo6myautxDUiAcYsVtaeQ8nhf");
+        put("endpoint", "https://sb-openapi.zalopay.vn/v2/create");
+    }};
 
-
-    private static final String APP_ID = "2554"; // Đặt ID ứng dụng của bạn
-    private static final String KEY1 = "sdngKKJmqEMzvh5QQcdD2A9XBSKUNaYn"; // Khóa 1 của ứng dụng
-    private static final String CREATE_ORDER_URL = "https://sb-openapi.zalopay.vn/v2/create"; // API endpoint
-
-    public Map<String, Object> createOrder(Map<String, Object> params) {
-        try {
-            // Kiểm tra null cho total_amount và các tham số khác
-            String totalAmount = (String) params.get("amount");
-            if (totalAmount == null || totalAmount.isEmpty()) {
-                throw new IllegalArgumentException("Total amount is required");
-            }
-
-            long amount = Long.parseLong(totalAmount); // Lấy số tiền từ map
-            long timestamp = System.currentTimeMillis() / 1000; // Thời gian hiện tại (giây)
-
-            // Tạo các tham số cần thiết cho việc gửi yêu cầu
-            Map<String, Object> order = new HashMap<>();
-            order.put("app_id", params.get("app_id"));
-            order.put("app_trans_id", getCurrentTimeString("yyMMdd") + "_" + UUID.randomUUID().toString());
-            order.put("app_time", System.currentTimeMillis());
-            order.put("app_user", params.get("app_user"));
-            order.put("amount", amount);
-            order.put("description", "Lazada - Payment for the order #" + UUID.randomUUID().toString());
-            order.put("bank_code", "zalopayapp");
-            order.put("item", params.get("item"));
-            order.put("embed_data", "{}");
-
-            // Tạo chuỗi dữ liệu cho việc tính toán MAC
-            String data = order.get("app_id") + "|" +
-                    order.get("app_trans_id") + "|" +
-                    order.get("app_user") + "|" +
-                    order.get("amount") + "|" +
-                    order.get("app_time") + "|" +
-                    order.get("embed_data") + "|" +
-                    order.get("item");
-
-            // Tạo MAC
-            String mac = generateMac(data);
-            order.put("mac", mac);
-
-            // Gửi yêu cầu đến ZaloPay
-            RestTemplate restTemplate = new RestTemplate();
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-
-            HttpEntity<Map<String, Object>> request = new HttpEntity<>(order, headers);
-            ResponseEntity<Map> response = restTemplate.postForEntity(CREATE_ORDER_URL, request, Map.class);
-
-            return response.getBody(); // Kết quả trả về từ ZaloPay
-        } catch (Exception e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
-            return errorResponse;
-        }
-    }
-
-    // Hàm tạo chữ ký HMAC SHA-256
-    private String generateMac(String data) {
-        try {
-            Mac sha256Hmac = Mac.getInstance("HmacSHA256");
-            SecretKeySpec secretKey = new SecretKeySpec(KEY1.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
-            sha256Hmac.init(secretKey);
-            byte[] hash = sha256Hmac.doFinal(data.getBytes(StandardCharsets.UTF_8));
-            return Hex.encodeHexString(hash);
-        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
-            throw new RuntimeException("Error generating MAC", e);
-        }
-    }
-
-    // Hàm lấy ngày hiện tại theo định dạng yyMMdd
+    // Định dạng thời gian hiện tại
     private String getCurrentTimeString(String format) {
-        SimpleDateFormat sdf = new SimpleDateFormat(format);
-        sdf.setTimeZone(TimeZone.getTimeZone("GMT+7"));
-        return sdf.format(Calendar.getInstance().getTime());
+        Calendar cal = new GregorianCalendar(TimeZone.getTimeZone("GMT+7"));
+        SimpleDateFormat fmt = new SimpleDateFormat(format);
+        fmt.setCalendar(cal);
+        return fmt.format(cal.getTimeInMillis());
+    }
+
+    public Map<String, Object> createOrder(Map<String, Object> request) throws Exception {
+        Random rand = new Random();
+        int random_id = rand.nextInt(1000000);
+
+        // Chuyển đổi danh sách items thành List<Map<String, Object> >
+        List<Map<String, Object>> itemList = new ArrayList<>();
+        for (Object itemObj : (List<Map<String, Object>>) request.get("items")) {
+            itemList.add((Map<String, Object>) itemObj);
+        }
+
+        // Chuyển itemList thành JSONArray
+        JSONArray itemJSONArray = new JSONArray();
+        for (Map<String, Object> itemMap : itemList) {
+            itemJSONArray.put(new JSONObject(itemMap));
+        }
+
+        Map<String, Object> embed_data = new HashMap<>();
+        Map<String, Object> order = new HashMap<String, Object>() {{
+            put("app_id", config.get("app_id"));
+            put("app_trans_id", getCurrentTimeString("yyMMdd") + "_" + random_id);
+            put("app_time", System.currentTimeMillis()); // milliseconds
+            put("app_user", request.get("userId")); // userId từ request
+            put("amount", request.get("totalAmount")); // tổng tiền từ request
+            put("description", "LAPTOP AINO " + random_id);
+            put("bank_code", "");
+            put("item", itemJSONArray.toString()); // Chuyển đổi itemList thành JSON string
+            put("embed_data", new JSONObject(embed_data).toString());
+        }};
+
+        // Tạo dữ liệu cho chữ ký HMAC
+        String data = order.get("app_id") + "|" + order.get("app_trans_id") + "|" + order.get("app_user") + "|" + order.get("amount")
+                + "|" + order.get("app_time") + "|" + order.get("embed_data") + "|" + order.get("item");
+
+        order.put("mac", HMACUtil.HMacHexStringEncode(HMACUtil.HMACSHA256, config.get("key1"), data));
+
+        // Tạo HttpClient để gửi yêu cầu đến ZaloPay API
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpPost post = new HttpPost(config.get("endpoint"));
+
+        List<NameValuePair> params = new ArrayList<>();
+        for (Map.Entry<String, Object> e : order.entrySet()) {
+            params.add(new BasicNameValuePair(e.getKey(), e.getValue().toString()));
+        }
+
+        post.setEntity(new UrlEncodedFormEntity(params));
+
+        CloseableHttpResponse res = client.execute(post);
+        BufferedReader rd = new BufferedReader(new InputStreamReader(res.getEntity().getContent()));
+        StringBuilder resultJsonStr = new StringBuilder();
+        String line;
+
+        while ((line = rd.readLine()) != null) {
+            resultJsonStr.append(line);
+        }
+
+        // Lấy kết quả trả về từ ZaloPay
+        JSONObject result = new JSONObject(resultJsonStr.toString());
+
+        // Chuyển JSONObject thành Map<String, Object>
+        Map<String, Object> response = new HashMap<>();
+        Iterator<String> keys = result.keys();
+        while (keys.hasNext()) {
+            String key = keys.next();
+            response.put(key, result.get(key));
+        }
+
+        return response;
     }
 }

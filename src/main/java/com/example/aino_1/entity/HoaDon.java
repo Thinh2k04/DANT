@@ -29,7 +29,7 @@ public class HoaDon {
     private Float tongTien;  // Tổng tiền của hóa đơn
 
     @ManyToOne
-    @JoinColumn(name = "hinh_thuc_thanh_toan", nullable = false)
+    @JoinColumn(name = "hinh_thuc_thanh_toan", nullable = true)
     private HinhThucThanhToan hinhThucThanhToan;  // Liên kết với bảng hinh_thuc_thanh_toan
 
     @Column(name = "dia_chi_nhan_hang", nullable = true, length = 255)

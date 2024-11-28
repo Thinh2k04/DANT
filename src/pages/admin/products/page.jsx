@@ -11,47 +11,35 @@ const ProductManagement = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   // State quản lý trạng thái hiển thị modal chi tiết
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  // State lưu trữ các hình ảnh được chọn để upload
-  const [selectedImages, setSelectedImages] = useState([]);
-  // State lưu trữ các hình ảnh đã tồn tại
-  const [existingImages, setExistingImages] = useState([]);
-  // State lưu trữ preview của tất cả hình ảnh
-  const [previewImages, setPreviewImages] = useState([]);
   // State xác định đang ở chế độ chỉnh sửa hay thêm mới
   const [isEditing, setIsEditing] = useState(false);
   // State lưu trữ sản phẩm đang được chọn để chỉnh sửa
   const [selectedProduct, setSelectedProduct] = useState(null);
   // State lưu trữ sản phẩm đang xem chi tiết
   const [detailProduct, setDetailProduct] = useState(null);
-  // State lưu trữ hình ảnh của sản phẩm đang xem chi tiết
-  const [detailProductImages, setDetailProductImages] = useState([]);
   // State quản lý việc hiển thị sản phẩm đã xóa
   const [showDeleted, setShowDeleted] = useState(false);
   // State lưu trữ dữ liệu form
   const [formData, setFormData] = useState({
-    sanPham: {
-      id: '',
-      tenSanPham: '',
-      namSanXuat: '',
-      trongLuong: '',
-      gioiThieu: '',
-      thoiHanBaoHanh: '',
-      trangThai: 1,
-      loaiSanPham: {
-        id: ''
-      },
-      nguonNhap: {
-        id: ''
-      },
-      chatLieu: {
-        id: ''
-      },
-      kichThuocLaptop: {
-        id: ''
-      },
-      pin: '',
+    id: '',
+    loaiSanPham: {
+      id: ''
     },
-    imageUrls: []
+    nguonNhap: {
+      id: ''
+    },
+    chatLieu: {
+      id: ''
+    },
+    kichThuocLaptop: {
+      id: ''
+    },
+    tenSanPham: '',
+    namSanXuat: '',
+    trongLuong: '',
+    thoiHanBaoHanh: '',
+    pin: '',
+    trangThai: 1
   });
   // State quản lý trạng thái loading
   const [loading, setLoading] = useState(false);
@@ -65,6 +53,15 @@ const ProductManagement = () => {
   const [chatLieus, setChatLieus] = useState([]);
   // State lưu trữ danh sách kích thước laptop
   const [ktlts, setKtlts] = useState([]);
+  // Thêm các state mới
+  const [detailProductImages, setDetailProductImages] = useState([]); 
+  const [existingImages, setExistingImages] = useState([]);
+  const [previewImages, setPreviewImages] = useState([]);
+  const [selectedImages, setSelectedImages] = useState([]);
+
+  // State lưu trữ danh sách năm từ 2010 đến năm hiện tại
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({length: currentYear - 2010 + 1}, (_, i) => currentYear - i);
 
   // useEffect để fetch dữ liệu khi component mount
   useEffect(() => {
@@ -117,63 +114,16 @@ const ProductManagement = () => {
     }
   };
 
-  // Xử lý khi người dùng chọn hình ảnh
-  const handleImageChange = (e) => {
-    const files = Array.from(e.target.files);
-    setSelectedImages(files);
-    
-    // Thêm hình ảnh mới vào preview
-    const newPreviewImages = files.map(file => ({
-      url: URL.createObjectURL(file),
-      isNew: true,
-      file: file
-    }));
-    setPreviewImages(prev => [...prev, ...newPreviewImages]);
-  };
-
-  // Xóa hình ảnh khỏi preview
-  const removeImage = (index) => {
-    setPreviewImages(prev => prev.filter((_, i) => i !== index));
-  };
-
-  // Upload hình ảnh lên Cloudinary
-  const uploadImages = async () => {
-    const uploadedUrls = [];
-    
-    for (const image of selectedImages) {
-      const formData = new FormData();
-      formData.append('file', image);
-      formData.append('api_key', '791946539476834');
-      formData.append('upload_preset', 'laptop_preset');
-
-      try {
-        const response = await axios.post(
-          'https://api.cloudinary.com/v1_1/dmtek0eaq/image/upload',
-          formData
-        );
-        uploadedUrls.push(response.data.secure_url);
-      } catch (error) {
-        console.error('Error uploading image:', error);
-        throw error;
-      }
-    }
-
-    return uploadedUrls;
-  };
-
   // Mở form thêm/sửa sản phẩm
   const openProductForm = async (product = null) => {
     if (product) {
       setSelectedProduct(product);
       setFormData({
-        sanPham: {
-          ...product,
-          loaiSanPham: product.loaiSanPham || { id: '' },
-          nguonNhap: product.nguonNhap || { id: '' },
-          chatLieu: product.chatLieu || { id: '' },
-          kichThuocLaptop: product.kichThuocLaptop || { id: '' }
-        },
-        imageUrls: product.imageUrls || []
+        ...product,
+        loaiSanPham: product.loaiSanPham || { id: '' },
+        nguonNhap: product.nguonNhap || { id: '' },
+        chatLieu: product.chatLieu || { id: '' },
+        kichThuocLaptop: product.kichThuocLaptop || { id: '' }
       });
 
       try {
@@ -194,20 +144,25 @@ const ProductManagement = () => {
       // Reset form khi thêm mới
       setSelectedProduct(null);
       setFormData({
-        sanPham: {
-          tenSanPham: '',
-          namSanXuat: '',
-          trongLuong: '',
-          gioiThieu: '',
-          thoiHanBaoHanh: '',
-          loaiSanPham: { id: '' },
-          nguonNhap: { id: '' },
-          chatLieu: { id: '' },
-          kichThuocLaptop: { id: '' },
-          pin: '',
-          trangThai: 1
+        id: '',
+        loaiSanPham: {
+          id: ''
         },
-        imageUrls: []
+        nguonNhap: {
+          id: ''
+        },
+        chatLieu: {
+          id: ''
+        },
+        kichThuocLaptop: {
+          id: ''
+        },
+        tenSanPham: '',
+        namSanXuat: '',
+        trongLuong: '',
+        thoiHanBaoHanh: '',
+        pin: '',
+        trangThai: 1
       });
       setIsEditing(false);
       setExistingImages([]);
@@ -221,7 +176,7 @@ const ProductManagement = () => {
     e.preventDefault();
     
     // Kiểm tra validation
-    if (!formData.sanPham.tenSanPham) {
+    if (!formData.tenSanPham) {
       setError('Tên sản phẩm là bắt buộc');
       return;
     }
@@ -230,36 +185,17 @@ const ProductManagement = () => {
     setError(null);
 
     try {
-      let imageUrls = [];
-      
-      // Upload hình ảnh mới nếu có
-      if (selectedImages.length > 0) {
-        const uploadedUrls = await uploadImages();
-        // Thêm các URL mới vào previewImages
-        const newPreviewImages = uploadedUrls.map(url => ({
-          url: url,
-          isNew: true
-        }));
-        setPreviewImages(prev => [...prev, ...newPreviewImages]);
-        imageUrls = [...uploadedUrls];
-      }
-
       // Lấy tất cả URL từ previewImages
       const allImageUrls = previewImages.map(img => img.url);
-
-      const requestData = {
-        sanPham: formData.sanPham,
-        imageUrls: allImageUrls
-      };
 
       // Gọi API tương ứng (update hoặc create)
       if (isEditing) {
         await axios.put(
           `http://localhost:8080/rest/san_pham/update/${selectedProduct.id}`,
-          requestData
+          formData
         );
       } else {
-        await axios.post('http://localhost:8080/rest/san_pham/add', requestData);
+        await axios.post('http://localhost:8080/rest/san_pham/add', formData);
       }
 
       // Refresh danh sách sản phẩm
@@ -269,20 +205,25 @@ const ProductManagement = () => {
 
       // Reset form và đóng modal
       setFormData({
-        sanPham: {
-          tenSanPham: '',
-          namSanXuat: '',
-          trongLuong: '',
-          gioiThieu: '',
-          thoiHanBaoHanh: '',
-          loaiSanPham: { id: '' },
-          nguonNhap: { id: '' },
-          chatLieu: { id: '' },
-          kichThuocLaptop: { id: '' },
-          pin: '',
-          trangThai: 1
+        id: '',
+        loaiSanPham: {
+          id: ''
         },
-        imageUrls: []
+        nguonNhap: {
+          id: ''
+        },
+        chatLieu: {
+          id: ''
+        },
+        kichThuocLaptop: {
+          id: ''
+        },
+        tenSanPham: '',
+        namSanXuat: '',
+        trongLuong: '',
+        thoiHanBaoHanh: '',
+        pin: '',
+        trangThai: 1
       });
       setSelectedImages([]);
       setExistingImages([]);
@@ -312,10 +253,7 @@ const ProductManagement = () => {
 
       await axios.put(
         `http://localhost:8080/rest/san_pham/update/${product.id}`,
-        {
-          sanPham: updatedProduct,
-          imageUrls: existingImages.map(img => img.url)
-        }
+        updatedProduct
       );
 
       // Refresh danh sách sản phẩm
@@ -328,9 +266,7 @@ const ProductManagement = () => {
   };
 
   // Lọc sản phẩm theo trạng thái
-  const filteredProducts = showDeleted 
-    ? products.filter(product => product.trangThai === 0)
-    : products.filter(product => product.trangThai === 1);
+  const filteredProducts = showDeleted ? products.filter(product => product.trangThai === 0) : products.filter(product => product.trangThai === 1);
 
   // Render giao diện
   return (
@@ -347,9 +283,9 @@ const ProductManagement = () => {
           </button>
           <button
             onClick={() => setShowDeleted(!showDeleted)}
-            className={`px-4 py-2 ${showDeleted ? 'bg-green-500' : 'bg-red-500'} text-white rounded`}
+            className="px-4 py-2 bg-purple-500 text-white rounded"
           >
-            {showDeleted ? 'Xem sản phẩm đang bán' : 'Xem thùng rác'}
+            {showDeleted ? 'Hiển thị sản phẩm đang bán' : 'Hiển thị sản phẩm đã ẩn'}
           </button>
         </div>
         <table className="min-w-full bg-white border border-gray-300">
@@ -365,29 +301,23 @@ const ProductManagement = () => {
           </thead>
           <tbody>
             {filteredProducts.map((product, index) => (
-              <tr key={index} onClick={() => handleViewDetail(product.id)} className="cursor-pointer hover:bg-gray-50">
-                <td className="border px-4 py-2">{product.tenSanPham}</td>
-                <td className="border px-4 py-2">{product.namSanXuat}</td>
-                <td className="border px-4 py-2">{product.trongLuong}</td>
-                <td className="border px-4 py-2">{product.loaiSanPham?.tenLoai}</td>
-                <td className="border px-4 py-2">
+              <tr key={index} className="cursor-pointer hover:bg-gray-50">
+                <td className="border px-4 py-2" onClick={() => handleViewDetail(product.id)}>{product.tenSanPham}</td>
+                <td className="border px-4 py-2" onClick={() => handleViewDetail(product.id)}>{product.namSanXuat}</td>
+                <td className="border px-4 py-2" onClick={() => handleViewDetail(product.id)}>{product.trongLuong}</td>
+                <td className="border px-4 py-2" onClick={() => handleViewDetail(product.id)}>{product.loaiSanPham?.tenLoai}</td>
+                <td className="border px-4 py-2" onClick={() => handleViewDetail(product.id)}>
                   {product.trangThai === 1 ? 'Đang bán' : 'Đã ẩn'}
                 </td>
                 <td className="border px-4 py-2">
                   <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      openProductForm(product);
-                    }}
+                    onClick={() => openProductForm(product)}
                     className="px-3 py-1 bg-yellow-500 text-white rounded mr-2"
                   >
                     Sửa
                   </button>
                   <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleToggleStatus(product);
-                    }}
+                    onClick={() => handleToggleStatus(product)}
                     className={`px-3 py-1 ${product.trangThai === 1 ? 'bg-red-500' : 'bg-green-500'} text-white rounded`}
                   >
                     {product.trangThai === 1 ? 'Ẩn' : 'Khôi phục'}
@@ -407,7 +337,6 @@ const ProductManagement = () => {
                 <p><span className="font-bold">Tên sản phẩm:</span> {detailProduct.tenSanPham}</p>
                 <p><span className="font-bold">Năm sản xuất:</span> {detailProduct.namSanXuat}</p>
                 <p><span className="font-bold">Trọng lượng:</span> {detailProduct.trongLuong} kg</p>
-                <p><span className="font-bold">Giới thiệu:</span> {detailProduct.gioiThieu}</p>
                 <p><span className="font-bold">Thời hạn bảo hành:</span> {detailProduct.thoiHanBaoHanh} tháng</p>
                 <p><span className="font-bold">Pin:</span> {detailProduct.pin} Wh</p>
                 <p><span className="font-bold">Loại sản phẩm:</span> {detailProduct.loaiSanPham?.tenLoai}</p>
@@ -455,69 +384,61 @@ const ProductManagement = () => {
                 {/* Form fields */}
                 <input 
                   type="text" 
-                  value={formData.sanPham.tenSanPham} 
+                  value={formData.tenSanPham} 
                   onChange={(e) => setFormData({ 
                     ...formData, 
-                    sanPham: { ...formData.sanPham, tenSanPham: e.target.value }
+                    tenSanPham: e.target.value
                   })} 
                   className="border p-2 w-full mb-4"
                   placeholder="Tên sản phẩm"
                 />
-                <input 
-                  type="number" 
-                  value={formData.sanPham.namSanXuat} 
-                  onChange={(e) => setFormData({ 
-                    ...formData, 
-                    sanPham: { ...formData.sanPham, namSanXuat: parseInt(e.target.value) }
-                  })} 
+                <input
+                  type="number"
+                  min="2010"
+                  max={currentYear}
+                  value={formData.namSanXuat}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    namSanXuat: e.target.value
+                  })}
                   className="border p-2 w-full mb-4"
                   placeholder="Năm sản xuất"
                 />
                 <input 
                   type="number" 
-                  value={formData.sanPham.trongLuong} 
+                  value={formData.trongLuong} 
                   onChange={(e) => setFormData({ 
                     ...formData, 
-                    sanPham: { ...formData.sanPham, trongLuong: parseFloat(e.target.value) }
+                    trongLuong: parseFloat(e.target.value)
                   })} 
                   className="border p-2 w-full mb-4"
                   placeholder="Trọng lượng (kg)"
                 />
-                <textarea
-                  value={formData.sanPham.gioiThieu}
-                  onChange={(e) => setFormData({ 
-                    ...formData, 
-                    sanPham: { ...formData.sanPham, gioiThieu: e.target.value }
-                  })}
-                  className="border p-2 w-full mb-4"
-                  placeholder="Giới thiệu"
-                  rows="3"
-                />
                 <input 
                   type="text"
-                  value={formData.sanPham.thoiHanBaoHanh}
+                  value={formData.thoiHanBaoHanh}
                   onChange={(e) => setFormData({ 
                     ...formData, 
-                    sanPham: { ...formData.sanPham, thoiHanBaoHanh: e.target.value }
+                    thoiHanBaoHanh: e.target.value
                   })}
                   className="border p-2 w-full mb-4"
                   placeholder="Thời hạn bảo hành"
                 />
                 <input 
                   type="number"
-                  value={formData.sanPham.pin}
+                  value={formData.pin}
                   onChange={(e) => setFormData({ 
                     ...formData, 
-                    sanPham: { ...formData.sanPham, pin: parseInt(e.target.value) }
+                    pin: parseInt(e.target.value)
                   })}
                   className="border p-2 w-full mb-4"
                   placeholder="Dung lượng pin (Wh)"
                 />
                 <select
-                  value={formData.sanPham.loaiSanPham.id}
+                  value={formData.loaiSanPham.id}
                   onChange={(e) => setFormData({ 
                     ...formData, 
-                    sanPham: { ...formData.sanPham, loaiSanPham: { id: e.target.value } }
+                    loaiSanPham: { id: e.target.value }
                   })}
                   className="border p-2 w-full mb-4"
                 >
@@ -527,10 +448,10 @@ const ProductManagement = () => {
                   ))}
                 </select>
                 <select
-                  value={formData.sanPham.nguonNhap.id}
+                  value={formData.nguonNhap.id}
                   onChange={(e) => setFormData({ 
                     ...formData, 
-                    sanPham: { ...formData.sanPham, nguonNhap: { id: e.target.value } }
+                    nguonNhap: { id: e.target.value }
                   })}
                   className="border p-2 w-full mb-4"
                 >
@@ -540,10 +461,10 @@ const ProductManagement = () => {
                   ))}
                 </select>
                 <select
-                  value={formData.sanPham.chatLieu.id}
+                  value={formData.chatLieu.id}
                   onChange={(e) => setFormData({ 
                     ...formData, 
-                    sanPham: { ...formData.sanPham, chatLieu: { id: e.target.value } }
+                    chatLieu: { id: e.target.value }
                   })}
                   className="border p-2 w-full mb-4"
                 >
@@ -553,10 +474,10 @@ const ProductManagement = () => {
                   ))}
                 </select>
                 <select
-                  value={formData.sanPham.kichThuocLaptop.id}
+                  value={formData.kichThuocLaptop.id}
                   onChange={(e) => setFormData({ 
                     ...formData, 
-                    sanPham: { ...formData.sanPham, kichThuocLaptop: { id: e.target.value } }
+                    kichThuocLaptop: { id: e.target.value }
                   })}
                   className="border p-2 w-full mb-4"
                 >
@@ -565,40 +486,6 @@ const ProductManagement = () => {
                     <option key={ktlt.id} value={ktlt.id}>{ktlt.kichThuoc} inch</option>
                   ))}
                 </select>
-
-                {/* Input file để upload hình ảnh */}
-                <input
-                  type="file"
-                  multiple
-                  onChange={handleImageChange}
-                  className="border p-2 w-full mb-4"
-                  accept="image/*"
-                />
-
-                {/* Hiển thị preview hình ảnh */}
-                {previewImages.length > 0 && (
-                  <div className="mb-4">
-                    <p>Tất cả hình ảnh:</p>
-                    <div className="flex flex-wrap gap-2">
-                      {previewImages.map((image, index) => (
-                        <div key={index} className="w-20 h-20 relative">
-                          <img
-                            src={image.url}
-                            alt={`Preview ${index + 1}`}
-                            className="w-full h-full object-cover"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => removeImage(index)}
-                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
-                          >
-                            ×
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
 
                 {/* Hiển thị thông báo lỗi nếu có */}
                 {error && <p className="text-red-500 text-sm mb-4">{error}</p>}

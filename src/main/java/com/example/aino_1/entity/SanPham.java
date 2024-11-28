@@ -43,7 +43,6 @@ public class SanPham {
     private Float trongLuong;
 
 
-
     @Column(name = "thoi_han_bao_hanh", length = 20)
     private String thoiHanBaoHanh;
 

@@ -21,7 +21,7 @@ public interface SanPhamChiTietInterface extends JpaRepository<SanPhamChiTiet, I
                     "mh.tamNen, mh.tanSoQuet, cpu.soNhan, gpu.kienTrucCongNghe, " +
                     "cpu.ten, spct.maSpct, " +
                     "spct.hinhAnhMinhHoa, " +
-                    "spct.donGia, sp.id, gpu.ten, sp.trongLuong" +
+                    "spct.donGia, sp.id, gpu.ten, sp.trongLuong , sp.pin, sp.thoiHanBaoHanh" +
                     ") " +
                     "FROM SanPhamChiTiet spct " +
                     "JOIN SanPham sp ON spct.sanPham.id = sp.id " +
@@ -45,7 +45,7 @@ public interface SanPhamChiTietInterface extends JpaRepository<SanPhamChiTiet, I
                     "mh.tamNen, mh.tanSoQuet, cpu.soNhan, gpu.kienTrucCongNghe, " +
                     "cpu.ten, spct.maSpct,  " +
                     "spct.hinhAnhMinhHoa, " +
-                    "spct.donGia, sp.id, gpu.ten, sp.trongLuong" +
+                    "spct.donGia, sp.id, gpu.ten, sp.trongLuong, sp.pin, sp.thoiHanBaoHanh" +
                     ") " +
                     "FROM SanPhamChiTiet spct " +
                     "JOIN SanPham sp ON spct.sanPham.id = sp.id " +

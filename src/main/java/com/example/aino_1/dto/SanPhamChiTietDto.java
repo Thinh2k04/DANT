@@ -27,6 +27,8 @@ public class SanPhamChiTietDto {
     private Integer idSanPham;
     private String gpu;
     private Float trongLuong;
+    private Integer pin;
+    private String thoiHanBaoHanh; 
     // Phương thức tạo tên sản phẩm chi tiết
     public String getTenSanPhamChiTiet() {
         return String.format(

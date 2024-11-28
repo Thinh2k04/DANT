@@ -21,14 +21,14 @@ public class SanPhamChiTietDto {
     private Integer soNhan;
     private String kienTrucCongNghe;
     private String tenCPU;
-    private String maSpct; // Thêm trường mã sản phẩm chi tiết
+    private String maSpct;
     private String hinhAnhMinhHoa;
     private Float donGia;
     private Integer idSanPham;
     private String gpu;
     private Float trongLuong;
     private Integer pin;
-    private String thoiHanBaoHanh; 
+    private String thoiHanBaoHanh;
     // Phương thức tạo tên sản phẩm chi tiết
     public String getTenSanPhamChiTiet() {
         return String.format(

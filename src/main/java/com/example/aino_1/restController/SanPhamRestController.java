@@ -59,6 +59,13 @@ public void AddSanPham(@RequestBody SanPham sanPham){
         spsi.save(sanPham);
 }
 
+
+    @PostMapping("/update/{id}")
+    public void UpdateSanPham(@PathVariable SanPham sanPham){
+        spsi.save(sanPham);
+    }
+
+
     @DeleteMapping("/del/{id}")
     public void delete(@PathVariable Integer id) {
         spsi.deleteById(id);

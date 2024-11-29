@@ -54,14 +54,12 @@ public class SanPhamRestController {
         return spsi.findById(id).get();
     }
 
-@PostMapping("/add")
-public void AddSanPham(@RequestBody SanPham sanPham){
-        spsi.save(sanPham);
+    @PostMapping("/add")
+    public void AddSanPham(@RequestBody SanPham sanPham){ spsi.save(sanPham);
 }
 
-
-    @PostMapping("/update/{id}")
-    public void UpdateSanPham(@PathVariable SanPham sanPham){
+    @PutMapping("/update/{id}")
+    public void UpdateSanPham(@RequestBody SanPham sanPham){
         spsi.save(sanPham);
     }
 

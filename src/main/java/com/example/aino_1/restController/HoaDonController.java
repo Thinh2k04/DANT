@@ -28,10 +28,10 @@ public class HoaDonController {
         return hdsi.findAll();
     }
 
-    @PostMapping("/add")
-    public HoaDon create(@RequestBody HoaDon HoaDon) {
-        return hdsi.save(HoaDon);
-    }
+//    @PostMapping("/add")
+//    public HoaDon create(@RequestBody HoaDon HoaDon) {
+//        return hdsi.save(HoaDon);
+//    }
 
     @PutMapping("/update/{id}")
     public HoaDon update(@RequestBody HoaDon HoaDon) {
@@ -64,9 +64,12 @@ public class HoaDonController {
                     requestData.get("lhdct"),
                     new TypeReference<List<HoaDonChiTiet>>() {}
             );
-            System.out.println(tttk+"THÔNG TIN TÀI KHOẢN");
-            System.out.println(hd+"HÓA ĐƠN");
-            System.out.println(lhdct+"LIST HÓA ĐƠN CHI TIẾT");
+            System.out.println(tttk+" THÔNG TIN TÀI KHOẢN");
+            System.out.println("----------------------------------------------------------------");
+            System.out.println(hd+" HÓA ĐƠN");
+            System.out.println("----------------------------------------------------------------");
+            System.out.println(lhdct+" LIST HÓA ĐƠN CHI TIẾT");
+            System.out.println("----------------------------------------------------------------");
 
 //            // Kiểm tra dữ liệu đầu vào
 //            if (tttk == null || hd == null || lhdct == null) {

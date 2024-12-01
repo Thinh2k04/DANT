@@ -343,23 +343,6 @@ const ProductManagement = () => {
                 <p><span className="font-bold">Nguồn nhập:</span> {detailProduct.nguonNhap?.tenNhaCungUng}</p>
                 <p><span className="font-bold">Chất liệu:</span> {detailProduct.chatLieu?.tenChatLieu}</p>
                 <p><span className="font-bold">Kích thước:</span> {detailProduct.kichThuocLaptop?.kichThuoc} inch</p>
-                
-                {/* Hiển thị hình ảnh sản phẩm */}
-                {detailProductImages.length > 0 && (
-                  <div>
-                    <p className="font-bold mb-2">Hình ảnh sản phẩm:</p>
-                    <div className="grid grid-cols-3 gap-4">
-                      {detailProductImages.map((image, index) => (
-                        <img
-                          key={index}
-                          src={image.duongDanHinhAnh}
-                          alt={`Sản phẩm ${index + 1}`}
-                          className="w-full h-40 object-cover rounded"
-                        />
-                      ))}
-                    </div>
-                  </div>
-                )}
               </div>
               <div className="mt-4 flex justify-end">
                 <button 

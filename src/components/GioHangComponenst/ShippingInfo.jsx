@@ -35,11 +35,14 @@ function ShippingInfo({
       const selectedProvinceName = provinces.find(
         p => p.code === parseInt(selectedProvince)
       )?.name;
+
       
       // Lấy tên quận/huyện từ mã code
       const selectedDistrictName = districts.find(
         d => d.code === parseInt(selectedDistrict)
       )?.name;
+
+      
 
       // // Tính tổng trọng lượng
       // const weight = calculateTotalWeight(); // Tính trọng lượng

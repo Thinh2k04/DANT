@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import ShippingInfo from './ShippingInfo';
 
 function OrderSummary({ 
   cartItems, 
@@ -30,38 +31,42 @@ function OrderSummary({
     
     const orderData = {
       tttk: {
+        id: "",
         hoTen: customerName,
         diaChi: specificAddress,
-        soDienThoai: phoneNumber
+        soCCCD: "",
+        soDienThoai: phoneNumber,
+        email: email,
+        taiKhoanNguoiDung: null,
+        trangThai: null
       },
       hd: {
         thoiGianLapHoaDon: now.toISOString(),
         tongTien: totalAmount + (shippingFee || 0),
         hinhThucThanhToan: {
-          id: parseInt(paymentMethod),
-          tenHinhThuc: paymentMethod === "1" ? "Thanh toán khi nhận hàng" : 
-                       paymentMethod === "2" ? "Thanh toán qua Momo" : "Thanh toán qua VNPay"
+          id: parseInt(paymentMethod)
         },
-        diaChiNhanHang: specificAddress,
+        diaChiNhanHang: `${specificAddress}, ${selectedWard}, ${selectedDistrict}, ${selectedProvince}`,
         cuaHang: {
           id: 1,
           tinh: selectedProvince,
           huyen: selectedDistrict,
           phuong: selectedWard,
-          soNha: "Số 123, Đường ABC",
+          soNha: "So 1",
           thoiGianMoCua: "08:00",
           thoiGianDongCua: "18:00",
           trangThai: 1
         },
+        voucher: null,
         trangThaiThanhToan: 0,
         trangThai: 0
       },
       lhdct: cartItems.map(item => ({
         hoaDon: {
-          id: 1
+          id: ""
         },
         sanPhamChiTiet: {
-          id: item.id
+          id: item.id.toString()
         },
         soLuong: quantities[item.id] || item.soLuong || 1,
         gia: parseFloat(item.donGia)

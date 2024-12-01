@@ -213,7 +213,7 @@ const ChiTietSanPham = () => {
                                     ['Card đồ họa rời', selectedConfig?.cardDoHoaRoi || 'Không có'],
                                     ['Pin', `${selectedConfig?.pin} Wh`],
                                     ['Trọng lượng', `${selectedConfig?.trongLuong} kg`],
-                                    ['Bảo hành', selectedConfig?.baoHanh]
+                                    ['Bảo hành', `${selectedConfig?.thoiHanBaoHanh} năm`]
                                 ].map(([label, value]) => (
                                     <div key={label} className="flex items-center gap-2">
                                         {specIcons[label]}

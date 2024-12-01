@@ -34,21 +34,21 @@ function OrderSummary({
     // Lấy tên tỉnh/thành phố từ mã code
     const selectedProvinceName = provinces.find(
       p => p.code === parseInt(selectedProvince)
-    )?.name;
+    )?.name || '';
  
     // Lấy tên quận/huyện từ mã code
     const selectedDistrictName = districts.find(
       d => d.code === parseInt(selectedDistrict)
-    )?.name;
+    )?.name || '';
 
     const orderData = {
       tttk: {
         id: "",
-        hoTen: customerName,
-        diaChi: specificAddress,
+        hoTen: customerName || '',
+        diaChi: specificAddress || '',
         soCCCD: "",
-        soDienThoai: phoneNumber,
-        email: email,
+        soDienThoai: phoneNumber || '',
+        email: email || '',
         taiKhoanNguoiDung: null,
         trangThai: null
       },
@@ -56,13 +56,13 @@ function OrderSummary({
         thoiGianLapHoaDon: now.toISOString(),
         tongTien: totalAmount + (shippingFee || 0),
         hinhThucThanhToan: {
-          id: parseInt(paymentMethod)
+          id: parseInt(paymentMethod) || 1
         },
-        diaChiNhanHang: `${specificAddress}, ${selectedWard}, ${selectedDistrictName}, ${selectedProvinceName}`,
+        diaChiNhanHang: `${specificAddress || ''}, ${selectedWard || ''}, ${selectedDistrictName}, ${selectedProvinceName}`,
         cuaHang: {
           id: 1,
-          tinh: selectedProvince,
-          huyen: selectedDistrict,
+          tinh: selectedProvince || '',
+          huyen: selectedDistrict || '',
           thoiGianMoCua: "08:00",
           thoiGianDongCua: "18:00",
           trangThai: 1
@@ -76,10 +76,10 @@ function OrderSummary({
           id: ""
         },
         sanPhamChiTiet: {
-          id: item.id.toString()
+          id: item?.id?.toString() || ''
         },
-        soLuong: quantities[item.id] || item.soLuong || 1,
-        gia: parseFloat(item.donGia)
+        soLuong: quantities[item?.id] || item?.soLuong || 1,
+        gia: parseFloat(item?.donGia || 0)
       }))
     };
     return orderData;
@@ -94,9 +94,9 @@ function OrderSummary({
           userId: localStorage.getItem('sub') || "1",
           totalAmount: totalAmount + (shippingFee || 0),
           items: cartItems.map(item => ({
-            product_id: item.id?.toString() || "",
-            quantity: quantities[item.id] || 1,
-            price: parseFloat(item.donGia || 0)
+            product_id: item?.id?.toString() || "",
+            quantity: quantities[item?.id] || 1,
+            price: parseFloat(item?.donGia || 0)
           })).filter(item => item.product_id)
         };
         
@@ -108,13 +108,14 @@ function OrderSummary({
           },
           body: JSON.stringify(paymentData)
         });
+
         if (!paymentResponse.ok) {
           throw new Error('Failed to create payment');
         }
 
         const paymentResult = await paymentResponse.json();
         
-        if (paymentResult.order_url) {
+        if (paymentResult?.order_url) {
           setPaymentUrl(paymentResult.order_url);
           try {
             const pageResponse = await fetch(paymentResult.order_url);
@@ -127,7 +128,7 @@ function OrderSummary({
             const expression = evaluator.createExpression('//*[@id="zp-qr"]/div[1]/div/div');
             const result = expression.evaluate(doc, XPathResult.FIRST_ORDERED_NODE_TYPE);
             
-            if (result.singleNodeValue) {
+            if (result?.singleNodeValue) {
               const qrElement = result.singleNodeValue;
               setQrCodeSvg(qrElement.innerHTML);
               setShowQrModal(true);
@@ -166,6 +167,11 @@ function OrderSummary({
       }
 
       const result = await response.json();
+      
+      if (!result) {
+        throw new Error('Invalid response data');
+      }
+
       toast.success('Đặt hàng thành công!', {
         position: "top-right",
         autoClose: 3000,
@@ -174,10 +180,10 @@ function OrderSummary({
         pauseOnHover: true,
         draggable: true,
       });
+
       handleCheckout(result);
       
     } catch (error) {
-      console.error('Error:', error);
       toast.error('Có lỗi xảy ra: ' + error.message);
     }
   };

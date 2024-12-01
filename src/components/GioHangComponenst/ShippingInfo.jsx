@@ -21,6 +21,8 @@ function ShippingInfo({
   quantities, // Số lượng sản phẩm,
   totalAmount, // Tổng tiền đơn hàng
   weight, // Trọng lượng đơn hàng
+  setSelectedProvince,
+  setSelectedDistrict
 }) {
 
   // Hàm tính phí vận chuyển
@@ -35,17 +37,12 @@ function ShippingInfo({
       const selectedProvinceName = provinces.find(
         p => p.code === parseInt(selectedProvince)
       )?.name;
-
+      
       
       // Lấy tên quận/huyện từ mã code
       const selectedDistrictName = districts.find(
         d => d.code === parseInt(selectedDistrict)
       )?.name;
-
-      
-
-      // // Tính tổng trọng lượng
-      // const weight = calculateTotalWeight(); // Tính trọng lượng
 
       // Chuẩn bị dữ liệu gửi lên API
       const requestData = {
@@ -58,6 +55,7 @@ function ShippingInfo({
         value: totalAmount, // Giá trị đơn hàng
         transport: "road" // Phương thức vận chuyển
       };
+      
 
       // Gọi API tính phí vận chuyển
       const response = await fetch('http://localhost:8080/api/ghtk/calculate-fee', {
@@ -89,10 +87,13 @@ function ShippingInfo({
     }
   };
 
+  
+
   // Gọi hàm tính phí vận chuyển khi chọn quận/huyện
   useEffect(() => {
     if (selectedDistrict) {
       calculateShippingFee();
+      
     }
   }, [selectedDistrict]);
 

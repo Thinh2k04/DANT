@@ -4,6 +4,9 @@ import 'react-toastify/dist/ReactToastify.css';
 import ShippingInfo from './ShippingInfo';
 
 function OrderSummary({ 
+  provinces, // Danh sách tỉnh/thành phố
+  districts, // Danh sách quận/huyện
+  wards, // Danh sách phường/xã
   cartItems, 
   quantities, 
   totalAmount, 
@@ -28,7 +31,16 @@ function OrderSummary({
 
   const prepareOrderData = () => {
     const now = new Date();
-    
+    // Lấy tên tỉnh/thành phố từ mã code
+    const selectedProvinceName = provinces.find(
+      p => p.code === parseInt(selectedProvince)
+    )?.name;
+ 
+    // Lấy tên quận/huyện từ mã code
+    const selectedDistrictName = districts.find(
+      d => d.code === parseInt(selectedDistrict)
+    )?.name;
+
     const orderData = {
       tttk: {
         id: "",
@@ -46,13 +58,11 @@ function OrderSummary({
         hinhThucThanhToan: {
           id: parseInt(paymentMethod)
         },
-        diaChiNhanHang: `${specificAddress}, ${selectedWard}, ${selectedDistrict}, ${selectedProvince}`,
+        diaChiNhanHang: `${specificAddress}, ${selectedWard}, ${selectedDistrictName}, ${selectedProvinceName}`,
         cuaHang: {
           id: 1,
           tinh: selectedProvince,
           huyen: selectedDistrict,
-          phuong: selectedWard,
-          soNha: "So 1",
           thoiGianMoCua: "08:00",
           thoiGianDongCua: "18:00",
           trangThai: 1

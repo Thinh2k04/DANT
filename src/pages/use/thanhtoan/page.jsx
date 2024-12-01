@@ -342,6 +342,12 @@ function CheckoutPage() {
           {/* Cột phải - Tổng quan đơn hàng */}
           <div className="w-full md:w-1/2 px-4">
             <OrderSummary
+            provinces={provinces}
+            districts={districts}
+            wards={wards}
+            selectedProvince={selectedProvince}
+            selectedDistrict={selectedDistrict}
+            selectedWard={selectedWard}
               cartItems={cartItems}
               quantities={quantities}
               totalAmount={totalAmount}
@@ -354,9 +360,6 @@ function CheckoutPage() {
               phoneNumber={phoneNumber}
               email={email}
               deliveryMethod={deliveryMethod}
-              selectedProvince={selectedProvince}
-              selectedDistrict={selectedDistrict}
-              selectedWard={selectedWard}
               specificAddress={specificAddress}
               paymentMethod={paymentMethod}
             />

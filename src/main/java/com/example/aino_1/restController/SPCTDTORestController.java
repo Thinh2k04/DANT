@@ -43,12 +43,12 @@ public class SPCTDTORestController {
     @PostMapping("/add")
     public void create(@RequestBody Map<String, Object> requestData) {
         // Lấy thông tin sản phẩm từ JSON
-        SanPhamChiTiet SanPhamChiTiet = new ObjectMapper().convertValue(requestData.get("sanPhamChiTiet"), SanPhamChiTiet.class);
+        SanPhamChiTiet sanPhamChiTiet = new ObjectMapper().convertValue(requestData.get("sanPhamChiTiet"), SanPhamChiTiet.class);
 
         // Lấy danh sách URL ảnh từ JSON
         List<String> imageUrls = (List<String>) requestData.get("imageUrls");
 
-        spctsv.saveSanPhamChiTietWithImage(SanPhamChiTiet, imageUrls);
+        spctsv.saveSanPhamChiTietWithImage(sanPhamChiTiet, imageUrls);
     }
 
     @PutMapping("/update/{id}")

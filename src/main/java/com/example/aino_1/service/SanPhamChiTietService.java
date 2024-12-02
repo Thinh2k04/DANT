@@ -45,7 +45,7 @@ public class SanPhamChiTietService {
 
 
 
-        SanPhamChiTiet savedSanPham = spctsi.save(spct);
+        SanPhamChiTiet savedSanPhamCT = spctsi.save(spct);
 
         if (urlImg != null ){
             for (String url : urlImg
@@ -53,7 +53,7 @@ public class SanPhamChiTietService {
                 // Bước 2: Lưu ảnh với ID sản phẩm
                 HinhAnh hinhAnh = new HinhAnh();
                 hinhAnh.setDuongDanHinhAnh(url); // Hàm uploadFile để lưu file và trả về đường dẫn
-                hinhAnh.setSanPhamChiTiet(savedSanPham); // Gán sản phẩm vào hình ảnh
+                hinhAnh.setSanPhamChiTiet(savedSanPhamCT); // Gán sản phẩm vào hình ảnh
 
                 // Lưu thông tin ảnh vào cơ sở dữ liệu
                 hasi.save(hinhAnh);

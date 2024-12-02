@@ -41,7 +41,6 @@ public class SanPhamChiTietRestController {
         return spctsi.findImagePathsByProductDetailId(id);
     }
 
-
     @PostMapping("/add")
     public SanPhamChiTiet create(@RequestBody SanPhamChiTiet spct) {
         return spctsi.save(spct);

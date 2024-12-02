@@ -1,5 +1,6 @@
 package com.example.aino_1.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -40,6 +41,7 @@ public class SanPhamChiTiet {
     private Ram ram;  // Liên kết với bảng ram
 
     @ManyToOne
+    @JsonProperty("oLuuTru")  // Ánh xạ trường JSON "oLuuTru" vào thuộc tính nà
     @JoinColumn(name = "id_o_luu_tru", referencedColumnName = "id")
     private OLuuTru oLuuTru;  // Liên kết với bảng o_luu_tru
 
@@ -56,8 +58,8 @@ public class SanPhamChiTiet {
     private Gpu gpu;  // Liên kết với bảng gpu
 
     @ManyToOne
-    @JoinColumn(name = "id_mausac", referencedColumnName = "id")
-    private MauSac mauSac;  // Liên kết với bảng gpu
+    @JoinColumn(name = "id_mau_sac", referencedColumnName = "id")
+    private MauSac mauSac;  // Liên kết với bảng MauSac
 
     @Column(name = "trang_thai_spct")
     private Integer trangThaiSpct;  // Trạng thái sản phẩm chi tiết

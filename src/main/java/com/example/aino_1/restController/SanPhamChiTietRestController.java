@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -56,6 +57,10 @@ public class SanPhamChiTietRestController {
         spctsi.deleteById(id);
     }
 
+    @GetMapping("/getSPCTByIdSP/{id}")
+    public ArrayList<SanPhamChiTietDto> getSPCTByIdSP(@PathVariable Integer id) {
+        return spctsi.getSanPhamChiTietByIdSP(id);
+    }
 
 
 //    @GetMapping("/tim_kiem/{tuKhoaTimKiem}")

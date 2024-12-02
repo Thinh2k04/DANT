@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -62,6 +63,29 @@ public interface SanPhamChiTietInterface extends JpaRepository<SanPhamChiTiet, I
     )
     SanPhamChiTietDto getSanPhamChiTietById(@Param("id") Integer id);
 
+    @Query(
+            "SELECT  new com.example.aino_1.dto.SanPhamChiTietDto(" +
+                    "spct.id, spct.soLuong, sp.tenSanPham, cl.tenChatLieu, spct.gioiThieu, " +
+                    "ram.dungLuong, olt.dungLuong, mh.doPhanGiai, ktlt.kichThuoc, " +
+                    "mh.tamNen, mh.tanSoQuet, cpu.soNhan, gpu.kienTrucCongNghe, " +
+                    "cpu.ten, spct.maSpct,  " +
+                    "spct.hinhAnhMinhHoa, " +
+                    "spct.donGia, sp.id, gpu.ten, sp.trongLuong, sp.pin, sp.thoiHanBaoHanh" +
+                    ") " +
+                    "FROM SanPhamChiTiet spct " +
+                    "JOIN SanPham sp ON spct.sanPham.id = sp.id " +
+                    "INNER JOIN ChatLieu cl ON cl.id = sp.chatLieu.id " +
+                    "INNER JOIN LoaiSanPham lsp ON lsp.id = sp.loaiSanPham.id " +
+                    "INNER JOIN KichThuocLapTop ktlt ON ktlt.id = sp.kichThuocLaptop.id " +
+                    "INNER JOIN NguonNhap nn ON nn.id = sp.nguonNhap.id " +
+                    "INNER JOIN ManHinh mh ON mh.id = spct.manHinh.id " +
+                    "INNER JOIN Ram ram ON ram.id = spct.ram.id " +
+                    "INNER JOIN OLuuTru olt ON olt.id = spct.oLuuTru.id " +
+                    "INNER JOIN Cpu cpu ON cpu.id = spct.cpu.id " +
+                    "INNER JOIN Gpu gpu ON gpu.id = spct.gpu.id " +
+                    " where sp.id = :id"
+    )
+    ArrayList<SanPhamChiTietDto> getSanPhamChiTietByIdSP(@Param("id") Integer id);
 
     @Query("SELECT ha.duongDanHinhAnh FROM SanPhamChiTiet spct " +
             "JOIN HinhAnh ha on ha.sanPhamChiTiet.id = spct.id  where spct.id = :id")

@@ -15,6 +15,9 @@ public class CuaHang {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Column(name = "ten_cua_hang", nullable = false)
+    private String tenCuaHang;
+
     @Column(name = "tinh", nullable = false, length = 20)
     private String tinh;
 

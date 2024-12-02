@@ -2,9 +2,11 @@
 import React, { useState, useEffect } from 'react';
 import NavbarAdmin from '../Navbar/NavbarAdmin';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 // Component quản lý sản phẩm
 const ProductManagement = () => {
+  const navigate = useNavigate();
   // Khai báo state để lưu trữ danh sách sản phẩm
   const [products, setProducts] = useState([]);
   // State quản lý trạng thái hiển thị modal
@@ -321,6 +323,12 @@ const ProductManagement = () => {
                     className={`px-3 py-1 ${product.trangThai === 1 ? 'bg-red-500' : 'bg-green-500'} text-white rounded`}
                   >
                     {product.trangThai === 1 ? 'Ẩn' : 'Khôi phục'}
+                  </button>
+                   <button
+                    onClick={() => navigate(`/admin/chitietsanpham/${product.id}`)}
+                    className="px-3 py-1 bg-blue-500 text-white rounded mr-2"
+                  >
+                    Sản phẩm chi tiết
                   </button>
                 </td>
               </tr>

@@ -8,6 +8,7 @@ import AttributeManagement from '../pages/admin/attributes/page';
 import ChiTietSanPham from '../pages/chitietsanpham[/id]/page';
 import CheckoutPage from '../pages/use/thanhtoan/page';
 import PaymentSuccess from '../pages/use/thanhtoan/page';
+import ChiTietSanPhamAdmin from '../pages/admin/sanphamchitietAdmin[/id]/page';
 
 // Public routes
 const publicRoutes = [
@@ -26,6 +27,7 @@ const privateRoutes = [
   { path: '/admin/orders', component: OrderManagement },
   { path: '/admin/customers', component: CustomerManagement },
   { path: '/admin/attributes', component: AttributeManagement },
+  { path: '/admin/chitietsanpham/:idSanPham', component: ChiTietSanPhamAdmin },
 ];
 
 export { privateRoutes, publicRoutes };

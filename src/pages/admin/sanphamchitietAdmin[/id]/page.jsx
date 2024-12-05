@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { FaEdit, FaTrash, FaPlus } from 'react-icons/fa';
 import Sidebar from '../../Navbar/NavbarAdmin';
+import uploadImage from '../../../../utils/imageUpload';
 
 const ChiTietSanPhamAdmin = () => {
   const { idSanPham } = useParams();
@@ -21,10 +22,10 @@ const ChiTietSanPhamAdmin = () => {
   const [formData, setFormData] = useState({
     sanPhamChiTiet: {
       id: '',
-      hinhAnhMinhHoa: 'https://i.postimg.cc/J47PBp3b/mbp-16-spaceblack-cto-hero-202310.jpg',
+      hinhAnhMinhHoa: '',
       soLuong: 5,
       trangThai: '1',
-      donGia: 20000.0,
+      donGia: 20000,
       maSpct: 'Dell_01',
       sanPham: {
         id: idSanPham
@@ -50,17 +51,13 @@ const ChiTietSanPhamAdmin = () => {
       trangThaiSpct: 1,
       gioiThieu: "Laptop Dell Latitude L3540 với bộ vi xử lý Intel i5, RAM 8GB, ổ cứng SSD 256GB, màn hình 15.6\" FHD, thích hợp cho công việc văn phòng và học tập.",
       cardDoHoa: {
-        id: 1,
-        tenCard: "Card đồ họa NVIDIA GTX 1650",
-        trangThai: 1
+        id: "1",
       }
     },
-    imageUrls: [
-      "https://i.postimg.cc/J47PBp3b/mbp-16-spaceblack-cto-hero-202310.jpg",
-      "https://i.postimg.cc/J47PBp3b/mbp-16-spaceblack-cto-hero-202310.jpg",
-      "https://i.postimg.cc/J47PBp3b/mbp-16-spaceblack-cto-hero-202310.jpg"
-    ]
+    imageUrls: []
   });
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -74,22 +71,22 @@ const ChiTietSanPhamAdmin = () => {
         setProductVariants(variantsResponse.data);
 
         // Fetch component options
-        const ramsResponse = await axios.get('http://localhost:8080/rest/ram');
+        const ramsResponse = await axios.get('http://localhost:8080/rest/ram/getAll');
         setRams(ramsResponse.data);
 
-        const cpusResponse = await axios.get('http://localhost:8080/api/cpus'); 
+        const cpusResponse = await axios.get('http://localhost:8080/rest/cpu/getAll'); 
         setCpus(cpusResponse.data);
 
-        const gpusResponse = await axios.get('http://localhost:8080/api/gpus');
+        const gpusResponse = await axios.get('http://localhost:8080/rest/gpu/getAll');
         setGpus(gpusResponse.data);
 
-        const storagesResponse = await axios.get('http://localhost:8080/api/storages');
+        const storagesResponse = await axios.get('http://localhost:8080/rest/o_luu_tru/getAll');
         setStorages(storagesResponse.data);
 
-        const displaysResponse = await axios.get('http://localhost:8080/api/displays');
+        const displaysResponse = await axios.get('http://localhost:8080/rest/man_hinh/getAll');
         setDisplays(displaysResponse.data);
 
-        const colorsResponse = await axios.get('http://localhost:8080/api/colors');
+        const colorsResponse = await axios.get('http://localhost:8080/rest/mau_sac/getAll');
         setColors(colorsResponse.data);
         
         setLoading(false);
@@ -102,10 +99,45 @@ const ChiTietSanPhamAdmin = () => {
     fetchData();
   }, [idSanPham]);
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type.startsWith('image/')) {
+      setSelectedImage(file);
+      setPreviewImage(URL.createObjectURL(file));
+    } else {
+      alert('Please select a valid image file.');
+    }
+  };
+
+  const handleImageUpload = async () => {
+    if (selectedImage) {
+      const uploadResult = await uploadImage(selectedImage);
+      if (uploadResult.success) {
+        const newImageUrls = [...formData.imageUrls, uploadResult.url];
+        setFormData({
+          ...formData,
+          imageUrls: newImageUrls
+        });
+      } else {
+        alert(uploadResult.message);
+      }
+    }
+  };
+
+  const handleImageDelete = (index) => {
+    const newImageUrls = [...formData.imageUrls];
+    newImageUrls.splice(index, 1);
+    setFormData({
+      ...formData,
+      imageUrls: newImageUrls
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:8080/rest/san_pham_chi_tiet/add', formData);
+      await handleImageUpload();
+      await axios.post('http://localhost:8080/rest/spctDTO/add', formData);
       const variantsResponse = await axios.get(`http://localhost:8080/rest/san_pham_chi_tiet/getSPCTByIdSP/${idSanPham}`);
       setProductVariants(variantsResponse.data);
       setIsModalOpen(false);
@@ -113,10 +145,10 @@ const ChiTietSanPhamAdmin = () => {
         sanPhamChiTiet: {
           id: '',
           hinhAnhMinhHoa: 'https://i.postimg.cc/J47PBp3b/mbp-16-spaceblack-cto-hero-202310.jpg',
-          soLuong: 5,
+          soLuong: "",
           trangThai: '1',
-          donGia: 20000.0,
-          maSpct: 'Dell_01',
+          donGia: "",
+          maSpct: '',
           sanPham: {
             id: idSanPham
           },
@@ -139,18 +171,12 @@ const ChiTietSanPhamAdmin = () => {
             id: ''
           },
           trangThaiSpct: 1,
-          gioiThieu: "Laptop Dell Latitude L3540 với bộ vi xử lý Intel i5, RAM 8GB, ổ cứng SSD 256GB, màn hình 15.6\" FHD, thích hợp cho công việc văn phòng và học tập.",
+          gioiThieu: "",
           cardDoHoa: {
-            id: 1,
-            tenCard: "Card đồ họa NVIDIA GTX 1650",
-            trangThai: 1
+            id: ''
           }
         },
-        imageUrls: [
-          "https://i.postimg.cc/J47PBp3b/mbp-16-spaceblack-cto-hero-202310.jpg",
-          "https://i.postimg.cc/J47PBp3b/mbp-16-spaceblack-cto-hero-202310.jpg",
-          "https://i.postimg.cc/J47PBp3b/mbp-16-spaceblack-cto-hero-202310.jpg"
-        ]
+        imageUrls: []
       });
     } catch (err) {
       console.error('Error adding product variant:', err);
@@ -283,7 +309,7 @@ const ChiTietSanPhamAdmin = () => {
         {/* Add Product Variant Modal */}
         {isModalOpen && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-            <div className="bg-white p-8 rounded-lg w-3/4 max-h-[90vh] overflow-y-auto">
+            <div className="bg-white p-8 rounded-lg w-full max-w-[90vw] max-h-[90vh] overflow-y-auto">
               <h2 className="text-xl font-bold mb-4">Thêm sản phẩm chi tiết</h2>
               <form onSubmit={handleSubmit}>
                 <div className="grid grid-cols-3 gap-4">
@@ -305,17 +331,33 @@ const ChiTietSanPhamAdmin = () => {
                   <div>
                     <label className="block mb-2">Hình ảnh minh họa</label>
                     <input
-                      type="text"
-                      className="w-full p-2 border rounded"
-                      value={formData.sanPhamChiTiet.hinhAnhMinhHoa}
-                      onChange={(e) => setFormData({
-                        ...formData,
-                        sanPhamChiTiet: {
-                          ...formData.sanPhamChiTiet,
-                          hinhAnhMinhHoa: e.target.value
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file && file.type.startsWith('image/')) {
+                          setFormData({
+                            ...formData,
+                            sanPhamChiTiet: {
+                              ...formData.sanPhamChiTiet,
+                              hinhAnhMinhHoa: URL.createObjectURL(file)
+                            }
+                          });
+                        } else {
+                          alert('Please select a valid image file.');
                         }
-                      })}
-                      placeholder="URL hình ảnh"
+                      }}
+                      className="w-full p-2 border rounded"
+                    />
+                  </div>
+                  <div>
+                    <label className="block mb-2">Hình ảnh sản phẩm chi tiết</label>
+                    {previewImage && <img src={previewImage} alt="Preview" className="w-20 h-20 object-cover mb-2" />}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="w-full p-2 border rounded"
                     />
                   </div>
                   <div>
@@ -479,7 +521,7 @@ const ChiTietSanPhamAdmin = () => {
                       >
                         <option value="">Chọn màu sắc</option>
                         {colors.map(color => (
-                          <option key={color.id} value={color.id}>{color.ten}</option>
+                          <option key={color.id} value={color.id}>{color.tenMau}</option>
                         ))}
                       </select>
                       <button type="button" className="px-3 py-1 bg-green-500 text-white rounded">

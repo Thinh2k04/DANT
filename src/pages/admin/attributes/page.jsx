@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import NavbarAdmin from '../Navbar/NavbarAdmin';
-import axios from 'axios';
+import uploadImage from '../../../utils/imageUpload';
 
 const AttributeManagement = () => {
   const [image, setImage] = useState(null);
@@ -27,34 +27,16 @@ const AttributeManagement = () => {
     setLoading(true);
     setError(null);
 
-    const formData = new FormData();
-    formData.append('file', image);
-    formData.append('api_key', '791946539476834');
-    formData.append('upload_preset', 'laptop_preset');
+    const result = await uploadImage(image);
 
-    try {
-      const response = await axios.post(
-        'https://api.cloudinary.com/v1_1/dmtek0eaq/image/upload',
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        }
-      );
-
-      setUrl(response.data.secure_url);
+    if (result.success) {
+      setUrl(result.url);
       alert('Image uploaded successfully!');
-    } catch (error) {
-      console.error('Error uploading the image:', error);
-      setError('Failed to upload image. Please try again.');
-      
-      if (error.response) {
-        console.error('Error details:', error.response.data);
-      }
-    } finally {
-      setLoading(false);
+    } else {
+      setError(result.message);
     }
+
+    setLoading(false);
   };
 
   return (

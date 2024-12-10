@@ -2,11 +2,11 @@ package com.example.aino_1.restController;
 
 import com.example.aino_1.dto.SanPhamChiTietDto;
 import com.example.aino_1.entity.HinhAnh;
+import com.example.aino_1.entity.SanPham;
 import com.example.aino_1.entity.SanPhamChiTiet;
 import com.example.aino_1.repository.SanPhamChiTietInterface;
 import com.example.aino_1.service.SanPhamChiTietService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,7 +34,6 @@ public class SPCTDTORestController {
 //        return spctsi.getSanPhamChiTietById(id);
 //    }
 
-
     @GetMapping("/getById/{id}")
     public SanPhamChiTietDto getByIDSPCT(@PathVariable Integer id){
         return spctsi.getSanPhamChiTietById(id);
@@ -44,11 +43,11 @@ public class SPCTDTORestController {
     public void create(@RequestBody Map<String, Object> requestData) {
         // Lấy thông tin sản phẩm từ JSON
         SanPhamChiTiet sanPhamChiTiet = new ObjectMapper().convertValue(requestData.get("sanPhamChiTiet"), SanPhamChiTiet.class);
-
+        // Lấy thông tin sản phẩm từ json;
+        SanPham sanPham = new ObjectMapper().convertValue(requestData.get("sanPham"), SanPham.class);
         // Lấy danh sách URL ảnh từ JSON
         List<String> imageUrls = (List<String>) requestData.get("imageUrls");
-
-        spctsv.saveSanPhamChiTietWithImage(sanPhamChiTiet, imageUrls);
+        spctsv.saveSanPhamChiTietWithImage(sanPhamChiTiet,sanPham, imageUrls);
     }
 
     @PutMapping("/update/{id}")
@@ -61,11 +60,6 @@ public class SPCTDTORestController {
 
         spctsv.updateSanPhamChiTietWithImage(SanPhamChiTiet, imageUrls);
     }
-
-
-
-
-
 
     }
 

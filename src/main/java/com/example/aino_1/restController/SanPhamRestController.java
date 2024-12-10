@@ -44,11 +44,6 @@ public class SanPhamRestController {
         return spsi.findAll();
     }
 
-//    @GetMapping("/getDTOADMIN")
-//    public  List<SanPhamDTO> AdminSanPhamDTO(){
-//        return spsi.findProductDetailsWithImageAndCategory();
-//    }
-
     @GetMapping("/getById/{id}")
     public SanPham getById(@PathVariable Integer id) {
         return spsi.findById(id).get();

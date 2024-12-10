@@ -23,5 +23,5 @@ public class OLuuTru {
 
     @Column(name = "trang_thai")
     private Integer trangThai;  // Cột trạng thái, mặc định là 1
-    
+
 }

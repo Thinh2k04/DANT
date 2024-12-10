@@ -1,9 +1,11 @@
 package com.example.aino_1.service;
 
 import com.example.aino_1.entity.HinhAnh;
+import com.example.aino_1.entity.SanPham;
 import com.example.aino_1.entity.SanPhamChiTiet;
 import com.example.aino_1.repository.HinhAnhInterface;
 import com.example.aino_1.repository.SanPhamChiTietInterface;
+import com.example.aino_1.repository.SanPhamInterface;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,12 +16,15 @@ import java.util.List;
 public class SanPhamChiTietService {
 
     @Autowired
+    SanPhamInterface spsi;
+
+    @Autowired
     SanPhamChiTietInterface spctsi;
 
     @Autowired
     HinhAnhInterface hasi;
 
-    public void saveSanPhamChiTietWithImage(SanPhamChiTiet spct, List<String> urlImg) {
+    public void saveSanPhamChiTietWithImage(SanPhamChiTiet spct, SanPham sp, List<String> urlImg) {
 //        // Bước 1: Lưu sản phẩm mà không có ảnh
 //        SanPham sanPham = new SanPham();
 //        sanPham.setTenSanPham(sp.getTenSanPham());
@@ -43,7 +48,9 @@ public class SanPhamChiTietService {
 //        KichThuocLapTop kichThuocLapTop = kichThuocLaptopInterface.findById(sp.getChatLieu().getId()).get();
 //        sanPham.setKichThuocLaptop(kichThuocLapTop);
 
+        SanPham sanPham = spsi.save(sp);
 
+        spct.setSanPham(sanPham);
 
         SanPhamChiTiet savedSanPhamCT = spctsi.save(spct);
 

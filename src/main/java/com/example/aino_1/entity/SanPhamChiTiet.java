@@ -68,7 +68,7 @@ public class SanPhamChiTiet {
     private String gioiThieu;
 
     @ManyToOne
-    @JoinColumn(name = "id_card_do_hoa", referencedColumnName = "id")
+    @JoinColumn(name = "id_card_do_hoa", referencedColumnName = "id", nullable = true)
     private CardDoHoa cardDoHoa;
 
 }

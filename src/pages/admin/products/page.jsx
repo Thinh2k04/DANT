@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import NavbarAdmin from '../Navbar/NavbarAdmin';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import uploadImageUtil from '../../../utils/imageUpload';
+import { toast } from 'react-toastify';
 
 // Component quản lý sản phẩm
 const ProductManagement = () => {
@@ -43,6 +45,43 @@ const ProductManagement = () => {
     pin: '',
     trangThai: 1
   });
+
+  // State lưu trữ dữ liệu sản phẩm chi tiết
+  const [spctData, setSpctData] = useState({
+    id: '',
+    hinhAnhMinhHoa: '',
+    soLuong: 0,
+    trangThai: '1',
+    donGia: 0,
+    maSpct: '',
+    sanPham: {
+      id: ''
+    },
+    ram: {
+      id: ''
+    },
+    oLuuTru: {
+      id: ''
+    },
+    manHinh: {
+      id: ''
+    },
+    cpu: {
+      id: ''
+    },
+    gpu: {
+      id: ''
+    },
+    mauSac: {
+      id: ''
+    },
+    trangThaiSpct: 1,
+    gioiThieu: '',
+    cardDoHoa: {
+      id: ''
+    }
+  });
+
   // State quản lý trạng thái loading
   const [loading, setLoading] = useState(false);
   // State quản lý thông báo lỗi
@@ -55,48 +94,82 @@ const ProductManagement = () => {
   const [chatLieus, setChatLieus] = useState([]);
   // State lưu trữ danh sách kích thước laptop
   const [ktlts, setKtlts] = useState([]);
+  // State lưu trữ danh sách RAM
+  const [rams, setRams] = useState([]);
+  // State lưu trữ danh sách ổ lưu trữ
+  const [oLuuTrus, setOLuuTrus] = useState([]);
+  // State lưu trữ danh sách màn hình
+  const [manHinhs, setManHinhs] = useState([]);
+  // State lưu trữ danh sách CPU
+  const [cpus, setCpus] = useState([]);
+  // State lưu trữ danh sách GPU
+  const [gpus, setGpus] = useState([]);
+  // State lưu trữ danh sách màu sắc
+  const [mauSacs, setMauSacs] = useState([]);
+  // State lưu trữ danh sách card đồ họa
+  const [cardDoHoas, setCardDoHoas] = useState([]);
   // Thêm các state mới
   const [detailProductImages, setDetailProductImages] = useState([]); 
   const [existingImages, setExistingImages] = useState([]);
   const [previewImages, setPreviewImages] = useState([]);
   const [selectedImages, setSelectedImages] = useState([]);
+  const [imageUrls, setImageUrls] = useState([]);
+  const [uploading, setUploading] = useState(false);
 
   // State lưu trữ danh sách năm từ 2010 đến năm hiện tại
   const currentYear = new Date().getFullYear();
   const years = Array.from({length: currentYear - 2010 + 1}, (_, i) => currentYear - i);
 
+  // Thêm hàm fetchProducts riêng để tái sử dụng
+  const fetchProducts = async () => {
+    try {
+      const response = await fetch('http://localhost:8080/rest/san_pham/getAll');
+      const data = await response.json();
+      setProducts(data);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      toast.error('Lỗi khi tải danh sách sản phẩm');
+    }
+  };
+
   // useEffect để fetch dữ liệu khi component mount
   useEffect(() => {
-    // Hàm fetch danh sách sản phẩm
-    const fetchProducts = async () => {
-      try {
-        const response = await fetch('http://localhost:8080/rest/san_pham/getAll');
-        const data = await response.json();
-        setProducts(data);
-      } catch (error) {
-        console.error('Error fetching products:', error);
-      }
-    };
+    // Fetch products khi component mount
+    fetchProducts();
 
-    // Hàm fetch các options cho form
+    // Fetch các options cho form
     const fetchOptions = async () => {
       try {
-        const [loaiRes, nguonRes, chatLieuRes, ktltRes] = await Promise.all([
+        const [loaiRes, nguonRes, chatLieuRes, ktltRes, ramRes, oLuuTruRes, manHinhRes, cpuRes, gpuRes, mauSacRes, cardDoHoaRes] = await Promise.all([
           axios.get('http://localhost:8080/rest/loai_san_pham/getAll'),
           axios.get('http://localhost:8080/rest/nguon_nhap/getAll'),
           axios.get('http://localhost:8080/rest/chat_lieu/getAll'),
-          axios.get('http://localhost:8080/rest/ktlt/getAll')
+          axios.get('http://localhost:8080/rest/ktlt/getAll'),
+          axios.get('http://localhost:8080/rest/ram/getAll'),
+          axios.get('http://localhost:8080/rest/o_luu_tru/getAll'),
+          axios.get('http://localhost:8080/rest/man_hinh/getAll'),
+          axios.get('http://localhost:8080/rest/cpu/getAll'),
+          axios.get('http://localhost:8080/rest/gpu/getAll'),
+          axios.get('http://localhost:8080/rest/mau_sac/getAll'),
+          axios.get('http://localhost:8080/rest/card_do_hoa/getAll')
         ]);
         setLoaiSanPhams(loaiRes.data);
         setNguonNhaps(nguonRes.data);
         setChatLieus(chatLieuRes.data);
         setKtlts(ktltRes.data);
+        setRams(ramRes.data);
+        setOLuuTrus(oLuuTruRes.data);
+        setManHinhs(manHinhRes.data);
+        setCpus(cpuRes.data);
+        setGpus(gpuRes.data);
+        setMauSacs(mauSacRes.data);
+        setCardDoHoas(cardDoHoaRes.data);
       } catch (error) {
         console.error('Error fetching options:', error);
+        toast.error('Lỗi khi tải dữ liệu tùy chọn');
       }
     };
 
-    fetchProducts();
     fetchOptions();
   }, []);
 
@@ -166,9 +239,44 @@ const ProductManagement = () => {
         pin: '',
         trangThai: 1
       });
+      setSpctData({
+        id: '',
+        hinhAnhMinhHoa: '',
+        soLuong: 0,
+        trangThai: '1',
+        donGia: 0,
+        maSpct: '',
+        sanPham: {
+          id: ''
+        },
+        ram: {
+          id: ''
+        },
+        oLuuTru: {
+          id: ''
+        },
+        manHinh: {
+          id: ''
+        },
+        cpu: {
+          id: ''
+        },
+        gpu: {
+          id: ''
+        },
+        mauSac: {
+          id: ''
+        },
+        trangThaiSpct: 1,
+        gioiThieu: '',
+        cardDoHoa: {
+          id: ''
+        }
+      });
       setIsEditing(false);
       setExistingImages([]);
       setPreviewImages([]);
+      setImageUrls([]);
     }
     setIsModalOpen(true);
   };
@@ -179,7 +287,19 @@ const ProductManagement = () => {
     
     // Kiểm tra validation
     if (!formData.tenSanPham) {
-      setError('Tên sản phẩm là bắt buộc');
+      toast.error('Tên sản phẩm là bắt buộc');
+      return;
+    }
+    if (!formData.loaiSanPham.id || !formData.nguonNhap.id || !formData.chatLieu.id || !formData.kichThuocLaptop.id) {
+      toast.error('Vui lòng chọn đầy đủ thông tin sản phẩm');
+      return;
+    }
+    if (!spctData.maSpct || !spctData.soLuong || !spctData.donGia) {
+      toast.error('Vui lòng nhập đầy đủ thông tin chi tiết sản phẩm');
+      return;
+    }
+    if (!spctData.ram.id || !spctData.oLuuTru.id || !spctData.manHinh.id || !spctData.cpu.id || !spctData.gpu.id || !spctData.mauSac.id || !spctData.cardDoHoa.id) {
+      toast.error('Vui lòng chọn đầy đủ thông tin cấu hình');
       return;
     }
 
@@ -187,58 +307,82 @@ const ProductManagement = () => {
     setError(null);
 
     try {
-      // Lấy tất cả URL từ previewImages
-      const allImageUrls = previewImages.map(img => img.url);
+      const requestData = {
+        sanPham: {
+          ...formData,
+          trangThai: 1
+        },
+        sanPhamChiTiet: {
+          ...spctData,
+          trangThai: '1',
+          trangThaiSpct: 1,
+          sanPham: {
+            id: formData.id || null
+          }
+        },
+        imageUrls: imageUrls.filter(url => url.trim() !== '')
+      };
 
-      // Gọi API tương ứng (update hoặc create)
-      if (isEditing) {
-        await axios.put(
-          `http://localhost:8080/rest/san_pham/update/${selectedProduct.id}`,
-          formData
-        );
-      } else {
-        await axios.post('http://localhost:8080/rest/san_pham/add', formData);
+      const response = await axios.post('http://localhost:8080/rest/spctDTO/add', requestData);
+
+      if (response.data) {
+        // Reset form
+        setFormData({
+          id: '',
+          loaiSanPham: { id: '' },
+          nguonNhap: { id: '' },
+          chatLieu: { id: '' },
+          kichThuocLaptop: { id: '' },
+          tenSanPham: '',
+          namSanXuat: '',
+          trongLuong: '',
+          thoiHanBaoHanh: '',
+          pin: '',
+          trangThai: 1
+        });
+        setSpctData({
+          id: '',
+          hinhAnhMinhHoa: '',
+          soLuong: 0,
+          trangThai: '1',
+          donGia: 0,
+          maSpct: '',
+          sanPham: { id: '' },
+          ram: { id: '' },
+          oLuuTru: { id: '' },
+          manHinh: { id: '' },
+          cpu: { id: '' },
+          gpu: { id: '' },
+          mauSac: { id: '' },
+          trangThaiSpct: 1,
+          gioiThieu: '',
+          cardDoHoa: { id: '' }
+        });
+        setImageUrls([]);
+        setIsModalOpen(false);
+        setIsEditing(false);
+        setSelectedProduct(null);
+
+        // Hiển thị thông báo thành công
+        toast.success(isEditing ? 'Cập nhật sản phẩm thành công!' : 'Thêm sản phẩm thành công!', {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+
+        // Load lại table
+        await fetchProducts();
       }
-
-      // Refresh danh sách sản phẩm
-      const updatedResponse = await fetch('http://localhost:8080/rest/san_pham/getAll');
-      const updatedData = await updatedResponse.json();
-      setProducts(updatedData);
-
-      // Reset form và đóng modal
-      setFormData({
-        id: '',
-        loaiSanPham: {
-          id: ''
-        },
-        nguonNhap: {
-          id: ''
-        },
-        chatLieu: {
-          id: ''
-        },
-        kichThuocLaptop: {
-          id: ''
-        },
-        tenSanPham: '',
-        namSanXuat: '',
-        trongLuong: '',
-        thoiHanBaoHanh: '',
-        pin: '',
-        trangThai: 1
-      });
-      setSelectedImages([]);
-      setExistingImages([]);
-      setPreviewImages([]);
-      setIsModalOpen(false);
-      setIsEditing(false);
-      setSelectedProduct(null);
-
     } catch (error) {
       console.error('Error submitting product:', error);
-      setError(`${isEditing ? 'Cập nhật' : 'Thêm'} sản phẩm thất bại. Vui lòng thử lại.`);
       if (error.response) {
         console.error('Error details:', error.response.data);
+        toast.error(error.response.data.message || 'Có lỗi xảy ra khi thêm sản phẩm');
+      } else {
+        toast.error(isEditing ? 'Cập nhật sản phẩm thất bại!' : 'Thêm sản phẩm thất bại!');
       }
     } finally {
       setLoading(false);
@@ -269,6 +413,42 @@ const ProductManagement = () => {
 
   // Lọc sản phẩm theo trạng thái
   const filteredProducts = showDeleted ? products.filter(product => product.trangThai === 0) : products.filter(product => product.trangThai === 1);
+
+  // Thêm hàm xử lý upload ảnh
+  const handleImageUpload = async (e) => {
+    try {
+      setUploading(true);
+      const file = e.target.files[0];
+      const result = await uploadImageUtil(file);
+      if (result && result.url) {
+        setSpctData({
+          ...spctData,
+          hinhAnhMinhHoa: result.url
+        });
+      } else {
+        alert('Lỗi khi tải ảnh lên: Không nhận được URL');
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert('Lỗi khi tải ảnh lên');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // Thêm hàm xử lý upload nhiều ảnh
+  const uploadImage = async (file) => {
+    try {
+      const result = await uploadImageUtil(file);
+      if (result && result.url) {
+        return result.url;
+      }
+      throw new Error('Không nhận được URL từ việc tải ảnh');
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      throw error;
+    }
+  };
 
   // Render giao diện
   return (
@@ -477,6 +657,253 @@ const ProductManagement = () => {
                     <option key={ktlt.id} value={ktlt.id}>{ktlt.kichThuoc} inch</option>
                   ))}
                 </select>
+
+                {/* Thêm các trường cho sản phẩm chi tiết */}
+                <input
+                  type="text"
+                  value={spctData.maSpct}
+                  onChange={(e) => setSpctData({
+                    ...spctData,
+                    maSpct: e.target.value
+                  })}
+                  className="border p-2 w-full mb-4"
+                  placeholder="Mã sản phẩm chi tiết"
+                />
+
+                <input
+                  type="number"
+                  value={spctData.soLuong}
+                  onChange={(e) => setSpctData({
+                    ...spctData,
+                    soLuong: parseInt(e.target.value)
+                  })}
+                  className="border p-2 w-full mb-4"
+                  placeholder="Số lượng"
+                />
+
+                <input
+                  type="number"
+                  value={spctData.donGia}
+                  onChange={(e) => setSpctData({
+                    ...spctData,
+                    donGia: parseFloat(e.target.value)
+                  })}
+                  className="border p-2 w-full mb-4"
+                  placeholder="Đơn giá"
+                />
+
+                <textarea
+                  value={spctData.gioiThieu}
+                  onChange={(e) => setSpctData({
+                    ...spctData,
+                    gioiThieu: e.target.value
+                  })}
+                  className="border p-2 w-full mb-4"
+                  placeholder="Giới thiệu sản phẩm"
+                  rows="4"
+                />
+
+                {/* Thêm các select cho các thuộc tính khác */}
+                <select
+                  value={spctData.ram.id}
+                  onChange={(e) => setSpctData({
+                    ...spctData,
+                    ram: { id: e.target.value }
+                  })}
+                  className="border p-2 w-full mb-4"
+                >
+                  <option value="">Chọn RAM</option>
+                  {rams.map((ram) => (
+                    <option key={ram.id} value={ram.id}>{ram.dungLuong}</option>
+                  ))}
+                </select>
+
+                <select
+                  value={spctData.oLuuTru.id}
+                  onChange={(e) => setSpctData({
+                    ...spctData,
+                    oLuuTru: { id: e.target.value }
+                  })}
+                  className="border p-2 w-full mb-4"
+                >
+                  <option value="">Chọn ổ lưu trữ</option>
+                  {oLuuTrus.map((olt) => (
+                    <option key={olt.id} value={olt.id}>{olt.dungLuong}</option>
+                  ))}
+                </select>
+
+                <select
+                  value={spctData.manHinh.id}
+                  onChange={(e) => setSpctData({
+                    ...spctData,
+                    manHinh: { id: e.target.value }
+                  })}
+                  className="border p-2 w-full mb-4"
+                >
+                  <option value="">Chọn màn hình</option>
+                  {manHinhs && manHinhs.map((mh) => (
+                    <option key={mh.id} value={mh.id}>
+                      {`${mh.loaiManHinh || ''} - ${mh.doPhanGiai || ''} - ${mh.tanSoQuet || ''}Hz`}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={spctData.cpu.id}
+                  onChange={(e) => setSpctData({
+                    ...spctData,
+                    cpu: { id: e.target.value }
+                  })}
+                  className="border p-2 w-full mb-4"
+                >
+                  <option value="">Chọn CPU</option>
+                  {cpus && cpus.map((cpu) => (
+                    <option key={cpu.id} value={cpu.id}>
+                      {cpu.ten || 'CPU không xác định'}
+                    </option>
+                  ))}
+                </select>
+
+                <select
+                  value={spctData.gpu.id}
+                  onChange={(e) => setSpctData({
+                    ...spctData,
+                    gpu: { id: e.target.value }
+                  })}
+                  className="border p-2 w-full mb-4"
+                >
+                  <option value="">Chọn GPU</option>
+                  {gpus && gpus.map((gpu) => (
+                    <option key={gpu.id} value={gpu.id}>
+                      {gpu.ten || 'GPU không xác định'}
+                    </option>
+                  ))}
+                </select>
+
+                <select
+                  value={spctData.mauSac.id}
+                  onChange={(e) => setSpctData({
+                    ...spctData,
+                    mauSac: { id: e.target.value }
+                  })}
+                  className="border p-2 w-full mb-4"
+                >
+                  <option value="">Chọn màu sắc</option>
+                  {mauSacs && mauSacs.map((mauSac) => (
+                    <option key={mauSac.id} value={mauSac.id}>
+                      {mauSac.tenMau|| 'Màu sắc không xác định'}
+                    </option>
+                  ))}
+                </select>
+
+                <select
+                  value={spctData.cardDoHoa.id}
+                  onChange={(e) => setSpctData({
+                    ...spctData,
+                    cardDoHoa: { id: e.target.value }
+                  })}
+                  className="border p-2 w-full mb-4"
+                >
+                  <option value="">Chọn card đồ họa</option>
+                  {cardDoHoas.map((card) => (
+                    <option key={card.id} value={card.id}>{card.tenCard}</option>
+                  ))}
+                </select>
+
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Hình ảnh minh họa
+                  </label>
+                  <div className="flex items-center space-x-4">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                      id="image-upload"
+                    />
+                    <label
+                      htmlFor="image-upload"
+                      className="cursor-pointer px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    >
+                      {uploading ? 'Đang tải...' : 'Chọn ảnh'}
+                    </label>
+                    {spctData.hinhAnhMinhHoa && (
+                      <div className="relative">
+                        <img
+                          src={spctData.hinhAnhMinhHoa}
+                          alt="Preview"
+                          className="h-20 w-20 object-cover rounded"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setSpctData({
+                            ...spctData,
+                            hinhAnhMinhHoa: ''
+                          })}
+                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Thêm phần upload nhiều ảnh */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Hình ảnh sản phẩm
+                  </label>
+                  <div className="flex items-center space-x-4">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={async (e) => {
+                        try {
+                          setUploading(true);
+                          const files = Array.from(e.target.files);
+                          const uploadPromises = files.map(uploadImage);
+                          const urls = await Promise.all(uploadPromises);
+                          // Filter out any undefined or null values
+                          const validUrls = urls.filter(url => url);
+                          setImageUrls(prevUrls => [...prevUrls, ...validUrls]);
+                        } catch (error) {
+                          console.error('Error uploading images:', error);
+                          alert('Lỗi khi tải ảnh lên: ' + error.message);
+                        } finally {
+                          setUploading(false);
+                        }
+                      }}
+                      className="hidden"
+                      id="multiple-image-upload"
+                    />
+                    <label
+                      htmlFor="multiple-image-upload"
+                      className="cursor-pointer px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    >
+                      {uploading ? 'Đang tải...' : 'Chọn nhiều ảnh'}
+                    </label>
+                  </div>
+                  <div className="grid grid-cols-4 gap-4 mt-4">
+                    {imageUrls.map((url, index) => (
+                      <div key={index} className="relative">
+                        <img
+                          src={url}
+                          alt={`Product ${index + 1}`}
+                          className="h-24 w-24 object-cover rounded"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setImageUrls(imageUrls.filter((_, i) => i !== index))}
+                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
 
                 {/* Hiển thị thông báo lỗi nếu có */}
                 {error && <p className="text-red-500 text-sm mb-4">{error}</p>}

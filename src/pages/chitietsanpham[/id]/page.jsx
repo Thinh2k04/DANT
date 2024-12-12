@@ -23,8 +23,15 @@ const ChiTietSanPham = () => {
                 const response = await fetch(`http://localhost:8080/rest/spctDTO/getById/${idSanPham}`);
                 if (!response.ok) throw new Error('Network response was not ok');
                 const data = await response.json();
-                setProduct(data);
-                setSelectedConfig(data);
+                
+                if (data) {
+                    setProduct(data);
+                    setSelectedConfig(data);
+                    console.log("Product data:", data);
+                } else {
+                    console.error('No product data received');
+                    toast.error('Không tìm thấy thông tin sản phẩm');
+                }
             } catch (error) {
                 console.error('Error fetching product details:', error);
                 toast.error('Không thể tải thông tin sản phẩm');

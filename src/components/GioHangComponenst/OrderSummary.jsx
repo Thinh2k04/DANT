@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ShippingInfo from './ShippingInfo';
+import { useNavigate } from 'react-router-dom';
 
 function OrderSummary({ 
   provinces, // Danh sách tỉnh/thành phố
@@ -28,6 +29,7 @@ function OrderSummary({
   const [showQrModal, setShowQrModal] = useState(false);
   const [qrCodeSvg, setQrCodeSvg] = useState('');
   const [paymentUrl, setPaymentUrl] = useState('');
+  const navigate = useNavigate();
 
   const prepareOrderData = () => {
     const now = new Date();
@@ -87,65 +89,10 @@ function OrderSummary({
 
   const handleOrderSubmit = async () => {
     try {
-      // If payment method is MoMo or VNPay (2 or 3)
-      if (paymentMethod === "2" || paymentMethod === "3") {
-        // Format payment data according to API requirements
-        const paymentData = {
-          userId: localStorage.getItem('sub') || "1",
-          totalAmount: totalAmount + (shippingFee || 0),
-          items: cartItems.map(item => ({
-            product_id: item?.id?.toString() || "",
-            quantity: quantities[item?.id] || 1,
-            price: parseFloat(item?.donGia || 0)
-          })).filter(item => item.product_id)
-        };
-        
-        // Call payment API
-        const paymentResponse = await fetch('http://localhost:8080/api/payment/create', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(paymentData)
-        });
-
-        if (!paymentResponse.ok) {
-          throw new Error('Failed to create payment');
-        }
-
-        const paymentResult = await paymentResponse.json();
-        
-        if (paymentResult?.order_url) {
-          setPaymentUrl(paymentResult.order_url);
-          try {
-            const pageResponse = await fetch(paymentResult.order_url);
-            const pageHtml = await pageResponse.text();
-            
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(pageHtml, 'text/html');
-            
-            const evaluator = new XPathEvaluator();
-            const expression = evaluator.createExpression('//*[@id="zp-qr"]/div[1]/div/div');
-            const result = expression.evaluate(doc, XPathResult.FIRST_ORDERED_NODE_TYPE);
-            
-            if (result?.singleNodeValue) {
-              const qrElement = result.singleNodeValue;
-              setQrCodeSvg(qrElement.innerHTML);
-              setShowQrModal(true);
-            } else {
-              throw new Error('QR code not found');
-            }
-          } catch (error) {
-            console.error('Error extracting QR code:', error);
-            window.open(paymentResult.order_url, '_blank');
-          }
-          return;
-        }
-      }
-
-      // Continue with normal order submission for COD
+      // Chuẩn bị dữ liệu đơn hàng
       const orderData = prepareOrderData();
       
+      // Gọi API tạo đơn hàng
       const response = await fetch('http://localhost:8080/rest/hoa_don/addHD', {
         method: 'PUT',
         headers: {
@@ -155,106 +102,92 @@ function OrderSummary({
       });
 
       if (!response.ok) {
-        toast.error('Có lỗi xảy ra khi tạo đơn hàng', {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        });
-        throw new Error('Lỗi khi tạo đơn hàng');
+        throw new Error('Failed to create order');
       }
 
-      const result = await response.json();
-      
-      if (!result) {
-        throw new Error('Invalid response data');
-      }
+      const orderResponse = await response.json();
+      console.log("Order Response:", orderResponse); // Thêm log để debug
 
+      // Thông báo thành công
       toast.success('Đặt hàng thành công!', {
         position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
+        autoClose: 2000,
+        onClose: () => {
+          // Chuyển hướng sau khi toast đóng
+          navigate('/payment-success', { 
+            state: { 
+              orderInfo: {
+                ...orderResponse,
+                tongTienHang: totalAmount,
+                phiVanChuyen: shippingFee || 0,
+                tttk: {
+                  hoTen: customerName,
+                  soDienThoai: phoneNumber,
+                  email: email
+                },
+                diaChiNhanHang: `${specificAddress}, ${wards.find(w => w.code === parseInt(selectedWard))?.name || ''}, ${districts.find(d => d.code === parseInt(selectedDistrict))?.name || ''}, ${provinces.find(p => p.code === parseInt(selectedProvince))?.name || ''}`,
+                hinhThucThanhToan: {
+                  id: parseInt(paymentMethod),
+                  tenHinhThuc: paymentMethod === "1" ? "Thanh toán khi nhận hàng" : 
+                              paymentMethod === "2" ? "Thanh toán qua MoMo" : 
+                              "Thanh toán qua ZaloPay"
+                },
+                trangThaiDonHang: "Chờ xác nhận"
+              }
+            },
+            replace: true // Thêm option replace để tránh quay lại trang thanh toán
+          });
+
+          // Xóa giỏ hàng sau khi đặt hàng thành công
+          localStorage.removeItem('cartItems');
+          localStorage.removeItem('quantities');
+        }
       });
 
-      handleCheckout(result);
-      
     } catch (error) {
-      toast.error('Có lỗi xảy ra: ' + error.message);
+      console.error('Error creating order:', error);
+      toast.error('Có lỗi xảy ra khi tạo đơn hàng');
     }
   };
 
   const validateFields = () => {
     const newErrors = {};
+    let isValid = true;
 
     // Validate họ tên
     if (!customerName?.trim()) {
-      toast.warning('Vui lòng nhập họ tên', {
-        position: "top-right",
-        autoClose: 3000
-      });
       newErrors.name = "Vui lòng nhập họ tên";
-    } else if (!/^[a-zA-ZÀ-ỹ\s]+$/.test(customerName)) {
-      toast.warning('Họ tên chỉ được chứa chữ cái và khoảng trắng', {
-        position: "top-right",
-        autoClose: 3000
-      });
-      newErrors.name = "Họ tên chỉ được chứa chữ cái và khoảng trắng";
+      isValid = false;
     }
 
-    // Validate số điện thoại  
+    // Validate số điện thoại
     if (!phoneNumber) {
-      toast.warning('Vui lòng nhập số điện thoại', {
-        position: "top-right",
-        autoClose: 3000
-      });
       newErrors.phone = "Vui lòng nhập số điện thoại";
-    } else if (!/^(0[3|5|7|8|9])+([0-9]{8})\b/.test(phoneNumber)) {
-      toast.warning('Số điện thoại không hợp lệ', {
-        position: "top-right",
-        autoClose: 3000
-      });
-      newErrors.phone = "Số điện thoại không hợp lệ";
+      isValid = false;
     }
 
     // Validate địa chỉ giao hàng nếu chọn giao hàng
     if (deliveryMethod === "delivery") {
       if (!selectedProvince) {
-        toast.warning('Vui lòng chọn tỉnh/thành', {
-          position: "top-right",
-          autoClose: 3000
-        });
         newErrors.province = "Vui lòng chọn tỉnh/thành";
+        isValid = false;
       }
       if (!selectedDistrict) {
-        toast.warning('Vui lòng chọn quận/huyện', {
-          position: "top-right",
-          autoClose: 3000
-        });
         newErrors.district = "Vui lòng chọn quận/huyện";  
+        isValid = false;
       }
       if (!selectedWard) {
-        toast.warning('Vui lòng chọn phường/xã', {
-          position: "top-right",
-          autoClose: 3000
-        });
         newErrors.ward = "Vui lòng chọn phường/xã";
+        isValid = false;
       }
       if (!specificAddress?.trim()) {
-        toast.warning('Vui lòng nhập địa chỉ cụ thể', {
-          position: "top-right",
-          autoClose: 3000
-        });
         newErrors.address = "Vui lòng nhập địa chỉ cụ thể";
+        isValid = false;
       }
     }
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return isValid;
   };
 
   return (

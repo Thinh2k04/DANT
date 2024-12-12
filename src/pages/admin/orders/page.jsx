@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import NavbarAdmin from '../Navbar/NavbarAdmin';
 
 const OrderManagement = () => {
@@ -9,74 +11,71 @@ const OrderManagement = () => {
   const [selectedStatus, setSelectedStatus] = useState(null);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchOrders = async () => {
       try {
         const response = await fetch('http://localhost:8080/rest/hoa_don/getAll');
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
+        if (!response.ok) throw new Error('Failed to fetch orders');
         const data = await response.json();
         setOrders(data);
       } catch (error) {
-        console.error('There was a problem with the fetch operation:', error);
+        console.error('Error fetching orders:', error);
+        toast.error('Không thể tải danh sách đơn hàng', {
+          position: "top-right",
+          autoClose: 3000
+        });
       }
     };
-
-    fetchData();
+    fetchOrders();
   }, []);
 
-  const handleOrderClick = async (id) => {
+  const handleOrderClick = async (orderId) => {
     try {
-      const response = await fetch(`http://localhost:8080/rest/hdct/Byidhd/${id}`);
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-
+      const response = await fetch(`http://localhost:8080/rest/hoa_don_chi_tiet/getByHoaDon/${orderId}`);
+      if (!response.ok) throw new Error('Failed to fetch order details');
       const data = await response.json();
-
-      // Ensure data is always an array
-      const detailsArray = Array.isArray(data) ? data : [data];
-
-      // Filter out any null or undefined details
-      const validDetails = detailsArray.filter(detail => detail != null);
-
-      if (validDetails.length > 0) {
-        setOrderDetails(validDetails);
-        // Get order info from the first detail's hoaDon property
-        setSelectedOrder(validDetails[0]?.hoaDon || null);
-      } else {
-        console.warn('No valid order details found');
-        setOrderDetails([]);
-        setSelectedOrder(null);
-      }
-
+      setOrderDetails(data);
+      const order = orders.find(o => o.id === orderId);
+      setSelectedOrder(order);
+      setShowStatusModal(true);
     } catch (error) {
       console.error('Error fetching order details:', error);
-      setOrderDetails([]);
-      setSelectedOrder(null);
+      toast.error('Không thể tải chi tiết đơn hàng', {
+        position: "top-right",
+        autoClose: 3000
+      });
     }
   };
 
   const handleUpdateStatus = async () => {
-    if (!selectedOrder || selectedStatus === null) return;
+    if (!selectedOrder || selectedStatus === null) {
+      toast.warning('Vui lòng chọn trạng thái mới', {
+        position: "top-right",
+        autoClose: 3000
+      });
+      return;
+    }
 
-    // Kiểm tra nếu đơn hàng đã hủy hoặc thành công thì không cho cập nhật
     if (selectedOrder.trangThaiThanhToan === 0) {
-      alert('Không thể cập nhật đơn hàng đã hủy');
+      toast.error('Không thể cập nhật đơn hàng đã hủy', {
+        position: "top-right",
+        autoClose: 3000
+      });
       setShowStatusModal(false);
       setSelectedStatus(null);
       return;
     }
 
     if (selectedOrder.trangThaiThanhToan === 1) {
-      alert('Không thể cập nhật đơn hàng đã thành công');
+      toast.error('Không thể cập nhật đơn hàng đã thành công', {
+        position: "top-right",
+        autoClose: 3000
+      });
       setShowStatusModal(false);
       setSelectedStatus(null);
       return;
     }
 
     try {
-      // Update status directly without fetching full order first
       const response = await fetch(`http://localhost:8080/rest/hoa_don/update/${selectedOrder.id}`, {
         method: 'PUT',
         headers: {
@@ -85,7 +84,6 @@ const OrderManagement = () => {
         body: JSON.stringify({
           id: selectedOrder.id,
           trangThaiThanhToan: selectedStatus,
-          // Include other required fields from selectedOrder
           tongTien: selectedOrder.tongTien,
           thoiGianLapHoaDon: selectedOrder.thoiGianLapHoaDon,
           diaChiNhanHang: selectedOrder.diaChiNhanHang,
@@ -96,11 +94,8 @@ const OrderManagement = () => {
         })
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to update status');
-      }
+      if (!response.ok) throw new Error('Failed to update status');
 
-      // Update local state
       setOrders(orders.map(order => 
         order.id === selectedOrder.id 
           ? {...order, trangThaiThanhToan: selectedStatus}
@@ -112,11 +107,17 @@ const OrderManagement = () => {
       setSelectedStatus(null);
       setOrderDetails([]);
 
-      alert('Cập nhật trạng thái đơn hàng thành công');
+      toast.success('Cập nhật trạng thái đơn hàng thành công', {
+        position: "top-right",
+        autoClose: 2000
+      });
 
     } catch (error) {
       console.error('Error updating order status:', error);
-      alert('Cập nhật trạng thái đơn hàng thất bại');
+      toast.error('Cập nhật trạng thái đơn hàng thất bại', {
+        position: "top-right",
+        autoClose: 3000
+      });
     }
   };
 
@@ -131,6 +132,18 @@ const OrderManagement = () => {
     <div className="min-h-screen flex">
       <NavbarAdmin />
       <main className="flex-1 bg-gray-100 p-6">
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+        />
         <h1 className="text-3xl font-bold mb-8 text-gray-800">Quản lý đơn hàng</h1>
         
         <div className="mt-4 overflow-hidden shadow-xl rounded-lg">
@@ -188,39 +201,41 @@ const OrderManagement = () => {
               <div className="bg-white p-8 rounded-lg w-96 shadow-2xl transform transition-all duration-300">
                 <h2 className="text-2xl font-bold mb-6 text-gray-800">Cập nhật trạng thái</h2>
                 <div className="space-y-4">
-                  <label className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors duration-200">
+                  <div className="flex items-center space-x-3">
                     <input
                       type="radio"
+                      id="status-success"
                       name="status"
                       value={1}
                       checked={selectedStatus === 1}
                       onChange={(e) => setSelectedStatus(Number(e.target.value))}
-                      className="form-radio h-5 w-5 text-blue-600"
+                      className="form-radio h-4 w-4 text-blue-600"
                     />
-                    <span className="text-gray-700 text-lg">Thành công</span>
-                  </label>
-                  <label className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors duration-200">
+                    <label htmlFor="status-success" className="text-gray-700">Thành công</label>
+                  </div>
+                  <div className="flex items-center space-x-3">
                     <input
                       type="radio"
+                      id="status-cancel"
                       name="status"
                       value={0}
                       checked={selectedStatus === 0}
                       onChange={(e) => setSelectedStatus(Number(e.target.value))}
-                      className="form-radio h-5 w-5 text-blue-600"
+                      className="form-radio h-4 w-4 text-blue-600"
                     />
-                    <span className="text-gray-700 text-lg">Đã hủy</span>
-                  </label>
+                    <label htmlFor="status-cancel" className="text-gray-700">Hủy đơn</label>
+                  </div>
                 </div>
                 <div className="mt-8 flex justify-end space-x-4">
                   <button
                     onClick={handleCloseModal}
-                    className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50"
+                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors"
                   >
                     Hủy
                   </button>
                   <button
                     onClick={handleUpdateStatus}
-                    className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-all duration-200 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
                   >
                     Cập nhật
                   </button>
@@ -258,7 +273,7 @@ const OrderManagement = () => {
                   <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
                     <h3 className="text-xl font-bold mb-4 text-gray-800">Thông tin đơn hàng</h3>
                     <div className="space-y-3">
-                      <p className="text-gray-700"><span className="font-semibold">Ngày đặt:</span> {selectedOrder.thoiGianLapHoaDon}</p>
+                      <p className="text-gray-700"><span className="font-semibold">Ngày đ���t:</span> {selectedOrder.thoiGianLapHoaDon}</p>
                       <p className="text-gray-700"><span className="font-semibold">Trạng thái:</span> 
                         <span className={`ml-2 px-3 py-1 rounded-full text-sm font-semibold
                           ${selectedOrder.trangThaiThanhToan === 0 ? 'bg-red-100 text-red-800' : 

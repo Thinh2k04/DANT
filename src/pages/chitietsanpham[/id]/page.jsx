@@ -6,6 +6,8 @@ import Footer from '../../../components/Layout/DefaultLayout/Footer';
 import { FaShoppingCart, FaRegHeart, FaHeart, FaShippingFast, FaShieldAlt, FaUndo, FaInfoCircle, FaMicrochip, FaMemory, FaHdd, FaDesktop, FaGamepad, FaBatteryFull, FaWeightHanging, FaTools, FaLaptop } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import AnimeLoading from '../../../components/Loading/AnimeLoading';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const ChiTietSanPham = () => {
     const { idSanPham } = useParams();
@@ -86,9 +88,36 @@ const ChiTietSanPham = () => {
         );
     }
 
-    const handleAddToCart = (item) => {
-        addToCart(item);
-        toast.success('Đã thêm vào giỏ hàng');
+    const handleAddToCart = (product) => {
+        // Lấy giỏ hàng hiện tại từ localStorage
+        const currentCart = JSON.parse(localStorage.getItem('cartItems')) || [];
+        
+        // Kiểm tra sản phẩm đã tồn tại trong giỏ hàng chưa
+        const existingItemIndex = currentCart.findIndex(item => item.id === product.id);
+        
+        if (existingItemIndex !== -1) {
+            // Nếu sản phẩm đã tồn tại, tăng số lượng
+            currentCart[existingItemIndex].quantity += 1;
+        } else {
+            // Nếu sản phẩm chưa tồn tại, thêm mới vào giỏ hàng
+            currentCart.push({
+                ...product,
+                quantity: 1
+            });
+        }
+        
+        // Lưu giỏ hàng mới vào localStorage
+        localStorage.setItem('cartItems', JSON.stringify(currentCart));
+        
+        // Hiển thị thông báo
+        toast.success('Đã thêm sản phẩm vào giỏ hàng!', {
+            position: "top-right",
+            autoClose: 2000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+        });
     };
 
     const handleRelatedProductClick = (relatedProduct) => {
@@ -126,6 +155,7 @@ const ChiTietSanPham = () => {
     return (
         <div className="min-h-screen bg-gray-50">
             <Navbar />
+            <ToastContainer />
             {!isLoading && product && (
                 <div className="container mx-auto px-4 py-8">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

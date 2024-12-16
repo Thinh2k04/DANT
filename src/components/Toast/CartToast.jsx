@@ -1,8 +1,8 @@
 import React from 'react';
-import { FaCheckCircle, FaShoppingCart, FaTimes } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
+import { FaCheckCircle, FaTimes, FaShoppingCart } from 'react-icons/fa';
 
-const CartToast = ({ isVisible, onClose, productName, price }) => {
+const CartToast = ({ isVisible, onClose, product }) => {
   if (!isVisible) return null;
 
   return (
@@ -24,13 +24,15 @@ const CartToast = ({ isVisible, onClose, productName, price }) => {
         </div>
 
         <div className="flex items-center space-x-3 bg-gray-50 p-3 rounded-lg mb-3">
-          <div className="flex-shrink-0">
-            <FaShoppingCart className="w-5 h-5 text-blue-500" />
-          </div>
+          <img 
+            src={product?.hinhAnhMinhHoa} 
+            alt={product?.tenSanPhamChiTiet}
+            className="w-16 h-16 object-cover rounded-lg"
+          />
           <div className="flex-grow">
-            <p className="text-gray-800 font-medium line-clamp-1">{productName}</p>
+            <p className="text-gray-800 font-medium line-clamp-1">{product?.tenSanPhamChiTiet}</p>
             <p className="text-green-600 font-medium">
-              {price?.toLocaleString('vi-VN')}₫
+              {product?.donGia?.toLocaleString('vi-VN')}₫
             </p>
           </div>
         </div>
@@ -43,7 +45,7 @@ const CartToast = ({ isVisible, onClose, productName, price }) => {
             Tiếp tục mua sắm
           </button>
           <Link
-            to="/cart"
+            to="/giohang"
             className="px-4 py-2 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
           >
             Xem giỏ hàng

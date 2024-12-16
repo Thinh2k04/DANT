@@ -30,7 +30,7 @@ const OrderManagement = () => {
 
   const handleOrderClick = async (orderId) => {
     try {
-      const response = await fetch(`http://localhost:8080/rest/hoa_don_chi_tiet/getByHoaDon/${orderId}`);
+      const response = await fetch(`http://localhost:8080/rest/hdct/Byidhd/${orderId}`);
       if (!response.ok) throw new Error('Failed to fetch order details');
       const data = await response.json();
       setOrderDetails(data);

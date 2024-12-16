@@ -16,10 +16,12 @@ const NavbarAdmin = () => {
 
   const navItems = [
     { path: '/admin', icon: FiHome, label: 'Thống kê' },
+    { path: '/admin/attributes', icon: FiTag, label: 'Bán hàng tại quầy' },
     { path: '/admin/products', icon: FiBox, label: 'Quản lý sản phẩm' },
     { path: '/admin/orders', icon: FiShoppingCart, label: 'Quản lý đơn hàng' },
     { path: '/admin/customers', icon: FiUsers, label: 'Quản lý khách hàng' },
-    { path: '/admin/attributes', icon: FiTag, label: 'Quản lý thuộc tính' },
+    { path: '/admin/account', icon: FiUsers, label: 'Quản lý tài khoản' },
+
   ];
 
   return (

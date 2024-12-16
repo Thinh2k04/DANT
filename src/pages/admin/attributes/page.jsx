@@ -14,6 +14,7 @@ const BanHangTaiQuay = () => {
     soDienThoai: '',
     email: ''
   });
+  const [customerSuggestions, setCustomerSuggestions] = useState([]);
 
   // Fetch sản phẩm từ API
   useEffect(() => {
@@ -78,7 +79,7 @@ const BanHangTaiQuay = () => {
       setLoading(true);
       const orderData = {
         tttk: {
-          hoTen: customerInfo.hoTen || "Khách lẻ",
+          hoTen: customerInfo.hoTen || "",
           soDienThoai: customerInfo.soDienThoai || "",
           email: customerInfo.email || "",
           trangThai: 1
@@ -118,6 +119,31 @@ const BanHangTaiQuay = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Thêm hàm kiểm tra thông tin khách hàng
+  const checkCustomerInfo = async (phoneNumber) => {
+    try {
+      if (phoneNumber.length >= 3) { // Chỉ tìm kiếm khi nhập ít nhất 3 số
+        const response = await axios.get(`http://localhost:8080/rest/tttk/search/${phoneNumber}`);
+        setCustomerSuggestions(response.data);
+      } else {
+        setCustomerSuggestions([]);
+      }
+    } catch (error) {
+      console.error('Error checking customer:', error);
+      setCustomerSuggestions([]);
+    }
+  };
+
+  // Thêm hàm xử lý khi chọn khách hàng từ gợi ý
+  const handleSelectCustomer = (customer) => {
+    setCustomerInfo({
+      hoTen: customer.hoTen,
+      soDienThoai: customer.soDienThoai,
+      email: customer.email
+    });
+    setCustomerSuggestions([]); // Đóng danh sách gợi ý
   };
 
   return (
@@ -176,21 +202,40 @@ const BanHangTaiQuay = () => {
             <h2 className="text-xl font-bold mb-4">Giỏ hàng</h2>
 
             {/* Thông tin khách hàng */}
-            <div className="mb-4 pb-4 border-b">
+            <div className="mb-4 pb-4 border-b relative">
               <h3 className="font-semibold mb-3">Thông tin khách hàng</h3>
               <div className="space-y-3">
+                <div className="relative">
+                  <input
+                    type="tel"
+                    placeholder="Số điện thoại"
+                    value={customerInfo.soDienThoai}
+                    onChange={(e) => {
+                      setCustomerInfo({...customerInfo, soDienThoai: e.target.value});
+                      checkCustomerInfo(e.target.value);
+                    }}
+                    className="w-full px-3 py-2 border rounded"
+                  />
+                  {customerSuggestions.length > 0 && (
+                    <div className="absolute z-10 w-full bg-white border rounded-lg mt-1 shadow-lg">
+                      {customerSuggestions.map((customer, index) => (
+                        <div
+                          key={index}
+                          className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                          onClick={() => handleSelectCustomer(customer)}
+                        >
+                          <div>{customer.hoTen}</div>
+                          <div className="text-sm text-gray-600">{customer.soDienThoai}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
                 <input
                   type="text"
                   placeholder="Họ tên khách hàng"
                   value={customerInfo.hoTen}
                   onChange={(e) => setCustomerInfo({...customerInfo, hoTen: e.target.value})}
-                  className="w-full px-3 py-2 border rounded"
-                />
-                <input
-                  type="tel"
-                  placeholder="Số điện thoại"
-                  value={customerInfo.soDienThoai}
-                  onChange={(e) => setCustomerInfo({...customerInfo, soDienThoai: e.target.value})}
                   className="w-full px-3 py-2 border rounded"
                 />
                 <input

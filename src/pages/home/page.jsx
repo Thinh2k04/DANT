@@ -5,6 +5,8 @@ import Footer from '../../../components/Layout/DefaultLayout/Footer';
 import { FaShoppingCart } from 'react-icons/fa';
 import CartToast from '../../../components/Toast/CartToast';
 import AnimeLoading from '../../../components/Loading/AnimeLoading';
+import { updateCartItemQuantity } from '../../utils/cartUtils';
+import { toast } from 'react-toastify';
 
 const Home = () => {
     const [laptops, setLaptops] = useState([]);
@@ -32,32 +34,38 @@ const Home = () => {
         }
     };
 
-    const handleAddToCart = (laptop, event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        
+    const handleAddToCart = async (laptop) => {
+        console.log("Function handleAddToCart called");
         try {
             const currentCart = JSON.parse(localStorage.getItem('cartItems')) || [];
-            const existingItemIndex = currentCart.findIndex(item => item.id === laptop.id);
-            
-            if (existingItemIndex !== -1) {
-                currentCart[existingItemIndex].quantity += 1;
-            } else {
-                currentCart.push({
-                    ...laptop,
-                    quantity: 1
+            const existingItem = currentCart.find(item => item.id === laptop.id);
+            const newQuantity = existingItem ? existingItem.quantity + 1 : 1;
+
+            const result = await updateCartItemQuantity(laptop.id, newQuantity);
+            if (result.success) {
+                if (existingItem) {
+                    existingItem.quantity = newQuantity;
+                } else {
+                    currentCart.push({ ...laptop, quantity: 1 });
+                }
+                localStorage.setItem('cartItems', JSON.stringify(currentCart));
+
+                toast.success('Đã thêm sản phẩm vào giỏ hàng!', {
+                    position: "top-right",
+                    autoClose: 2000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
                 });
+
+                setSelectedProduct(laptop);
+                setShowToast(true);
+
+                setTimeout(() => {
+                    setShowToast(false);
+                }, 3000);
             }
-            
-            localStorage.setItem('cartItems', JSON.stringify(currentCart));
-            
-            setSelectedProduct(laptop);
-            setShowToast(true);
-            
-            setTimeout(() => {
-                setShowToast(false);
-            }, 3000);
-            
         } catch (error) {
             console.error('Error adding to cart:', error);
         }
@@ -130,7 +138,10 @@ const Home = () => {
                                 </div>
 
                                 <button 
-                                    onClick={(e) => handleAddToCart(laptop, e)}
+                                    onClick={(e) => {
+                                        console.log("Click detected");
+                                        handleAddToCart(laptop);
+                                    }}
                                     className="w-full py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
                                 >
                                     <FaShoppingCart />

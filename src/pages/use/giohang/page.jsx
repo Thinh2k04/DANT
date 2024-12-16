@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../../../components/Layout/DefaultLayout/Navbar';
+import { 
+  getCartItems, 
+  removeFromCart, 
+  updateCartItemQuantity, 
+  calculateTotal, 
+  processCheckout 
+} from '../../../utils/cartUtils';
+
+
 import { Link, useNavigate } from 'react-router-dom';
 
 function CartPage() {
@@ -10,63 +19,37 @@ function CartPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const storedCartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
-    const uniqueItems = [];
-    const initialQuantities = {};
-    const initialSelectedItems = {};
-
-    storedCartItems.forEach(item => {
-      if (!initialQuantities[item.id]) {
-        uniqueItems.push(item);
-        initialQuantities[item.id] = 1;
-        initialSelectedItems[item.id] = false;
-      } else {
-        initialQuantities[item.id] += 1;
-      }
-    });
-
-    setCartItems(uniqueItems);
-    setQuantities(initialQuantities);
-    setSelectedItems(initialSelectedItems);
+    const { items, quantities, selectedItems } = getCartItems();
+    setCartItems(items);
+    setQuantities(quantities);
+    setSelectedItems(selectedItems);
   }, []);
 
   const handleRemoveFromCart = (id) => {
-    const updatedCart = cartItems.filter(item => item.id !== id);
-    setCartItems(updatedCart);
-    
-    // Update localStorage with filtered items
-    const currentCartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
-    const updatedCartItems = currentCartItems.filter(item => item.id !== id);
-    localStorage.setItem('cartItems', JSON.stringify(updatedCartItems));
-    
-    const updatedQuantities = { ...quantities };
-    delete updatedQuantities[id];
-    setQuantities(updatedQuantities);
-
-    const updatedSelectedItems = { ...selectedItems };
-    delete updatedSelectedItems[id];
-    setSelectedItems(updatedSelectedItems);
+    const result = removeFromCart(id);
+    if (result.success) {
+      setCartItems(prevItems => prevItems.filter(item => item.id !== id));
+      setQuantities(prevQuantities => {
+        const updatedQuantities = { ...prevQuantities };
+        delete updatedQuantities[id];
+        return updatedQuantities;
+      });
+      setSelectedItems(prevSelectedItems => {
+        const updatedSelectedItems = { ...prevSelectedItems };
+        delete updatedSelectedItems[id];
+        return updatedSelectedItems;
+      });
+    }
   };
 
-  const handleQuantityChange = (id, newQuantity) => {
-    const item = cartItems.find(item => item.id === id);
-    if (newQuantity > 0 && newQuantity <= item.soLuong) {
+  const handleQuantityChange = async (id, newQuantity) => {
+    console.log('hàm + được gọi')
+    const result = await updateCartItemQuantity(id, newQuantity);
+    if (result.success) {
       setQuantities(prev => ({
         ...prev,
         [id]: newQuantity
       }));
-      
-      // Update localStorage with new quantity
-      const currentCartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
-      const updatedCartItems = currentCartItems.map(cartItem => {
-        if (cartItem.id === id) {
-          return { ...cartItem, soLuong: newQuantity };
-        }
-        return cartItem;
-      });
-      localStorage.setItem('cartItems', JSON.stringify(updatedCartItems));
-    } else {
-      alert(`Số lượng sản phẩm không được vượt quá số lượng trong kho`);
     }
   };
 
@@ -77,7 +60,6 @@ function CartPage() {
     }));
   };
 
-  // hàm chọn tất cả 
   const handleSelectAll = () => {
     const newSelectAll = !selectAll;
     setSelectAll(newSelectAll);
@@ -88,68 +70,11 @@ function CartPage() {
     setSelectedItems(updatedSelectedItems);
   };
 
-  const calculateTotal = () => {
-    return cartItems.reduce((total, item) => {
-      if (selectedItems[item.id]) {
-        const quantity = quantities[item.id] || 1;
-        return total + (parseFloat(item.donGia) * quantity);
-      }
-      return total;
-    }, 0);
-  };
-
   const handleCheckout = () => {
-    const itemsToCheckout = cartItems.filter(item => selectedItems[item.id]);
-    if (itemsToCheckout.length === 0) {
-        alert('Vui lòng chọn ít nhất một sản phẩm để thanh toán');
-        return;
+    const result = processCheckout(cartItems, selectedItems, quantities);
+    if (result.success) {
+      navigate('/checkout');
     }
-    
-    // Tạo object mới với số lượng chính xác
-    const checkoutData = itemsToCheckout.map(item => {
-        const quantity = quantities[item.id] || 1;
-        return {
-            ...item,
-            id: item.id,
-            maDinhDanh: item.id,
-            soLuong: quantity,
-            thanhTien: quantity * parseFloat(item.donGia)
-        };
-    });
-
-    // Lưu thông tin chi tiết về số lượng
-    const quantityData = {};
-    checkoutData.forEach(item => {
-        quantityData[item.id] = item.soLuong;
-    });
-
-    localStorage.setItem('checkoutItems', JSON.stringify(checkoutData));
-    localStorage.setItem('checkoutQuantities', JSON.stringify(quantityData));
-    navigate('/checkout');
-  };
-
-  const handleRemoveSelectedItems = () => {
-    const itemsToKeep = cartItems.filter(item => !selectedItems[item.id]);
-    setCartItems(itemsToKeep);
-    
-    // Update localStorage with remaining items
-    const currentCartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
-    const updatedCartItems = currentCartItems.filter(item => !selectedItems[item.id]);
-    localStorage.setItem('cartItems', JSON.stringify(updatedCartItems));
-
-    const updatedQuantities = { ...quantities };
-    const updatedSelectedItems = { ...selectedItems };
-
-    cartItems.forEach(item => {
-      if (selectedItems[item.id]) {
-        delete updatedQuantities[item.id];
-        delete updatedSelectedItems[item.id];
-      }
-    });
-
-    setQuantities(updatedQuantities);
-    setSelectedItems(updatedSelectedItems);
-    setSelectAll(false);
   };
 
   return (
@@ -240,18 +165,12 @@ function CartPage() {
               <div className="flex justify-between items-center">
                 <span className="text-xl font-semibold text-gray-800">Tổng tiền:</span>
                 <span className="text-2xl font-bold text-red-600">
-                  {calculateTotal().toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
+                  {calculateTotal(cartItems, selectedItems, quantities).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
                 </span>
               </div>
               
               <div className="mt-8 flex justify-end space-x-4">
                 <button 
-                  onClick={handleRemoveSelectedItems}
-                  className="px-6 py-3 border border-gray-300 rounded-full hover:bg-gray-50 transition duration-300"
-                >
-                  Xóa các mục đã chọn
-                </button>
-                <button
                   onClick={handleCheckout}
                   className="px-8 py-3 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition duration-300 shadow-md"
                 >

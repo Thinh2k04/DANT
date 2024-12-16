@@ -24,7 +24,10 @@ function OrderSummary({
   selectedDistrict, 
   selectedWard,
   specificAddress,
-  paymentMethod
+  paymentMethod,
+  selectedStore,
+  stores,
+  pickupDate // Thêm prop pickupDate
 }) {
   const [showQrModal, setShowQrModal] = useState(false);
   const [qrCodeSvg, setQrCodeSvg] = useState('');
@@ -43,6 +46,20 @@ function OrderSummary({
       d => d.code === parseInt(selectedDistrict)
     )?.name || '';
 
+    // Xác định địa chỉ nhận hàng dựa trên phương thức giao hàng
+    let deliveryAddress;
+    
+    if (deliveryMethod === "pickup") {
+      // Tìm thông tin cửa hàng được chọn
+      const selectedStoreInfo = stores.find(store => store.id === parseInt(selectedStore));
+      if (selectedStoreInfo) {
+        deliveryAddress = `${selectedStoreInfo.tenCuaHang}, ${selectedStoreInfo.phuong}, ${selectedStoreInfo.huyen}, ${selectedStoreInfo.tinh}`;
+      }
+    } else {
+      // Nếu là giao hàng thì sử dụng địa chỉ khách hàng nhập
+      deliveryAddress = `${specificAddress || ''}, ${selectedWard || ''}, ${selectedDistrictName}, ${selectedProvinceName}`;
+    }
+
     const orderData = {
       tttk: {
         id: "",
@@ -60,13 +77,9 @@ function OrderSummary({
         hinhThucThanhToan: {
           id: parseInt(paymentMethod) || 1
         },
-        diaChiNhanHang: `${specificAddress || ''}, ${selectedWard || ''}, ${selectedDistrictName}, ${selectedProvinceName}`,
+        diaChiNhanHang: deliveryAddress,
         cuaHang: {
-          id: 1,
-          tinh: selectedProvince || '',
-          huyen: selectedDistrict || '',
-          thoiGianMoCua: "08:00",
-          thoiGianDongCua: "18:00",
+          id: deliveryMethod === "pickup" ? parseInt(selectedStore) : 1,
           trangThai: 1
         },
         voucher: null,
@@ -158,22 +171,56 @@ function OrderSummary({
     if (!customerName?.trim()) {
       newErrors.name = "Vui lòng nhập họ tên";
       isValid = false;
+    } else if (!/^[a-zA-ZÀ-ỹ\s]+$/.test(customerName)) {
+      newErrors.name = "Họ tên chỉ được chứa chữ cái và khoảng trắng";
+      isValid = false;
+    } else if (customerName.trim().length < 2) {
+      newErrors.name = "Họ tên phải có ít nhất 2 ký tự";
+      isValid = false;
+    } else if (customerName.trim().length > 50) {
+      newErrors.name = "Họ tên không được vượt quá 50 ký tự";
+      isValid = false;
     }
 
     // Validate số điện thoại
     if (!phoneNumber) {
       newErrors.phone = "Vui lòng nhập số điện thoại";
       isValid = false;
+    } else if (!/^(0[3|5|7|8|9])+([0-9]{8})\b/.test(phoneNumber)) {
+      newErrors.phone = "Số điện thoại không hợp lệ";
+      isValid = false;
     }
 
-    // Validate địa chỉ giao hàng nếu chọn giao hàng
-    if (deliveryMethod === "delivery") {
+    // Validate email (nếu có nhập)
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      newErrors.email = "Email không hợp lệ";
+      isValid = false;
+    }
+
+    // Validate phương thức nhận hàng
+    if (deliveryMethod === "pickup") {
+      if (!selectedStore) {
+        newErrors.store = "Vui lòng chọn cửa hàng";
+        isValid = false;
+      }
+      if (!pickupDate) {
+        newErrors.pickupDate = "Vui lòng chọn ngày nhận hàng";
+        isValid = false;
+      } else {
+        const selectedDate = new Date(pickupDate);
+        const today = new Date();
+        if (selectedDate < today) {
+          newErrors.pickupDate = "Ngày nhận hàng không được là ngày trong quá khứ";
+          isValid = false;
+        }
+      }
+    } else if (deliveryMethod === "shipping") {
       if (!selectedProvince) {
         newErrors.province = "Vui lòng chọn tỉnh/thành";
         isValid = false;
       }
       if (!selectedDistrict) {
-        newErrors.district = "Vui lòng chọn quận/huyện";  
+        newErrors.district = "Vui lòng chọn quận/huyện";
         isValid = false;
       }
       if (!selectedWard) {
@@ -183,7 +230,22 @@ function OrderSummary({
       if (!specificAddress?.trim()) {
         newErrors.address = "Vui lòng nhập địa chỉ cụ thể";
         isValid = false;
+      } else if (specificAddress.trim().length > 200) {
+        newErrors.address = "Địa chỉ không được vượt quá 200 ký tự";
+        isValid = false;
       }
+    }
+
+    // Validate giỏ hàng
+    if (!cartItems || cartItems.length === 0) {
+      newErrors.cart = "Giỏ hàng không được để trống";
+      isValid = false;
+    }
+
+    // Validate phương thức thanh toán
+    if (!paymentMethod || paymentMethod === "") {
+      newErrors.paymentMethod = "Vui lòng chọn phương thức thanh toán";
+      isValid = false;
     }
 
     setErrors(newErrors);
@@ -320,6 +382,12 @@ function OrderSummary({
           {errors.address && (
             <div className="text-red-500 text-sm mb-4">
               {errors.address}
+            </div>
+          )}
+
+          {errors.paymentMethod && (
+            <div className="text-red-500 text-sm mb-4">
+              {errors.paymentMethod}
             </div>
           )}
 

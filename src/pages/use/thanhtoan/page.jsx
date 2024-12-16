@@ -78,33 +78,21 @@ function CheckoutPage() {
   // Effect hook để lấy danh sách tỉnh/thành và khởi tạo danh sách cửa hàng
   useEffect(() => {
     callAPI(`${host}?depth=1`);
-    // Dữ liệu mẫu cho danh sách cửa hàng
-    setStores([
-      {
-        id: "1",
-        name: "Cửa hàng A",
-        pick_province: "Hà Nội",
-        pick_district: "Quận Hoàn Kiếm",
-        pick_street: "phố nhổn",
-        hours: "8:00 - 17:00",
-      },
-      {
-        id: "2",
-        name: "Cửa hàng B",
-        pick_province: "Hà Nội",
-        pick_district: "Quận Hoàn Kiếm",
-        pick_street: "phố nhổn",
-        hours: "9:00 - 18:00",
-      },
-      {
-        id: "3",
-        name: "Cửa hàng C",
-        pick_province: "Hà Nội",
-        pick_district: "Quận Hoàn Kiếm",
-        pick_street: "phố nhổn",
-        hours: "10:00 - 19:00",
-      },
-    ]);
+    // Gọi API lấy danh sách cửa hàng
+    fetch('http://localhost:8080/rest/cuaHang/getAll')
+      .then(response => response.json())
+      .then(data => {
+        // Map data để thêm tên cửa hàng và giờ mở/đóng cửa vào mỗi store
+        const storesWithNames = data.map(store => ({
+          ...store,
+          name: store.tenCuaHang,
+          hours: `${store.thoiGianMoCua} - ${store.thoiGianDongCua}` // Thêm giờ mở/đóng cửa
+        }));
+        setStores(storesWithNames);
+      })
+      .catch(error => {
+        console.error('Error fetching stores:', error);
+      });
   }, []);
 
   // Hàm gọi API lấy danh sách tỉnh/thành
@@ -171,6 +159,10 @@ function CheckoutPage() {
       newErrors.name = "Vui lòng nhập họ tên";
     } else if (!/^[a-zA-ZÀ-ỹ\s]+$/.test(customerName)) {
       newErrors.name = "Họ tên chỉ được chứa chữ cái và khoảng trắng";
+    } else if (customerName.trim().length < 2) {
+      newErrors.name = "Họ tên phải có ít nhất 2 ký tự";
+    } else if (customerName.trim().length > 50) {
+      newErrors.name = "Họ tên không được vượt quá 50 ký tự";
     }
 
     // Validate số điện thoại  
@@ -180,8 +172,28 @@ function CheckoutPage() {
       newErrors.phone = "Số điện thoại không hợp lệ";
     }
 
-    // Validate địa chỉ giao hàng
-    if (deliveryMethod === "delivery") {
+    // Validate email (nếu có nhập)
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      newErrors.email = "Email không hợp lệ";
+    }
+
+    // Validate phương thức nhận hàng
+    if (deliveryMethod === "pickup") {
+      // Validate thông tin nhận tại cửa hàng
+      if (!selectedStore) {
+        newErrors.store = "Vui lòng chọn cửa hàng";
+      }
+      if (!pickupDate) {
+        newErrors.pickupDate = "Vui lòng chọn ngày nhận hàng";
+      } else {
+        const selectedDate = new Date(pickupDate);
+        const today = new Date();
+        if (selectedDate < today) {
+          newErrors.pickupDate = "Ngày nhận hàng không được là ngày trong quá khứ";
+        }
+      }
+    } else if (deliveryMethod === "shipping") {
+      // Validate địa chỉ giao hàng
       if (!selectedProvince) {
         newErrors.province = "Vui lòng chọn tỉnh/thành";
       }
@@ -193,7 +205,19 @@ function CheckoutPage() {
       }
       if (!specificAddress.trim()) {
         newErrors.address = "Vui lòng nhập địa chỉ cụ thể";
+      } else if (specificAddress.trim().length > 200) {
+        newErrors.address = "Địa chỉ không được vượt quá 200 ký tự";
       }
+    }
+
+    // Validate giỏ hàng
+    if (!cartItems || cartItems.length === 0) {
+      newErrors.cart = "Giỏ hàng không được để trống";
+    }
+
+    // Validate phương thức thanh toán
+    if (!paymentMethod) {
+      newErrors.paymentMethod = "Vui lòng chọn phương thức thanh toán";
     }
 
     setErrors(newErrors);
@@ -335,6 +359,7 @@ function CheckoutPage() {
                 setPaymentMethod={setPaymentMethod}
                 errors={errors}
                 setErrors={setErrors}
+                deliveryMethod={deliveryMethod}
               />
             </div>
           </div>
@@ -342,12 +367,12 @@ function CheckoutPage() {
           {/* Cột phải - Tổng quan đơn hàng */}
           <div className="w-full md:w-1/2 px-4">
             <OrderSummary
-            provinces={provinces}
-            districts={districts}
-            wards={wards}
-            selectedProvince={selectedProvince}
-            selectedDistrict={selectedDistrict}
-            selectedWard={selectedWard}
+              provinces={provinces}
+              districts={districts}
+              wards={wards}
+              selectedProvince={selectedProvince}
+              selectedDistrict={selectedDistrict}
+              selectedWard={selectedWard}
               cartItems={cartItems}
               quantities={quantities}
               totalAmount={totalAmount}
@@ -362,6 +387,9 @@ function CheckoutPage() {
               deliveryMethod={deliveryMethod}
               specificAddress={specificAddress}
               paymentMethod={paymentMethod}
+              selectedStore={selectedStore}
+              stores={stores}
+              pickupDate={pickupDate}
             />
           </div>
         </div>

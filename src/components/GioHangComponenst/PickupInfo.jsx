@@ -28,8 +28,13 @@ function PickupInfo({
               id="store"
               value={selectedStore}
               onChange={(e) => {
-                setSelectedStore(e.target.value);
-                setErrors((prev) => ({ ...prev, store: "" }));
+                const value = e.target.value;
+                if (!value) {
+                  setErrors((prev) => ({ ...prev, store: "Vui lòng chọn cửa hàng" }));
+                } else {
+                  setErrors((prev) => ({ ...prev, store: "" }));
+                }
+                setSelectedStore(value);
               }}
               className={`pl-10 border rounded-lg p-3 w-full appearance-none bg-white
                 ${errors.store ? "border-red-500" : "border-gray-300"}`}
@@ -58,8 +63,18 @@ function PickupInfo({
               id="pickupDate"
               value={pickupDate}
               onChange={(e) => {
-                setPickupDate(e.target.value);
-                setErrors((prev) => ({ ...prev, pickupDate: "" }));
+                const value = e.target.value;
+                const selectedDate = new Date(value);
+                const today = new Date();
+                
+                if (!value) {
+                  setErrors((prev) => ({ ...prev, pickupDate: "Vui lòng chọn ngày nhận hàng" }));
+                } else if (selectedDate < today) {
+                  setErrors((prev) => ({ ...prev, pickupDate: "Ngày nhận hàng không được là ngày trong quá khứ" }));
+                } else {
+                  setErrors((prev) => ({ ...prev, pickupDate: "" }));
+                }
+                setPickupDate(value);
               }}
               className={`pl-10 border rounded-lg p-3 w-full
                 ${errors.pickupDate ? "border-red-500" : "border-gray-300"}`}

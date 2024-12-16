@@ -20,7 +20,7 @@ function ShippingInfo({
   cartItems, // Danh sách sản phẩm trong giỏ hàng
   quantities, // Số lượng sản phẩm,
   totalAmount, // Tổng tiền đơn hàng
-  weight, // Trọng lượng đơn hàng
+  weight, // Trọng lượng đơn h��ng
   setSelectedProvince,
   setSelectedDistrict
 }) {
@@ -108,7 +108,15 @@ function ShippingInfo({
         <select
           id="province"
           value={selectedProvince}
-          onChange={handleProvinceChange}
+          onChange={(e) => {
+            const value = e.target.value;
+            if (!value) {
+              setErrors((prev) => ({ ...prev, province: "Vui lòng chọn tỉnh/thành" }));
+            } else {
+              setErrors((prev) => ({ ...prev, province: "" }));
+            }
+            handleProvinceChange(e);
+          }}
           className={`border rounded p-2 w-full ${errors.province ? "border-red-500" : ""}`}
         >
           <option value="" disabled>Chọn tỉnh thành</option>
@@ -131,7 +139,15 @@ function ShippingInfo({
         <select
           id="district"
           value={selectedDistrict}
-          onChange={handleDistrictChange}
+          onChange={(e) => {
+            const value = e.target.value;
+            if (!value) {
+              setErrors((prev) => ({ ...prev, district: "Vui lòng chọn quận/huyện" }));
+            } else {
+              setErrors((prev) => ({ ...prev, district: "" }));
+            }
+            handleDistrictChange(e);
+          }}
           className={`border rounded p-2 w-full ${errors.district ? "border-red-500" : ""}`}
           disabled={!selectedProvince}
         >
@@ -156,8 +172,13 @@ function ShippingInfo({
           id="ward"
           value={selectedWard}
           onChange={(e) => {
+            const value = e.target.value;
+            if (!value) {
+              setErrors((prev) => ({ ...prev, ward: "Vui lòng chọn phường/xã" }));
+            } else {
+              setErrors((prev) => ({ ...prev, ward: "" }));
+            }
             setSelectedWard(e.target.value);
-            setErrors((prev) => ({ ...prev, ward: "" }));
           }}
           className={`border rounded p-2 w-full ${errors.ward ? "border-red-500" : ""}`}
           disabled={!selectedDistrict}
@@ -184,8 +205,15 @@ function ShippingInfo({
           id="specificAddress"
           value={specificAddress}
           onChange={(e) => {
-            setSpecificAddress(e.target.value);
-            setErrors((prev) => ({ ...prev, address: "" }));
+            const value = e.target.value;
+            if (!value.trim()) {
+              setErrors((prev) => ({ ...prev, address: "Vui lòng nhập địa chỉ cụ thể" }));
+            } else if (value.trim().length > 200) {
+              setErrors((prev) => ({ ...prev, address: "Địa chỉ không được vượt quá 200 ký tự" }));
+            } else {
+              setErrors((prev) => ({ ...prev, address: "" }));
+            }
+            setSpecificAddress(value);
           }}
           className={`border rounded p-2 w-full ${errors.address ? "border-red-500" : ""}`}
           maxLength={250}

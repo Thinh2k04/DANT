@@ -24,7 +24,7 @@ public class SanPhamChiTiet {
     private Integer soLuong;
 
     @Column(name = "trang_thai", nullable = false, length = 20)
-    private String trangThai;
+    private Integer trangThai;
 
     @Column(name = "don_gia", nullable = false)
     private Float donGia;
@@ -61,8 +61,6 @@ public class SanPhamChiTiet {
     @JoinColumn(name = "id_mau_sac", referencedColumnName = "id")
     private MauSac mauSac;  // Liên kết với bảng MauSac
 
-    @Column(name = "trang_thai_spct")
-    private Integer trangThaiSpct;  // Trạng thái sản phẩm chi tiết
 
     @Column(name = "gioi_thieu", length = 300)
     private String gioiThieu;

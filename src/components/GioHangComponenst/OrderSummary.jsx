@@ -1,39 +1,43 @@
+// Import các thư viện và components cần thiết
 import React, { useState } from 'react';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ShippingInfo from './ShippingInfo';
 import { useNavigate } from 'react-router-dom';
 
+// Component OrderSummary để hiển thị và xử lý thông tin đơn hàng
 function OrderSummary({ 
   provinces, // Danh sách tỉnh/thành phố
   districts, // Danh sách quận/huyện
   wards, // Danh sách phường/xã
-  cartItems, 
-  quantities, 
-  totalAmount, 
-  shippingFee, 
-  errors,
-  setErrors, 
-  loading, 
-  handleCheckout,
-  customerName,
-  phoneNumber,
-  email,
-  deliveryMethod,
-  selectedProvince,
-  selectedDistrict, 
-  selectedWard,
-  specificAddress,
-  paymentMethod,
-  selectedStore,
-  stores,
-  pickupDate // Thêm prop pickupDate
+  cartItems, // Danh sách sản phẩm trong giỏ hàng
+  quantities, // Số lượng của từng sản phẩm
+  totalAmount, // Tổng tiền đơn hàng
+  shippingFee, // Phí vận chuyển
+  errors, // Các lỗi validation
+  setErrors, // Hàm set lỗi
+  loading, // Trạng thái loading
+  handleCheckout, // Hàm xử lý thanh toán
+  customerName, // Tên khách hàng
+  phoneNumber, // Số điện thoại
+  email, // Email
+  deliveryMethod, // Phương thức giao hàng
+  selectedProvince, // Tỉnh/thành đã chọn
+  selectedDistrict, // Quận/huyện đã chọn
+  selectedWard, // Phường/xã đã chọn
+  specificAddress, // Địa chỉ cụ thể
+  paymentMethod, // Phương thức thanh toán
+  selectedStore, // Cửa hàng đã chọn (cho pickup)
+  stores, // Danh sách cửa hàng
+  pickupDate // Ngày nhận hàng (cho pickup)
 }) {
+  // Khởi tạo state cho modal QR và navigation
   const [showQrModal, setShowQrModal] = useState(false);
   const [qrCodeSvg, setQrCodeSvg] = useState('');
   const [paymentUrl, setPaymentUrl] = useState('');
   const navigate = useNavigate();
 
+  // Hàm chuẩn bị dữ liệu đơn hàng để gửi lên server
   const prepareOrderData = () => {
     const now = new Date();
     // Lấy tên tỉnh/thành phố từ mã code
@@ -49,8 +53,8 @@ function OrderSummary({
     // Xác định địa chỉ nhận hàng dựa trên phương thức giao hàng
     let deliveryAddress;
     
+    // Nếu là pickup thì lấy địa chỉ cửa hàng
     if (deliveryMethod === "pickup") {
-      // Tìm thông tin cửa hàng được chọn
       const selectedStoreInfo = stores.find(store => store.id === parseInt(selectedStore));
       if (selectedStoreInfo) {
         deliveryAddress = `${selectedStoreInfo.tenCuaHang}, ${selectedStoreInfo.phuong}, ${selectedStoreInfo.huyen}, ${selectedStoreInfo.tinh}`;
@@ -60,7 +64,9 @@ function OrderSummary({
       deliveryAddress = `${specificAddress || ''}, ${selectedWard || ''}, ${selectedDistrictName}, ${selectedProvinceName}`;
     }
 
+    // Tạo object chứa thông tin đơn hàng
     const orderData = {
+      // Thông tin tài khoản khách hàng
       tttk: {
         id: "",
         hoTen: customerName || '',
@@ -71,6 +77,7 @@ function OrderSummary({
         taiKhoanNguoiDung: null,
         trangThai: null
       },
+      // Thông tin hóa đơn
       hd: {
         thoiGianLapHoaDon: now.toISOString(),
         tongTien: totalAmount + (shippingFee || 0),
@@ -86,6 +93,7 @@ function OrderSummary({
         trangThaiThanhToan: 0,
         trangThai: 0
       },
+      // Chi tiết hóa đơn
       lhdct: cartItems.map(item => ({
         hoaDon: {
           id: ""
@@ -99,7 +107,10 @@ function OrderSummary({
     };
     return orderData;
   };
+  console.log('hiển thị danh sách các phần tử trong hóa dơn chi tiết ')
+  console.log(cartItems);
 
+  // Hàm xử lý khi submit đơn hàng
   const handleOrderSubmit = async () => {
     try {
       // Chuẩn bị dữ liệu đơn hàng
@@ -114,55 +125,62 @@ function OrderSummary({
         body: JSON.stringify(orderData)
       });
 
+      // Kiểm tra response
       if (!response.ok) {
         throw new Error('Failed to create order');
       }
 
-      const orderResponse = await response.json();
-      console.log("Order Response:", orderResponse); // Thêm log để debug
-
-      // Thông báo thành công
+      // Hiển thị thông báo thành công
       toast.success('Đặt hàng thành công!', {
-        position: "top-right",
+        position: "top-center",
         autoClose: 2000,
-        onClose: () => {
-          // Chuyển hướng sau khi toast đóng
-          navigate('/payment-success', { 
-            state: { 
-              orderInfo: {
-                ...orderResponse,
-                tongTienHang: totalAmount,
-                phiVanChuyen: shippingFee || 0,
-                tttk: {
-                  hoTen: customerName,
-                  soDienThoai: phoneNumber,
-                  email: email
-                },
-                diaChiNhanHang: `${specificAddress}, ${wards.find(w => w.code === parseInt(selectedWard))?.name || ''}, ${districts.find(d => d.code === parseInt(selectedDistrict))?.name || ''}, ${provinces.find(p => p.code === parseInt(selectedProvince))?.name || ''}`,
-                hinhThucThanhToan: {
-                  id: parseInt(paymentMethod),
-                  tenHinhThuc: paymentMethod === "1" ? "Thanh toán khi nhận hàng" : 
-                              paymentMethod === "2" ? "Thanh toán qua MoMo" : 
-                              "Thanh toán qua ZaloPay"
-                },
-                trangThaiDonHang: "Chờ xác nhận"
-              }
-            },
-            replace: true // Thêm option replace để tránh quay lại trang thanh toán
-          });
-
-          // Xóa giỏ hàng sau khi đặt hàng thành công
-          localStorage.removeItem('cartItems');
-          localStorage.removeItem('quantities');
-        }
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
       });
 
+      // Chuyển hướng sau khi hiển thị toast
+      setTimeout(() => {
+        navigate('/payment-success', { 
+          state: { 
+            orderInfo: {
+              tongTienHang: totalAmount,
+              phiVanChuyen: shippingFee || 0,
+              tttk: {
+                hoTen: customerName,
+                soDienThoai: phoneNumber,
+                email: email
+              },
+              diaChiNhanHang: `${specificAddress}, ${wards.find(w => w.code === parseInt(selectedWard))?.name || ''}, ${districts.find(d => d.code === parseInt(selectedDistrict))?.name || ''}, ${provinces.find(p => p.code === parseInt(selectedProvince))?.name || ''}`,
+              hinhThucThanhToan: {
+                id: parseInt(paymentMethod),
+                tenHinhThuc: paymentMethod === "1" ? "Thanh toán khi nhận hàng" : 
+                            paymentMethod === "2" ? "Thanh toán qua MoMo" : 
+                            "Thanh toán qua ZaloPay"
+              },
+              trangThaiDonHang: "Chờ xác nhận",
+              cartItems: cartItems.map(item => ({
+                ...item,
+                soLuong: quantities[item?.id] || item?.soLuong || 1
+              }))
+            }
+          },
+          replace: true
+        });
+      }, 2000);
+
     } catch (error) {
+      // Xử lý lỗi
       console.error('Error creating order:', error);
-      toast.error('Có lỗi xảy ra khi tạo đơn hàng');
+      toast.error('Có lỗi xảy ra khi tạo đơn hàng', {
+        position: "top-center",
+        autoClose: 2000
+      });
     }
   };
 
+  // Hàm validate các trường dữ liệu
   const validateFields = () => {
     const newErrors = {};
     let isValid = true;
@@ -252,9 +270,12 @@ function OrderSummary({
     return isValid;
   };
 
+  // Render component
   return (
     <>
+      {/* Container chính */}
       <div className="bg-white rounded-xl shadow-lg p-8 mb-8 border border-gray-100">
+        {/* Tiêu đề */}
         <h2 className="text-2xl font-bold mb-6 text-gray-800 flex items-center">
           <svg className="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -262,12 +283,14 @@ function OrderSummary({
           Thông tin đơn hàng
         </h2>
 
+        {/* Hiển thị lỗi giỏ hàng nếu có */}
         {errors.cart && (
           <div className="bg-red-50 text-red-600 p-4 rounded-lg mb-6">
             {errors.cart}
           </div>
         )}
 
+        {/* Danh sách sản phẩm trong giỏ hàng */}
         <div className="space-y-6">
           {cartItems.map((item) => (
             <div key={item?.id || Math.random()} className="flex items-start space-x-6 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
@@ -407,44 +430,6 @@ function OrderSummary({
           </button>
         </div>
       </div>
-
-      {/* QR Code Modal */}
-      {showQrModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-8 rounded-xl shadow-lg max-w-md w-full">
-            <h3 className="text-xl font-bold mb-4 text-center">Quét mã để thanh toán</h3>
-            
-            <div className="flex justify-center mb-4">
-              <div 
-                dangerouslySetInnerHTML={{ __html: qrCodeSvg }}
-                className="w-64 h-64"
-              />
-            </div>
-
-            <p className="text-gray-600 text-center mb-4">
-              Vui lòng quét mã QR để thanh toán số tiền{' '}
-              <span className="font-semibold text-green-600">
-                {(totalAmount + (shippingFee || 0)).toLocaleString('vi-VN')}₫
-              </span>
-            </p>
-
-            <div className="flex justify-center gap-4">
-              <button
-                onClick={() => setShowQrModal(false)}
-                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
-              >
-                Đóng
-              </button>
-              <button
-                onClick={() => window.open(paymentUrl, '_blank')}
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-              >
-                Mở trang thanh toán
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 }

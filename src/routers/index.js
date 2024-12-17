@@ -7,7 +7,7 @@ import CustomerManagement from '../pages/admin/customers/page';
 import AttributeManagement from '../pages/admin/attributes/page';
 import ChiTietSanPham from '../pages/chitietsanpham[/id]/page';
 import CheckoutPage from '../pages/use/thanhtoan/page';
-import PaymentSuccess from '../pages/use/thanhtoan/page';
+import PaymentSuccess from '../components/GioHangComponenst/PaymentSuccess';
 import ChiTietSanPhamAdmin from '../pages/admin/sanphamchitietAdmin[/id]/page';
 import AccountManagement from '../pages/admin/account/page';
 

@@ -81,17 +81,17 @@ const PaymentSuccess = () => {
               Chi tiết đơn hàng
             </h2>
             <div className="space-y-4">
-              {orderInfo.orderDetails.map((item, index) => (
+              {orderInfo.cartItems && orderInfo.cartItems.map((item, index) => (
                 <div key={index} className="flex items-start space-x-4 p-4 bg-gray-50 rounded-lg">
                   <img
-                    src={item.sanPhamChiTiet?.hinhAnh?.[0]?.duongDan || '/placeholder-image.jpg'}
-                    alt={item.sanPhamChiTiet?.tenSanPham}
+                    src={item.hinhAnh?.[0]?.duongDan || '/placeholder-image.jpg'}
+                    alt={item.tenSanPham}
                     className="w-20 h-20 object-cover rounded-lg"
                   />
                   <div className="flex-1">
-                    <h3 className="font-semibold text-gray-800">{item.sanPhamChiTiet?.sanPham?.tenSanPham}</h3>
+                    <h3 className="font-semibold text-gray-800">{item.tenSanPham}</h3>
                     <p className="text-sm text-gray-600">Số lượng: {item.soLuong}</p>
-                    <p className="text-sm font-semibold text-gray-800">{item.gia?.toLocaleString('vi-VN')}₫</p>
+                    <p className="text-sm font-semibold text-gray-800">{item.donGia?.toLocaleString('vi-VN')}₫</p>
                   </div>
                 </div>
               ))}
@@ -115,7 +115,7 @@ const PaymentSuccess = () => {
               </div>
               <div className="flex justify-between text-lg font-bold text-green-600 pt-2 border-t">
                 <span>Tổng thanh toán:</span>
-                <span>{orderInfo.tongTien.toLocaleString('vi-VN')}₫</span>
+                <span>{(orderInfo.tongTienHang + orderInfo.phiVanChuyen).toLocaleString('vi-VN')}₫</span>
               </div>
               <div className="flex justify-between pt-2">
                 <span className="text-gray-600">Phương thức thanh toán:</span>
@@ -145,4 +145,4 @@ const PaymentSuccess = () => {
   );
 };
 
-export default PaymentSuccess; 
+export default PaymentSuccess;

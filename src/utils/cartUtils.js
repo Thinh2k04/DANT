@@ -64,6 +64,7 @@ export const updateCartItemQuantity = async (id, newQuantity) => {
         }
         return item;
       });
+      
       localStorage.setItem('cartItems', JSON.stringify(updatedCart));
       
       // Trigger event để cập nhật số lượng trong navbar

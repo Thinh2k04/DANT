@@ -1,39 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 
 const AnimeLoading = () => {
-  const [text, setText] = useState('');
-  const fullText = 'Loading...System...Access...Granted...';
-  
-  useEffect(() => {
-    let index = 0;
-    const interval = setInterval(() => {
-      setText(fullText.substring(0, index));
-      index++;
-      if (index > fullText.length) {
-        index = 0;
-      }
-    }, 100);
-
-    return () => clearInterval(interval);
-  }, []);
-
   return (
-    <div className="fixed inset-0 bg-black z-50 flex flex-col items-center justify-center">
-      <div className="font-mono text-2xl text-green-500">
-        <span className="inline-block animate-pulse"></span>
-        <span className="ml-2">{text}</span>
-        <span className="animate-pulse">_</span>
-      </div>
-      <div className="mt-4 font-mono text-green-500 text-sm opacity-75">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className="my-1">
-            {Array.from({ length: 32 }).map((_, j) => (
-              <span key={j} className="animate-pulse inline-block" style={{animationDelay: `${(i * 32 + j) * 0.1}s`}}>
-                {Math.random() > 0.5 ? '1' : '0'}
-              </span>
-            ))}
-          </div>
-        ))}
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+      <div className="bg-white p-5 rounded-lg flex flex-col items-center">
+        <div className="w-12 h-12 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
+        <p className="mt-4 text-lg font-semibold text-gray-700">Loading...</p>
       </div>
     </div>
   );

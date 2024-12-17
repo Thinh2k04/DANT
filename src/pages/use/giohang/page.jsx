@@ -27,7 +27,7 @@ function CartPage() {
     setQuantities(quantities); 
     setSelectedItems(selectedItems);
   }, []);
-
+  
   // Hàm xử lý xóa sản phẩm khỏi giỏ hàng
   const handleRemoveFromCart = (id) => {
     const result = removeFromCart(id);
@@ -84,6 +84,22 @@ function CartPage() {
     if (result.success) {
       navigate('/checkout');
     }
+  };
+
+  // Add this function
+  const handleRemoveSelectedItems = () => {
+    const itemsToRemove = cartItems.filter(item => selectedItems[item.id]);
+    itemsToRemove.forEach(item => removeFromCart(item.id));
+
+    const updatedCartItems = cartItems.filter(item => !selectedItems[item.id]);
+    setCartItems(updatedCartItems);
+    setQuantities(prevQuantities => {
+      const updatedQuantities = { ...prevQuantities };
+      itemsToRemove.forEach(item => delete updatedQuantities[item.id]);
+      return updatedQuantities;
+    });
+    setSelectedItems({});
+    setSelectAll(false);
   };
 
   // Return JSX để render giao diện
@@ -189,6 +205,12 @@ function CartPage() {
               </div>
               
               <div className="mt-8 flex justify-end space-x-4">
+                <button
+                  onClick={handleRemoveSelectedItems}
+                  className="px-8 py-3 bg-red-500 text-white rounded-full hover:bg-red-600 transition duration-300 shadow-md"
+                >
+                  Xóa sản phẩm đã chọn
+                </button>
                 <button 
                   onClick={handleCheckout}
                   className="px-8 py-3 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition duration-300 shadow-md"

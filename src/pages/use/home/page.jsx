@@ -1,3 +1,4 @@
+// Import các thư viện và components cần thiết từ React và các nguồn khác
 import React, { useState, useEffect } from 'react';
 import Navbar from '../../../components/Layout/DefaultLayout/Navbar';
 import { addToCart } from '../../../utils/cartUtils';
@@ -5,22 +6,30 @@ import Footer from '../../../components/Layout/DefaultLayout/Footer';
 import { FaShoppingCart, FaSearch, FaFilter, FaLaptop, FaMemory, FaHdd, FaMicrochip, FaTag } from 'react-icons/fa';
 import { IoMdPricetag } from 'react-icons/io';
 import { AiFillStar, AiOutlineStar } from 'react-icons/ai';
-import { toast } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { updateCartItemQuantity } from '../../../utils/cartUtils';
+import CartToast from '../../../components/Toast/CartToast';
 
+// Định nghĩa component HomePage
 const HomePage = () => {
-  const [laptops, setLaptops] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 12;
-  const [loading, setLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
-  const [filters, setFilters] = useState({
+  // Khai báo các state cần thiết
+  const [laptops, setLaptops] = useState([]); // State lưu trữ danh sách laptop
+  const [currentPage, setCurrentPage] = useState(1); // State quản lý trang hiện tại
+  const itemsPerPage = 12; // Số sản phẩm hiển thị trên mỗi trang
+  const [loading, setLoading] = useState(false); // State quản lý trạng thái loading
+  const [hasMore, setHasMore] = useState(true); // State kiểm tra còn sản phẩm để load không
+  const [filters, setFilters] = useState({ // State quản lý các bộ lọc
     priceRange: '',
     brand: '',
     ram: '',
     storage: '',
     processor: ''
   });
+  const [selectedProduct, setSelectedProduct] = useState(null); // Thêm state cho sản phẩm được chọn
+  const [showToast, setShowToast] = useState(false); // Thêm state cho toast notification
 
+  // useEffect hook để fetch dữ liệu laptop khi component mount
   useEffect(() => {
     const fetchLaptops = async () => {
       try {
@@ -41,15 +50,18 @@ const HomePage = () => {
     fetchLaptops();
   }, []);
 
+  // Hàm lọc laptop dựa trên các bộ lọc đã chọn
   const filterLaptops = (laptops) => {
     return laptops.filter(laptop => {
       const price = parseFloat(laptop.donGia);
       
+      // Kiểm tra điều kiện lọc theo giá
       if (filters.priceRange) {
         const [min, max] = filters.priceRange.split('-').map(Number);
         if (price < min || price > max) return false;
       }
       
+      // Kiểm tra các điều kiện lọc khác
       if (filters.brand && laptop.sanPham.thuongHieu !== filters.brand) return false;
       if (filters.ram && laptop.ram !== filters.ram) return false;
       if (filters.storage && laptop.storage !== filters.storage) return false;
@@ -59,12 +71,14 @@ const HomePage = () => {
     });
   };
 
+  // Xử lý dữ liệu để hiển thị
   const filteredLaptops = filterLaptops(laptops);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredLaptops.slice(0, indexOfLastItem);
   const totalPages = Math.ceil(filteredLaptops.length / itemsPerPage);
 
+  // Hàm xử lý khi click nút "Xem thêm"
   const handleLoadMore = () => {
     if (currentPage < totalPages) {
       setCurrentPage(prevPage => prevPage + 1);
@@ -72,6 +86,7 @@ const HomePage = () => {
     }
   };
 
+  // Hàm xử lý khi thay đổi bộ lọc
   const handleFilterChange = (filterName, value) => {
     setFilters(prev => ({
       ...prev,
@@ -81,23 +96,61 @@ const HomePage = () => {
     setHasMore(true);
   };
 
-  const handleAddToCart = (item) => {
-    addToCart(item);
-    toast.success('Đã thêm sản phẩm vào giỏ hàng!', {
-      position: "top-right",
-      autoClose: 2000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-    });
+  // Hàm xử lý khi thêm sản phẩm vào giỏ hàng
+  const handleAddToCart = async (laptop) => {
+    console.log("Function handleAddToCart called");
+    try {
+      const currentCart = JSON.parse(localStorage.getItem('cartItems')) || [];
+      const existingItem = currentCart.find(item => item.id === laptop.id);
+      const newQuantity = existingItem ? existingItem.quantity + 1 : 1;
+
+      const result = await updateCartItemQuantity(laptop.id, newQuantity);
+      if (result.success) {
+        if (existingItem) {
+          existingItem.quantity = newQuantity;
+        } else {
+          currentCart.push({ ...laptop, quantity: 1 });
+        }
+        localStorage.setItem('cartItems', JSON.stringify(currentCart));
+
+        // toast.success('Đã thêm sản phẩm vào giỏ hàng!', {
+        //   position: "top-right",
+        //   autoClose: 2000,
+        //   hideProgressBar: false,
+        //   closeOnClick: true,
+        //   pauseOnHover: true,
+        //   draggable: true,
+        //   progress: undefined,
+        // });
+
+        setSelectedProduct(laptop);
+        setShowToast(true);
+
+        setTimeout(() => {
+          setShowToast(false);
+        }, 3000);
+      }
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      toast.error('Có lỗi xảy ra khi thêm vào giỏ hàng!', {
+        position: "top-right",
+        autoClose: 2000,
+      });
+    }
   };
 
+  // Return JSX để render giao diện
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
       <Navbar />
+      <ToastContainer />
+      <CartToast 
+        isVisible={showToast}
+        onClose={() => setShowToast(false)}
+        product={selectedProduct}
+      />
       <main className="flex-grow container mx-auto py-8 px-4">
-        {/* Hero Section */}
+        {/* Phần Hero Section - Banner chính */}
         <div className="mb-10">
           <div className="relative rounded-2xl overflow-hidden h-[500px] shadow-lg">
             <img 
@@ -125,7 +178,7 @@ const HomePage = () => {
         </div>
 
         <div className="grid grid-cols-12 gap-8">
-          {/* Filters Sidebar */}
+          {/* Phần Sidebar chứa các bộ lọc */}
           <div className="col-span-3">
             <div className="bg-white rounded-xl shadow-sm p-6 sticky top-4">
               <h3 className="text-xl font-bold mb-6 text-gray-800 flex items-center gap-2">
@@ -134,7 +187,7 @@ const HomePage = () => {
               </h3>
               
               <div className="space-y-5">
-                {/* Price Filter */}
+                {/* Bộ lọc theo giá */}
                 <div>
                   <label className="text-sm font-medium text-gray-700 block mb-2 flex items-center gap-2">
                     <IoMdPricetag className="text-blue-600" />
@@ -153,7 +206,7 @@ const HomePage = () => {
                   </select>
                 </div>
 
-                {/* Brand Filter */}
+                {/* Bộ lọc theo thương hiệu */}
                 <div>
                   <label className="text-sm font-medium text-gray-700 block mb-2 flex items-center gap-2">
                     <FaLaptop className="text-blue-600" />
@@ -172,7 +225,7 @@ const HomePage = () => {
                   </select>
                 </div>
 
-                {/* RAM Filter */}
+                {/* Bộ lọc theo RAM */}
                 <div>
                   <label className="text-sm font-medium text-gray-700 block mb-2 flex items-center gap-2">
                     <FaMemory className="text-blue-600" />
@@ -190,7 +243,7 @@ const HomePage = () => {
                   </select>
                 </div>
 
-                {/* Storage Filter */}
+                {/* Bộ lọc theo ổ cứng */}
                 <div>
                   <label className="text-sm font-medium text-gray-700 block mb-2 flex items-center gap-2">
                     <FaHdd className="text-blue-600" />
@@ -208,7 +261,7 @@ const HomePage = () => {
                   </select>
                 </div>
 
-                {/* Processor Filter */}
+                {/* Bộ lọc theo CPU */}
                 <div>
                   <label className="text-sm font-medium text-gray-700 block mb-2 flex items-center gap-2">
                     <FaMicrochip className="text-blue-600" />
@@ -231,13 +284,14 @@ const HomePage = () => {
             </div>
           </div>
 
-          {/* Products Grid */}
+          {/* Phần hiển thị lưới sản phẩm */}
           <div className="col-span-9">
             <div className="mb-6">
               <h2 className="text-2xl font-bold text-gray-800">Laptop cao cấp chính hãng</h2>
               <p className="text-gray-600 mt-2">Hiển thị {currentItems.length} trên {filteredLaptops.length} sản phẩm</p>
             </div>
 
+            {/* Hiển thị danh sách sản phẩm hoặc thông báo không tìm thấy */}
             {currentItems.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {currentItems.map((laptop) => (
@@ -292,6 +346,7 @@ const HomePage = () => {
                       <button 
                         onClick={(e) => {
                           e.stopPropagation();
+                          console.log("đã click vào nút thêm")
                           handleAddToCart(laptop);
                         }}
                         className="w-full py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
@@ -309,6 +364,7 @@ const HomePage = () => {
               </div>
             )}
 
+            {/* Nút "Xem thêm" */}
             {hasMore && (
               <div className="mt-8 text-center">
                 <button
@@ -330,4 +386,5 @@ const HomePage = () => {
   );
 };
 
+// Export component HomePage
 export default HomePage;

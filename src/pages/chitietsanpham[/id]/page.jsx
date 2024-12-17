@@ -1,43 +1,58 @@
+// Import các thư viện và components cần thiết
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { addToCart } from '../../../utils/cartUtils';
 import Navbar from '../../../components/Layout/DefaultLayout/Navbar';
 import Footer from '../../../components/Layout/DefaultLayout/Footer';
+// Import các icon từ react-icons/fa
 import { FaShoppingCart, FaRegHeart, FaHeart, FaShippingFast, FaShieldAlt, FaUndo, FaInfoCircle, FaMicrochip, FaMemory, FaHdd, FaDesktop, FaGamepad, FaBatteryFull, FaWeightHanging, FaTools, FaLaptop } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import AnimeLoading from '../../../components/Loading/AnimeLoading';
 import { ToastContainer } from 'react-toastify';
+import { updateCartItemQuantity } from '../../../utils/cartUtils';
+import CartToast from '../../../components/Toast/CartToast';
+
 import 'react-toastify/dist/ReactToastify.css';
 
+// Định nghĩa component ChiTietSanPham
 const ChiTietSanPham = () => {
+    // Lấy id sản phẩm từ URL params
     const { idSanPham } = useParams();
-    const [product, setProduct] = useState(null);
-    const [laptops, setLaptops] = useState([]);
-    const [relatedProducts, setRelatedProducts] = useState([]);
-    const [productImages, setProductImages] = useState([]);
-    const [selectedImage, setSelectedImage] = useState('');
-    const [selectedConfig, setSelectedConfig] = useState(null);
-    const [isFavorite, setIsFavorite] = useState(false);
-    const navigate = useNavigate();
-    const [isLoading, setIsLoading] = useState(true);
+    // Khai báo các state cần thiết
+    const [product, setProduct] = useState(null); // State lưu thông tin sản phẩm
+    const [laptops, setLaptops] = useState([]); // State lưu danh sách laptop
+    const [relatedProducts, setRelatedProducts] = useState([]); // State lưu sản phẩm liên quan
+    const [productImages, setProductImages] = useState([]); // State lưu ảnh sản phẩm
+    const [selectedImage, setSelectedImage] = useState(''); // State lưu ảnh được chọn
+    const [selectedConfig, setSelectedConfig] = useState(null); // State lưu cấu hình được chọn
+    const [isFavorite, setIsFavorite] = useState(false); // State lưu trạng thái yêu thích
+    const navigate = useNavigate(); // Hook điều hướng
+    const [isLoading, setIsLoading] = useState(true); // State loading
+    const [selectedProduct, setSelectedProduct] = useState(null); // Thêm state cho sản phẩm được chọn
+    const [showToast, setShowToast] = useState(false); // Thêm state cho toast
 
+    // useEffect để fetch thông tin chi tiết sản phẩm
     useEffect(() => {
         const fetchProductDetails = async () => {
             try {
                 setIsLoading(true);
+                // Gọi API lấy thông tin sản phẩm
                 const response = await fetch(`http://localhost:8080/rest/spctDTO/getById/${idSanPham}`);
                 if (!response.ok) throw new Error('Network response was not ok');
                 const data = await response.json();
                 setProduct(data);
                 setSelectedConfig(data);
 
+                // Gọi API lấy danh sách laptop
                 const laptopsResponse = await fetch('http://localhost:8080/rest/spctDTO/getAll');
                 if (!laptopsResponse.ok) throw new Error('Network response was not ok');
                 const laptopsData = await laptopsResponse.json();
                 setLaptops(laptopsData);
+                // Lọc sản phẩm liên quan
                 const related = laptopsData.filter(item => item.idSanPham === data?.idSanPham);
                 setRelatedProducts(related);
 
+                // Delay 1s để hiển thị loading
                 await new Promise(resolve => setTimeout(resolve, 1000));
                 
             } catch (error) {
@@ -51,13 +66,16 @@ const ChiTietSanPham = () => {
         fetchProductDetails();
     }, [idSanPham]);
 
+    // useEffect để fetch ảnh sản phẩm
     useEffect(() => {
         const fetchProductImages = async () => {
             try {
+                // Gọi API lấy ảnh sản phẩm
                 const response = await fetch(`http://localhost:8080/rest/san_pham_chi_tiet/getIMG/${idSanPham}`);
                 if (!response.ok) throw new Error('Network response was not ok');
                 const imageData = await response.json();
                 
+                // Format dữ liệu ảnh
                 let formattedImages = Array.isArray(imageData) 
                     ? imageData.map(img => ({ imageUrl: img.imageUrl || img }))
                     : [{ imageUrl: imageData.imageUrl || imageData }];
@@ -76,10 +94,12 @@ const ChiTietSanPham = () => {
         fetchProductImages();
     }, [idSanPham]);
 
+    // Hiển thị loading khi đang tải dữ liệu
     if (isLoading) {
         return <AnimeLoading />;
     }
 
+    // Hiển thị loading spinner khi chưa có dữ liệu sản phẩm
     if (!product) {
         return (
             <div className="min-h-screen flex justify-center items-center bg-gray-50">
@@ -88,58 +108,64 @@ const ChiTietSanPham = () => {
         );
     }
 
-    const handleAddToCart = (product) => {
-        // Lấy giỏ hàng hiện tại từ localStorage
-        const currentCart = JSON.parse(localStorage.getItem('cartItems')) || [];
-        
-        // Kiểm tra sản phẩm đã tồn tại trong giỏ hàng chưa
-        const existingItemIndex = currentCart.findIndex(item => item.id === product.id);
-        
-        if (existingItemIndex !== -1) {
-            // Nếu sản phẩm đã tồn tại, tăng số lượng
-            currentCart[existingItemIndex].quantity += 1;
-        } else {
-            // Nếu sản phẩm chưa tồn tại, thêm mới vào giỏ hàng
-            currentCart.push({
-                ...product,
-                quantity: 1
+    // Hàm xử lý thêm vào giỏ hàng
+    const handleAddToCart = async (product) => {
+        try {
+            const currentCart = JSON.parse(localStorage.getItem('cartItems')) || [];
+            const existingItem = currentCart.find(item => item.id === product.id);
+            const newQuantity = existingItem ? existingItem.quantity + 1 : 1;
+
+            const result = await updateCartItemQuantity(product.id, newQuantity);
+            if (result.success) {
+                if (existingItem) {
+                    existingItem.quantity = newQuantity;
+                } else {
+                    currentCart.push({ ...product, quantity: 1 });
+                }
+                localStorage.setItem('cartItems', JSON.stringify(currentCart));
+
+                setSelectedProduct(product);
+                setShowToast(true);
+
+                setTimeout(() => {
+                    setShowToast(false);
+                }, 3000);
+            }
+        } catch (error) {
+            console.error('Error adding to cart:', error);
+            toast.error('Có lỗi xảy ra khi thêm vào giỏ hàng!', {
+                position: "top-right", 
+                autoClose: 2000,
             });
         }
-        
-        // Lưu giỏ hàng mới vào localStorage
-        localStorage.setItem('cartItems', JSON.stringify(currentCart));
-        
-        // Hiển thị thông báo
-        toast.success('Đã thêm sản phẩm vào giỏ hàng!', {
-            position: "top-right",
-            autoClose: 2000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-        });
     };
 
+    // Hàm xử lý khi click vào sản phẩm liên quan
     const handleRelatedProductClick = (relatedProduct) => {
         navigate(`/chitietsanpham/${relatedProduct.id}`);
     };
 
+    // Hàm xử lý khi click nút mua ngay
     const handleBuyNow = () => {
         navigate(`/xacnhandonhang/${selectedConfig.id}`);
     };
 
+    // Hàm xử lý khi click vào ảnh thumbnail
     const handleThumbnailClick = (imageUrl) => {
         setSelectedImage(imageUrl);
     };
 
+    // Hàm xử lý khi chọn cấu hình
     const handleConfigSelect = (config) => {
         setSelectedConfig(config);
     };
 
+    // Hàm format giá tiền
     const formatPrice = (price) => {
         return price ? price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : 'Liên hệ';
     };
 
+    // Object chứa các icon cho thông số kỹ thuật
     const specIcons = {
         CPU: <FaMicrochip className="text-blue-600" />,
         RAM: <FaMemory className="text-green-600" />,
@@ -152,14 +178,20 @@ const ChiTietSanPham = () => {
         'Bảo hành': <FaTools className="text-gray-600" />
     };
 
+    // Return JSX
     return (
         <div className="min-h-screen bg-gray-50">
             <Navbar />
             <ToastContainer />
+            <CartToast 
+        isVisible={showToast}
+        onClose={() => setShowToast(false)}
+        product={selectedProduct}
+      />
             {!isLoading && product && (
                 <div className="container mx-auto px-4 py-8">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        {/* Left Column - Product Images */}
+                        {/* Cột trái - Ảnh sản phẩm */}
                         <div className="sticky top-20 h-fit">
                             <div className="bg-white rounded-2xl shadow-sm overflow-hidden p-4">
                                 <div className="relative h-80 mb-4">
@@ -199,7 +231,7 @@ const ChiTietSanPham = () => {
                             </div>
                         </div>
 
-                        {/* Right Column - Product Info */}
+                        {/* Cột phải - Thông tin sản phẩm */}
                         <div className="space-y-6">
                             <div className="bg-white rounded-2xl shadow-sm p-6">
                                 <h1 className="text-3xl font-bold text-gray-900 mb-3">{selectedConfig.tenSanPhamChiTiet}</h1>
@@ -269,7 +301,7 @@ const ChiTietSanPham = () => {
                                 </div>
                             </div>
 
-                            {/* Configuration Options */}
+                            {/* Phần tùy chọn cấu hình */}
                             <div className="bg-white rounded-2xl shadow-sm p-6">
                                 <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                                     <FaInfoCircle className="text-blue-600" />
@@ -303,7 +335,7 @@ const ChiTietSanPham = () => {
                         </div>
                     </div>
 
-                    {/* Related Products */}
+                    {/* Phần sản phẩm tương tự */}
                     <div className="mt-12">
                         <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
                             <FaLaptop className="text-blue-600" />

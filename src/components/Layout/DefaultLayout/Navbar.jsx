@@ -7,13 +7,10 @@ const Navbar = () => {
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-8">
-            <Link to="/" className="text-2xl font-bold">LaptopStore</Link>
+            <Link to="/" className="text-2xl font-bold">AINO</Link>
             <nav className="flex space-x-6">
-              <Link to="/" className="hover:text-blue-400 transition">Trang Chủ</Link>
-              <Link to="/laptops" className="hover:text-blue-400 transition">Laptop Gaming</Link>
-              <Link to="/office" className="hover:text-blue-400 transition">Laptop Văn Phòng</Link>
-              <Link to="/macbook" className="hover:text-blue-400 transition">Macbook</Link>
-              <Link to="/accessories" className="hover:text-blue-400 transition">Phụ Kiện</Link>
+              <Link to="/macbook" className="hover:text-blue-400 transition">Tra cứu đơn hàng</Link>
+              <Link to="/accessories" className="hover:text-blue-400 transition">Giảm giá SỐC</Link>
             </nav>
           </div>
           

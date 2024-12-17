@@ -1,33 +1,38 @@
+// Import các thư viện và components cần thiết
 import React, { useState, useEffect } from 'react';
 import Navbar from '../../../components/Layout/DefaultLayout/Navbar';
 import { 
-  getCartItems, 
-  removeFromCart, 
-  updateCartItemQuantity, 
-  calculateTotal, 
-  processCheckout 
+  getCartItems, // Hàm lấy danh sách sản phẩm trong giỏ hàng
+  removeFromCart, // Hàm xóa sản phẩm khỏi giỏ hàng 
+  updateCartItemQuantity, // Hàm cập nhật số lượng sản phẩm
+  calculateTotal, // Hàm tính tổng tiền
+  processCheckout // Hàm xử lý thanh toán
 } from '../../../utils/cartUtils';
 
-
+// Import các components từ react-router-dom
 import { Link, useNavigate } from 'react-router-dom';
 
 function CartPage() {
-  const [cartItems, setCartItems] = useState([]);
-  const [quantities, setQuantities] = useState({});
-  const [selectedItems, setSelectedItems] = useState({});
-  const [selectAll, setSelectAll] = useState(false);
-  const navigate = useNavigate();
+  // Khai báo các state cần thiết
+  const [cartItems, setCartItems] = useState([]); // State lưu danh sách sản phẩm
+  const [quantities, setQuantities] = useState({}); // State lưu số lượng của từng sản phẩm
+  const [selectedItems, setSelectedItems] = useState({}); // State lưu trạng thái chọn của từng sản phẩm
+  const [selectAll, setSelectAll] = useState(false); // State lưu trạng thái chọn tất cả
+  const navigate = useNavigate(); // Hook điều hướng
 
+  // Effect hook để lấy dữ liệu giỏ hàng khi component mount
   useEffect(() => {
     const { items, quantities, selectedItems } = getCartItems();
     setCartItems(items);
-    setQuantities(quantities);
+    setQuantities(quantities); 
     setSelectedItems(selectedItems);
   }, []);
 
+  // Hàm xử lý xóa sản phẩm khỏi giỏ hàng
   const handleRemoveFromCart = (id) => {
     const result = removeFromCart(id);
     if (result.success) {
+      // Cập nhật lại state sau khi xóa thành công
       setCartItems(prevItems => prevItems.filter(item => item.id !== id));
       setQuantities(prevQuantities => {
         const updatedQuantities = { ...prevQuantities };
@@ -42,6 +47,7 @@ function CartPage() {
     }
   };
 
+  // Hàm xử lý thay đổi số lượng sản phẩm
   const handleQuantityChange = async (id, newQuantity) => {
     console.log('hàm + được gọi')
     const result = await updateCartItemQuantity(id, newQuantity);
@@ -53,6 +59,7 @@ function CartPage() {
     }
   };
 
+  // Hàm xử lý chọn/bỏ chọn một sản phẩm
   const handleSelectItem = (id) => {
     setSelectedItems(prev => ({
       ...prev,
@@ -60,6 +67,7 @@ function CartPage() {
     }));
   };
 
+  // Hàm xử lý chọn/bỏ chọn tất cả sản phẩm
   const handleSelectAll = () => {
     const newSelectAll = !selectAll;
     setSelectAll(newSelectAll);
@@ -70,6 +78,7 @@ function CartPage() {
     setSelectedItems(updatedSelectedItems);
   };
 
+  // Hàm xử lý khi nhấn nút thanh toán
   const handleCheckout = () => {
     const result = processCheckout(cartItems, selectedItems, quantities);
     if (result.success) {
@@ -77,10 +86,12 @@ function CartPage() {
     }
   };
 
+  // Return JSX để render giao diện
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
       <Navbar />
       <div className="container mx-auto py-8 px-4">
+        {/* Phần header của giỏ hàng */}
         <div className="flex items-center mb-6">
           <Link 
             to="/home"
@@ -91,7 +102,9 @@ function CartPage() {
           <h1 className="text-3xl font-bold text-gray-800">Giỏ hàng của bạn</h1>
         </div>
         
+        {/* Hiển thị nội dung giỏ hàng */}
         {cartItems.length === 0 ? (
+          // Hiển thị khi giỏ hàng trống
           <div className="bg-white p-8 rounded-2xl shadow-lg text-center transform transition-all hover:scale-105">
             <p className="text-gray-600 text-lg">Giỏ hàng của bạn đang trống</p>
             <Link to="/" className="text-blue-500 hover:text-blue-600 mt-4 inline-block font-semibold">
@@ -99,7 +112,9 @@ function CartPage() {
             </Link>
           </div>
         ) : (
+          // Hiển thị khi có sản phẩm trong giỏ
           <div className="bg-white rounded-2xl shadow-lg p-8">
+            {/* Phần chọn tất cả */}
             <div className="flex items-center mb-6">
               <input 
                 type="checkbox" 
@@ -109,6 +124,7 @@ function CartPage() {
               />
               <span className="text-lg font-medium">Chọn tất cả ({cartItems.length})</span>
             </div>
+            {/* Danh sách sản phẩm */}
             <div className="space-y-6">
               {cartItems.map((item) => (
                 <div key={item.id} className="flex items-center border-b pb-6 hover:bg-gray-50 p-4 rounded-xl transition duration-300">
@@ -129,6 +145,7 @@ function CartPage() {
                       {parseFloat(item.donGia).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
                     </p>
                   </div>
+                  {/* Phần điều chỉnh số lượng */}
                   <div className="flex items-center space-x-3">
                     <button 
                       onClick={() => handleQuantityChange(item.id, (quantities[item.id] || 1) - 1)}
@@ -151,6 +168,7 @@ function CartPage() {
                       +
                     </button>
                   </div>
+                  {/* Nút xóa sản phẩm */}
                   <button
                     onClick={() => handleRemoveFromCart(item.id)}
                     className="ml-6 text-red-500 hover:text-red-700 transition duration-200"
@@ -161,6 +179,7 @@ function CartPage() {
               ))}
             </div>
             
+            {/* Phần tổng tiền và nút thanh toán */}
             <div className="mt-8 border-t pt-6">
               <div className="flex justify-between items-center">
                 <span className="text-xl font-semibold text-gray-800">Tổng tiền:</span>

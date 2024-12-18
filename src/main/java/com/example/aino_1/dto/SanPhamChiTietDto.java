@@ -30,6 +30,7 @@ public class SanPhamChiTietDto {
     private Integer pin;
     private String thoiHanBaoHanh;
     private Integer trangThai;
+    private String thuongHieu;
     // Phương thức tạo tên sản phẩm chi tiết
     public String getTenSanPhamChiTiet() {
         return String.format(

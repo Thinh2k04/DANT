@@ -15,16 +15,16 @@ public class Imei {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @Column(name = "id_spct", nullable = false)
-    private Long idSpct;
+    private Integer idSpct;
 
     @Column(name = "imei", unique = true, nullable = false)
     private String imei;
 
     @Column(name = "id_hoa_don_chi_tiet", nullable = false)
-    private Long idHDCT;
+    private Integer idHDCT;
 
     @Column(name = "trang_thai", nullable = false)
     private Integer trangThai;

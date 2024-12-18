@@ -22,7 +22,7 @@ public interface SanPhamChiTietInterface extends JpaRepository<SanPhamChiTiet, I
                     "mh.tamNen, mh.tanSoQuet, cpu.soNhan, gpu.kienTrucCongNghe, " +
                     "cpu.ten, spct.maSpct, " +
                     "spct.hinhAnhMinhHoa, " +
-                    "spct.donGia, sp.id, gpu.ten, sp.trongLuong , sp.pin, sp.thoiHanBaoHanh,spct.trangThai" +
+                    "spct.donGia, sp.id, gpu.ten, sp.trongLuong , sp.pin, sp.thoiHanBaoHanh,spct.trangThai, thuongHieu.ten" +
                     ") " +
                     "FROM SanPhamChiTiet spct " +
                     "JOIN SanPham sp ON spct.sanPham.id = sp.id " +
@@ -34,7 +34,8 @@ public interface SanPhamChiTietInterface extends JpaRepository<SanPhamChiTiet, I
                     "INNER JOIN Ram ram ON ram.id = spct.ram.id " +
                     "INNER JOIN OLuuTru olt ON olt.id = spct.oLuuTru.id " +
                     "INNER JOIN Cpu cpu ON cpu.id = spct.cpu.id " +
-                    "INNER JOIN Gpu gpu ON gpu.id = spct.gpu.id "
+                    "INNER JOIN Gpu gpu ON gpu.id = spct.gpu.id " +
+                    "inner join ThuongHieu thuongHieu on thuongHieu.id = spct.thuongHieu.id"
     )
     List<SanPhamChiTietDto> getAllDTO();
 
@@ -46,7 +47,7 @@ public interface SanPhamChiTietInterface extends JpaRepository<SanPhamChiTiet, I
                     "mh.tamNen, mh.tanSoQuet, cpu.soNhan, gpu.kienTrucCongNghe, " +
                     "cpu.ten, spct.maSpct,  " +
                     "spct.hinhAnhMinhHoa, " +
-                    "spct.donGia, sp.id, gpu.ten, sp.trongLuong, sp.pin, sp.thoiHanBaoHanh,spct.trangThai" +
+                    "spct.donGia, sp.id, gpu.ten, sp.trongLuong, sp.pin, sp.thoiHanBaoHanh,spct.trangThai, thuongHieu.ten" +
                     ") " +
                     "FROM SanPhamChiTiet spct " +
                     "JOIN SanPham sp ON spct.sanPham.id = sp.id " +
@@ -59,6 +60,7 @@ public interface SanPhamChiTietInterface extends JpaRepository<SanPhamChiTiet, I
                     "INNER JOIN OLuuTru olt ON olt.id = spct.oLuuTru.id " +
                     "INNER JOIN Cpu cpu ON cpu.id = spct.cpu.id " +
                     "INNER JOIN Gpu gpu ON gpu.id = spct.gpu.id " +
+                    "inner join ThuongHieu thuongHieu on thuongHieu.id = spct.thuongHieu.id" +
                     " where spct.id = :id"
     )
     SanPhamChiTietDto getSanPhamChiTietById(@Param("id") Integer id);
@@ -70,7 +72,7 @@ public interface SanPhamChiTietInterface extends JpaRepository<SanPhamChiTiet, I
                     "mh.tamNen, mh.tanSoQuet, cpu.soNhan, gpu.kienTrucCongNghe, " +
                     "cpu.ten, spct.maSpct,  " +
                     "spct.hinhAnhMinhHoa, " +
-                    "spct.donGia, sp.id, gpu.ten, sp.trongLuong, sp.pin, sp.thoiHanBaoHanh,spct.trangThai" +
+                    "spct.donGia, sp.id, gpu.ten, sp.trongLuong, sp.pin, sp.thoiHanBaoHanh,spct.trangThai, thuongHieu.ten" +
                     ") " +
                     "FROM SanPhamChiTiet spct " +
                     "JOIN SanPham sp ON spct.sanPham.id = sp.id " +
@@ -83,6 +85,7 @@ public interface SanPhamChiTietInterface extends JpaRepository<SanPhamChiTiet, I
                     "INNER JOIN OLuuTru olt ON olt.id = spct.oLuuTru.id " +
                     "INNER JOIN Cpu cpu ON cpu.id = spct.cpu.id " +
                     "INNER JOIN Gpu gpu ON gpu.id = spct.gpu.id " +
+                    "inner join ThuongHieu thuongHieu on thuongHieu.id = spct.thuongHieu.id"+
                     " where sp.id = :id"
     )
     ArrayList<SanPhamChiTietDto> getSanPhamChiTietByIdSP(@Param("id") Integer id);

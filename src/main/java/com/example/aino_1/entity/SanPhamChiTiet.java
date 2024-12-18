@@ -41,6 +41,10 @@ public class SanPhamChiTiet {
     private Ram ram;  // Liên kết với bảng ram
 
     @ManyToOne
+    @JoinColumn(name = "id_thuong_hieu", referencedColumnName = "id")
+    private ThuongHieu thuongHieu;  // Liên kết với bảng thương hiệu
+
+    @ManyToOne
     @JsonProperty("oLuuTru")  // Ánh xạ trường JSON "oLuuTru" vào thuộc tính nà
     @JoinColumn(name = "id_o_luu_tru", referencedColumnName = "id")
     private OLuuTru oLuuTru;  // Liên kết với bảng o_luu_tru
@@ -56,6 +60,10 @@ public class SanPhamChiTiet {
     @ManyToOne
     @JoinColumn(name = "id_gpu", referencedColumnName = "id")
     private Gpu gpu;  // Liên kết với bảng gpu
+
+    @ManyToOne
+    @JoinColumn(name = "id_cua_hang", referencedColumnName = "id")
+    private CuaHang cuaHang;  // Liên kết với bảng cửa Hàng
 
     @ManyToOne
     @JoinColumn(name = "id_mau_sac", referencedColumnName = "id")

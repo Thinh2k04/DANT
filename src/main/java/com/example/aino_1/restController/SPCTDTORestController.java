@@ -16,7 +16,7 @@ import java.util.Map;
 @CrossOrigin("*") //cho phép tất cả các miền khác truy cập tài nguyên server (end point api)
 @RestController
 @RequestMapping("/rest/spctDTO") //đường dẫn chung cho các phương thức http bên dưới
-public class SPCTDTORestController {
+public class    SPCTDTORestController {
 
     @Autowired
     SanPhamChiTietInterface spctsi;

@@ -42,6 +42,10 @@ public class SanPham {
     @Column(name = "trong_luong", nullable = false)
     private Float trongLuong;
 
+    @ManyToOne
+    @JoinColumn(name = "id_thuong_hieu", referencedColumnName = "id")
+    private ThuongHieu thuongHieu;  // Liên kết với bảng thương hiệu
+
 
     @Column(name = "thoi_han_bao_hanh", length = 20)
     private String thoiHanBaoHanh;

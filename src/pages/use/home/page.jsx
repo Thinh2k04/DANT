@@ -47,7 +47,7 @@ const HomePage = () => {
         setHasMore(laptopsData.length > itemsPerPage);
 
         // Fetch danh sách thương hiệu
-        const thuongHieuResponse = await fetch('http://localhost:8080/rest/thuonghieu/getAll');
+        const thuongHieuResponse = await fetch('http://localhost:8080/rest/thuong-hieu/getAll');
         if (!thuongHieuResponse.ok) throw new Error('Failed to fetch brands');
         const thuongHieuData = await thuongHieuResponse.json();
         setThuongHieus(thuongHieuData);
@@ -59,7 +59,7 @@ const HomePage = () => {
         setRams(ramData);
 
         // Fetch danh sách ổ cứng
-        const oCungResponse = await fetch('http://localhost:8080/rest/ocung/getAll');
+        const oCungResponse = await fetch('http://localhost:8080/rest/o_luu_tru/getAll');
         if (!oCungResponse.ok) throw new Error('Failed to fetch storage');
         const oCungData = await oCungResponse.json();
         setOCungs(oCungData);
@@ -242,7 +242,7 @@ const HomePage = () => {
                   >
                     <option value="">Tất cả thương hiệu</option>
                     {thuongHieus.map(th => (
-                      <option key={th.id} value={th.id}>{th.tenThuongHieu}</option>
+                      <option key={th.id} value={th.id}>{th.ten}</option>
                     ))}
                   </select>
                 </div>
@@ -296,7 +296,7 @@ const HomePage = () => {
                   >
                     <option value="">Tất cả CPU</option>
                     {cpus.map(cpu => (
-                      <option key={cpu.id} value={cpu.id}>{cpu.tenCPU}</option>
+                      <option key={cpu.id} value={cpu.id}>{cpu.ten}</option>
                     ))}
                   </select>
                 </div>

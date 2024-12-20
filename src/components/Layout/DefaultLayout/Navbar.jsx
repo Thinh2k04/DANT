@@ -9,7 +9,7 @@ const Navbar = () => {
           <div className="flex items-center space-x-8">
             <Link to="/" className="text-2xl font-bold">AINO</Link>
             <nav className="flex space-x-6">
-              <Link to="/macbook" className="hover:text-blue-400 transition">Tra cứu đơn hàng</Link>
+              <Link to="/track-order" className="hover:text-blue-400 transition">Tra cứu đơn hàng</Link>
               <Link to="/accessories" className="hover:text-blue-400 transition">Giảm giá SỐC</Link>
             </nav>
           </div>

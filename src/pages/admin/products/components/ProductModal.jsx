@@ -24,7 +24,8 @@ const ProductModal = ({
   cpus,
   gpus,
   mauSacs,
-  cardDoHoas
+  cardDoHoas,
+  thuongHieus
 }) => {
   if (!isOpen) return null;
 
@@ -80,6 +81,24 @@ const ProductModal = ({
                     className="w-full p-2 border rounded"
                     required
                   />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">Thương hiệu</label>
+                  <select
+                    value={formData.thuongHieu?.id || ''}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      thuongHieu: { id: e.target.value }
+                    })}
+                    className="w-full p-2 border rounded"
+                    required
+                  >
+                    <option value="">Chọn thương hiệu</option>
+                    {thuongHieus?.map(th => (
+                      <option key={th.id} value={th.id}>{th.ten}</option>
+                    ))}
+                  </select>
                 </div>
 
                 <div>
@@ -520,4 +539,4 @@ const ProductModal = ({
   );
 };
 
-export default ProductModal; 
+export default ProductModal;

@@ -21,62 +21,104 @@ const HomePage = () => {
   const [hasMore, setHasMore] = useState(true); // State kiểm tra còn sản phẩm để load không
   const [filters, setFilters] = useState({ // State quản lý các bộ lọc
     priceRange: '',
-    brand: '',
+    thuongHieu: '',
     ram: '',
-    storage: '',
-    processor: ''
+    oCung: '',
+    cpu: ''
   });
   const [selectedProduct, setSelectedProduct] = useState(null); // Thêm state cho sản phẩm được chọn
   const [showToast, setShowToast] = useState(false); // Thêm state cho toast notification
+  const [thuongHieus, setThuongHieus] = useState([]); // State cho thương hiệu
+  const [rams, setRams] = useState([]); // State cho RAM
+  const [oCungs, setOCungs] = useState([]); // State cho ổ cứng  
+  const [cpus, setCpus] = useState([]); // State cho CPU
 
-  // useEffect hook để fetch dữ liệu laptop khi component mount
+  // useEffect hook để fetch dữ liệu laptop và các options cho bộ lọc khi component mount
   useEffect(() => {
-    const fetchLaptops = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://localhost:8080/rest/spctDTO/getAll');
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        const data = await response.json();
-        setLaptops(data);
-        setHasMore(data.length > itemsPerPage);
+        
+        // Fetch danh sách laptop
+        const laptopsResponse = await fetch('http://localhost:8080/rest/spctDTO/getAll');
+        if (!laptopsResponse.ok) throw new Error('Failed to fetch laptops');
+        const laptopsData = await laptopsResponse.json();
+        setLaptops(laptopsData);
+        setHasMore(laptopsData.length > itemsPerPage);
+
+        // Fetch danh sách thương hiệu
+        const thuongHieuResponse = await fetch('http://localhost:8080/rest/thuonghieu/getAll');
+        if (!thuongHieuResponse.ok) throw new Error('Failed to fetch brands');
+        const thuongHieuData = await thuongHieuResponse.json();
+        setThuongHieus(thuongHieuData);
+
+        // Fetch danh sách RAM
+        const ramResponse = await fetch('http://localhost:8080/rest/ram/getAll');
+        if (!ramResponse.ok) throw new Error('Failed to fetch RAM');
+        const ramData = await ramResponse.json();
+        setRams(ramData);
+
+        // Fetch danh sách ổ cứng
+        const oCungResponse = await fetch('http://localhost:8080/rest/ocung/getAll');
+        if (!oCungResponse.ok) throw new Error('Failed to fetch storage');
+        const oCungData = await oCungResponse.json();
+        setOCungs(oCungData);
+
+        // Fetch danh sách CPU
+        const cpuResponse = await fetch('http://localhost:8080/rest/cpu/getAll');
+        if (!cpuResponse.ok) throw new Error('Failed to fetch CPUs');
+        const cpuData = await cpuResponse.json();
+        setCpus(cpuData);
+
       } catch (error) {
-        console.error('Error fetching laptops:', error);
+        console.error('Error fetching data:', error);
+        toast.error('Có lỗi xảy ra khi tải dữ liệu!');
       } finally {
         setLoading(false);
       }
     };
-    fetchLaptops();
+
+    fetchData();
   }, []);
 
   // Hàm lọc laptop dựa trên các bộ lọc đã chọn
-  const filterLaptops = (laptops) => {
-    return laptops.filter(laptop => {
-      const price = parseFloat(laptop.donGia);
+  const filterLaptops = async () => {
+    try {
+      setLoading(true);
       
-      // Kiểm tra điều kiện lọc theo giá
+      // Tạo query params từ filters
+      const params = new URLSearchParams();
       if (filters.priceRange) {
-        const [min, max] = filters.priceRange.split('-').map(Number);
-        if (price < min || price > max) return false;
+        const [min, max] = filters.priceRange.split('-');
+        params.append('minPrice', min);
+        params.append('maxPrice', max);
       }
+      if (filters.thuongHieu) params.append('thuongHieuId', filters.thuongHieu);
+      if (filters.ram) params.append('ramId', filters.ram);
+      if (filters.oCung) params.append('oCungId', filters.oCung);
+      if (filters.cpu) params.append('cpuId', filters.cpu);
+
+      // Gọi API với các params đã được lọc
+      const response = await fetch(`http://localhost:8080/rest/spctDTO/filter?${params}`);
+      if (!response.ok) throw new Error('Failed to filter laptops');
       
-      // Kiểm tra các điều kiện lọc khác
-      if (filters.brand && laptop.sanPham.thuongHieu !== filters.brand) return false;
-      if (filters.ram && laptop.ram !== filters.ram) return false;
-      if (filters.storage && laptop.storage !== filters.storage) return false;
-      if (filters.processor && laptop.processor !== filters.processor) return false;
+      const filteredData = await response.json();
+      setLaptops(filteredData);
+      setCurrentPage(1);
+      setHasMore(filteredData.length > itemsPerPage);
       
-      return true;
-    });
+    } catch (error) {
+      console.error('Error filtering laptops:', error);
+      toast.error('Có lỗi xảy ra khi lọc sản phẩm!');
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Xử lý dữ liệu để hiển thị
-  const filteredLaptops = filterLaptops(laptops);
   const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredLaptops.slice(0, indexOfLastItem);
-  const totalPages = Math.ceil(filteredLaptops.length / itemsPerPage);
+  const currentItems = laptops.slice(0, indexOfLastItem);
+  const totalPages = Math.ceil(laptops.length / itemsPerPage);
 
   // Hàm xử lý khi click nút "Xem thêm"
   const handleLoadMore = () => {
@@ -92,37 +134,18 @@ const HomePage = () => {
       ...prev,
       [filterName]: value
     }));
-    setCurrentPage(1);
-    setHasMore(true);
+    filterLaptops();
   };
 
   // Hàm xử lý khi thêm sản phẩm vào giỏ hàng
   const handleAddToCart = async (laptop) => {
-    console.log("Function handleAddToCart called");
     try {
       const currentCart = JSON.parse(localStorage.getItem('cartItems')) || [];
       const existingItem = currentCart.find(item => item.id === laptop.id);
-      const newQuantity = existingItem ? existingItem.quantity + 1 : 1;
+      const newQuantity = existingItem ? (existingItem.quantity || 1) + 1 : 1;
 
       const result = await updateCartItemQuantity(laptop.id, newQuantity);
       if (result.success) {
-        if (existingItem) {
-          existingItem.quantity = newQuantity;
-        } else {
-          currentCart.push({ ...laptop, quantity: 1 });
-        }
-        localStorage.setItem('cartItems', JSON.stringify(currentCart));
-
-        // toast.success('Đã thêm sản phẩm vào giỏ hàng!', {
-        //   position: "top-right",
-        //   autoClose: 2000,
-        //   hideProgressBar: false,
-        //   closeOnClick: true,
-        //   pauseOnHover: true,
-        //   draggable: true,
-        //   progress: undefined,
-        // });
-
         setSelectedProduct(laptop);
         setShowToast(true);
 
@@ -214,14 +237,13 @@ const HomePage = () => {
                   </label>
                   <select 
                     className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    value={filters.brand}
-                    onChange={(e) => handleFilterChange('brand', e.target.value)}
+                    value={filters.thuongHieu}
+                    onChange={(e) => handleFilterChange('thuongHieu', e.target.value)}
                   >
                     <option value="">Tất cả thương hiệu</option>
-                    <option value="Apple">Apple</option>
-                    <option value="Dell">Dell</option>
-                    <option value="HP">HP</option>
-                    <option value="Lenovo">Lenovo</option>
+                    {thuongHieus.map(th => (
+                      <option key={th.id} value={th.id}>{th.tenThuongHieu}</option>
+                    ))}
                   </select>
                 </div>
 
@@ -237,9 +259,9 @@ const HomePage = () => {
                     onChange={(e) => handleFilterChange('ram', e.target.value)}
                   >
                     <option value="">Tất cả RAM</option>
-                    <option value="8GB">8GB</option>
-                    <option value="16GB">16GB</option>
-                    <option value="32GB">32GB</option>
+                    {rams.map(ram => (
+                      <option key={ram.id} value={ram.id}>{ram.dungLuong}</option>
+                    ))}
                   </select>
                 </div>
 
@@ -251,13 +273,13 @@ const HomePage = () => {
                   </label>
                   <select 
                     className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    value={filters.storage}
-                    onChange={(e) => handleFilterChange('storage', e.target.value)}
+                    value={filters.oCung}
+                    onChange={(e) => handleFilterChange('oCung', e.target.value)}
                   >
                     <option value="">Tất cả dung lượng</option>
-                    <option value="256GB">256GB SSD</option>
-                    <option value="512GB">512GB SSD</option>
-                    <option value="1TB">1TB SSD</option>
+                    {oCungs.map(oc => (
+                      <option key={oc.id} value={oc.id}>{oc.dungLuong}</option>
+                    ))}
                   </select>
                 </div>
 
@@ -269,15 +291,13 @@ const HomePage = () => {
                   </label>
                   <select 
                     className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    value={filters.processor}
-                    onChange={(e) => handleFilterChange('processor', e.target.value)}
+                    value={filters.cpu}
+                    onChange={(e) => handleFilterChange('cpu', e.target.value)}
                   >
                     <option value="">Tất cả CPU</option>
-                    <option value="Intel i5">Intel Core i5</option>
-                    <option value="Intel i7">Intel Core i7</option>
-                    <option value="Intel i9">Intel Core i9</option>
-                    <option value="M1">Apple M1</option>
-                    <option value="M2">Apple M2</option>
+                    {cpus.map(cpu => (
+                      <option key={cpu.id} value={cpu.id}>{cpu.tenCPU}</option>
+                    ))}
                   </select>
                 </div>
               </div>
@@ -288,7 +308,7 @@ const HomePage = () => {
           <div className="col-span-9">
             <div className="mb-6">
               <h2 className="text-2xl font-bold text-gray-800">Laptop cao cấp chính hãng</h2>
-              <p className="text-gray-600 mt-2">Hiển thị {currentItems.length} trên {filteredLaptops.length} sản phẩm</p>
+              <p className="text-gray-600 mt-2">Hiển thị {currentItems.length} trên {laptops.length} sản phẩm</p>
             </div>
 
             {/* Hiển thị danh sách sản phẩm hoặc thông báo không tìm thấy */}

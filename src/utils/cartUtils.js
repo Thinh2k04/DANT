@@ -58,14 +58,20 @@ export const updateCartItemQuantity = async (id, newQuantity) => {
 
     if (newQuantity > 0 && newQuantity <= dbProduct.soLuong) {
       const currentCart = JSON.parse(localStorage.getItem('cartItems')) || [];
-      const updatedCart = currentCart.map(item => {
-        if (item.id === id) {
-          return { ...item, soLuong: newQuantity };
-        }
-        return item;
-      });
+      const existingItemIndex = currentCart.findIndex(item => item.id === id);
+
+      if (existingItemIndex !== -1) {
+        // Cập nhật số lượng cho sản phẩm đã tồn tại
+        currentCart[existingItemIndex] = {
+          ...currentCart[existingItemIndex],
+          quantity: newQuantity
+        };
+      } else {
+        // Thêm sản phẩm mới với số lượng được chỉ định
+        currentCart.push({ ...dbProduct, quantity: newQuantity });
+      }
       
-      localStorage.setItem('cartItems', JSON.stringify(updatedCart));
+      localStorage.setItem('cartItems', JSON.stringify(currentCart));
       
       // Trigger event để cập nhật số lượng trong navbar
       window.dispatchEvent(new Event('cartUpdated'));
@@ -93,10 +99,10 @@ export const getCartItems = () => {
     cartItems.forEach(item => {
       if (!quantities[item.id]) {
         uniqueItems.push(item);
-        quantities[item.id] = 1;
+        quantities[item.id] = item.quantity || 1;
         selectedItems[item.id] = false;
       } else {
-        quantities[item.id] += 1;
+        quantities[item.id] = item.quantity || quantities[item.id];
       }
     });
 

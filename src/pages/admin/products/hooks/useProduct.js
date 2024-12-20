@@ -10,13 +10,27 @@ export const useProduct = () => {
   const [showDeleted, setShowDeleted] = useState(false);
   const [formData, setFormData] = useState({
     id: '',
+    loaiSanPham: {
+      id: ''
+    },
+    nguonNhap: {
+      id: ''
+    },
+    chatLieu: {
+      id: ''
+    },
+    kichThuocLaptop: {
+      id: ''
+    },
+    thuongHieu: {
+      id: ''
+    },
     tenSanPham: '',
     namSanXuat: '',
     trongLuong: '',
     thoiHanBaoHanh: '',
     pin: '',
-    trangThai: 1,
-    loaiSanPham: { id: '' }
+    trangThai: 1
   });
   const [detailProduct, setDetailProduct] = useState(null);
   const [detailProductImages, setDetailProductImages] = useState([]);
@@ -25,20 +39,37 @@ export const useProduct = () => {
   const [spctData, setSpctData] = useState({
     id: '',
     hinhAnhMinhHoa: '',
-    soLuong: 0,
-    trangThai: '1',
-    donGia: 0,
+    soLuong: '',
+    trangThai: 1,
+    donGia: '',
     maSpct: '',
-    sanPham: { id: '' },
-    ram: { id: '' },
-    oLuuTru: { id: '' },
-    manHinh: { id: '' },
-    cpu: { id: '' },
-    gpu: { id: '' },
-    mauSac: { id: '' },
-    trangThaiSpct: 1,
+    sanPham: {
+      id: ''
+    },
+    ram: {
+      id: ''
+    },
+    oLuuTru: {
+      id: ''
+    },
+    manHinh: {
+      id: ''
+    },
+    cpu: {
+      id: ''
+    },
+    gpu: {
+      id: ''
+    },
+    mauSac: {
+      id: ''
+    },
     gioiThieu: '',
-    cardDoHoa: { id: '' }
+    cardDoHoa: {
+      id: '',
+      tenCard: '',
+      trangThai: 1
+    }
   });
   const [imageUrls, setImageUrls] = useState([]);
   const [loaiSanPhams, setLoaiSanPhams] = useState([]);
@@ -52,6 +83,7 @@ export const useProduct = () => {
   const [gpus, setGpus] = useState([]);
   const [mauSacs, setMauSacs] = useState([]);
   const [cardDoHoas, setCardDoHoas] = useState([]);
+  const [thuongHieus, setThuongHieus] = useState([]);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -88,7 +120,8 @@ export const useProduct = () => {
           cpuResponse,
           gpuResponse,
           mauSacResponse,
-          cardDoHoaResponse
+          cardDoHoaResponse,
+          thuongHieuResponse
         ] = await Promise.all([
           axios.get('http://localhost:8080/rest/loai_san_pham/getAll'),
           axios.get('http://localhost:8080/rest/nguon_nhap/getAll'),
@@ -100,7 +133,8 @@ export const useProduct = () => {
           axios.get('http://localhost:8080/rest/cpu/getAll'),
           axios.get('http://localhost:8080/rest/gpu/getAll'),
           axios.get('http://localhost:8080/rest/mau_sac/getAll'),
-          axios.get('http://localhost:8080/rest/card_do_hoa/getAll')
+          axios.get('http://localhost:8080/rest/card_do_hoa/getAll'),
+          axios.get('http://localhost:8080/rest/thuong-hieu/getAll')
         ]);
 
         setLoaiSanPhams(loaiSPResponse.data);
@@ -114,6 +148,7 @@ export const useProduct = () => {
         setGpus(gpuResponse.data);
         setMauSacs(mauSacResponse.data);
         setCardDoHoas(cardDoHoaResponse.data);
+        setThuongHieus(thuongHieuResponse.data);
       } catch (error) {
         console.error('Error fetching combobox data:', error);
         toast.error('Lỗi khi tải dữ liệu cho các tùy chọn');
@@ -182,20 +217,24 @@ export const useProduct = () => {
     } else {
       setFormData({
         id: '',
+        loaiSanPham: { id: '' },
+        nguonNhap: { id: '' },
+        chatLieu: { id: '' },
+        kichThuocLaptop: { id: '' },
+        thuongHieu: { id: '' },
         tenSanPham: '',
         namSanXuat: '',
         trongLuong: '',
         thoiHanBaoHanh: '',
         pin: '',
-        trangThai: 1,
-        loaiSanPham: { id: '' }
+        trangThai: 1
       });
       setSpctData({
         id: '',
         hinhAnhMinhHoa: '',
-        soLuong: 0,
-        trangThai: '1',
-        donGia: 0,
+        soLuong: '',
+        trangThai: 1,
+        donGia: '',
         maSpct: '',
         sanPham: { id: '' },
         ram: { id: '' },
@@ -204,9 +243,12 @@ export const useProduct = () => {
         cpu: { id: '' },
         gpu: { id: '' },
         mauSac: { id: '' },
-        trangThaiSpct: 1,
         gioiThieu: '',
-        cardDoHoa: { id: '' }
+        cardDoHoa: {
+          id: '',
+          tenCard: '',
+          trangThai: 1
+        }
       });
       setIsEditing(false);
       setImageUrls([]);
@@ -217,17 +259,14 @@ export const useProduct = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Validation
-    if (!formData.tenSanPham) {
-      toast.error('Tên sản phẩm là bắt buộc');
+    // Validate dữ liệu
+    if (!formData.tenSanPham || !formData.loaiSanPham.id || !formData.thuongHieu.id) {
+      toast.error('Vui lòng điền đầy đủ thông tin sản phẩm');
       return;
     }
-    if (!formData.loaiSanPham.id) {
-      toast.error('Vui lòng chọn loại sản phẩm');
-      return;
-    }
+
     if (!spctData.maSpct || !spctData.soLuong || !spctData.donGia) {
-      toast.error('Vui lòng nhập đầy đủ thông tin chi tiết sản phẩm');
+      toast.error('Vui lòng điền đầy đủ thông tin chi tiết sản phẩm');
       return;
     }
 
@@ -236,81 +275,66 @@ export const useProduct = () => {
     try {
       const requestData = {
         sanPham: {
-          ...formData,
-          trangThai: 1
+          ...formData
         },
         sanPhamChiTiet: {
           ...spctData,
-          trangThai: '1',
-          trangThaiSpct: 1,
           sanPham: {
-            id: formData.id || null
+            id: formData.id || ''
           }
         },
-        imageUrls: imageUrls.filter(url => url.trim() !== '')
+        imageUrls: imageUrls
       };
 
       const response = await axios.post('http://localhost:8080/rest/spctDTO/add', requestData);
 
-      // Đóng modal và reset form trước khi gọi API refresh
-      setIsModalOpen(false);
-      
-      // Reset form và các state khác
-      setFormData({
-        id: '',
-        tenSanPham: '',
-        namSanXuat: '',
-        trongLuong: '',
-        thoiHanBaoHanh: '',
-        pin: '',
-        trangThai: 1,
-        loaiSanPham: { id: '' }
-      });
-      
-      setSpctData({
-        id: '',
-        hinhAnhMinhHoa: '',
-        soLuong: 0,
-        trangThai: '1',
-        donGia: 0,
-        maSpct: '',
-        sanPham: { id: '' },
-        ram: { id: '' },
-        oLuuTru: { id: '' },
-        manHinh: { id: '' },
-        cpu: { id: '' },
-        gpu: { id: '' },
-        mauSac: { id: '' },
-        trangThaiSpct: 1,
-        gioiThieu: '',
-        cardDoHoa: { id: '' }
-      });
-      
-      setImageUrls([]);
-      
-      // Refresh danh sách sản phẩm
-      await fetchProducts();
-      
-      // Hiển thị thông báo thành công sau khi mọi thứ đã hoàn tất
-      toast.success(isEditing ? 'Cập nhật sản phẩm thành công!' : 'Thêm sản phẩm mới thành công!', {
-        position: "top-right",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
+      if (response.status === 200) {
+        setIsModalOpen(false);
+        // Reset form về rỗng
+        setFormData({
+          id: '',
+          loaiSanPham: { id: '' },
+          nguonNhap: { id: '' },
+          chatLieu: { id: '' },
+          kichThuocLaptop: { id: '' },
+          thuongHieu: { id: '' },
+          tenSanPham: '',
+          namSanXuat: '',
+          trongLuong: '',
+          thoiHanBaoHanh: '',
+          pin: '',
+          trangThai: 1
+        });
 
+        setSpctData({
+          id: '',
+          hinhAnhMinhHoa: '',
+          soLuong: '',
+          trangThai: 1,
+          donGia: '',
+          maSpct: '',
+          sanPham: { id: '' },
+          ram: { id: '' },
+          oLuuTru: { id: '' },
+          manHinh: { id: '' },
+          cpu: { id: '' },
+          gpu: { id: '' },
+          mauSac: { id: '' },
+          gioiThieu: '',
+          cardDoHoa: {
+            id: '',
+            tenCard: '',
+            trangThai: 1
+          }
+        });
+
+        setImageUrls([]);
+        await fetchProducts();
+        toast.success('Thêm sản phẩm mới thành công!');
+      }
     } catch (error) {
       console.error('Error submitting product:', error);
-      toast.error(error.response?.data?.message || 'Có lỗi xảy ra khi thêm s��n phẩm', {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
+      toast.error(error.response?.data?.message || 'Có lỗi xảy ra khi thêm sản phẩm');
     } finally {
       setLoading(false);
     }
@@ -337,7 +361,6 @@ export const useProduct = () => {
         sanPhamChiTiet: {
           ...spctData,
           trangThai: '1',
-          trangThaiSpct: 1,
           sanPham: {
             id: formData.id
           }
@@ -409,6 +432,7 @@ export const useProduct = () => {
     gpus,
     mauSacs,
     cardDoHoas,
+    thuongHieus,
     isEditModalOpen,
     setIsEditModalOpen,
     handleEdit,

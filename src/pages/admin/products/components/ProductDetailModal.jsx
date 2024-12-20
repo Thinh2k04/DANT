@@ -29,6 +29,7 @@ const ProductDetailModal = ({ isOpen, onClose, product }) => {
               <p><span className="font-medium">Trọng lượng:</span> {product.trongLuong}</p>
               <p><span className="font-medium">Pin:</span> {product.pin}</p>
               <p><span className="font-medium">Loại sản phẩm:</span> {product.loaiSanPham?.tenLoai}</p>
+              <p><span className="font-medium">Thương hiệu:</span> {product.thuongHieu?.tenThuongHieu}</p>
               <p><span className="font-medium">Trạng thái:</span> 
                 <span className={`ml-2 px-3 py-1 rounded-full text-sm font-semibold ${
                   product.trangThai === 1 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'

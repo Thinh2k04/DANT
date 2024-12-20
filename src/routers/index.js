@@ -10,6 +10,8 @@ import CheckoutPage from '../pages/use/thanhtoan/page';
 import PaymentSuccess from '../components/GioHangComponenst/PaymentSuccess';
 import ChiTietSanPhamAdmin from '../pages/admin/sanphamchitietAdmin[/id]/page';
 import AccountManagement from '../pages/admin/account/page';
+import TrackOrder from '../pages/use/track order/page';
+import TrackOrderPage from '../pages/use/track order/page';
 
 
 // Public routes
@@ -20,6 +22,7 @@ const publicRoutes = [
   { path: '/chitietsanpham/:idSanPham', component: ChiTietSanPham },
   { path: '/checkout', component: CheckoutPage },
   { path: '/payment-success', component: PaymentSuccess },
+  { path: '/track-order', component: TrackOrder },
 ];
 
 // Private routes (Admin routes)

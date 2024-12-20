@@ -38,6 +38,7 @@ const ProductManagement = () => {
     gpus,
     mauSacs,
     cardDoHoas,
+    thuongHieus,
     isEditModalOpen,
     setIsEditModalOpen,
     handleEdit,
@@ -102,6 +103,7 @@ const ProductManagement = () => {
           gpus={gpus}
           mauSacs={mauSacs}
           cardDoHoas={cardDoHoas}
+          thuongHieus={thuongHieus}
         />
 
         <EditProductModal 
@@ -126,6 +128,7 @@ const ProductManagement = () => {
           gpus={gpus}
           mauSacs={mauSacs}
           cardDoHoas={cardDoHoas}
+          thuongHieus={thuongHieus}
         />
 
         <ProductDetailModal 

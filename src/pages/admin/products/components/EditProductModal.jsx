@@ -23,7 +23,8 @@ const EditProductModal = ({
   cpus,
   gpus,
   mauSacs,
-  cardDoHoas
+  cardDoHoas,
+  thuongHieus
 }) => {
   if (!isOpen) return null;
 
@@ -75,6 +76,9 @@ const EditProductModal = ({
             kichThuocLaptop: {
                 id: formData.kichThuocLaptop.id
             },
+            thuongHieu: {
+                id: formData.thuongHieu.id
+            },
             tenSanPham: formData.tenSanPham,
             namSanXuat: formData.namSanXuat,
             trongLuong: formData.trongLuong,
@@ -110,7 +114,6 @@ const EditProductModal = ({
             mauSac: {
                 id: parseInt(spctData.mauSac.id)
             },
-            trangThaiSpct: spctData.trangThaiSpct,
             gioiThieu: spctData.gioiThieu,
             cardDoHoa: {
                 id: spctData.cardDoHoa.id
@@ -240,6 +243,27 @@ const EditProductModal = ({
                 {loaiSanPhams.map(loai => (
                   <option key={loai.id} value={loai.id}>
                     {loai.tenLoai}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Thương hiệu
+              </label>
+              <select
+                value={formData.thuongHieu.id}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  thuongHieu: { id: e.target.value }
+                })}
+                className="w-full p-2 border rounded-lg"
+                required
+              >
+                {thuongHieus.map(th => (
+                  <option key={th.id} value={th.id}>
+                    {th.ten}
                   </option>
                 ))}
               </select>

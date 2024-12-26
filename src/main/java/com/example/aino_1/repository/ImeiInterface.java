@@ -1,2 +1,9 @@
-package com.example.aino_1.repository;public interface ImeiInterface {
+package com.example.aino_1.repository;
+
+import com.example.aino_1.entity.Imei;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface ImeiInterface extends JpaRepository<Imei,Integer> {
 }

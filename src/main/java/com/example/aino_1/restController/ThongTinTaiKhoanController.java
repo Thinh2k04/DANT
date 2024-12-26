@@ -1,8 +1,6 @@
 package com.example.aino_1.restController;
 
-import com.example.aino_1.dto.SanPhamChiTietDto;
-import com.example.aino_1.entity.HoaDon;
-
+import com.example.aino_1.dto.TTTKDTO;
 import com.example.aino_1.entity.ThongTinTaiKhoan;
 import com.example.aino_1.repository.ThongTinTaiKhoaninterface;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,5 +33,10 @@ public class ThongTinTaiKhoanController {
     @PostMapping("/add")
     public ThongTinTaiKhoan create(@RequestBody ThongTinTaiKhoan tk) {
         return tttksi.save(tk);
+    }
+
+    @GetMapping("/timSDT/{SDT}")
+    public TTTKDTO timTTTKBySDT(@PathVariable String SDT) {
+        return tttksi.timTTTKBySDT(SDT);
     }
 }

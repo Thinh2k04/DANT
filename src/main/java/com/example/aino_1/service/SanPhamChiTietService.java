@@ -1,6 +1,7 @@
 package com.example.aino_1.service;
 
 import com.example.aino_1.entity.HinhAnh;
+import com.example.aino_1.entity.Imei;
 import com.example.aino_1.entity.SanPham;
 import com.example.aino_1.entity.SanPhamChiTiet;
 import com.example.aino_1.repository.HinhAnhInterface;
@@ -24,7 +25,7 @@ public class SanPhamChiTietService {
     @Autowired
     HinhAnhInterface hasi;
 
-    public void saveSanPhamChiTietWithImage(SanPhamChiTiet spct, SanPham sp, List<String> urlImg) {
+    public void saveSanPhamChiTietWithImage(SanPhamChiTiet spct, SanPham sp, List<String> urlImg)  {
 //        // Bước 1: Lưu sản phẩm mà không có ảnh
 //        SanPham sanPham = new SanPham();
 //        sanPham.setTenSanPham(sp.getTenSanPham());
@@ -66,6 +67,20 @@ public class SanPhamChiTietService {
                 hasi.save(hinhAnh);
             }
         }
+
+//        if (listimei != null ){
+//            for (String lkimei : listimei
+//            ) {
+//                // Bước 2: Lưu ảnh với ID sản phẩm
+//                Imei imei = new Imei();
+//                imei.setDuongDanHinhAnh(url); // Hàm uploadFile để lưu file và trả về đường dẫn
+//                hinhAn.setSanPhamChiTiet(savedSanPhamCT); // Gán sản phẩm vào hình ảnh
+//
+//                // Lưu thông tin ảnh vào cơ sở dữ liệu
+//                hasi.save(hinhAnh);
+//            }
+//        }
+
 
     }
     @Transactional

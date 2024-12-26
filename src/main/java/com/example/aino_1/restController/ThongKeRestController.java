@@ -20,6 +20,16 @@ public class ThongKeRestController {
         return tksi.getMonthlyRevenue();
     }
 
+    @GetMapping("/thang/{thang}")
+    public Object[] getMonth(@PathVariable Integer thang) {
+        return tksi.getMonth(thang);
+    }
+
+    @GetMapping("/nam/{nam}")
+    public Object[] getYear(@PathVariable Integer nam) {
+        return tksi.getYear(nam);
+    }
+
     @GetMapping("/theoNam")
     public List<Object[]> getYearlyRevenue() {
         return tksi.getYearlyRevenue();
@@ -30,10 +40,10 @@ public class ThongKeRestController {
         return tksi.soDonHangThanhToan();
     }
 
-    //    @GetMapping("/daThanhToan")
-//    public Integer soKhachHangDangKy() {
-//        return tksi.soKhachHangDangKy();
-//    }
+    @GetMapping("/daBan")
+    public Integer soSanPhamDaBan() {
+        return tksi.soSanPhamDaBan();
+    }
     @GetMapping("/tongDoanhThu")
     public Double tongDoanhThu(){
         return tksi.tongdoanhthu();

@@ -62,10 +62,10 @@ public class SanPhamChiTietRestController {
     }
 
 
-//    @GetMapping("/tim_kiem/{tuKhoaTimKiem}")
-//    public List<SanPhamChiTietDto> search(@PathVariable String tuKhoaTimKiem) {
-//        return spctsi.sreach(tuKhoaTimKiem);
-//    }
+    @GetMapping("/tim_kiem/{tuKhoaTimKiem}")
+    public List<SanPhamChiTietDto> search(@PathVariable String tuKhoaTimKiem) {
+        return spctsi.timSanPhamTheoTuKhoa(tuKhoaTimKiem);
+    }
 //    @GetMapping("/locTheoGia/{minPrice}&{maxPrice}")
 //    public List<SanPhamChiTietDto> locTheoGia(@PathVariable Double minPrice,@PathVariable Double maxPrice) {
 //        return spctsi.locTheoGia(minPrice,maxPrice);

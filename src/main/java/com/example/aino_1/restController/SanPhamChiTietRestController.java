@@ -69,24 +69,22 @@ public class  SanPhamChiTietRestController {
     public List<SanPhamChiTietDto> locTheoGia(@PathVariable Double minPrice,@PathVariable Double maxPrice) {
         return spctsi.locTheoGia(minPrice,maxPrice);
     }
-//    @GetMapping("/locTheoDungLuongRam/{dungLuongRam}")
-//    public List<SanPhamChiTietDto> locTheoDungLuongRam(@PathVariable Integer dungLuongRam) {
-//        return spctsi.locTheoDungLuongRam(dungLuongRam);
-//    }
-//    @GetMapping("/locTheoHangSanXuat/{hangSanXuat}")
-//    public List<SanPhamChiTietDto> locTheoHangSanXuat(@PathVariable String hangSanXuat) {
-//        return spctsi.locTheoHangSanXuat(hangSanXuat);
-//    }
-//    @GetMapping("/locTheoTamNen/{tamNen}")
-//    public List<SanPhamChiTietDto> locTheoTamNen(@PathVariable String tamNen) {
-//        return spctsi.locTheoTamNen(tamNen);
-//    }
-//    @GetMapping("/locTheoCongNgheCPU/{congNgheCPU}")
-//    public List<SanPhamChiTietDto> locTheoCongNgheCPU(@PathVariable String congNgheCPU) {
-//        return spctsi.locTheoCongNgheCPU(congNgheCPU);
-//    }
-//    @GetMapping("/locTheoKichThuoc/{kichThuoc}")
-//    public List<SanPhamChiTietDto> locTheoKichThuoc(@PathVariable Double kichThuoc) {
-//        return spctsi.locTheoKichThuoc(kichThuoc);
-//    }
+    @GetMapping("/locTheoDungLuongRam/{dungLuongRam}")
+    public List<SanPhamChiTietDto> locTheoDungLuongRam(@PathVariable Integer dungLuongRam) {
+        return spctsi.locTheoRam(dungLuongRam);
+    }
+
+    @GetMapping("/locTheoHangSanXuat/{hangSanXuat}")
+    public List<SanPhamChiTietDto> locTheoHangSanXuat(@PathVariable String hangSanXuat) {
+        return spctsi.locTheoHangSanXuat(hangSanXuat);
+    }
+
+    @GetMapping("/locTheoOLuuTru/{oLuuTru}")
+    public List<SanPhamChiTietDto> locTheoOLuuTru(@PathVariable Integer oLuuTru) {
+        return spctsi.locTheoOLuuTru(oLuuTru);
+    }
+    @GetMapping("/locTheoCongNgheCPU/{congNgheCPU}")
+    public List<SanPhamChiTietDto> locTheoCongNgheCPU(@PathVariable String congNgheCPU) {
+        return spctsi.locTheoCongNgheCPU(congNgheCPU);
+    }
 }

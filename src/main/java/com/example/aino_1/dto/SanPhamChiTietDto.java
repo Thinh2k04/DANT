@@ -31,16 +31,5 @@ public class SanPhamChiTietDto {
     private String thoiHanBaoHanh;
     private Integer trangThai;
     private String thuongHieu;
-    // Phương thức tạo tên sản phẩm chi tiết
-    public String getTenSanPhamChiTiet() {
-        return String.format(
-                "Laptop %s %s/%dGB/%dGB/%.1f\" %s/Win11",
-                this.tenSanPham,
-                this.tenCPU,
-                this.dungLuongRam,
-                this.dungLuong,
-                this.kichThuocLaptop,
-                this.doPhanGiai
-        );
-    }
+    public String tenSanPhamChiTiet;
 }

@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 @CrossOrigin("*") //cho phép tất cả các miền khác truy cập tài nguyên server (end point api)
 @RestController
 @RequestMapping("/rest/san_pham_chi_tiet") //đường dẫn chung cho các phương thức http bên dưới
-public class SanPhamChiTietRestController {
+public class  SanPhamChiTietRestController {
     @Autowired
     SanPhamChiTietInterface spctsi;
 
@@ -61,15 +61,14 @@ public class SanPhamChiTietRestController {
         return spctsi.getSanPhamChiTietByIdSP(id);
     }
 
-
     @GetMapping("/tim_kiem/{tuKhoaTimKiem}")
     public List<SanPhamChiTietDto> search(@PathVariable String tuKhoaTimKiem) {
         return spctsi.timSanPhamTheoTuKhoa(tuKhoaTimKiem);
     }
-//    @GetMapping("/locTheoGia/{minPrice}&{maxPrice}")
-//    public List<SanPhamChiTietDto> locTheoGia(@PathVariable Double minPrice,@PathVariable Double maxPrice) {
-//        return spctsi.locTheoGia(minPrice,maxPrice);
-//    }
+    @GetMapping("/locTheoGia/{minPrice}&{maxPrice}")
+    public List<SanPhamChiTietDto> locTheoGia(@PathVariable Double minPrice,@PathVariable Double maxPrice) {
+        return spctsi.locTheoGia(minPrice,maxPrice);
+    }
 //    @GetMapping("/locTheoDungLuongRam/{dungLuongRam}")
 //    public List<SanPhamChiTietDto> locTheoDungLuongRam(@PathVariable Integer dungLuongRam) {
 //        return spctsi.locTheoDungLuongRam(dungLuongRam);

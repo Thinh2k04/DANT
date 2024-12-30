@@ -10,7 +10,7 @@ const BanHangTaiQuay = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [customerInfo, setCustomerInfo] = useState({
-    hoTen: '',
+    hoten: '',
     soDienThoai: '',
     email: ''
   });
@@ -79,7 +79,7 @@ const BanHangTaiQuay = () => {
       setLoading(true);
       const orderData = {
         tttk: {
-          hoTen: customerInfo.hoTen || "",
+          hoten: customerInfo.hoten || "",
           soDienThoai: customerInfo.soDienThoai || "",
           email: customerInfo.email || "",
           trangThai: 1
@@ -108,7 +108,7 @@ const BanHangTaiQuay = () => {
         toast.success('Thanh toán thành công!');
         setCart([]); // Clear cart
         setCustomerInfo({ // Reset customer info
-          hoTen: '',
+          hoten: '',
           soDienThoai: '',
           email: ''
         });
@@ -124,9 +124,24 @@ const BanHangTaiQuay = () => {
   // Thêm hàm kiểm tra thông tin khách hàng
   const checkCustomerInfo = async (phoneNumber) => {
     try {
-      if (phoneNumber.length >= 3) { // Chỉ tìm kiếm khi nhập ít nhất 3 số
-        const response = await axios.get(`http://localhost:8080/rest/tttk/search/${phoneNumber}`);
-        setCustomerSuggestions(response.data);
+      if (phoneNumber.length === 10) {
+        const response = await axios.get(`http://localhost:8080/rest/tttk/timSDT/${phoneNumber}`);
+        if (response.data) {
+          // Cập nhật tất cả thông tin khách hàng bao gồm họ tên
+          setCustomerInfo({
+            hoten: response.data.hoten || '',
+            soDienThoai: response.data.soDienThoai || phoneNumber,
+            email: response.data.email || ''
+          });
+          setCustomerSuggestions([]);
+        } else {
+          // Reset form nếu không tìm thấy khách hàng
+          setCustomerInfo({
+            hoten: '',
+            soDienThoai: phoneNumber,
+            email: ''
+          });
+        }
       } else {
         setCustomerSuggestions([]);
       }
@@ -139,7 +154,7 @@ const BanHangTaiQuay = () => {
   // Thêm hàm xử lý khi chọn khách hàng từ gợi ý
   const handleSelectCustomer = (customer) => {
     setCustomerInfo({
-      hoTen: customer.hoTen,
+      hoten: customer.hoten,
       soDienThoai: customer.soDienThoai,
       email: customer.email
     });
@@ -224,7 +239,7 @@ const BanHangTaiQuay = () => {
                           className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                           onClick={() => handleSelectCustomer(customer)}
                         >
-                          <div>{customer.hoTen}</div>
+                          <div>{customer.hoten}</div>
                           <div className="text-sm text-gray-600">{customer.soDienThoai}</div>
                         </div>
                       ))}
@@ -234,8 +249,8 @@ const BanHangTaiQuay = () => {
                 <input
                   type="text"
                   placeholder="Họ tên khách hàng"
-                  value={customerInfo.hoTen}
-                  onChange={(e) => setCustomerInfo({...customerInfo, hoTen: e.target.value})}
+                  value={customerInfo.hoten}
+                  onChange={(e) => setCustomerInfo({...customerInfo, hoten: e.target.value})}
                   className="w-full px-3 py-2 border rounded"
                 />
                 <input

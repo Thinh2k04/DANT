@@ -26,6 +26,7 @@ const HomePage = () => {
     oCung: '',
     cpu: ''
   });
+  const [searchTerm, setSearchTerm] = useState(''); // State cho từ khóa tìm kiếm
   const [selectedProduct, setSelectedProduct] = useState(null); // Thêm state cho sản phẩm được chọn
   const [showToast, setShowToast] = useState(false); // Thêm state cho toast notification
   const [thuongHieus, setThuongHieus] = useState([]); // State cho thương hiệu
@@ -80,6 +81,24 @@ const HomePage = () => {
 
     fetchData();
   }, []);
+
+  // Hàm tìm kiếm laptop
+  const searchLaptops = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`http://localhost:8080/rest/san_pham_chi_tiet/tim_kiem/${searchTerm}`);
+      if (!response.ok) throw new Error('Failed to search laptops');
+      const searchResults = await response.json();
+      setLaptops(searchResults);
+      setCurrentPage(1);
+      setHasMore(searchResults.length > itemsPerPage);
+    } catch (error) {
+      console.error('Error searching laptops:', error);
+      toast.error('Có lỗi xảy ra khi tìm kiếm sản phẩm!');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Hàm lọc laptop dựa trên các bộ lọc đã chọn
   const filterLaptops = async () => {
@@ -191,10 +210,22 @@ const HomePage = () => {
                 <p className="text-xl text-gray-200">
                   Khám phá bộ sưu tập laptop cao cấp với công nghệ mới nhất
                 </p>
-                <button className="bg-blue-600 hover:bg-blue-700 px-8 py-3 rounded-full font-semibold transition flex items-center gap-2">
-                  <FaSearch className="text-xl" />
-                  Khám phá ngay
-                </button>
+                <div className="flex items-center gap-4">
+                  <input
+                    type="text"
+                    placeholder="Tìm kiếm laptop..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="px-6 py-3 rounded-full w-96 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <button 
+                    onClick={searchLaptops}
+                    className="bg-blue-600 hover:bg-blue-700 px-8 py-3 rounded-full font-semibold transition flex items-center gap-2"
+                  >
+                    <FaSearch className="text-xl" />
+                    Tìm kiếm
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -319,46 +350,46 @@ const HomePage = () => {
                     className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 group"
                     onClick={() => window.location.href = `/chitietsanpham/${laptop.id}`}
                   >
-                    <div className="relative aspect-w-16 aspect-h-9">
+                    <div className="relative h-[200px] overflow-hidden">
                       <img 
                         src={laptop.hinhAnhMinhHoa} 
                         alt={laptop.tenSanPhamChiTiet}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        className="w-full h-full object-contain p-4 group-hover:scale-110 transition-transform duration-500"
                       />
-                      <div className="absolute top-3 right-3 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-medium flex items-center gap-1">
-                        <FaTag />
+                      <div className="absolute top-3 right-3 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+                        <FaTag className="text-xs" />
                         -10%
                       </div>
                     </div>
 
-                    <div className="p-5">
-                      <h3 className="font-bold text-lg mb-2 line-clamp-2 min-h-[3.5rem]">
+                    <div className="p-4">
+                      <h3 className="font-bold text-base mb-2 line-clamp-2 min-h-[3rem] hover:text-blue-600 transition-colors">
                         {laptop.tenSanPhamChiTiet}
                       </h3>
                       
-                      <div className="flex items-center gap-1 mb-2">
-                        <AiFillStar className="text-yellow-400" />
-                        <AiFillStar className="text-yellow-400" />
-                        <AiFillStar className="text-yellow-400" />
-                        <AiFillStar className="text-yellow-400" />
-                        <AiOutlineStar className="text-yellow-400" />
-                        <span className="text-sm text-gray-500 ml-2">(4.0)</span>
+                      <div className="flex items-center gap-0.5 mb-2">
+                        <AiFillStar className="text-yellow-400 text-sm" />
+                        <AiFillStar className="text-yellow-400 text-sm" />
+                        <AiFillStar className="text-yellow-400 text-sm" />
+                        <AiFillStar className="text-yellow-400 text-sm" />
+                        <AiOutlineStar className="text-yellow-400 text-sm" />
+                        <span className="text-xs text-gray-500 ml-1">(4.0)</span>
                       </div>
 
-                      <div className="flex items-baseline gap-2 mb-4">
-                        <span className="text-2xl font-bold text-red-600">
+                      <div className="flex items-baseline gap-2 mb-3">
+                        <span className="text-xl font-bold text-red-600">
                           {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(laptop.donGia)}
                         </span>
-                        <span className="text-sm text-gray-500 line-through">
+                        <span className="text-xs text-gray-500 line-through">
                           {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(laptop.donGia * 1.1)}
                         </span>
                       </div>
 
-                      <div className="space-y-2 mb-4">
+                      <div className="space-y-1.5 mb-4">
                         {laptop.specs && laptop.specs.map((spec, index) => (
-                          <div key={index} className="flex items-center gap-2 text-gray-600">
-                            <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
-                            <span className="text-sm">{spec}</span>
+                          <div key={index} className="flex items-center gap-1.5 text-gray-600">
+                            <span className="w-1 h-1 bg-blue-500 rounded-full"></span>
+                            <span className="text-xs">{spec}</span>
                           </div>
                         ))}
                       </div>
@@ -369,9 +400,9 @@ const HomePage = () => {
                           console.log("đã click vào nút thêm")
                           handleAddToCart(laptop);
                         }}
-                        className="w-full py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+                        className="w-full py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-1.5"
                       >
-                        <FaShoppingCart />
+                        <FaShoppingCart className="text-xs" />
                         Thêm vào giỏ hàng
                       </button>
                     </div>
@@ -405,6 +436,5 @@ const HomePage = () => {
     </div>
   );
 };
-
 // Export component HomePage
 export default HomePage;

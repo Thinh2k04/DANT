@@ -9,11 +9,11 @@ const ProductVariantsTable = ({ variants }) => {
           <th className="border px-4 py-2">Mã SPCT</th>
           <th className="border px-4 py-2">Hình ảnh</th>
           <th className="border px-4 py-2">CPU</th>
-          <th className="border px-4 py-2">RAM</th>
-          <th className="border px-4 py-2">Ổ cứng</th>
+          <th className="border px-4 py-2">RAM (GB)</th>
+          <th className="border px-4 py-2">Ổ cứng (GB)</th>
           <th className="border px-4 py-2">GPU</th>
           <th className="border px-4 py-2">Màn hình</th>
-          <th className="border px-4 py-2">Đơn giá</th>
+          <th className="border px-4 py-2">Đơn giá (VNĐ)</th>
           <th className="border px-4 py-2">Số lượng</th>
           <th className="border px-4 py-2">Thao tác</th>
         </tr>
@@ -23,14 +23,14 @@ const ProductVariantsTable = ({ variants }) => {
           <tr key={index}>
             <td className="border px-4 py-2">{variant.maSpct}</td>
             <td className="border px-4 py-2">
-              <img src={variant.hinhAnhMinhHoa} alt={variant.maSpct} className="w-20 h-20 object-cover"/>
+              <img src={variant.hinhAnhMinhHoa} alt={variant.tenSanPhamChiTiet} className="w-20 h-20 object-cover"/>
             </td>
-            <td className="border px-4 py-2">{variant.cpu?.ten}</td>
-            <td className="border px-4 py-2">{variant.ram?.dungLuong}GB {variant.ram?.tocDo}MHz</td>
-            <td className="border px-4 py-2">{variant.oluuTru?.dungLuong}GB {variant.oluuTru?.loaiOCung}</td>
-            <td className="border px-4 py-2">{variant.gpu?.ten}</td>
-            <td className="border px-4 py-2">{variant.manHinh?.doPhanGiai} {variant.manHinh?.tanSoQuet}Hz</td>
-            <td className="border px-4 py-2">{variant.donGia?.toLocaleString()} VNĐ</td>
+            <td className="border px-4 py-2">{variant.tenCPU}</td>
+            <td className="border px-4 py-2">{variant.dungLuongRam}</td>
+            <td className="border px-4 py-2">{variant.dungLuong}</td>
+            <td className="border px-4 py-2">{variant.gpu}</td>
+            <td className="border px-4 py-2">{variant.doPhanGiai} {variant.tanSoQuet}Hz</td>
+            <td className="border px-4 py-2">{variant.donGia?.toLocaleString()}</td>
             <td className="border px-4 py-2">{variant.soLuong}</td>
             <td className="border px-4 py-2">
               <button className="px-3 py-1 bg-yellow-500 text-white rounded mr-2">
@@ -47,4 +47,4 @@ const ProductVariantsTable = ({ variants }) => {
   );
 };
 
-export default ProductVariantsTable; 
+export default ProductVariantsTable;

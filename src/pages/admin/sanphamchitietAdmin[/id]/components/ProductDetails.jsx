@@ -5,7 +5,7 @@ const ProductDetails = ({ productDetails }) => {
 
   return (
     <div className="mb-8">
-      <h2 className="text-xl font-semibold mb-4">Thông tin sản phẩm</h2>
+      <h2 className="text-xl font-semibold mb-4">Thông tin sản phẩm thinh nguẹ</h2>
       <table className="min-w-full bg-white border border-gray-300 mb-8">
         <thead>
           <tr>

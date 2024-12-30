@@ -1,3 +1,4 @@
+// Import các thư viện và components cần thiết
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
@@ -6,27 +7,37 @@ import Sidebar from '../../Navbar/NavbarAdmin';
 import ProductDetails from './components/ProductDetails';
 import ProductVariantsTable from './components/ProductVariantsTable';
 import AddVariantModal from './components/AddVariantModal';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
+// Component chính để hiển thị chi tiết sản phẩm admin
 const ChiTietSanPhamAdmin = () => {
+  // Lấy id sản phẩm từ params URL
   const { idSanPham } = useParams();
+  
+  // Khai báo các state cần thiết
   const [productDetails, setProductDetails] = useState(null);
   const [productVariants, setProductVariants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  // State lưu trữ danh sách các thành phần
   const [rams, setRams] = useState([]);
   const [cpus, setCpus] = useState([]);
   const [gpus, setGpus] = useState([]);
   const [storages, setStorages] = useState([]);
   const [displays, setDisplays] = useState([]);
   const [colors, setColors] = useState([]);
+
+  // State lưu trữ form data cho việc thêm mới sản phẩm chi tiết
   const [formData, setFormData] = useState({
     sanPhamChiTiet: {
       id: '',
       hinhAnhMinhHoa: '',
       soLuong: '',
-      trangThai: '',
+      trangThai: 1,
       donGia: '',
       maSpct: '',
       sanPham: {
@@ -50,33 +61,29 @@ const ChiTietSanPhamAdmin = () => {
       mauSac: {
         id: ''
       },
-      trangThaiSpct: 1,
-      gioiThieu: "Laptop Dell Latitude L3540 với bộ vi xử lý Intel i5, RAM 8GB, ổ cứng SSD 256GB, màn hình 15.6\" FHD, thích hợp cho công việc văn phòng và học tập.",
+      gioiThieu: '',
       cardDoHoa: {
-        id: 1,
-        tenCard: "Card đồ họa NVIDIA GTX 1650",
+        id: '',
+        tenCard: '',
         trangThai: 1
       }
     },
-    imageUrls: [
-      "https://i.postimg.cc/J47PBp3b/mbp-16-spaceblack-cto-hero-202310.jpg",
-      "https://i.postimg.cc/J47PBp3b/mbp-16-spaceblack-cto-hero-202310.jpg",
-      "https://i.postimg.cc/J47PBp3b/mbp-16-spaceblack-cto-hero-202310.jpg"
-    ]
+    imageUrls: []
   });
 
+  // useEffect để fetch dữ liệu khi component mount
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch product details
+        // Fetch thông tin chi tiết sản phẩm
         const productResponse = await axios.get(`http://localhost:8080/rest/san_pham/getById/${idSanPham}`);
         setProductDetails(productResponse.data);
 
-        // Fetch product variants
+        // Fetch danh sách biến thể sản phẩm
         const variantsResponse = await axios.get(`http://localhost:8080/rest/san_pham_chi_tiet/getSPCTByIdSP/${idSanPham}`);
         setProductVariants(variantsResponse.data);
 
-        // Fetch component options
+        // Fetch danh sách các thành phần
         const ramsResponse = await axios.get('http://localhost:8080/rest/ram/getAll');
         setRams(ramsResponse.data);
 
@@ -105,66 +112,69 @@ const ChiTietSanPhamAdmin = () => {
     fetchData();
   }, [idSanPham]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  // Xử lý submit form thêm mới sản phẩm chi tiết
+  const handleSubmit = async (formPayload) => {
     try {
-      await axios.post('http://localhost:8080/rest/san_pham_chi_tiet/add', formData);
-      const variantsResponse = await axios.get(`http://localhost:8080/rest/san_pham_chi_tiet/getSPCTByIdSP/${idSanPham}`);
-      setProductVariants(variantsResponse.data);
-      setIsModalOpen(false);
-      setFormData({
-        sanPhamChiTiet: {
-          id: '',
-          hinhAnhMinhHoa: 'https://i.postimg.cc/J47PBp3b/mbp-16-spaceblack-cto-hero-202310.jpg',
-          soLuong: 5,
-          trangThai: '1',
-          donGia: 20000.0,
-          maSpct: 'Dell_01',
-          sanPham: {
-            id: idSanPham
+      const response = await axios.post('http://localhost:8080/rest/spctDTO/add', formPayload);
+      if (response.status === 200) {
+        // Fetch lại danh sách biến thể sau khi thêm thành công
+        const variantsResponse = await axios.get(`http://localhost:8080/rest/san_pham_chi_tiet/getSPCTByIdSP/${idSanPham}`);
+        setProductVariants(variantsResponse.data);
+        setIsModalOpen(false);
+        
+        // Reset form về trạng thái ban đầu
+        setFormData({
+          sanPhamChiTiet: {
+            id: '',
+            hinhAnhMinhHoa: '',
+            soLuong: '',
+            trangThai: 1,
+            donGia: '',
+            maSpct: '',
+            sanPham: {
+              id: idSanPham
+            },
+            ram: {
+              id: ''
+            },
+            oLuuTru: {
+              id: ''
+            },
+            manHinh: {
+              id: ''
+            },
+            cpu: {
+              id: ''
+            },
+            gpu: {
+              id: ''
+            },
+            mauSac: {
+              id: ''
+            },
+            gioiThieu: '',
+            cardDoHoa: {
+              id: '',
+              tenCard: '',
+              trangThai: 1
+            }
           },
-          ram: {
-            id: ''
-          },
-          oLuuTru: {
-            id: ''
-          },
-          manHinh: {
-            id: ''
-          },
-          cpu: {
-            id: ''
-          },
-          gpu: {
-            id: ''
-          },
-          mauSac: {
-            id: ''
-          },
-          trangThaiSpct: 1,
-          gioiThieu: "Laptop Dell Latitude L3540 với bộ vi xử lý Intel i5, RAM 8GB, ổ cứng SSD 256GB, màn hình 15.6\" FHD, thích hợp cho công việc văn phòng và học tập.",
-          cardDoHoa: {
-            id: 1,
-            tenCard: "Card đồ họa NVIDIA GTX 1650",
-            trangThai: 1
-          }
-        },
-        imageUrls: [
-          "https://i.postimg.cc/J47PBp3b/mbp-16-spaceblack-cto-hero-202310.jpg",
-          "https://i.postimg.cc/J47PBp3b/mbp-16-spaceblack-cto-hero-202310.jpg",
-          "https://i.postimg.cc/J47PBp3b/mbp-16-spaceblack-cto-hero-202310.jpg"
-        ]
-      });
+          imageUrls: []
+        });
+      }
     } catch (err) {
       console.error('Error adding product variant:', err);
+      toast.error('Có lỗi xảy ra khi thêm sản phẩm chi tiết');
     }
   };
 
+  // Lọc danh sách biến thể theo từ khóa tìm kiếm
   const filteredVariants = productVariants.filter(variant =>
     (variant.maSpct?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
     (variant.sanPham?.tenSanPham?.toLowerCase() || '').includes(searchTerm.toLowerCase())
   );
 
+  // Hiển thị loading khi đang tải dữ liệu
   if (loading) {
     return (
       <div className="flex">
@@ -176,6 +186,7 @@ const ChiTietSanPhamAdmin = () => {
     );
   }
 
+  // Hiển thị thông báo lỗi nếu có
   if (error) {
     return (
       <div className="flex">
@@ -187,13 +198,15 @@ const ChiTietSanPhamAdmin = () => {
     );
   }
 
+  // Render giao diện chính
   return (
     <div className="flex">
       <Sidebar />
       <div className="flex-1 p-8">
+        <ToastContainer />
         <h1 className="text-2xl font-bold mb-6">Chi Tiết Sản Phẩm</h1>
 
-        {/* Search Filter */}
+        {/* Thanh tìm kiếm và nút thêm mới */}
         <div className="mb-4 flex justify-between">
           <input
             type="text"
@@ -210,13 +223,16 @@ const ChiTietSanPhamAdmin = () => {
           </button>
         </div>
 
+        {/* Hiển thị thông tin chi tiết sản phẩm */}
         <ProductDetails productDetails={productDetails} />
         
+        {/* Hiển thị danh sách biến thể sản phẩm */}
         <div>
           <h2 className="text-xl font-semibold mb-4">Danh sách sản phẩm chi tiết</h2>
           <ProductVariantsTable variants={filteredVariants} />
         </div>
 
+        {/* Modal thêm mới sản phẩm chi tiết */}
         <AddVariantModal 
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
@@ -229,6 +245,7 @@ const ChiTietSanPhamAdmin = () => {
           gpus={gpus}
           displays={displays}
           colors={colors}
+          productDetails={productDetails}
         />
       </div>
     </div>

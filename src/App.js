@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
 import './App.css';
 import { publicRoutes, privateRoutes } from './routers/index';
-import LoginPage from './pages/login/page'; // Đảm bảo đã import LoginPage
 import handleLogin from './utils/auth'
 
 function App() {
@@ -12,10 +11,7 @@ function App() {
     <div className="w-full h-screen">
       <div className="w-full h-full">
         <Routes>
-          {/* Route cho trang đăng nhập */}
-          <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
-
-          {/* Public routes */}
+         {/* Public routes */}
           {Array.isArray(publicRoutes) &&
             publicRoutes.map((route, index) => {
               const Page = route.component;

@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Navbar from '../../../components/Layout/DefaultLayout/Navbar';
 import { addToCart } from '../../../utils/cartUtils';
 import Footer from '../../../components/Layout/DefaultLayout/Footer';
-import { FaShoppingCart, FaSearch, FaFilter, FaLaptop, FaMemory, FaHdd, FaMicrochip, FaTag } from 'react-icons/fa';
+import { FaShoppingCart, FaSearch, FaFilter, FaLaptop, FaMemory, FaHdd, FaMicrochip, FaTag, FaDesktop } from 'react-icons/fa';
 import { IoMdPricetag } from 'react-icons/io';
 import { AiFillStar, AiOutlineStar } from 'react-icons/ai';
 import { toast, ToastContainer } from 'react-toastify';
@@ -24,7 +24,8 @@ const HomePage = () => {
     thuongHieu: '',
     ram: '',
     oCung: '',
-    cpu: ''
+    cpu: '',
+    manHinh: '' // Thêm filter cho màn hình
   });
   const [searchTerm, setSearchTerm] = useState(''); // State cho từ khóa tìm kiếm
   const [selectedProduct, setSelectedProduct] = useState(null); // Thêm state cho sản phẩm được chọn
@@ -33,6 +34,7 @@ const HomePage = () => {
   const [rams, setRams] = useState([]); // State cho RAM
   const [oCungs, setOCungs] = useState([]); // State cho ổ cứng  
   const [cpus, setCpus] = useState([]); // State cho CPU
+  const [manHinhs, setManHinhs] = useState([]); // State cho màn hình
 
   // useEffect hook để fetch dữ liệu laptop và các options cho bộ lọc khi component mount
   useEffect(() => {
@@ -70,6 +72,12 @@ const HomePage = () => {
         if (!cpuResponse.ok) throw new Error('Failed to fetch CPUs');
         const cpuData = await cpuResponse.json();
         setCpus(cpuData);
+
+        // Fetch danh sách màn hình
+        const manHinhResponse = await fetch('http://localhost:8080/rest/man_hinh/getAll');
+        if (!manHinhResponse.ok) throw new Error('Failed to fetch screens');
+        const manHinhData = await manHinhResponse.json();
+        setManHinhs(manHinhData);
 
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -116,6 +124,7 @@ const HomePage = () => {
       if (filters.ram) params.append('ramId', filters.ram);
       if (filters.oCung) params.append('oCungId', filters.oCung);
       if (filters.cpu) params.append('cpuId', filters.cpu);
+      if (filters.manHinh) params.append('manHinhId', filters.manHinh);
 
       // Gọi API với các params đã được lọc
       const response = await fetch(`http://localhost:8080/rest/spctDTO/filter?${params}`);
@@ -328,6 +337,24 @@ const HomePage = () => {
                     <option value="">Tất cả CPU</option>
                     {cpus.map(cpu => (
                       <option key={cpu.id} value={cpu.id}>{cpu.ten}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Bộ lọc theo màn hình */}
+                <div>
+                  <label className="text-sm font-medium text-gray-700 block mb-2 flex items-center gap-2">
+                    <FaDesktop className="text-blue-600" />
+                    Màn hình
+                  </label>
+                  <select 
+                    className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    value={filters.manHinh}
+                    onChange={(e) => handleFilterChange('manHinh', e.target.value)}
+                  >
+                    <option value="">Tất cả màn hình</option>
+                    {manHinhs.map(mh => (
+                      <option key={mh.id} value={mh.id}>{mh.doPhanGiai}</option>
                     ))}
                   </select>
                 </div>

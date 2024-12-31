@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import NavbarAdmin from '../Navbar/NavbarAdmin';
+import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 const OrderManagement = () => {
   const [orders, setOrders] = useState([]);
@@ -9,6 +12,7 @@ const OrderManagement = () => {
   const [orderDetails, setOrderDetails] = useState([]);
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState(null);
+  const [isPolling, setIsPolling] = useState(true);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -16,7 +20,10 @@ const OrderManagement = () => {
         const response = await fetch('http://localhost:8080/rest/hoa_don/getAll');
         if (!response.ok) throw new Error('Failed to fetch orders');
         const data = await response.json();
-        setOrders(data);
+        const sortedOrders = data.sort((a, b) => 
+          new Date(b.thoiGianLapHoaDon) - new Date(a.thoiGianLapHoaDon)
+        );
+        setOrders(sortedOrders);
       } catch (error) {
         console.error('Error fetching orders:', error);
         toast.error('Không thể tải danh sách đơn hàng', {
@@ -25,8 +32,28 @@ const OrderManagement = () => {
         });
       }
     };
+
     fetchOrders();
-  }, []);
+
+    let pollInterval;
+    if (isPolling) {
+      pollInterval = setInterval(fetchOrders, 10000);
+    }
+
+    return () => {
+      if (pollInterval) {
+        clearInterval(pollInterval);
+      }
+    };
+  }, [isPolling]);
+
+  useEffect(() => {
+    if (showStatusModal) {
+      setIsPolling(false);
+    } else {
+      setIsPolling(true);
+    }
+  }, [showStatusModal]);
 
   const handleOrderClick = async (orderId) => {
     try {
@@ -82,15 +109,8 @@ const OrderManagement = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          id: selectedOrder.id,
-          trangThaiThanhToan: selectedStatus,
-          tongTien: selectedOrder.tongTien,
-          thoiGianLapHoaDon: selectedOrder.thoiGianLapHoaDon,
-          diaChiNhanHang: selectedOrder.diaChiNhanHang,
-          thongTinTaiKhoan: selectedOrder.thongTinTaiKhoan,
-          cuaHang: selectedOrder.cuaHang,
-          hinhThucThanhToan: selectedOrder.hinhThucThanhToan,
-          voucher: selectedOrder.voucher
+          ...selectedOrder,
+          trangThaiThanhToan: selectedStatus
         })
       });
 
@@ -106,6 +126,7 @@ const OrderManagement = () => {
       setShowStatusModal(false);
       setSelectedStatus(null);
       setOrderDetails([]);
+      setIsPolling(true);
 
       toast.success('Cập nhật trạng thái đơn hàng thành công', {
         position: "top-right",
@@ -126,6 +147,200 @@ const OrderManagement = () => {
     setSelectedStatus(null);
     setSelectedOrder(null);
     setOrderDetails([]);
+    setIsPolling(true);
+  };
+
+  const exportToExcel = () => {
+    const excelData = orders.map(order => ({
+      'Mã đơn hàng': order.id,
+      'Tên khách hàng': order.thongTinTaiKhoan?.hoTen,
+      'Số điện thoại': order.thongTinTaiKhoan?.soDienThoai,
+      'Email': order.thongTinTaiKhoan?.email,
+      'Địa chỉ nhận hàng': order.diaChiNhanHang,
+      'Tổng tiền': order.tongTien,
+      'Thời gian đặt hàng': order.thoiGianLapHoaDon,
+      'Trạng thái': order.trangThaiThanhToan === 0 ? 'Đã hủy' :
+                    order.trangThaiThanhToan === 1 ? 'Thành công' :
+                    order.trangThaiThanhToan === 2 ? 'Chờ thanh toán' : 'Không xác định',
+      'Hình thức thanh toán': order.hinhThucThanhToan?.tenHinhThuc,
+      'Cửa hàng': `${order.cuaHang?.soNha}, ${order.cuaHang?.phuong}, ${order.cuaHang?.huyen}, ${order.cuaHang?.tinh}`
+    }));
+
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(excelData);
+
+    const colWidths = [
+      { wch: 15 },
+      { wch: 25 },
+      { wch: 15 },
+      { wch: 25 },
+      { wch: 40 },
+      { wch: 15 },
+      { wch: 20 },
+      { wch: 15 },
+      { wch: 20 },
+      { wch: 50 },
+    ];
+    ws['!cols'] = colWidths;
+
+    XLSX.utils.book_append_sheet(wb, ws, 'Danh sách đơn hàng');
+
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const fileName = `danh_sach_don_hang_${timestamp}.xlsx`;
+
+    XLSX.writeFile(wb, fileName);
+
+    toast.success('Xuất file Excel thành công!', {
+      position: "top-right",
+      autoClose: 2000
+    });
+  };
+
+  const generatePDF = (order, details) => {
+    const doc = new jsPDF();
+    
+    doc.setFont('helvetica');
+    
+    doc.setFontSize(24);
+    doc.setTextColor(44, 62, 80);
+    doc.text("LAPTOP SHOP", 105, 20, { align: "center" });
+    
+    doc.setFontSize(18);
+    doc.text("HÓA ĐƠN BÁN HÀNG", 105, 30, { align: "center" });
+    doc.text(`#${order.id}`, 105, 38, { align: "center" });
+    
+    doc.setDrawColor(41, 128, 185);
+    doc.setLineWidth(0.5);
+    doc.line(20, 42, 190, 42);
+    
+    doc.setFontSize(10);
+    doc.setTextColor(52, 73, 94);
+    doc.text([
+      "CÔNG TY TNHH LAPTOP SHOP",
+      "Địa chỉ: 123 Đường ABC, Quận XYZ, TP.HCM",
+      "Hotline: 0123.456.789 - Email: contact@laptopshop.com",
+      "MST: 0123456789"
+    ], 105, 50, { align: "center" });
+
+    const customerInfo = {
+      startY: 70,
+      head: [['THÔNG TIN ĐƠN HÀNG']],
+      body: [
+        ['Khách hàng:', order.thongTinTaiKhoan?.hoTen],
+        ['Số điện thoại:', order.thongTinTaiKhoan?.soDienThoai],
+        ['Email:', order.thongTinTaiKhoan?.email],
+        ['Địa chỉ giao hàng:', order.diaChiNhanHang],
+        ['Ngày đặt hàng:', new Date(order.thoiGianLapHoaDon).toLocaleString('vi-VN')],
+        ['Hình thức thanh toán:', order.hinhThucThanhToan?.tenHinhThuc],
+        ['Trạng thái đơn hàng:', order.trangThaiThanhToan === 0 ? 'Đã hủy' :
+                                 order.trangThaiThanhToan === 1 ? 'Thành công' :
+                                 'Chờ thanh toán']
+      ],
+      theme: 'plain',
+      styles: { 
+        fontSize: 10,
+        cellPadding: 3,
+      },
+      headStyles: {
+        fillColor: [41, 128, 185],
+        textColor: 255,
+        fontSize: 12,
+        fontStyle: 'bold',
+        halign: 'center'
+      },
+      columnStyles: {
+        0: { cellWidth: 40, fontStyle: 'bold' },
+        1: { cellWidth: 100 }
+      }
+    };
+    
+    doc.autoTable(customerInfo);
+
+    const productDetails = {
+      startY: doc.lastAutoTable.finalY + 15,
+      head: [['STT', 'Sản phẩm', 'Thông số', 'SL', 'Đơn giá', 'Thành tiền']],
+      body: details.map((detail, index) => [
+        index + 1,
+        detail.sanPhamChiTiet?.sanPham?.tenSanPham,
+        [
+          `CPU: ${detail.sanPhamChiTiet?.cpu?.ten}`,
+          `RAM: ${detail.sanPhamChiTiet?.ram?.dungLuong}GB`,
+          `Ổ cứng: ${detail.sanPhamChiTiet?.oluuTru?.dungLuong}GB ${detail.sanPhamChiTiet?.oluuTru?.loaiOCung}`,
+          `GPU: ${detail.sanPhamChiTiet?.gpu?.ten}`,
+          `Màn hình: ${detail.sanPhamChiTiet?.manHinh?.doPhanGiai}`
+        ].join('\n'),
+        detail.soLuong,
+        `${detail.gia?.toLocaleString()}₫`,
+        `${(detail.soLuong * detail.gia)?.toLocaleString()}₫`
+      ]),
+      theme: 'striped',
+      headStyles: {
+        fillColor: [41, 128, 185],
+        textColor: 255,
+        fontSize: 10,
+        fontStyle: 'bold',
+        halign: 'center'
+      },
+      styles: {
+        fontSize: 9,
+        cellPadding: 3,
+      },
+      columnStyles: {
+        0: { cellWidth: 10, halign: 'center' },
+        1: { cellWidth: 40 },
+        2: { cellWidth: 70 },
+        3: { cellWidth: 10, halign: 'center' },
+        4: { cellWidth: 25, halign: 'right' },
+        5: { cellWidth: 25, halign: 'right' }
+      }
+    };
+
+    doc.autoTable(productDetails);
+
+    const summaryData = [];
+    if (order.voucher) {
+      summaryData.push([
+        'Tổng tiền hàng:',
+        `${order.tongTien?.toLocaleString()}₫`
+      ]);
+      summaryData.push([
+        `Voucher giảm giá (${order.voucher.maVoucher}):`,
+        `-${(order.tongTien * order.voucher.phanTramApDung)?.toLocaleString()}₫`
+      ]);
+    }
+    summaryData.push([
+      'Tổng thanh toán:',
+      `${(order.tongTien - (order.voucher ? order.tongTien * order.voucher.phanTramApDung : 0))?.toLocaleString()}₫`
+    ]);
+
+    doc.autoTable({
+      startY: doc.lastAutoTable.finalY + 5,
+      body: summaryData,
+      theme: 'plain',
+      styles: { fontSize: 10, cellPadding: 3 },
+      columnStyles: {
+        0: { cellWidth: 150, fontStyle: 'bold', halign: 'right' },
+        1: { cellWidth: 30, halign: 'right', fontStyle: 'bold', textColor: [41, 128, 185] }
+      }
+    });
+
+    doc.setDrawColor(41, 128, 185);
+    doc.setLineWidth(0.5);
+    doc.line(20, doc.lastAutoTable.finalY + 10, 190, doc.lastAutoTable.finalY + 10);
+
+    doc.setFontSize(10);
+    doc.setTextColor(127, 140, 141);
+    const currentDate = new Date().toLocaleString('vi-VN');
+    doc.text(`Ngày in: ${currentDate}`, 20, doc.lastAutoTable.finalY + 20);
+
+    doc.setFontSize(10);
+    doc.setTextColor(44, 62, 80);
+    doc.text([
+      "Cảm ơn quý khách đã mua hàng!",
+      "Mọi thắc mắc xin vui lòng liên hệ Hotline: 0123.456.789"
+    ], 105, doc.lastAutoTable.finalY + 20, { align: "center" });
+
+    doc.save(`hoa_don_${order.id}.pdf`);
   };
 
   return (
@@ -144,7 +359,18 @@ const OrderManagement = () => {
           pauseOnHover
           theme="light"
         />
-        <h1 className="text-3xl font-bold mb-8 text-gray-800">Quản lý đơn hàng</h1>
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-800">Quản lý đơn hàng</h1>
+          <button
+            onClick={exportToExcel}
+            className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-all duration-200 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 flex items-center gap-2"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v3.586L7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V8z" clipRule="evenodd" />
+            </svg>
+            Xuất Excel
+          </button>
+        </div>
         
         <div className="mt-4 overflow-hidden shadow-xl rounded-lg">
           <table className="min-w-full bg-white divide-y divide-gray-200">
@@ -248,7 +474,18 @@ const OrderManagement = () => {
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
               <div className="bg-white p-8 rounded-lg w-4/5 max-h-[85vh] overflow-y-auto shadow-2xl">
                 <div className="flex justify-between items-center mb-8">
-                  <h2 className="text-3xl font-bold text-gray-800">Chi tiết đơn hàng #{selectedOrder.id}</h2>
+                  <div className="flex items-center gap-4">
+                    <h2 className="text-3xl font-bold text-gray-800">Chi tiết đơn hàng #{selectedOrder.id}</h2>
+                    <button 
+                      onClick={() => generatePDF(selectedOrder, orderDetails)}
+                      className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-all duration-200 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 flex items-center gap-2"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 3a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+                      </svg>
+                      In hóa đơn
+                    </button>
+                  </div>
                   <button 
                     onClick={handleCloseModal}
                     className="text-gray-500 hover:text-gray-700 transition-colors duration-200 p-2 hover:bg-gray-100 rounded-full"
@@ -273,7 +510,7 @@ const OrderManagement = () => {
                   <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
                     <h3 className="text-xl font-bold mb-4 text-gray-800">Thông tin đơn hàng</h3>
                     <div className="space-y-3">
-                      <p className="text-gray-700"><span className="font-semibold">Ngày đ���t:</span> {selectedOrder.thoiGianLapHoaDon}</p>
+                      <p className="text-gray-700"><span className="font-semibold">Ngày đặt:</span> {selectedOrder.thoiGianLapHoaDon}</p>
                       <p className="text-gray-700"><span className="font-semibold">Trạng thái:</span> 
                         <span className={`ml-2 px-3 py-1 rounded-full text-sm font-semibold
                           ${selectedOrder.trangThaiThanhToan === 0 ? 'bg-red-100 text-red-800' : 

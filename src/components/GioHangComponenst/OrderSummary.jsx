@@ -37,6 +37,9 @@ function OrderSummary({
   const [paymentUrl, setPaymentUrl] = useState('');
   const navigate = useNavigate();
 
+  // Thêm state để theo dõi trạng thái disable của nút
+  const [isButtonDisabled, setIsButtonDisabled] = useState(false);
+
   // Hàm chuẩn bị dữ liệu đơn hàng để gửi lên server
   const prepareOrderData = () => {
     const now = new Date();
@@ -90,7 +93,7 @@ function OrderSummary({
           trangThai: 1
         },
         voucher: null,
-        trangThaiThanhToan: 0,
+        trangThaiThanhToan: 2,
         trangThai: 0
       },
       // Chi tiết hóa đơn
@@ -113,6 +116,9 @@ function OrderSummary({
   // Hàm xử lý khi submit đơn hàng
   const handleOrderSubmit = async () => {
     try {
+      // Disable nút ngay khi bắt đầu xử lý
+      setIsButtonDisabled(true);
+      
       // Chuẩn bị dữ liệu đơn hàng
       const orderData = prepareOrderData();
       
@@ -125,7 +131,6 @@ function OrderSummary({
         body: JSON.stringify(orderData)
       });
 
-      // Kiểm tra response
       if (!response.ok) {
         throw new Error('Failed to create order');
       }
@@ -170,13 +175,19 @@ function OrderSummary({
         });
       }, 2000);
 
+      // Set timeout 10 giây trước khi enable lại nút
+      setTimeout(() => {
+        setIsButtonDisabled(false);
+      }, 10000);
+
     } catch (error) {
-      // Xử lý lỗi
       console.error('Error creating order:', error);
       toast.error('Có lỗi xảy ra khi tạo đơn hàng', {
         position: "top-center",
         autoClose: 2000
       });
+      // Enable lại nút nếu có lỗi
+      setIsButtonDisabled(false);
     }
   };
 
@@ -420,13 +431,15 @@ function OrderSummary({
                 handleOrderSubmit();
               }
             }}
-            disabled={loading}
+            disabled={loading || isButtonDisabled}
             className={`w-full py-4 bg-gradient-to-r from-green-500 to-green-600 text-white text-lg font-bold rounded-xl
               hover:from-green-600 hover:to-green-700 transform hover:-translate-y-0.5 transition-all
               focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2
-              ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
+              ${(loading || isButtonDisabled) ? "opacity-50 cursor-not-allowed" : ""}`}
           >
-            {loading ? "đang xử lý..." : "Xác nhận đơn hàng"}
+            {loading ? "Đang xử lý..." : 
+             isButtonDisabled ? "Vui lòng đợi" : 
+             "Xác nhận đơn hàng"}
           </button>
         </div>
       </div>

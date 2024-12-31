@@ -4,16 +4,10 @@ package com.example.aino_1.restController;
 import com.example.aino_1.dto.SanPhamChiTietDto;
 import com.example.aino_1.entity.SanPhamChiTiet;
 import com.example.aino_1.repository.SanPhamChiTietInterface;
+import com.example.aino_1.service.SanPhamChiTietService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,9 +16,10 @@ import java.util.stream.Collectors;
 @CrossOrigin("*") //cho phép tất cả các miền khác truy cập tài nguyên server (end point api)
 @RestController
 @RequestMapping("/rest/san_pham_chi_tiet") //đường dẫn chung cho các phương thức http bên dưới
-public class SanPhamChiTietRestController {
+public class  SanPhamChiTietRestController {
     @Autowired
     SanPhamChiTietInterface spctsi;
+    SanPhamChiTietService spctsv;
 
     @GetMapping("/getAll")
     public List<SanPhamChiTiet> getAll() {
@@ -61,33 +56,41 @@ public class SanPhamChiTietRestController {
         return spctsi.getSanPhamChiTietByIdSP(id);
     }
 
-
     @GetMapping("/tim_kiem/{tuKhoaTimKiem}")
     public List<SanPhamChiTietDto> search(@PathVariable String tuKhoaTimKiem) {
         return spctsi.timSanPhamTheoTuKhoa(tuKhoaTimKiem);
     }
-//    @GetMapping("/locTheoGia/{minPrice}&{maxPrice}")
-//    public List<SanPhamChiTietDto> locTheoGia(@PathVariable Double minPrice,@PathVariable Double maxPrice) {
-//        return spctsi.locTheoGia(minPrice,maxPrice);
-//    }
+
+    @GetMapping("/loc/{minPrice}&{maxPrice}&{hangSanXuat}&{oLuuTru}&{congNgheCPU}&{ram}")
+    public List<SanPhamChiTietDto> locSanPham(
+            @PathVariable(required = false) Double minPrice,  // Giá tối thiểu
+            @PathVariable(required = false) Double maxPrice,  // Giá tối đa
+            @PathVariable(required = false) Integer hangSanXuat,  // ID hãng sản xuất
+            @PathVariable(required = false) Integer oLuuTru,  // ID ổ lưu trữ
+            @PathVariable(required = false) Integer congNgheCPU,  // ID CPU
+            @PathVariable(required = false) Integer ram  // ID RAM
+    ) {
+        // Gọi service để lấy dữ liệu lọc
+        return spctsi.loc(minPrice, maxPrice, hangSanXuat, oLuuTru, congNgheCPU, ram);
+
+
+    }
 //    @GetMapping("/locTheoDungLuongRam/{dungLuongRam}")
 //    public List<SanPhamChiTietDto> locTheoDungLuongRam(@PathVariable Integer dungLuongRam) {
-//        return spctsi.locTheoDungLuongRam(dungLuongRam);
+//        return spctsi.locTheoRam(dungLuongRam);
 //    }
+//
 //    @GetMapping("/locTheoHangSanXuat/{hangSanXuat}")
 //    public List<SanPhamChiTietDto> locTheoHangSanXuat(@PathVariable String hangSanXuat) {
 //        return spctsi.locTheoHangSanXuat(hangSanXuat);
 //    }
-//    @GetMapping("/locTheoTamNen/{tamNen}")
-//    public List<SanPhamChiTietDto> locTheoTamNen(@PathVariable String tamNen) {
-//        return spctsi.locTheoTamNen(tamNen);
+//
+//    @GetMapping("/locTheoOLuuTru/{oLuuTru}")
+//    public List<SanPhamChiTietDto> locTheoOLuuTru(@PathVariable Integer oLuuTru) {
+//        return spctsi.locTheoOLuuTru(oLuuTru);
 //    }
 //    @GetMapping("/locTheoCongNgheCPU/{congNgheCPU}")
 //    public List<SanPhamChiTietDto> locTheoCongNgheCPU(@PathVariable String congNgheCPU) {
 //        return spctsi.locTheoCongNgheCPU(congNgheCPU);
-//    }
-//    @GetMapping("/locTheoKichThuoc/{kichThuoc}")
-//    public List<SanPhamChiTietDto> locTheoKichThuoc(@PathVariable Double kichThuoc) {
-//        return spctsi.locTheoKichThuoc(kichThuoc);
 //    }
 }

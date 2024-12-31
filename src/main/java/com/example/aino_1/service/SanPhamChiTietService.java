@@ -1,5 +1,6 @@
 package com.example.aino_1.service;
 
+import com.example.aino_1.dto.SanPhamChiTietDto;
 import com.example.aino_1.entity.HinhAnh;
 import com.example.aino_1.entity.Imei;
 import com.example.aino_1.entity.SanPham;
@@ -140,5 +141,6 @@ public class SanPhamChiTietService {
         }
 
     }
+
 
 }

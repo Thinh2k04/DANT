@@ -26,7 +26,7 @@ public class HoaDonService {
     VoucherInterface vcsi;
 
     @Autowired
-    TaiKhoanInterface tksi;
+    TaiKhoanNguoiDungInterface tksi;
 
     @Transactional
     public void hamXuLiHoaDon(ThongTinTaiKhoan ttk, HoaDon hd, List<HoaDonChiTiet> lhdct) {

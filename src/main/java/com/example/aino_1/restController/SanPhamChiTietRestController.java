@@ -61,17 +61,18 @@ public class  SanPhamChiTietRestController {
         return spctsi.timSanPhamTheoTuKhoa(tuKhoaTimKiem);
     }
 
-    @GetMapping("/loc/{minPrice}&{maxPrice}&{hangSanXuat}&{oLuuTru}&{congNgheCPU}&{ram}")
+    @GetMapping("/loc/{minPrice}&{maxPrice}&{hangSanXuat}&{oLuuTru}&{congNgheCPU}&{ram}&{manHinh}")
     public List<SanPhamChiTietDto> locSanPham(
-            @PathVariable(required = false) Double minPrice,  // Giá tối thiểu
-            @PathVariable(required = false) Double maxPrice,  // Giá tối đa
-            @PathVariable(required = false) Integer hangSanXuat,  // ID hãng sản xuất
-            @PathVariable(required = false) Integer oLuuTru,  // ID ổ lưu trữ
-            @PathVariable(required = false) Integer congNgheCPU,  // ID CPU
-            @PathVariable(required = false) Integer ram  // ID RAM
+            @PathVariable(required = false) Double minPrice,
+            @PathVariable(required = false) Double maxPrice,
+            @PathVariable(required = false) Integer hangSanXuat,
+            @PathVariable(required = false) Integer oLuuTru,
+            @PathVariable(required = false) Integer congNgheCPU,
+            @PathVariable(required = false) Integer ram,
+            @PathVariable(required = false) Integer manHinh
     ) {
         // Gọi service để lấy dữ liệu lọc
-        return spctsi.loc(minPrice, maxPrice, hangSanXuat, oLuuTru, congNgheCPU, ram);
+        return spctsi.loc(minPrice, maxPrice, hangSanXuat, oLuuTru, congNgheCPU, ram, manHinh);
 
 
     }

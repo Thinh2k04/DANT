@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -16,16 +18,28 @@ public class TaiKhoanNguoiDung {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "ten_tai_khoan", nullable = false, length = 50)
-    private String tenTaiKhoan;
+    @Column(name = "username", nullable = false, unique = true, length = 50)
+    private String username;
 
-    @Column(name = "mat_khau", nullable = false, length = 50)
-    private String matKhau;
+    @Column(name = "password", nullable = false, length = 255)
+    private String password;
 
-    @ManyToOne
-    @JoinColumn(name = "id_chuc_vu", referencedColumnName = "id")
-    private ChucVu chucVu;  // Liên kết với bảng chuc_vu qua khóa ngoại
+    @Column(name = "email", nullable = false, unique = true, length = 100)
+    private String email;
 
-    @Column(name = "trang_thai")
-    private Integer trangThai;  // Trạng thái tài khoản người dùng
+    @Column(name = "full_name", length = 100)
+    private String fullName;
+
+    @Column(name = "chuc_vu", length = 50)
+    private String chucVu = "USER";
+
+    @Column(name = "enabled")
+    private Integer enabled;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
 }

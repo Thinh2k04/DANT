@@ -1,11 +1,7 @@
 package com.example.aino_1.restController;
 
 import com.example.aino_1.entity.CardDoHoa;
-import com.example.aino_1.entity.ChatLieu;
-import com.example.aino_1.entity.ChucVu;
 import com.example.aino_1.repository.CardDoHoaInterface;
-import com.example.aino_1.repository.ChatLieuInterface;
-import com.example.aino_1.repository.ChucVuInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;

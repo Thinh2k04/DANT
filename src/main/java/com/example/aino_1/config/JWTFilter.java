@@ -34,6 +34,7 @@
 //        String authHeader = request.getHeader("Authorization");
 //        String token = null;
 //        String username = null;
+//
 //        //nếu header (token) khác null và bắt đầu bằng Bearer
 //        if (authHeader != null && authHeader.startsWith("Bearer")) {
 //            //khi gửi đi, token sẽ bị chèn thêm đoạn "Bearer" ở phía trước nên phải cắt nó ra

@@ -34,7 +34,7 @@ public class CuaHangRestController {
         return csi.save(cuaHang);
     }
 
-    @PutMapping("/update/{maSo}")
+    @PostMapping("/update")
     public CuaHang update(@RequestBody CuaHang cuaHang) {
         return csi.save(cuaHang);
     }

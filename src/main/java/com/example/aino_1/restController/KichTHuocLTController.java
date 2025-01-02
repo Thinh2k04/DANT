@@ -41,7 +41,7 @@ public class KichTHuocLTController {
         return ktltsi.save(KichThuocLapTop);
     }
 
-    @PutMapping("/update/{maLoai}")
+    @PostMapping("/update")
     public KichThuocLapTop update(@RequestBody KichThuocLapTop KichThuocLapTop) {
         return ktltsi.save(KichThuocLapTop);
     }

@@ -38,7 +38,7 @@ public class NguonNhapRestController {
         return nnsi.save(nguonNhap);
     }
 
-    @PutMapping("/update/{maNhaCungUng}")
+    @PostMapping("/update")
     public NguonNhap update(@RequestBody NguonNhap nguonNhap) {
         return nnsi.save(nguonNhap);
     }

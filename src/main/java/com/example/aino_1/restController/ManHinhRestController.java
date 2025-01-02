@@ -38,7 +38,7 @@ public class ManHinhRestController {
         return mhsi.save(manHinh);
     }
 
-    @PutMapping("/update/{maSo}")
+    @PostMapping("/update")
     public ManHinh update(@RequestBody ManHinh manHinh) {
         return mhsi.save(manHinh);
     }

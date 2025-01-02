@@ -41,7 +41,7 @@ public class MauSacResstController {
         return mssi.save(mauSac);
     }
 
-    @PutMapping("/update/{maSo}")
+    @PostMapping("/update")
     public MauSac update(@RequestBody MauSac mauSac) {
         return mssi.save(mauSac);
     }

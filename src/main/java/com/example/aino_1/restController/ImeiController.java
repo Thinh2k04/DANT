@@ -1,6 +1,7 @@
 package com.example.aino_1.restController;
 
 import com.example.aino_1.entity.ChatLieu;
+import com.example.aino_1.entity.Gpu;
 import com.example.aino_1.entity.Imei;
 import com.example.aino_1.repository.ImeiInterface;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,9 +23,22 @@ public class ImeiController {
     }
 
 
-    @GetMapping("/getByID/{id}")
-    public Imei getAll(@PathVariable Integer id) {
-        return ii.findById(id).get();
+
+
+    @PostMapping("/add")
+    public Imei create(@RequestBody Imei gpu) {
+        return ii.save(gpu);
     }
+
+    @PostMapping("/update")
+    public Imei update(@RequestBody Imei gpu) {
+        return ii.save(gpu);
+    }
+
+    @DeleteMapping("/del/{maSo}")
+    public void delete(@PathVariable Integer maSo) {
+        ii.deleteById(maSo);
+    }
+
 
 }

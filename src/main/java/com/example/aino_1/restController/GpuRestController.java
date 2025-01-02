@@ -39,7 +39,7 @@ public class GpuRestController {
         return gsi.save(gpu);
     }
 
-    @PutMapping("/update/{maSo}")
+    @PostMapping("/update")
     public Gpu update(@RequestBody Gpu gpu) {
         return gsi.save(gpu);
     }

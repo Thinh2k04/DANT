@@ -38,7 +38,7 @@ public class LoaiSanPhamRestController {
         return lspsi.save(loaiSanPham);
     }
 
-    @PutMapping("/update/{maLoai}")
+    @PostMapping("/update")
     public LoaiSanPham update(@RequestBody LoaiSanPham loaiSanPham) {
         return lspsi.save(loaiSanPham);
     }

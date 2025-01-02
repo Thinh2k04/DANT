@@ -38,7 +38,7 @@ public class RamRestController {
         return rsi.save(ram);
     }
 
-    @PutMapping("/update/{maSo}")
+    @PostMapping("/update")
     public Ram update(@RequestBody Ram ram) {
         return rsi.save(ram);
     }

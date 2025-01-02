@@ -39,7 +39,7 @@ public class OLuuTruRestController {
         return oltsi.save(oLuuTru);
     }
 
-    @PutMapping("/update/{maSo}")
+    @PostMapping("/update")
     public OLuuTru update(@RequestBody OLuuTru oLuuTru) {
         return oltsi.save(oLuuTru);
     }

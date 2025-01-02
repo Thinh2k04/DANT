@@ -6,6 +6,7 @@ import com.example.aino_1.entity.Imei;
 import com.example.aino_1.entity.SanPham;
 import com.example.aino_1.entity.SanPhamChiTiet;
 import com.example.aino_1.repository.HinhAnhInterface;
+import com.example.aino_1.repository.ImeiInterface;
 import com.example.aino_1.repository.SanPhamChiTietInterface;
 import com.example.aino_1.repository.SanPhamInterface;
 import jakarta.transaction.Transactional;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class SanPhamChiTietService {
@@ -24,66 +26,65 @@ public class SanPhamChiTietService {
     SanPhamChiTietInterface spctsi;
 
     @Autowired
+    ImeiInterface imsi;
+
+    @Autowired
     HinhAnhInterface hasi;
 
-    public void saveSanPhamChiTietWithImage(SanPhamChiTiet spct, SanPham sp, List<String> urlImg)  {
-//        // Bước 1: Lưu sản phẩm mà không có ảnh
-//        SanPham sanPham = new SanPham();
-//        sanPham.setTenSanPham(sp.getTenSanPham());
-//        sanPham.setNamSanXuat(sp.getNamSanXuat());
-//        sanPham.setTrongLuong(sp.getTrongLuong());
-//        sanPham.setGioiThieu(sp.getGioiThieu());
-//        sanPham.setThoiHanBaoHanh(sp.getThoiHanBaoHanh());
-//        sanPham.setPin(sp.getPin());
-//        sanPham.setTrangThai(sp.getTrangThai());
-//
-//        // Thiết lập loại sản phẩm
-//        LoaiSanPham loaiSanPham = loaiSanPhamInterface.findById(sp.getLoaiSanPham().getId()).get();
-//        sanPham.setLoaiSanPham(loaiSanPham);
-//        // Thiết lập nguồn nhập
-//        NguonNhap nguonNhap = nguonNhapInterface.findById(sp.getNguonNhap().getId()).get();
-//        sanPham.setNguonNhap(nguonNhap);
-//        // Thiết lập nguồn nhập
-//        ChatLieu chatLieu = chatLieuInterface.findById(sp.getChatLieu().getId()).get();
-//        sanPham.setChatLieu(chatLieu);
-//        // Thiết lập nguồn nhập
-//        KichThuocLapTop kichThuocLapTop = kichThuocLaptopInterface.findById(sp.getChatLieu().getId()).get();
-//        sanPham.setKichThuocLaptop(kichThuocLapTop);
-
-        SanPham sanPham = spsi.save(sp);
-
-        spct.setSanPham(sanPham);
-
-        SanPhamChiTiet savedSanPhamCT = spctsi.save(spct);
-
-        if (urlImg != null ){
-            for (String url : urlImg
-            ) {
-                // Bước 2: Lưu ảnh với ID sản phẩm
-                HinhAnh hinhAnh = new HinhAnh();
-                hinhAnh.setDuongDanHinhAnh(url); // Hàm uploadFile để lưu file và trả về đường dẫn
-                hinhAnh.setSanPhamChiTiet(savedSanPhamCT); // Gán sản phẩm vào hình ảnh
-
-                // Lưu thông tin ảnh vào cơ sở dữ liệu
-                hasi.save(hinhAnh);
+    public Boolean saveSanPhamChiTietWithImage(SanPhamChiTiet spct, SanPham sp, List<String> urlImg, List<String> listImei) {
+        try {
+            // Kiểm tra sản phẩm và sản phẩm chi tiết
+            if (spct == null || sp == null) {
+                throw new IllegalArgumentException("Sản phẩm chi tiết hoặc sản phẩm không được để trống");
             }
+
+            // Kiểm tra ID sản phẩm
+            Integer idSanPham = sp.getId();
+            if (idSanPham == null) {
+                throw new IllegalArgumentException("ID sản phẩm không được để trống");
+            }
+
+            // Tìm sản phẩm trong cơ sở dữ liệu
+            SanPham sanPham = spsi.findById(idSanPham)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm với ID: " + idSanPham));
+
+            // Gán sản phẩm vào sản phẩm chi tiết và lưu
+            spct.setSanPham(sanPham);
+            SanPhamChiTiet savedSpct = spctsi.save(spct);
+
+            // Lưu hình ảnh nếu danh sách URL hợp lệ
+            if (urlImg != null && !urlImg.isEmpty()) {
+                urlImg.stream()
+                        .filter(url -> url != null && !url.isEmpty()) // Loại bỏ URL null hoặc rỗng
+                        .forEach(url -> {
+                            HinhAnh hinhAnh = new HinhAnh();
+                            hinhAnh.setDuongDanHinhAnh(url);
+                            hinhAnh.setSanPhamChiTiet(savedSpct);
+                            hasi.save(hinhAnh);
+                        });
+            }
+
+            // Lưu hình ảnh nếu danh sách URL hợp lệ
+            if (listImei != null && !listImei.isEmpty()) {
+                listImei.stream()
+                        .filter(url -> url != null && !url.isEmpty()) // Loại bỏ URL null hoặc rỗng
+                        .forEach(url -> {
+                            Imei imei = new Imei();
+                            imei.setImei(url);
+                            imei.setIdSpct(savedSpct.getId());
+                            imsi.save(imei);
+                        });
+            }
+
+            return true;
+        } catch (Exception e) {
+            // Log lỗi
+            System.err.println("Lỗi khi lưu sản phẩm chi tiết hoặc hình ảnh: " + e.getMessage());
+            e.printStackTrace();
+            return false;
         }
 
-//        if (listimei != null ){
-//            for (String lkimei : listimei
-//            ) {
-//                // Bước 2: Lưu ảnh với ID sản phẩm
-//                Imei imei = new Imei();
-//                imei.setDuongDanHinhAnh(url); // Hàm uploadFile để lưu file và trả về đường dẫn
-//                hinhAn.setSanPhamChiTiet(savedSanPhamCT); // Gán sản phẩm vào hình ảnh
-//
-//                // Lưu thông tin ảnh vào cơ sở dữ liệu
-//                hasi.save(hinhAnh);
-//            }
-//        }
-
-
-    }
+}
     @Transactional
     public void updateSanPhamChiTietWithImage(SanPhamChiTiet sp, List<String> urlImg) {
 //        SanPham existingSanPham = sanPhamInterface.findById(sp.getId()).orElse(null);

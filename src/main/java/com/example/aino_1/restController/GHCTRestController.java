@@ -1,5 +1,6 @@
 package com.example.aino_1.restController;
 
+import com.example.aino_1.entity.ChatLieu;
 import com.example.aino_1.entity.GioHangChiTiet;
 import com.example.aino_1.entity.Gpu;
 import com.example.aino_1.repository.GioHangChiTietInterface;
@@ -27,6 +28,12 @@ public class GHCTRestController {
     @GetMapping("/getAll")
     public List<GioHangChiTiet> getAll() {
         return gsi.findAll();
+    }
+
+
+    @GetMapping("/getByID/{id}")
+    public GioHangChiTiet getAll(@PathVariable Integer id) {
+        return gsi.findById(id).get();
     }
 
     @PostMapping("/add")

@@ -3,8 +3,11 @@ package com.example.aino_1.restController;
 import com.example.aino_1.dto.SanPhamDTO;
 import com.example.aino_1.entity.SanPham;
 import com.example.aino_1.entity.SanPhamChiTiet;
+import com.example.aino_1.repository.SanPhamChiTietInterface;
 import com.example.aino_1.repository.SanPhamInterface;
+import com.example.aino_1.service.SanPhamChiTietService;
 import com.example.aino_1.service.SanPhamService;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -39,6 +42,12 @@ public class SanPhamRestController {
     @Autowired
     SanPhamService spsv;
 
+    @Autowired
+    SanPhamChiTietInterface spctsi;
+
+
+
+
     @GetMapping("/getAll")
     public List<SanPham> getAll() {
         return spsi.findAll();
@@ -50,8 +59,52 @@ public class SanPhamRestController {
     }
 
     @PostMapping("/add")
-    public void AddSanPham(@RequestBody SanPham sanPham){ spsi.save(sanPham);
-}
+    public ResponseEntity<String> create(@RequestBody Map<String, Object> requestData) {
+        try {
+            // Tạo một ObjectMapper dùng chung
+            ObjectMapper objectMapper = new ObjectMapper();
+
+            // Lấy thông tin sản phẩm chi tiết từ JSON
+            if (!requestData.containsKey("sanPhamChiTiet")) {
+                return ResponseEntity.badRequest().body("Thiếu thông tin 'sanPhamChiTiet'");
+            }
+            SanPhamChiTiet sanPhamChiTiet = objectMapper.convertValue(requestData.get("sanPhamChiTiet"), SanPhamChiTiet.class);
+
+            // Lấy thông tin sản phẩm từ JSON
+            if (!requestData.containsKey("sanPham")) {
+                return ResponseEntity.badRequest().body("Thiếu thông tin 'sanPham'");
+            }
+            SanPham sanPham = objectMapper.convertValue(requestData.get("sanPham"), SanPham.class);
+
+            // Lấy danh sách URL ảnh từ JSON
+            if (!requestData.containsKey("imageUrls")) {
+                return ResponseEntity.badRequest().body("Thiếu danh sách URL ảnh 'imageUrls'");
+            }
+            List<String> imageUrls = objectMapper.convertValue(requestData.get("imageUrls"), new TypeReference<List<String>>() {});
+
+            // Lấy danh sách IMEU từ JSON
+            if (!requestData.containsKey("listImei")) {
+                return ResponseEntity.badRequest().body("Thiếu danh sách IMEI");
+            }
+            List<String> listImei = objectMapper.convertValue(requestData.get("listImei"), new TypeReference<List<String>>() {});
+
+            // Gọi service để thêm sản phẩm
+            boolean result = spsv.addSanPham(sanPhamChiTiet, sanPham, imageUrls,listImei);
+
+            if (result) {
+                return ResponseEntity.ok("Thêm sản phẩm thành công");
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Thêm sản phẩm thất bại");
+            }
+        } catch (IllegalArgumentException e) {
+            // Lỗi khi chuyển đổi JSON
+            return ResponseEntity.badRequest().body("Dữ liệu không hợp lệ: " + e.getMessage());
+        } catch (Exception e) {
+            // Các lỗi khác
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Đã xảy ra lỗi: " + e.getMessage());
+        }
+    }
+
 
     @PutMapping("/update/{id}")
     public void UpdateSanPham(@RequestBody SanPham sanPham){

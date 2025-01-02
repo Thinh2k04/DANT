@@ -1,5 +1,6 @@
 package com.example.aino_1.restController;
 
+import com.example.aino_1.entity.ChatLieu;
 import com.example.aino_1.entity.Gpu;
 
 import com.example.aino_1.repository.GpuInterface;
@@ -26,6 +27,11 @@ public class GpuRestController {
     @GetMapping("/getAll")
     public List<Gpu> getAll() {
         return gsi.findAll();
+    }
+
+    @GetMapping("/getByID/{id}")
+    public Gpu getAll(@PathVariable Integer id) {
+        return gsi.findById(id).get();
     }
 
     @PostMapping("/add")

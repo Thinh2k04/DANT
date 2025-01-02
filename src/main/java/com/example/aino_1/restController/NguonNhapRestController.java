@@ -1,5 +1,6 @@
 package com.example.aino_1.restController;
 
+import com.example.aino_1.entity.ChatLieu;
 import com.example.aino_1.entity.NguonNhap;
 import com.example.aino_1.repository.NguonNhapInterface;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,11 @@ public class NguonNhapRestController {
     @GetMapping("/getAll")
     public List<NguonNhap> getAll() {
         return nnsi.findAll();
+    }
+
+    @GetMapping("/getByID/{id}")
+    public NguonNhap getAll(@PathVariable Integer id) {
+        return nnsi.findById(id).get();
     }
 
     @PostMapping("/add")

@@ -23,10 +23,10 @@ public class Imei {
     @Column(name = "imei", unique = true, nullable = false)
     private String imei;
 
-    @Column(name = "id_hoa_don_chi_tiet", nullable = false)
+    @Column(name = "id_hoa_don_chi_tiet")
     private Integer idHDCT;
 
-    @Column(name = "trang_thai", nullable = false)
+    @Column(name = "trang_thai")
     private Integer trangThai;
 
 }

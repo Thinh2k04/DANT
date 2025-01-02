@@ -1,5 +1,6 @@
 package com.example.aino_1.restController;
 
+import com.example.aino_1.entity.ChatLieu;
 import com.example.aino_1.entity.Cpu;
 import com.example.aino_1.repository.CpuInterface;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,12 +28,17 @@ public class CpuRestController {
         return csi.findAll();
     }
 
+    @GetMapping("/getByID/{id}")
+    public Cpu getAll(@PathVariable Integer id) {
+        return csi.findById(id).get();
+    }
+
     @PostMapping("/add")
     public Cpu create(@RequestBody Cpu cpu) {
         return csi.save(cpu);
     }
 
-    @PutMapping("/update/{maSo}")
+    @PostMapping("/update")
     public Cpu update(@RequestBody Cpu cpu) {
         return csi.save(cpu);
     }

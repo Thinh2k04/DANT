@@ -27,12 +27,17 @@ public class CardDoHoaController {
         return cdhsi.findAll();
     }
 
+    @GetMapping("/getByID/{id}")
+    public CardDoHoa getAll(@PathVariable Integer id) {
+        return cdhsi.findById(id).get();
+    }
+
     @PostMapping("/add")
     public CardDoHoa create(@RequestBody CardDoHoa CardDoHoa) {
         return cdhsi.save(CardDoHoa);
     }
 
-    @PutMapping("/update/{id}")
+    @PostMapping("/update")
     public CardDoHoa update(@RequestBody CardDoHoa CardDoHoa) {
         return cdhsi.save(CardDoHoa);
     }

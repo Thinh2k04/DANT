@@ -1,5 +1,6 @@
 package com.example.aino_1.restController;
 
+import com.example.aino_1.entity.ChatLieu;
 import com.example.aino_1.entity.HinhAnh;
 import com.example.aino_1.repository.HinhAnhInterface;
 import com.example.aino_1.service.HinhAnhService;
@@ -36,6 +37,11 @@ public class HinhAnhRestController {
     @PostMapping("/add")
     public HinhAnh create(@RequestBody HinhAnh hinhAnh) {
         return hasi.save(hinhAnh);
+    }
+
+    @GetMapping("/getByID/{id}")
+    public HinhAnh getAll(@PathVariable Integer id) {
+        return hasi.findById(id).get();
     }
 
     @PutMapping("/update/{id}")

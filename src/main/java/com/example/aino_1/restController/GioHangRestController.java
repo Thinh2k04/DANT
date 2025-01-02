@@ -1,5 +1,6 @@
 package com.example.aino_1.restController;
 
+import com.example.aino_1.entity.ChatLieu;
 import com.example.aino_1.entity.GioHang;
 
 import com.example.aino_1.repository.GioHangInterface;
@@ -26,6 +27,11 @@ public class GioHangRestController {
     @GetMapping("/getAll")
     public List<GioHang> getAll() {
         return gsi.findAll();
+    }
+
+    @GetMapping("/getByID/{id}")
+    public GioHang getAll(@PathVariable Integer id) {
+        return gsi.findById(id).get();
     }
 
     @PostMapping("/add")

@@ -1,6 +1,7 @@
 package com.example.aino_1.restController;
 
 
+import com.example.aino_1.entity.ChatLieu;
 import com.example.aino_1.entity.ManHinh;
 import com.example.aino_1.entity.MauSac;
 import com.example.aino_1.repository.ManHinhInterface;
@@ -28,6 +29,11 @@ public class MauSacResstController {
     @GetMapping("/getAll")
     public List<MauSac> getAll() {
         return mssi.findAll();
+    }
+
+    @GetMapping("/getByID/{id}")
+    public MauSac getAll(@PathVariable Integer id) {
+        return mssi.findById(id).get();
     }
 
     @PostMapping("/add")

@@ -1,6 +1,7 @@
 package com.example.aino_1.restController;
 
 import com.example.aino_1.config.JwtUtils;
+import com.example.aino_1.entity.ChatLieu;
 import com.example.aino_1.entity.TaiKhoanNguoiDung;
 
 import com.example.aino_1.repository.TaiKhoanNguoiDungInterface;
@@ -67,11 +68,17 @@ public class TaiKhoanNguoiDungRestController {
 
 
         // Đưa token vào phản hồi
+        response.put("role",role);
         response.put("message", "Đăng nhập thành công");
         response.put("token", token);
 
         // Trả về phản hồi
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/getByID/{id}")
+    public TaiKhoanNguoiDung getAll(@PathVariable Integer id) {
+        return taiKhoanInterface.findById(id).get();
     }
 
 

@@ -1,6 +1,7 @@
 package com.example.aino_1.restController;
 
 
+import com.example.aino_1.entity.ChatLieu;
 import com.example.aino_1.entity.Cpu;
 import com.example.aino_1.entity.CuaHang;
 import com.example.aino_1.repository.CuaHangInterface;
@@ -20,6 +21,12 @@ public class CuaHangRestController {
     @GetMapping("/getAll")
     public List<CuaHang> getAll() {
         return csi.findAll();
+    }
+
+
+    @GetMapping("/getByID/{id}")
+    public CuaHang getAll(@PathVariable Integer id) {
+        return csi.findById(id).get();
     }
 
     @PostMapping("/add")

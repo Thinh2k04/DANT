@@ -1,5 +1,6 @@
 package com.example.aino_1.restController;
 
+import com.example.aino_1.entity.ChatLieu;
 import com.example.aino_1.entity.Ram;
 import com.example.aino_1.repository.RamInterface;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,11 @@ public class RamRestController {
     @GetMapping("/getAll")
     public List<Ram> getAll() {
         return rsi.findAll();
+    }
+
+    @GetMapping("/getByID/{id}")
+    public Ram getAll(@PathVariable Integer id) {
+        return rsi.findById(id).get();
     }
 
     @PostMapping("/add")

@@ -1,6 +1,7 @@
 package com.example.aino_1.restController;
 
 
+import com.example.aino_1.entity.CardDoHoa;
 import com.example.aino_1.entity.ChatLieu;
 import com.example.aino_1.repository.ChatLieuInterface;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,12 +30,17 @@ public class ChatLieuRestController {
         return clsi.findAll();
     }
 
+    @GetMapping("/getByID/{id}")
+    public ChatLieu getAll(@PathVariable Integer id) {
+        return clsi.findById(id).get();
+    }
+
     @PostMapping("/add")
     public ChatLieu create(@RequestBody ChatLieu ChatLieu) {
         return clsi.save(ChatLieu);
     }
 
-    @PutMapping("/update/{id}")
+    @PostMapping("/update")
     public ChatLieu update(@RequestBody ChatLieu ChatLieu) {
         return clsi.save(ChatLieu);
     }

@@ -1,5 +1,6 @@
 package com.example.aino_1.restController;
 
+import com.example.aino_1.entity.ChatLieu;
 import com.example.aino_1.entity.Voucher;
 
 import com.example.aino_1.repository.VoucherInterface;
@@ -31,6 +32,11 @@ public class VoucherRestController {
     @PostMapping("/add")
     public Voucher create(@RequestBody Voucher voucher) {
         return vsi.save(voucher);
+    }
+
+    @GetMapping("/getByID/{id}")
+    public Voucher getAll(@PathVariable Integer id) {
+        return vsi.findById(id).get();
     }
 
     @PutMapping("/update/{id}")

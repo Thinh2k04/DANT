@@ -1,5 +1,6 @@
 package com.example.aino_1.restController;
 
+import com.example.aino_1.entity.ChatLieu;
 import com.example.aino_1.entity.KichThuocLapTop;
 import com.example.aino_1.entity.LoaiSanPham;
 import com.example.aino_1.repository.KichThuocLaptopInterface;
@@ -28,6 +29,11 @@ public class KichTHuocLTController {
     @GetMapping("/getAll")
     public List<KichThuocLapTop> getAll() {
         return ktltsi.findAll();
+    }
+
+    @GetMapping("/getByID/{id}")
+    public KichThuocLapTop getAll(@PathVariable Integer id) {
+        return ktltsi.findById(id).get();
     }
 
     @PostMapping("/add")

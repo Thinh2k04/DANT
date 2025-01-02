@@ -1,5 +1,6 @@
 package com.example.aino_1.restController;
 
+import com.example.aino_1.entity.ChatLieu;
 import com.example.aino_1.entity.ManHinh;
 import com.example.aino_1.repository.ManHinhInterface;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,11 @@ public class ManHinhRestController {
     @GetMapping("/getAll")
     public List<ManHinh> getAll() {
         return mhsi.findAll();
+    }
+
+    @GetMapping("/getByID/{id}")
+    public ManHinh getAll(@PathVariable Integer id) {
+        return mhsi.findById(id).get();
     }
 
     @PostMapping("/add")

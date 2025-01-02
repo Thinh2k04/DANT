@@ -8,6 +8,8 @@ import com.example.aino_1.repository.SanPhamChiTietInterface;
 import com.example.aino_1.service.SanPhamChiTietService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,10 +30,6 @@ public class    SPCTDTORestController {
     public List<SanPhamChiTietDto> getAllSanPhamChiTietDto() {
         return spctsi.getAllDTO();
     }
-
-//    @GetMapping("/getById/{id}")
-//    public SanPhamChiTietDto getById(@PathVariable Integer id) {
-//        return spctsi.getSanPhamChiTietById(id);
 //    }
 
     @GetMapping("/getById/{id}")
@@ -40,15 +38,37 @@ public class    SPCTDTORestController {
     }
 
     @PostMapping("/add")
-    public void create(@RequestBody Map<String, Object> requestData) {
-        // Lấy thông tin sản phẩm từ JSON
-        SanPhamChiTiet sanPhamChiTiet = new ObjectMapper().convertValue(requestData.get("sanPhamChiTiet"), SanPhamChiTiet.class);
-        // Lấy thông tin sản phẩm từ json;
-        SanPham sanPham = new ObjectMapper().convertValue(requestData.get("sanPham"), SanPham.class);
-        // Lấy danh sách URL ảnh từ JSON
-        List<String> imageUrls = (List<String>) requestData.get("imageUrls");
-        spctsv.saveSanPhamChiTietWithImage(sanPhamChiTiet,sanPham, imageUrls);
+    public ResponseEntity<String> create(@RequestBody Map<String, Object> requestData) {
+        try {
+            // Lấy thông tin sản phẩm từ JSON
+            ObjectMapper objectMapper = new ObjectMapper();
+            SanPhamChiTiet sanPhamChiTiet = objectMapper.convertValue(requestData.get("sanPhamChiTiet"), SanPhamChiTiet.class);
+            SanPham sanPham = objectMapper.convertValue(requestData.get("sanPham"), SanPham.class);
+
+            // Lấy danh sách URL ảnh từ JSON
+            List<String> imageUrls = (List<String>) requestData.get("imageUrls");
+            // Lấy danh sách URL ảnh từ JSON
+            List<String> listImei = (List<String>) requestData.get("listImei");
+
+
+            // Gọi phương thức lưu dữ liệu
+            boolean isSaved = spctsv.saveSanPhamChiTietWithImage(sanPhamChiTiet, sanPham, imageUrls,listImei);
+
+            // Kiểm tra kết quả lưu
+            if (isSaved) {
+                return ResponseEntity.ok("Sản phẩm chi tiết đã được lưu thành công.");
+            } else {
+                return ResponseEntity.status(   HttpStatus.INTERNAL_SERVER_ERROR).body("Không thể lưu sản phẩm chi tiết.");
+            }
+        } catch (IllegalArgumentException e) {
+            // Xử lý lỗi dữ liệu không hợp lệ
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Dữ liệu không hợp lệ: " + e.getMessage());
+        } catch (Exception e) {
+            // Xử lý lỗi chung
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Đã xảy ra lỗi: " + e.getMessage());
+        }
     }
+
 
     @PutMapping("/update/{id}")
     public void update(@RequestBody Map<String, Object> requestData) {

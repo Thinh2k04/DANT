@@ -1,5 +1,6 @@
 package com.example.aino_1.restController;
 
+import com.example.aino_1.entity.ChatLieu;
 import com.example.aino_1.entity.LoaiSanPham;
 import com.example.aino_1.repository.LoaiSanPhamInterface;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,11 @@ public class LoaiSanPhamRestController {
     @GetMapping("/getAll")
     public List<LoaiSanPham> getAll() {
         return lspsi.findAll();
+    }
+
+    @GetMapping("/getByID/{id}")
+    public LoaiSanPham getAll(@PathVariable Integer id) {
+        return lspsi.findById(id).get();
     }
 
     @PostMapping("/add")

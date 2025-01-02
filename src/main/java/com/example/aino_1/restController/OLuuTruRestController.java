@@ -1,5 +1,6 @@
 package com.example.aino_1.restController;
 
+import com.example.aino_1.entity.ChatLieu;
 import com.example.aino_1.entity.OLuuTru;
 
 import com.example.aino_1.repository.OLuuTruInterface;
@@ -26,6 +27,11 @@ public class OLuuTruRestController {
     @GetMapping("/getAll")
     public List<OLuuTru> getAll() {
         return oltsi.findAll();
+    }
+
+    @GetMapping("/getByID/{id}")
+    public OLuuTru getAll(@PathVariable Integer id) {
+        return oltsi.findById(id).get();
     }
 
     @PostMapping("/add")

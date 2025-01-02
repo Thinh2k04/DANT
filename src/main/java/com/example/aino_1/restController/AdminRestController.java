@@ -22,10 +22,10 @@ public class AdminRestController {
     public ResponseEntity<String> getDashboard(@RequestHeader("Authorization") String token) {
         System.out.println("AdminRestController: Received token for dashboard: " + token);
 
-        // Loại bỏ "Bearer " nếu có trong token
-        if (token.startsWith("Bearer ")) {
-            token = token.substring(7); // Cắt "Bearer " ra khỏi token
-        }
+//        // Loại bỏ "Bearer " nếu có trong token
+//        if (token.startsWith("Bearer ")) {
+//            token = token.substring(7); // Cắt "Bearer " ra khỏi token
+//        }
 
         if (isValidToken(token)) {
             return ResponseEntity.ok("Welcome to the Admin Dashboard");

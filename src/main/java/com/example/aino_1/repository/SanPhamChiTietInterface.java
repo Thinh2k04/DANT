@@ -209,7 +209,8 @@ public interface SanPhamChiTietInterface extends JpaRepository<SanPhamChiTiet, I
                           AND (:hangSanXuat IS NULL OR thuongHieu.id = :hangSanXuat)
                           AND (:oLuuTru IS NULL OR olt.id = :oLuuTru)
                           AND (:congNgheCPU IS NULL OR cpu.id = :congNgheCPU)
-                          AND (:ram IS NULL OR ram.id = :ram)                                        
+                          AND (:ram IS NULL OR ram.id = :ram)  
+                          AND (:manHinh IS NULL OR mh.id = :manHinh)                                      
 """
     )
     List<SanPhamChiTietDto> loc(
@@ -218,7 +219,8 @@ public interface SanPhamChiTietInterface extends JpaRepository<SanPhamChiTiet, I
             @Param("hangSanXuat") Integer hangSanXuat,
             @Param("oLuuTru") Integer oLuuTru,
             @Param("congNgheCPU") Integer congNgheCPU,
-            @Param("ram") Integer ram
+            @Param("ram") Integer ram,
+            @Param("manHinh") Integer manHinh
     );
 
 //    @Query(

@@ -47,12 +47,38 @@ public class    SPCTDTORestController {
 
             // Lấy danh sách URL ảnh từ JSON
             List<String> imageUrls = (List<String>) requestData.get("imageUrls");
-            // Lấy danh sách URL ảnh từ JSON
-            List<String> listImei = (List<String>) requestData.get("listImei");
-
 
             // Gọi phương thức lưu dữ liệu
-            boolean isSaved = spctsv.saveSanPhamChiTietWithImage(sanPhamChiTiet, sanPham, imageUrls,listImei);
+            boolean isSaved = spctsv.saveSanPhamChiTietWithImage(sanPhamChiTiet, sanPham, imageUrls);
+
+            // Kiểm tra kết quả lưu
+            if (isSaved) {
+                return ResponseEntity.ok("Sản phẩm chi tiết đã được lưu thành công.");
+            } else {
+                return ResponseEntity.status(   HttpStatus.INTERNAL_SERVER_ERROR).body("Không thể lưu sản phẩm chi tiết.");
+            }
+        } catch (IllegalArgumentException e) {
+            // Xử lý lỗi dữ liệu không hợp lệ
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Dữ liệu không hợp lệ: " + e.getMessage());
+        } catch (Exception e) {
+            // Xử lý lỗi chung
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Đã xảy ra lỗi: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/Update")
+    public ResponseEntity<String> update(@RequestBody Map<String, Object> requestData) {
+        try {
+            // Lấy thông tin sản phẩm từ JSON
+            ObjectMapper objectMapper = new ObjectMapper();
+            SanPhamChiTiet sanPhamChiTiet = objectMapper.convertValue(requestData.get("sanPhamChiTiet"), SanPhamChiTiet.class);
+            SanPham sanPham = objectMapper.convertValue(requestData.get("sanPham"), SanPham.class);
+
+            // Lấy danh sách URL ảnh từ JSON
+            List<String> imageUrls = (List<String>) requestData.get("imageUrls");
+
+            // Gọi phương thức lưu dữ liệu
+            boolean isSaved = spctsv.saveSanPhamChiTietWithImage(sanPhamChiTiet, sanPham, imageUrls);
 
             // Kiểm tra kết quả lưu
             if (isSaved) {
@@ -70,16 +96,7 @@ public class    SPCTDTORestController {
     }
 
 
-    @PutMapping("/update/{id}")
-    public void update(@RequestBody Map<String, Object> requestData) {
-        // Lấy thông tin sản phẩm từ JSON
-        SanPhamChiTiet SanPhamChiTiet  = new ObjectMapper().convertValue(requestData.get("sanPhamChiTiet"), SanPhamChiTiet.class);
 
-        // Lấy danh sách URL ảnh từ JSON
-        List<String> imageUrls = (List<String>) requestData.get("imageUrls");
-
-        spctsv.updateSanPhamChiTietWithImage(SanPhamChiTiet, imageUrls);
-    }
 
     }
 

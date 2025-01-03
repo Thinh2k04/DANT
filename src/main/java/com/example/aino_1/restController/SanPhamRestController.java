@@ -58,8 +58,55 @@ public class SanPhamRestController {
         return spsi.findById(id).get();
     }
 
-    @PostMapping("/add")
+    @PostMapping("/addOrUpdate")
     public ResponseEntity<String> create(@RequestBody Map<String, Object> requestData) {
+        try {
+            // Tạo một ObjectMapper dùng chung
+            ObjectMapper objectMapper = new ObjectMapper();
+
+            // Lấy thông tin sản phẩm chi tiết từ JSON
+            if (!requestData.containsKey("sanPhamChiTiet")) {
+                return ResponseEntity.badRequest().body("Thiếu thông tin 'sanPhamChiTiet'");
+            }
+            SanPhamChiTiet sanPhamChiTiet = objectMapper.convertValue(requestData.get("sanPhamChiTiet"), SanPhamChiTiet.class);
+
+            // Lấy thông tin sản phẩm từ JSON
+            if (!requestData.containsKey("sanPham")) {
+                return ResponseEntity.badRequest().body("Thiếu thông tin 'sanPham'");
+            }
+            SanPham sanPham = objectMapper.convertValue(requestData.get("sanPham"), SanPham.class);
+
+            // Lấy danh sách URL ảnh từ JSON
+            if (!requestData.containsKey("imageUrls")) {
+                return ResponseEntity.badRequest().body("Thiếu danh sách URL ảnh 'imageUrls'");
+            }
+            List<String> imageUrls = objectMapper.convertValue(requestData.get("imageUrls"), new TypeReference<List<String>>() {});
+
+//            // Lấy danh sách IMEU từ JSON
+//            if (!requestData.containsKey("listImei")) {
+//                return ResponseEntity.badRequest().body("Thiếu danh sách IMEI");
+//            }
+//            List<String> listImei = objectMapper.convertValue(requestData.get("listImei"), new TypeReference<List<String>>() {});
+
+            // Gọi service để thêm sản phẩm
+            boolean result = spsv.addSanPham(sanPhamChiTiet, sanPham, imageUrls);
+
+            if (result) {
+                return ResponseEntity.ok("Thêm sản phẩm thành công");
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Thêm sản phẩm thất bại");
+            }
+        } catch (IllegalArgumentException e) {
+            // Lỗi khi chuyển đổi JSON
+            return ResponseEntity.badRequest().body("Dữ liệu không hợp lệ: " + e.getMessage());
+        } catch (Exception e) {
+            // Các lỗi khác
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Đã xảy ra lỗi: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/Update")
+    public ResponseEntity<String> update(@RequestBody Map<String, Object> requestData) {
         try {
             // Tạo một ObjectMapper dùng chung
             ObjectMapper objectMapper = new ObjectMapper();

@@ -31,8 +31,11 @@ const ChiTietSanPhamAdmin = () => {
   const [displays, setDisplays] = useState([]);
   const [colors, setColors] = useState([]);
 
-  // State lưu trữ form data cho việc thêm mới sản phẩm chi tiết
+  // State lưu trữ form data với giá trị rỗng
   const [formData, setFormData] = useState({
+    sanPham: {
+      id: idSanPham
+    },
     sanPhamChiTiet: {
       id: '',
       hinhAnhMinhHoa: '',
@@ -68,7 +71,8 @@ const ChiTietSanPhamAdmin = () => {
         trangThai: 1
       }
     },
-    imageUrls: []
+    imageUrls: [],
+    listImei: []
   });
 
   // useEffect để fetch dữ liệu khi component mount
@@ -112,59 +116,63 @@ const ChiTietSanPhamAdmin = () => {
     fetchData();
   }, [idSanPham]);
 
-  // Xử lý submit form thêm mới sản phẩm chi tiết
-  const handleSubmit = async (formPayload) => {
+  // Sửa lại hàm handleSubmit để tạo IMEI theo số lượng nhập vào
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:8080/rest/spctDTO/add', formPayload);
+      // Kiểm tra số lượng và IMEI
+      const soLuong = formData.sanPhamChiTiet.soLuong;
+      if (!soLuong || soLuong <= 0) {
+        toast.error('Vui lòng nhập số lượng hợp lệ');
+        return { success: false };
+      }
+
+      // Kiểm tra danh sách IMEI
+      if (!formData.listImei || formData.listImei.length !== soLuong) {
+        toast.error('Vui lòng nhập đủ IMEI cho tất cả sản phẩm');
+        return { success: false };
+      }
+
+      // Kiểm tra hình ảnh
+      if (!formData.sanPhamChiTiet.hinhAnhMinhHoa) {
+        toast.error('Vui lòng chọn hình ảnh đại diện');
+        return { success: false };
+      }
+
+      // Tạo payload với đầy đủ thông tin
+      const payload = {
+        sanPham: {
+          id: formData.sanPham.id
+        },
+        sanPhamChiTiet: {
+          ...formData.sanPhamChiTiet,
+          trangThai: 1,
+          cardDoHoa: {
+            ...formData.sanPhamChiTiet.cardDoHoa,
+            trangThai: 1
+          }
+        },
+        imageUrls: [
+          formData.sanPhamChiTiet.hinhAnhMinhHoa,
+          ...formData.imageUrls
+        ],
+        listImei: formData.listImei
+      };
+
+      const response = await axios.post('http://localhost:8080/rest/spctDTO/add', payload);
+      
       if (response.status === 200) {
-        // Fetch lại danh sách biến thể sau khi thêm thành công
+        toast.success('Thêm sản phẩm chi tiết thành công!');
         const variantsResponse = await axios.get(`http://localhost:8080/rest/san_pham_chi_tiet/getSPCTByIdSP/${idSanPham}`);
         setProductVariants(variantsResponse.data);
         setIsModalOpen(false);
-        
-        // Reset form về trạng thái ban đầu
-        setFormData({
-          sanPhamChiTiet: {
-            id: '',
-            hinhAnhMinhHoa: '',
-            soLuong: '',
-            trangThai: 1,
-            donGia: '',
-            maSpct: '',
-            sanPham: {
-              id: idSanPham
-            },
-            ram: {
-              id: ''
-            },
-            oLuuTru: {
-              id: ''
-            },
-            manHinh: {
-              id: ''
-            },
-            cpu: {
-              id: ''
-            },
-            gpu: {
-              id: ''
-            },
-            mauSac: {
-              id: ''
-            },
-            gioiThieu: '',
-            cardDoHoa: {
-              id: '',
-              tenCard: '',
-              trangThai: 1
-            }
-          },
-          imageUrls: []
-        });
+        return { success: true };
       }
+      return { success: false };
     } catch (err) {
-      console.error('Error adding product variant:', err);
+      console.error('Error:', err);
       toast.error('Có lỗi xảy ra khi thêm sản phẩm chi tiết');
+      return { success: false };
     }
   };
 
@@ -245,7 +253,7 @@ const ChiTietSanPhamAdmin = () => {
           gpus={gpus}
           displays={displays}
           colors={colors}
-          productDetails={productDetails}
+          idSanPham={idSanPham}
         />
       </div>
     </div>

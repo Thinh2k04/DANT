@@ -117,19 +117,21 @@ const LoginPage = () => {
           localStorage.removeItem('savedCredentials');
         }
 
+        // Lưu token và thông tin user vào localStorage
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data));
         
-        toast.success('🎉 Chào mừng trở lại! Nhớ bạn ghê 💖', {
+        toast.success('🎉 Đăng nhập thành công! Chào mừng trở lại! 💖', {
           position: "top-center",
           autoClose: 1500,
         });
 
+        // Kiểm tra role và điều hướng
         setTimeout(() => {
-          if (data.role === 'ROLE_ADMIN') {
-            navigate('/admin');
-          } else {
-            navigate('/');
+          if (data.role === 'ADMIN') {
+            navigate('/admin'); // Điều hướng admin vào trang admin
+          } else if (data.role === 'USER') {
+            navigate('/home'); // Điều hướng user vào trang home
           }
         }, 1500);
       } else {
@@ -164,35 +166,17 @@ const LoginPage = () => {
         >
           <div className="text-center space-y-2">
             <motion.div
-              className="relative w-40 h-40 mx-auto"
+              className="relative w-32 h-32 mx-auto"
               whileHover={{ scale: 1.1 }}
               transition={{ duration: 0.5 }}
             >
-              <motion.div
-                className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 to-pink-500"
-                animate={{ 
-                  rotate: 360,
-                  scale: [1, 1.1, 1]
-                }}
-                transition={{
-                  rotate: {
-                    duration: 20,
-                    repeat: Infinity,
-                    ease: "linear"
-                  },
-                  scale: {
-                    duration: 2,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }
-                }}
-              />
               <motion.img
-                src="https://i.imgur.com/IXnvGqg.png"
+                src="https://png.pngtree.com/png-vector/20190223/ourmid/pngtree-vector-laptop-icon-png-image_695726.jpg"
                 alt="Laptop Store Logo"
-                className="absolute inset-2 object-contain rounded-full bg-white p-2"
+                className="w-full h-full object-contain"
+                initial={{ rotate: 0 }}
                 animate={{ 
-                  rotateY: [0, 180, 360],
+                  rotate: [0, 5, -5, 0],
                   scale: [1, 1.05, 1]
                 }}
                 transition={{
@@ -204,13 +188,13 @@ const LoginPage = () => {
               <motion.div
                 className="absolute -inset-4"
                 style={{
-                  background: "radial-gradient(circle, rgba(168,85,247,0.4), rgba(236,72,153,0.4))",
-                  filter: "blur(20px)",
+                  background: "radial-gradient(circle, rgba(168,85,247,0.2), rgba(236,72,153,0.2))",
+                  filter: "blur(15px)",
                   zIndex: -1
                 }}
                 animate={{
                   scale: [1, 1.2, 1],
-                  opacity: [0.5, 0.8, 0.5]
+                  opacity: [0.3, 0.5, 0.3]
                 }}
                 transition={{
                   duration: 4,

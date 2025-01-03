@@ -87,6 +87,7 @@ export const useProduct = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [imeiList, setImeiList] = useState([]);
 
   // Định nghĩa fetchProducts ở ngoài useEffect
   const fetchProducts = async () => {
@@ -275,7 +276,22 @@ export const useProduct = () => {
     try {
       const requestData = {
         sanPham: {
-          ...formData
+          ...formData,
+          loaiSanPham: {
+            id: formData.loaiSanPham.id
+          },
+          nguonNhap: {
+            id: formData.nguonNhap.id
+          },
+          chatLieu: {
+            id: formData.chatLieu.id
+          },
+          kichThuocLaptop: {
+            id: formData.kichThuocLaptop.id
+          },
+          thuongHieu: {
+            id: formData.thuongHieu.id
+          }
         },
         sanPhamChiTiet: {
           ...spctData,
@@ -283,7 +299,8 @@ export const useProduct = () => {
             id: formData.id || ''
           }
         },
-        imageUrls: imageUrls
+        imageUrls: imageUrls,
+        listImei: imeiList
       };
 
       const response = await axios.post('http://localhost:8080/rest/spctDTO/add', requestData);
@@ -439,6 +456,8 @@ export const useProduct = () => {
     openEditForm,
     showDetailModal,
     setShowDetailModal,
-    selectedProduct
+    selectedProduct,
+    imeiList,
+    setImeiList
   };
 }; 

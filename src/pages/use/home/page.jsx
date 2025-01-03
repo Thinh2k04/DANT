@@ -91,43 +91,50 @@ const HomePage = () => {
   }, []);
 
   // Hàm tìm kiếm laptop
-  const searchLaptops = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch(`http://localhost:8080/rest/san_pham_chi_tiet/tim_kiem/${searchTerm}`);
-      if (!response.ok) throw new Error('Failed to search laptops');
-      const searchResults = await response.json();
-      setLaptops(searchResults);
-      setCurrentPage(1);
-      setHasMore(searchResults.length > itemsPerPage);
-    } catch (error) {
-      console.error('Error searching laptops:', error);
-      toast.error('Có lỗi xảy ra khi tìm kiếm sản phẩm!');
-    } finally {
-      setLoading(false);
-    }
-  };
+  useEffect(() => {
+    const searchLaptops = async () => {
+      try {
+        setLoading(true);
+        let response;
+        if (searchTerm.trim() === '') {
+          response = await fetch('http://localhost:8080/rest/spctDTO/getAll');
+        } else {
+          response = await fetch(`http://localhost:8080/rest/san_pham_chi_tiet/tim_kiem/${searchTerm}`);
+        }
+        if (!response.ok) throw new Error('Failed to search laptops');
+        const searchResults = await response.json();
+        setLaptops(searchResults);
+        setCurrentPage(1);
+        setHasMore(searchResults.length > itemsPerPage);
+      } catch (error) {
+        console.error('Error searching laptops:', error);
+        toast.error('Có lỗi xảy ra khi tìm kiếm sản phẩm!');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const debounceTimer = setTimeout(() => {
+      searchLaptops();
+    }, 300);
+
+    return () => clearTimeout(debounceTimer);
+  }, [searchTerm]);
 
   // Hàm lọc laptop dựa trên các bộ lọc đã chọn
-  const filterLaptops = async () => {
+  const filterLaptops = async (newFilters) => {
     try {
       setLoading(true);
       
-      // Tạo query params từ filters
-      const params = new URLSearchParams();
-      if (filters.priceRange) {
-        const [min, max] = filters.priceRange.split('-');
-        params.append('minPrice', min);
-        params.append('maxPrice', max);
+      let minPrice = '';
+      let maxPrice = '';
+      if (newFilters.priceRange) {
+        [minPrice, maxPrice] = newFilters.priceRange.split('-');
       }
-      if (filters.thuongHieu) params.append('thuongHieuId', filters.thuongHieu);
-      if (filters.ram) params.append('ramId', filters.ram);
-      if (filters.oCung) params.append('oCungId', filters.oCung);
-      if (filters.cpu) params.append('cpuId', filters.cpu);
-      if (filters.manHinh) params.append('manHinhId', filters.manHinh);
 
-      // Gọi API với các params đã được lọc
-      const response = await fetch(`http://localhost:8080/rest/spctDTO/filter?${params}`);
+      const url = `http://localhost:8080/rest/san_pham_chi_tiet/loc/${minPrice || ''}&${maxPrice || ''}&${newFilters.thuongHieu || ''}&${newFilters.oCung || ''}&${newFilters.cpu || ''}&${newFilters.ram || ''}&${newFilters.manHinh || ''}`;
+
+      const response = await fetch(url);
       if (!response.ok) throw new Error('Failed to filter laptops');
       
       const filteredData = await response.json();
@@ -158,11 +165,12 @@ const HomePage = () => {
 
   // Hàm xử lý khi thay đổi bộ lọc
   const handleFilterChange = (filterName, value) => {
-    setFilters(prev => ({
-      ...prev,
+    const newFilters = {
+      ...filters,
       [filterName]: value
-    }));
-    filterLaptops();
+    };
+    setFilters(newFilters);
+    filterLaptops(newFilters);
   };
 
   // Hàm xử lý khi thêm sản phẩm vào giỏ hàng
@@ -227,13 +235,6 @@ const HomePage = () => {
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="px-6 py-3 rounded-full w-96 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
-                  <button 
-                    onClick={searchLaptops}
-                    className="bg-blue-600 hover:bg-blue-700 px-8 py-3 rounded-full font-semibold transition flex items-center gap-2"
-                  >
-                    <FaSearch className="text-xl" />
-                    Tìm kiếm
-                  </button>
                 </div>
               </div>
             </div>

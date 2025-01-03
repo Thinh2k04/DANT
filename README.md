@@ -8,3 +8,4 @@ npm install react-toastify
 npm install axios react-toastify react-icons
 npm install xlsx
 npm install jspdf jspdf-autotable
+npm install framer-motion

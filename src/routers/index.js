@@ -13,6 +13,7 @@ import AccountManagement from '../pages/admin/account/page';
 import TrackOrder from '../pages/use/track order/page';
 import LoginPage from '../pages/use/loginuse/page';
 import RegisterPage from '../pages/use/register/page';
+import ProductAttributesPage from '../pages/admin/product-attributes/page';
 
 
 // Public routes
@@ -37,6 +38,7 @@ const privateRoutes = [
   { path: '/admin/attributes', component: AttributeManagement },
   { path: '/admin/chitietsanpham/:idSanPham', component: ChiTietSanPhamAdmin },
   { path: '/admin/account', component: AccountManagement },
+  { path: '/admin/product-attributes', component: ProductAttributesPage },
 ];
 
 export { privateRoutes, publicRoutes };

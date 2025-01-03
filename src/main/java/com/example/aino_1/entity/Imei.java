@@ -17,8 +17,9 @@ public class Imei {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "id_spct", nullable = false)
-    private Integer idSpct;
+    @ManyToOne
+    @JoinColumn(name = "id_spct", nullable = false)
+    private SanPhamChiTiet Spct;
 
     @Column(name = "imei", unique = true, nullable = false)
     private String imei;

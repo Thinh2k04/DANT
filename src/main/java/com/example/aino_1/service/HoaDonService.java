@@ -29,14 +29,14 @@ public class HoaDonService {
     TaiKhoanNguoiDungInterface tksi;
 
     @Transactional
-    public void hamXuLiHoaDon(ThongTinTaiKhoan ttk, HoaDon hd, List<HoaDonChiTiet> lhdct) {
+    public void hamXuLiHoaDon(ThongTinTaiKhoan ttk, HoaDon hd, List<HoaDonChiTiet> lhdct, List<Imei> listImei) {
 //        // Lưu thông tin tài khoản
 //        ThongTinTaiKhoan stttk = tttksi.save(ttk);
         System.out.println("CHạy vào phần hóa đơn service");
 
         // Kiểm tra nếu khách hàng không đăng nhập
         if (ttk.getTaiKhoanNguoiDung() == null) {
-            System.out.println("Chạy vào phần xử lí tiafk hoản người dùng null");
+            System.out.println("Chạy vào phần xử lí tài hoản người dùng null");
             // Không xử lý TaiKhoanNguoiDung, tiếp tục lưu ThongTinTaiKhoan
             ThongTinTaiKhoan savedThongTinTaiKhoan = tttksi.save(ttk);
             hd.setThongTinTaiKhoan(savedThongTinTaiKhoan);
@@ -45,7 +45,7 @@ public class HoaDonService {
 
         } else {
             // Lưu TaiKhoanNguoiDung nếu tồn tại
-            System.out.println("Chạy vào phần xử lí tiafk hoản người dùng not null");
+            System.out.println("Chạy vào phần xử lí tài hoản người dùng not null");
             TaiKhoanNguoiDung savedTaiKhoanNguoiDung = tksi.save(ttk.getTaiKhoanNguoiDung());
             ttk.setTaiKhoanNguoiDung(savedTaiKhoanNguoiDung);
             ThongTinTaiKhoan savedThongTinTaiKhoan = tttksi.save(ttk);
@@ -55,7 +55,7 @@ public class HoaDonService {
 
         }
 
-        System.out.println("Hoàn thành bước xử lí người dùng, tới bước kiểm tra didaj chỉ nhận hàng: " + hd.getDiaChiNhanHang());
+        System.out.println("Hoàn thành bước xử lí người dùng, tới bước kiểm tra địa chỉ nhận hàng: " + hd.getDiaChiNhanHang());
 
         if (hd.getDiaChiNhanHang() == null || hd.getDiaChiNhanHang().isEmpty()) {
             System.out.println("Chạy vào phần xử lý địa chỉ nhận hàng null hoặc trống");

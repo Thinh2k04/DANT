@@ -141,7 +141,6 @@ public interface SanPhamChiTietInterface extends JpaRepository<SanPhamChiTiet, I
                 INNER JOIN Gpu gpu ON gpu.id = spct.gpu.id
                 inner join ThuongHieu thuongHieu on thuongHieu.id = sp.thuongHieu.id
                 WHERE sp.tenSanPham LIKE %:tuKhoaTimKiem%
-                OR spct.gioiThieu LIKE %:tuKhoaTimKiem%
                 OR CAST(ram.dungLuong AS string) LIKE %:tuKhoaTimKiem%
                 OR CAST(olt.dungLuong AS string) LIKE %:tuKhoaTimKiem%
                 OR mh.doPhanGiai LIKE %:tuKhoaTimKiem%

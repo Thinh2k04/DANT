@@ -1,5 +1,6 @@
 package com.example.aino_1.restController;
 
+import com.example.aino_1.dto.ThongKeDTO;
 import com.example.aino_1.entity.Voucher;
 
 import com.example.aino_1.repository.ThongKeInterface;
@@ -15,23 +16,33 @@ public class ThongKeRestController {
     @Autowired
     ThongKeInterface tksi;
 
+    @GetMapping("/getToday/{ngay}")
+    public List<ThongKeDTO> getTongTienTheoNgay(@PathVariable String ngay) {
+        return tksi.findTongTienTheoNgay(ngay);
+    }
+
+    @GetMapping("/theoNgay")
+    public List<ThongKeDTO> getDailyRevenue() {
+        return tksi.getDailyRevenue();
+    }
+
     @GetMapping("/theoThang")
-    public List<Object[]> getMonthlyRevenue() {
+    public List<ThongKeDTO> getMonthlyRevenue() {
         return tksi.getMonthlyRevenue();
     }
 
     @GetMapping("/thang/{thang}")
-    public Object[] getMonth(@PathVariable Integer thang) {
+    public ThongKeDTO getMonth(@PathVariable Integer thang) {
         return tksi.getMonth(thang);
     }
 
     @GetMapping("/nam/{nam}")
-    public Object[] getYear(@PathVariable Integer nam) {
+    public ThongKeDTO getYear(@PathVariable Integer nam) {
         return tksi.getYear(nam);
     }
 
     @GetMapping("/theoNam")
-    public List<Object[]> getYearlyRevenue() {
+    public List<ThongKeDTO> getYearlyRevenue() {
         return tksi.getYearlyRevenue();
     }
 

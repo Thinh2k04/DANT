@@ -1,9 +1,6 @@
 package com.example.aino_1.restController;
 
-import com.example.aino_1.entity.HoaDon;
-import com.example.aino_1.entity.HoaDonChiTiet;
-import com.example.aino_1.entity.SanPhamChiTiet;
-import com.example.aino_1.entity.ThongTinTaiKhoan;
+import com.example.aino_1.entity.*;
 import com.example.aino_1.repository.HoaDonInterface;
 import com.example.aino_1.service.HoaDonService;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -57,30 +54,46 @@ public class HoaDonController {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
 
-            // Ánh xạ dữ liệu
+            // Ánh xạ dữ liệu từ requestData
             ThongTinTaiKhoan tttk = objectMapper.convertValue(requestData.get("tttk"), ThongTinTaiKhoan.class);
             HoaDon hd = objectMapper.convertValue(requestData.get("hd"), HoaDon.class);
-            List<HoaDonChiTiet> lhdct = objectMapper.convertValue(
-                    requestData.get("lhdct"),
-                    new TypeReference<List<HoaDonChiTiet>>() {}
-            );
-            System.out.println(tttk+" THÔNG TIN TÀI KHOẢN");
-            System.out.println("----------------------------------------------------------------");
-            System.out.println(hd+" HÓA ĐƠN");
-            System.out.println("----------------------------------------------------------------");
-            System.out.println(lhdct+" LIST HÓA ĐƠN CHI TIẾT");
-            System.out.println("----------------------------------------------------------------");
+            List<Imei> listImei = objectMapper.convertValue(requestData.get("listImei"), new TypeReference<List<Imei>>() {});
+            List<HoaDonChiTiet> lhdct = objectMapper.convertValue(requestData.get("lhdct"), new TypeReference<List<HoaDonChiTiet>>() {});
 
-//            // Kiểm tra dữ liệu đầu vào
-//            if (tttk == null || hd == null || lhdct == null) {
-//                throw new IllegalArgumentException("Dữ liệu đầu vào không đầy đủ");
-//            }
+            // Kiểm tra dữ liệu đầu vào
+            if (tttk == null) {
+                throw new IllegalArgumentException("Dữ liệu thông tin tài khoản không hợp lệ.");
+            }
+            if (hd == null) {
+                throw new IllegalArgumentException("Dữ liệu hóa đơn không hợp lệ.");
+            }
+            if (lhdct == null || lhdct.isEmpty()) {
+                throw new IllegalArgumentException("Danh sách hóa đơn chi tiết không được để trống.");
+            }
+
+            // Log dữ liệu để kiểm tra
+            System.out.println(tttk + " - Thông tin tài khoản");
+            System.out.println("----------------------------------------------------------------");
+            System.out.println(hd + " - Hóa đơn");
+            System.out.println("----------------------------------------------------------------");
+            System.out.println(listImei + " - Danh sách IMEI");
+            System.out.println("----------------------------------------------------------------");
+            System.out.println(lhdct + " - Danh sách hóa đơn chi tiết");
+            System.out.println("----------------------------------------------------------------");
 
             // Gọi hàm xử lý
-            hdsv.hamXuLiHoaDon(tttk, hd, lhdct);
+            hdsv.hamXuLiHoaDon(tttk, hd, lhdct,listImei);
 
+        } catch (IllegalArgumentException e) {
+            // Xử lý lỗi dữ liệu đầu vào
+            System.err.println("Lỗi dữ liệu đầu vào: " + e.getMessage());
+            throw e;
         } catch (Exception e) {
-            throw e; // Hoặc trả về phản hồi lỗi cụ thể
+            // Xử lý lỗi không mong muốn
+            System.err.println("Lỗi hệ thống: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Đã xảy ra lỗi trong quá trình xử lý yêu cầu.");
         }
+
     }
 }

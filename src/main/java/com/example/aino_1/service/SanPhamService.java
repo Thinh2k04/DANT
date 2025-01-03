@@ -47,7 +47,7 @@ public class SanPhamService {
     private HinhAnhInterface hinhAnhInterface; // Repository cho HinhAnh
 
 
-    public Boolean addSanPham(SanPhamChiTiet spct, SanPham sp, List<String> urlImg,List<String> listImei) {
+    public Boolean addSanPham(SanPhamChiTiet spct, SanPham sp, List<String> urlImg) {
         try {
             // Bước 1: Lưu sản phẩm
             if (sp == null) {
@@ -74,18 +74,18 @@ public class SanPhamService {
                 }
             }
 
-            // Bước 4:
-            if (listImei != null && !listImei.isEmpty()) {
-                for (String url : listImei) {
-                    if (url != null && !url.isEmpty()) {
-                        Imei imei = new Imei();
-                        imei.setImei(url);
-                        imei.setIdSpct(savedSanPhamCT.getId());
-                        imei.setTrangThai(1);
-                        imsi.save(imei);
-                    }
-                }
-            }
+//            // Bước 4:
+//            if (listImei != null && !listImei.isEmpty()) {
+//                for (String url : listImei) {
+//                    if (url != null && !url.isEmpty()) {
+//                        Imei imei = new Imei();
+//                        imei.setImei(url);
+//                        imei.setSpct(savedSanPhamCT);
+//                        imei.setTrangThai(1);
+//                        imsi.save(imei);
+//                    }
+//                }
+//            }
 
             return true; // Thành công
         } catch (Exception e) {

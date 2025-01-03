@@ -1,10 +1,12 @@
 package com.example.aino_1.restController;
 
 import com.example.aino_1.config.JwtUtils;
-import com.example.aino_1.entity.ChatLieu;
-import com.example.aino_1.entity.TaiKhoanNguoiDung;
+import com.example.aino_1.entity.*;
 
 import com.example.aino_1.repository.TaiKhoanNguoiDungInterface;
+import com.example.aino_1.service.TaiKhoanService;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,8 +28,11 @@ import java.util.Map;
 @RequestMapping("/rest/tai_khoan")
 public class TaiKhoanNguoiDungRestController {
     @Autowired
+    TaiKhoanService tksv;
+    @Autowired
     private TaiKhoanNguoiDungInterface taiKhoanInterface; // Thống nhất tên interface
-
+    @Autowired
+    TaiKhoanService tkndsv;
     private final BCryptPasswordEncoder passwordEncoder;
 
     public TaiKhoanNguoiDungRestController(TaiKhoanNguoiDungInterface taiKhoanInterface) {
@@ -41,10 +46,27 @@ public class TaiKhoanNguoiDungRestController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody TaiKhoanNguoiDung user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword())); // Mã hóa mật khẩu
-        taiKhoanInterface.save(user); // Lưu vào repository
-        return ResponseEntity.ok("User registered successfully");
+    public ResponseEntity<String> register(@RequestBody TaiKhoanNguoiDung taiKhoanNguoiDung) {
+        try {
+
+            // Mã hóa mật khẩu
+            taiKhoanNguoiDung.setPassword(passwordEncoder.encode(taiKhoanNguoiDung.getPassword()));
+
+            // Gọi service để thêm tài khoản
+            boolean result = tkndsv.addTaiKhoan(taiKhoanNguoiDung);
+
+            if (result) {
+                return ResponseEntity.ok("Thêm tài khoản thành công");
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Thêm tài khoản thất bại");
+            }
+        } catch (IllegalArgumentException e) {
+            // Lỗi khi chuyển đổi JSON
+            return ResponseEntity.badRequest().body("Dữ liệu không hợp lệ: " + e.getMessage());
+        } catch (Exception e) {
+            // Các lỗi khác
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Đã xảy ra lỗi: " + e.getMessage());
+        }
     }
 
     @PostMapping("/login")

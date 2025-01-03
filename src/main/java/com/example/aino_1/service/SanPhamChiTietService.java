@@ -71,7 +71,7 @@ public class SanPhamChiTietService {
                         .forEach(url -> {
                             Imei imei = new Imei();
                             imei.setImei(url);
-                            imei.setIdSpct(savedSpct.getId());
+                            imei.setSpct(savedSpct);
                             imsi.save(imei);
                         });
             }

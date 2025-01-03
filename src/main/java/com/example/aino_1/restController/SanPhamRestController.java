@@ -82,14 +82,14 @@ public class SanPhamRestController {
             }
             List<String> imageUrls = objectMapper.convertValue(requestData.get("imageUrls"), new TypeReference<List<String>>() {});
 
-            // Lấy danh sách IMEU từ JSON
-            if (!requestData.containsKey("listImei")) {
-                return ResponseEntity.badRequest().body("Thiếu danh sách IMEI");
-            }
-            List<String> listImei = objectMapper.convertValue(requestData.get("listImei"), new TypeReference<List<String>>() {});
+//            // Lấy danh sách IMEU từ JSON
+//            if (!requestData.containsKey("listImei")) {
+//                return ResponseEntity.badRequest().body("Thiếu danh sách IMEI");
+//            }
+//            List<String> listImei = objectMapper.convertValue(requestData.get("listImei"), new TypeReference<List<String>>() {});
 
             // Gọi service để thêm sản phẩm
-            boolean result = spsv.addSanPham(sanPhamChiTiet, sanPham, imageUrls,listImei);
+            boolean result = spsv.addSanPham(sanPhamChiTiet, sanPham, imageUrls);
 
             if (result) {
                 return ResponseEntity.ok("Thêm sản phẩm thành công");

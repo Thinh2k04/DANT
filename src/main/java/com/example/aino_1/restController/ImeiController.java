@@ -36,7 +36,7 @@ public class ImeiController {
     public ResponseEntity<String> createOrUpdate(@RequestBody Map<String, Object> requestData) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
-
+            System.out.println("IMEI Controller: hàm createOrUpdate");
             // Lấy id từ sanPhamChiTiet
             Map<String, Object> spctData = (Map<String, Object>) requestData.get("spct");
             Integer idSPCT = (Integer) spctData.get("id");

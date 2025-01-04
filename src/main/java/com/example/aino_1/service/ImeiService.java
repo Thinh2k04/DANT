@@ -28,42 +28,40 @@ public class ImeiService {
         SanPhamChiTiet spct = spctif.findById(idSPCT)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm chi tiết với ID: " + idSPCT));
 
-        // Danh sách chứa các IMEI đã tồn tại
-        List<String> existingImeiList = new ArrayList<>();
+        // Danh sách chứa các IMEI không hợp lệ hoặc đã tồn tại
+        List<String> invalidImeiList = new ArrayList<>();
 
-        // Kiểm tra trùng lặp IMEI trong cơ sở dữ liệu
+        // Kiểm tra trùng lặp IMEI trong cơ sở dữ liệu và tính hợp lệ
         for (Imei im : listImei) {
             // Kiểm tra nếu IMEI đã tồn tại trong DB
             Optional<Imei> existingImei = imif.findByImei(im.getImei());
             if (existingImei.isPresent()) {
-                // Nếu IMEI đã tồn tại, thêm vào danh sách các IMEI trùng
-                existingImeiList.add(im.getImei());
-                // Dừng lại và trả về thông báo nếu có IMEI trùng
-                return "IMEI đã tồn tại: " + String.join(", ", existingImeiList) + ". Thêm không thành công!";
-            }
-
-            // Nếu IMEI chưa tồn tại, kiểm tra và cập nhật nếu có ID
-            if (im.getId() != null) {
-                Optional<Imei> existingImeiById = imif.findById(im.getId());
-                if (existingImeiById.isPresent()) {
-                    // Cập nhật IMEI nếu đã tồn tại
-                    Imei imeiToUpdate = existingImeiById.get();
-                    imeiToUpdate.setImei(im.getImei());
-                    imeiToUpdate.setHDCT(im.getHDCT());
-                    imeiToUpdate.setTrangThai(im.getTrangThai());
-                    imeiToUpdate.setSpct(spct);
-                    imif.save(imeiToUpdate);
-                    continue;
+                // Nếu IMEI đã tồn tại, thêm vào danh sách các IMEI không hợp lệ
+                invalidImeiList.add(im.getImei());
+            } else {
+                // Kiểm tra tính hợp lệ của IMEI (ví dụ: không rỗng hoặc theo quy tắc cụ thể của bạn)
+                if (im.getImei() == null || im.getImei().isEmpty()) {
+                    invalidImeiList.add(im.getImei());
                 }
             }
+        }
 
-            // Thêm mới IMEI nếu không có ID hoặc không tồn tại trong DB
+        // Nếu có IMEI không hợp lệ hoặc đã tồn tại, dừng lại và trả về thông báo
+        if (!invalidImeiList.isEmpty()) {
+            return "IMEI không hợp lệ hoặc đã tồn tại: " + String.join(", ", invalidImeiList) + ". Chúc bạn may mắn lần sau!";
+        }
+
+        // Nếu tất cả IMEI hợp lệ, tiếp tục thêm vào cơ sở dữ liệu
+        for (Imei im : listImei) {
+            // Nếu IMEI chưa tồn tại, thêm IMEI mới vào cơ sở dữ liệu
             im.setSpct(spct);
             imif.save(im);
         }
 
-        return "Thêm hoặc cập nhật IMEI thành công!";
+        return "Thêm và cập nhật IMEI thành công.";
     }
+
+
 
 
     public String updateTopImeiTrangThai(Integer idSpct, Integer soLuong, Integer idHoaDonChiTiet) {

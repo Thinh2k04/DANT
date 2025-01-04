@@ -24,8 +24,9 @@ public class Imei {
     @Column(name = "imei", unique = true, nullable = false)
     private String imei;
 
-    @Column(name = "id_hoa_don_chi_tiet")
-    private Integer idHDCT;
+    @ManyToOne
+    @JoinColumn(name = "id_hoa_don_chi_tiet")
+    private HoaDonChiTiet HDCT;
 
     @Column(name = "trang_thai")
     private Integer trangThai;

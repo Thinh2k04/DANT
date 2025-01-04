@@ -5,6 +5,7 @@ import com.example.aino_1.entity.*;
 import com.example.aino_1.repository.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,51 +29,56 @@ public class HoaDonService {
     @Autowired
     TaiKhoanNguoiDungInterface tksi;
 
+    @Autowired
+    ImeiInterface imeiRepository;
+
+    @Autowired
+    ImeiService imeiService;
+
     @Transactional
-    public void hamXuLiHoaDon(ThongTinTaiKhoan ttk, HoaDon hd, List<HoaDonChiTiet> lhdct, List<Imei> listImei) {
-//        // Lưu thông tin tài khoản
-//        ThongTinTaiKhoan stttk = tttksi.save(ttk);
-        System.out.println("CHạy vào phần hóa đơn service");
-
-        // Kiểm tra nếu khách hàng không đăng nhập
+    public String hamXuLiHoaDon(ThongTinTaiKhoan ttk, HoaDon hd, List<HoaDonChiTiet> lhdct) {
+        // Xử lý thông tin tài khoản
+        ThongTinTaiKhoan savedThongTinTaiKhoan;
         if (ttk.getTaiKhoanNguoiDung() == null) {
-            System.out.println("Chạy vào phần xử lí tài hoản người dùng null");
-            // Không xử lý TaiKhoanNguoiDung, tiếp tục lưu ThongTinTaiKhoan
-            ThongTinTaiKhoan savedThongTinTaiKhoan = tttksi.save(ttk);
-            hd.setThongTinTaiKhoan(savedThongTinTaiKhoan);
-            // Liên kết tài khoản vào hóa đơn
-            hd.setThongTinTaiKhoan(savedThongTinTaiKhoan);
-
+            savedThongTinTaiKhoan = tttksi.save(ttk);
         } else {
-            // Lưu TaiKhoanNguoiDung nếu tồn tại
-            System.out.println("Chạy vào phần xử lí tài hoản người dùng not null");
             TaiKhoanNguoiDung savedTaiKhoanNguoiDung = tksi.save(ttk.getTaiKhoanNguoiDung());
             ttk.setTaiKhoanNguoiDung(savedTaiKhoanNguoiDung);
-            ThongTinTaiKhoan savedThongTinTaiKhoan = tttksi.save(ttk);
-            hd.setThongTinTaiKhoan(savedThongTinTaiKhoan);
-            // Liên kết tài khoản vào hóa đơn
-            hd.setThongTinTaiKhoan(savedThongTinTaiKhoan);
-
+            savedThongTinTaiKhoan = tttksi.save(ttk);
         }
+        hd.setThongTinTaiKhoan(savedThongTinTaiKhoan);
 
-        System.out.println("Hoàn thành bước xử lí người dùng, tới bước kiểm tra địa chỉ nhận hàng: " + hd.getDiaChiNhanHang());
-
+        // Xử lý địa chỉ nhận hàng
         if (hd.getDiaChiNhanHang() == null || hd.getDiaChiNhanHang().isEmpty()) {
-            System.out.println("Chạy vào phần xử lý địa chỉ nhận hàng null hoặc trống");
-            String diaChiCuaHang = hd.getCuaHang().getTinh() +" "+ hd.getCuaHang().getHuyen() +" "+ hd.getCuaHang().getPhuong() +" "+ hd.getCuaHang().getSoNha();
-            System.out.println("Địa chỉ của hàng: " + diaChiCuaHang);
-
+            String diaChiCuaHang = String.join(" ", hd.getCuaHang().getTinh(), hd.getCuaHang().getHuyen(),
+                    hd.getCuaHang().getPhuong(), hd.getCuaHang().getSoNha());
             hd.setDiaChiNhanHang(diaChiCuaHang);
         }
 
+        HoaDon savedHoaDon = hdsi.save(hd);
 
-        HoaDon shd = hdsi.save(hd);
-
-        // Liên kết hóa đơn và lưu danh sách chi tiết
+        // Xử lý danh sách chi tiết hóa đơn
         for (HoaDonChiTiet hdct : lhdct) {
-            hdct.setHoaDon(shd);
+            Integer idSanPhamChiTiet = hdct.getSanPhamChiTiet().getId();
+            Integer soLuong = hdct.getSoLuong();
+
+            // Lấy danh sách IMEI theo số lượng yêu cầu
+            List<Imei> imeiList = imeiRepository.findTopImeiBySanPhamChiTietIdAndTrangThaiNative(idSanPhamChiTiet);
+            if (imeiList.size() < soLuong) {
+                throw new RuntimeException("Không đủ IMEI để đáp ứng số lượng yêu cầu cho sản phẩm ID: " + idSanPhamChiTiet);
+            }
+
+            // Cập nhật trạng thái của IMEI và liên kết với chi tiết hóa đơn
+            for (int i = 0; i < soLuong; i++) {
+                imeiList.get(i).setTrangThai(1);
+                imeiList.get(i).setHDCT(hdct); // Liên kết IMEI với hóa đơn chi tiết
+            }
+            imeiRepository.saveAll(imeiList);
+            hdct.setHoaDon(savedHoaDon);
+            hdctsi.save(hdct);
         }
-        hdctsi.saveAll(lhdct); // Lưu theo batch
+
+        return "Hóa đơn và chi tiết hóa đơn đã được xử lý thành công!";
     }
 
 }

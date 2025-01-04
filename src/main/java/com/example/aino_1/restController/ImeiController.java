@@ -70,4 +70,26 @@ public class ImeiController {
     }
 
 
-}
+    @GetMapping("/getTopImei")
+    public ResponseEntity<?> getTopImeiBySanPhamChiTietIdAndTrangThai(
+            @RequestParam("idSpct") Integer idSpct,
+            @RequestParam("idHDCT") Integer idHDCT,
+            @RequestParam("soLuong") Integer soLuong) {
+        try {
+            // Gọi service để xử lý logic
+            String result = imsv.updateTopImeiTrangThai(idSpct, soLuong, idHDCT);
+
+            // Kiểm tra kết quả trả về
+            if (result.startsWith("Số lượng không đủ")) {
+                return ResponseEntity.badRequest().body(result);
+            }
+
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Đã xảy ra lỗi: " + e.getMessage());
+        }
+    }
+
+    }
+

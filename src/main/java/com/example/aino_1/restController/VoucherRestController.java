@@ -44,6 +44,7 @@ public class VoucherRestController {
         return vsi.save(voucher);
     }
 
+
     @DeleteMapping("/del/{id}")
     public void delete(@PathVariable Integer id) {
         vsi.deleteById(id);

@@ -59,24 +59,24 @@ public interface ThongKeInterface extends JpaRepository<GioHang, Integer> {
 
     @Query("""
             SELECT new com.example.aino_1.dto.ThongKeDTO(
-            YEAR(hd.thoiGianLapHoaDon), 
+            FORMAT(hd.thoiGianLapHoaDon, 'yyyy'), 
             SUM(hd.tongTien)) 
             FROM HoaDon hd
-            WHERE hd.trangThaiThanhToan = 1 AND YEAR(hd.thoiGianLapHoaDon) = :nam
-            GROUP BY YEAR(hd.thoiGianLapHoaDon)
-            ORDER BY YEAR(hd.thoiGianLapHoaDon)
+            WHERE hd.trangThaiThanhToan = 1 AND FORMAT(hd.thoiGianLapHoaDon, 'yyyy') = :nam
+            GROUP BY FORMAT(hd.thoiGianLapHoaDon, 'yyyy')
+            ORDER BY FORMAT(hd.thoiGianLapHoaDon, 'yyyy')
             """)
     ThongKeDTO getYear(@Param("nam") Integer nam);
 
     //  Thống kê doanh thu theo năm
     @Query("""
             SELECT new com.example.aino_1.dto.ThongKeDTO(
-            YEAR(hd.thoiGianLapHoaDon), 
+            FORMAT(hd.thoiGianLapHoaDon, 'yyyy'), 
             SUM(hd.tongTien)) 
             FROM HoaDon hd
-            WHERE hd.trangThaiThanhToan = 1
-            GROUP BY YEAR(hd.thoiGianLapHoaDon)
-            ORDER BY YEAR(hd.thoiGianLapHoaDon)
+            WHERE hd.trangThaiThanhToan = 1 
+            GROUP BY FORMAT(hd.thoiGianLapHoaDon, 'yyyy')
+            ORDER BY FORMAT(hd.thoiGianLapHoaDon, 'yyyy')
             """)
     List<ThongKeDTO> getYearlyRevenue();
 

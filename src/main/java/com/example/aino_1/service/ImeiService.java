@@ -1,9 +1,7 @@
 package com.example.aino_1.service;
 
-import com.example.aino_1.entity.Imei;
-import com.example.aino_1.entity.SanPham;
-import com.example.aino_1.entity.SanPhamChiTiet;
-import com.example.aino_1.entity.ThongTinTaiKhoan;
+import com.example.aino_1.entity.*;
+import com.example.aino_1.repository.HDCTInterFace;
 import com.example.aino_1.repository.ImeiInterface;
 import com.example.aino_1.repository.SanPhamChiTietInterface;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +19,9 @@ public class ImeiService {
 
     @Autowired
     ImeiInterface imif;
+
+    @Autowired
+    HDCTInterFace hdctInterFace;
 
     public String addOrUpdateImei(Integer idSPCT, List<Imei> listImei) {
         // Tìm sản phẩm chi tiết dựa trên ID
@@ -48,7 +49,7 @@ public class ImeiService {
                     // Cập nhật IMEI nếu đã tồn tại
                     Imei imeiToUpdate = existingImeiById.get();
                     imeiToUpdate.setImei(im.getImei());
-                    imeiToUpdate.setIdHDCT(im.getIdHDCT());
+                    imeiToUpdate.setHDCT(im.getHDCT());
                     imeiToUpdate.setTrangThai(im.getTrangThai());
                     imeiToUpdate.setSpct(spct);
                     imif.save(imeiToUpdate);
@@ -62,6 +63,29 @@ public class ImeiService {
         }
 
         return "Thêm hoặc cập nhật IMEI thành công!";
+    }
+
+
+    public String updateTopImeiTrangThai(Integer idSpct, Integer soLuong, Integer idHoaDonChiTiet) {
+        // Lấy danh sách IMEI từ cơ sở dữ liệu
+        List<Imei> imeiList = imif.findTopImeiBySanPhamChiTietIdAndTrangThaiNative(idSpct);
+
+        // Kiểm tra số lượng trả về
+        if (imeiList.size() < soLuong) {
+            return "Số lượng không đủ. Yêu cầu: " + soLuong + ", hiện có: " + imeiList.size();
+        }
+
+        // Cập nhật trạng thái của các IMEI
+        for (int i = 0; i < soLuong; i++) {
+            imeiList.get(i).setTrangThai(1); // Ví dụ: 1 là đã sử dụng
+            HoaDonChiTiet hdct =  hdctInterFace.findById(idHoaDonChiTiet).get();
+            imeiList.get(i).setHDCT(hdct);
+        }
+
+        // Lưu lại danh sách IMEI đã cập nhật
+        imif.saveAll(imeiList);
+
+        return "Cập nhật trạng thái thành công cho " + soLuong + " IMEI.";
     }
 
 

@@ -40,8 +40,6 @@ public class SanPhamChiTiet {
     @JoinColumn(name = "id_ram", referencedColumnName = "id")
     private Ram ram;  // Liên kết với bảng ram
 
-
-
     @ManyToOne
     @JsonProperty("oLuuTru")  // Ánh xạ trường JSON "oLuuTru" vào thuộc tính nà
     @JoinColumn(name = "id_o_luu_tru", referencedColumnName = "id")

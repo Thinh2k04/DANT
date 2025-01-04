@@ -31,7 +31,7 @@ public class SanPhamChiTietService {
     @Autowired
     HinhAnhInterface hasi;
 
-    public Boolean saveSanPhamChiTietWithImage(SanPhamChiTiet spct, SanPham sp, List<String> urlImg, List<String> listImei) {
+    public Boolean saveSanPhamChiTietWithImage(SanPhamChiTiet spct, SanPham sp, List<String> urlImg) {
         try {
             // Kiểm tra sản phẩm và sản phẩm chi tiết
             if (spct == null || sp == null) {
@@ -64,17 +64,17 @@ public class SanPhamChiTietService {
                         });
             }
 
-            // Lưu hình ảnh nếu danh sách URL hợp lệ
-            if (listImei != null && !listImei.isEmpty()) {
-                listImei.stream()
-                        .filter(url -> url != null && !url.isEmpty()) // Loại bỏ URL null hoặc rỗng
-                        .forEach(url -> {
-                            Imei imei = new Imei();
-                            imei.setImei(url);
-                            imei.setSpct(savedSpct);
-                            imsi.save(imei);
-                        });
-            }
+//            // Lưu hình ảnh nếu danh sách URL hợp lệ
+//            if (listImei != null && !listImei.isEmpty()) {
+//                listImei.stream()
+//                        .filter(url -> url != null && !url.isEmpty()) // Loại bỏ URL null hoặc rỗng
+//                        .forEach(url -> {
+//                            Imei imei = new Imei();
+//                            imei.setImei(url);
+//                            imei.setSpct(savedSpct);
+//                            imsi.save(imei);
+//                        });
+//            }
 
             return true;
         } catch (Exception e) {

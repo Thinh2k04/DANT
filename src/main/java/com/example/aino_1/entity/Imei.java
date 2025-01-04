@@ -19,16 +19,15 @@ public class Imei {
 
     @ManyToOne
     @JoinColumn(name = "id_spct", nullable = false)
-    private SanPhamChiTiet Spct;
+    private SanPhamChiTiet spct; // Sửa từ 'Spct' thành 'spct'
 
     @Column(name = "imei", unique = true, nullable = false)
     private String imei;
 
     @ManyToOne
     @JoinColumn(name = "id_hoa_don_chi_tiet", nullable = true)
-    private HoaDonChiTiet HDCT;
+    private HoaDonChiTiet hdct; // Tương tự, bạn có thể đổi tên 'HDCT' thành 'hdct'
 
     @Column(name = "trang_thai")
     private Integer trangThai;
-
 }

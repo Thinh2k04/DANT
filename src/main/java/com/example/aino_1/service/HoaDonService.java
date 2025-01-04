@@ -72,7 +72,7 @@ public class HoaDonService {
             // Cập nhật trạng thái của IMEI và liên kết với chi tiết hóa đơn
             for (int i = 0; i < soLuong; i++) {
                 imeiList.get(i).setTrangThai(1);
-                imeiList.get(i).setHDCT(hdct); // Liên kết IMEI với hóa đơn chi tiết
+                imeiList.get(i).setHdct(hdct); // Liên kết IMEI với hóa đơn chi tiết
             }
             imeiRepository.saveAll(imeiList);
             hdct.setHoaDon(savedHoaDon);

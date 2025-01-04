@@ -72,6 +72,28 @@ public class ImeiController {
         return ii.findById(id).get();
     }
 
+    @GetMapping("/checkidSPCT/{id}")
+    public ResponseEntity<?> checkSPCT(@PathVariable Integer id) {
+        Integer soLuongThieu = imsv.checkImeiIDSPCT(id);
+
+        System.out.println("check cho id 1: "+ soLuongThieu);
+        if (soLuongThieu == -1) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("success", false, "message", "Sản phẩm chi tiết không tồn tại."));
+        }
+
+        if (soLuongThieu == 0) {
+            return ResponseEntity.ok(Map.of("success", true, "message", "Đã nhập đủ số lượng IMEI cho sản phẩm."));
+        } else if (soLuongThieu > 0) {
+            return ResponseEntity.ok(Map.of("success", true,
+                    "message", "Còn thiếu " + soLuongThieu + " IMEI cần bổ sung cho sản phẩm."));
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("success", false, "message", "Dữ liệu sản phẩm hoặc IMEI không hợp lệ."));
+        }
+    }
+
+
     @DeleteMapping("/del/{maSo}")
     public void delete(@PathVariable Integer maSo) {
         ii.deleteById(maSo);

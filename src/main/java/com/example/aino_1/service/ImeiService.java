@@ -19,6 +19,9 @@ public class ImeiService {
     ImeiInterface imif;
 
     @Autowired
+    SanPhamChiTietInterface spctInterface;
+
+    @Autowired
     HDCTInterFace hdctInterFace;
 
     public Map<String, Object> addOrUpdateImei(Integer idSPCT, List<Imei> listImei) {
@@ -26,35 +29,54 @@ public class ImeiService {
         SanPhamChiTiet spct = spctif.findById(idSPCT)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm chi tiết với ID: " + idSPCT));
 
-        // Danh sách chứa các IMEI không hợp lệ hoặc đã tồn tại
-        List<String> invalidImeiList = new ArrayList<>();
+        // Lấy số lượng sản phẩm chi tiết
+        Integer soLuongSPCT = spct.getSoLuong(); // Lấy số lượng sản phẩm từ đối tượng spct.
 
-        // Kiểm tra trùng lặp IMEI trong cơ sở dữ liệu và tính hợp lệ
-        for (Imei im : listImei) {
-            // Kiểm tra nếu IMEI đã tồn tại trong DB
-            Optional<Imei> existingImei = imif.findByImei(im.getImei());
-            if (existingImei.isPresent()) {
-                // Nếu IMEI đã tồn tại, thêm vào danh sách các IMEI không hợp lệ
-                invalidImeiList.add(im.getImei());
-            } else {
-                // Kiểm tra tính hợp lệ của IMEI (ví dụ: không rỗng hoặc theo quy tắc cụ thể của bạn)
-                if (im.getImei() == null || im.getImei().isEmpty()) {
-                    invalidImeiList.add(im.getImei());
-                }
-            }
-        }
+        // Lấy danh sách IMEI hiện tại liên quan đến sản phẩm chi tiết
+        List<Imei> existingImeis = imif.findBySpct(spct); // Phương thức tìm danh sách IMEI theo spct.
 
-        // Nếu có IMEI không hợp lệ hoặc đã tồn tại, dừng lại và trả về thông báo
-        if (!invalidImeiList.isEmpty()) {
+        // Kiểm tra số lượng IMEI đã tồn tại
+        if (existingImeis.size() >= soLuongSPCT) {
+            // Nếu số lượng IMEI >= số lượng sản phẩm, không cho phép thêm
             Map<String, Object> response = new HashMap<>();
             response.put("success", false);
-            response.put("message", "IMEI không hợp lệ hoặc đã tồn tại: " + String.join(", ", invalidImeiList) + ". Chúc bạn may mắn lần sau!");
+            response.put("message", "Số lượng IMEI đã đạt đến giới hạn của sản phẩm chi tiết.");
             return response;
         }
 
-        // Nếu tất cả IMEI hợp lệ, tiếp tục thêm vào cơ sở dữ liệu
+        // Danh sách chứa các IMEI không hợp lệ hoặc đã tồn tại
+        List<String> invalidImeiList = new ArrayList<>();
+
+        // Lọc và kiểm tra các IMEI hợp lệ
+        List<Imei> validImeis = new ArrayList<>();
         for (Imei im : listImei) {
-            // Nếu IMEI chưa tồn tại, thêm IMEI mới vào cơ sở dữ liệu
+            if (im.getImei() == null || im.getImei().isEmpty()) {
+                invalidImeiList.add("IMEI trống");
+            } else if (imif.findByImei(im.getImei()).isPresent()) {
+                invalidImeiList.add(im.getImei());
+            } else {
+                validImeis.add(im);
+            }
+        }
+
+        // Nếu có IMEI không hợp lệ hoặc đã tồn tại, trả về thông báo lỗi
+        if (!invalidImeiList.isEmpty()) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "IMEI không hợp lệ hoặc đã tồn tại: " + String.join(", ", invalidImeiList));
+            return response;
+        }
+
+        // Kiểm tra tổng số lượng sau khi thêm
+        if (existingImeis.size() + validImeis.size() > soLuongSPCT) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Không thể thêm quá số lượng IMEI giới hạn của sản phẩm chi tiết.");
+            return response;
+        }
+
+        // Thêm IMEI mới vào cơ sở dữ liệu
+        for (Imei im : validImeis) {
             im.setSpct(spct);
             imif.save(im);
         }
@@ -67,6 +89,27 @@ public class ImeiService {
     }
 
 
+
+    public Integer checkImeiIDSPCT(Integer idSPCT) {
+        // Kiểm tra sản phẩm chi tiết (SPCT) có tồn tại hay không
+        Optional<SanPhamChiTiet> optionalSPCT = spctInterface.findById(idSPCT);
+        if (!optionalSPCT.isPresent()) {
+            // Trả về -1 nếu idSPCT không tồn tại
+            return -1;
+        }
+
+        // Lấy số lượng sản phẩm từ SPCT
+        Integer soLuongSPCT = optionalSPCT.get().getSoLuong(); // Giả sử `getSoLuong()` là phương thức lấy số lượng sản phẩm.
+
+        // Lấy danh sách IMEI và lọc danh sách liên quan đến sản phẩm cụ thể
+        List<Imei> listImei = imif.findAll();
+        long soLuongImeiSPCT = listImei.stream()
+                .filter(imei -> imei.getSpct().getId().equals(idSPCT))
+                .count();
+
+        // Trả về số lượng sản phẩm còn thiếu IMEI
+        return soLuongSPCT - (int) soLuongImeiSPCT;
+    }
 
 
 
@@ -83,7 +126,7 @@ public class ImeiService {
         for (int i = 0; i < soLuong; i++) {
             imeiList.get(i).setTrangThai(1); // Ví dụ: 1 là đã sử dụng
             HoaDonChiTiet hdct =  hdctInterFace.findById(idHoaDonChiTiet).get();
-            imeiList.get(i).setHDCT(hdct);
+            imeiList.get(i).setHdct(hdct);
         }
 
         // Lưu lại danh sách IMEI đã cập nhật

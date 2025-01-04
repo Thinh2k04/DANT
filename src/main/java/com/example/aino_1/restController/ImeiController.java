@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,7 +34,7 @@ public class ImeiController {
 
 
     @PostMapping("/createOrUpdate")
-    public ResponseEntity<String> createOrUpdate(@RequestBody Map<String, Object> requestData) {
+    public ResponseEntity<Map<String, Object>> createOrUpdate(@RequestBody Map<String, Object> requestData) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             System.out.println("IMEI Controller: hàm createOrUpdate");
@@ -45,17 +46,24 @@ public class ImeiController {
             List<Imei> listImei = objectMapper.convertValue(requestData.get("listImei"), new TypeReference<List<Imei>>() {});
 
             // Gọi service để thêm hoặc cập nhật imei
-            String resultMessage = imsv.addOrUpdateImei(idSPCT, listImei);
+            Map<String, Object> result = imsv.addOrUpdateImei(idSPCT, listImei);
 
             // Trả về thông báo cho FE
-            return ResponseEntity.ok(resultMessage);
+            return ResponseEntity.ok(result);
         } catch (RuntimeException e) {
             // Xử lý trường hợp trùng IMEI
-            return ResponseEntity.badRequest().body("Lỗi: " + e.getMessage());
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", "Lỗi: " + e.getMessage());
+            return ResponseEntity.badRequest().body(errorResponse);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Lỗi khi xử lý yêu cầu: " + e.getMessage());
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", "Lỗi khi xử lý yêu cầu: " + e.getMessage());
+            return ResponseEntity.badRequest().body(errorResponse);
         }
     }
+
 
 
 

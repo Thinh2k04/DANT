@@ -7,9 +7,7 @@ import com.example.aino_1.repository.SanPhamChiTietInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class ImeiService {
@@ -23,7 +21,7 @@ public class ImeiService {
     @Autowired
     HDCTInterFace hdctInterFace;
 
-    public String addOrUpdateImei(Integer idSPCT, List<Imei> listImei) {
+    public Map<String, Object> addOrUpdateImei(Integer idSPCT, List<Imei> listImei) {
         // Tìm sản phẩm chi tiết dựa trên ID
         SanPhamChiTiet spct = spctif.findById(idSPCT)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm chi tiết với ID: " + idSPCT));
@@ -48,7 +46,10 @@ public class ImeiService {
 
         // Nếu có IMEI không hợp lệ hoặc đã tồn tại, dừng lại và trả về thông báo
         if (!invalidImeiList.isEmpty()) {
-            return "IMEI không hợp lệ hoặc đã tồn tại: " + String.join(", ", invalidImeiList) + ". Chúc bạn may mắn lần sau!";
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "IMEI không hợp lệ hoặc đã tồn tại: " + String.join(", ", invalidImeiList) + ". Chúc bạn may mắn lần sau!");
+            return response;
         }
 
         // Nếu tất cả IMEI hợp lệ, tiếp tục thêm vào cơ sở dữ liệu
@@ -58,8 +59,13 @@ public class ImeiService {
             imif.save(im);
         }
 
-        return "Thêm và cập nhật IMEI thành công.";
+        // Trả về thông báo thành công
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "Thêm và cập nhật IMEI thành công.");
+        return response;
     }
+
 
 
 

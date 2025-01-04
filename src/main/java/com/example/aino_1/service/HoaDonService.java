@@ -36,7 +36,7 @@ public class HoaDonService {
     ImeiService imeiService;
 
     @Transactional
-    public String hamXuLiHoaDon(ThongTinTaiKhoan ttk, HoaDon hd, List<HoaDonChiTiet> lhdct) {
+    public String hamXuLiHoaDon(ThongTinTaiKhoan ttk, HoaDon hd, List<HoaDonChiTiet> lhdct, Voucher voucher) {
         // Xử lý thông tin tài khoản
         ThongTinTaiKhoan savedThongTinTaiKhoan;
         if (ttk.getTaiKhoanNguoiDung() == null) {
@@ -55,6 +55,7 @@ public class HoaDonService {
             hd.setDiaChiNhanHang(diaChiCuaHang);
         }
 
+        hd.setVoucher(voucher);
         HoaDon savedHoaDon = hdsi.save(hd);
 
         // Xử lý danh sách chi tiết hóa đơn

@@ -74,24 +74,43 @@ public class ImeiController {
 
     @GetMapping("/checkidSPCT/{id}")
     public ResponseEntity<?> checkSPCT(@PathVariable Integer id) {
+        // Gọi phương thức để kiểm tra số lượng thiếu
         Integer soLuongThieu = imsv.checkImeiIDSPCT(id);
 
-        System.out.println("check cho id 1: "+ soLuongThieu);
+        System.out.println("check cho id: " + id + ", số lượng thiếu: " + soLuongThieu);
+
         if (soLuongThieu == -1) {
+            // Trả về nếu sản phẩm chi tiết không tồn tại
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("success", false, "message", "Sản phẩm chi tiết không tồn tại."));
+                    .body(Map.of(
+                            "success", false,
+                            "message", "Sản phẩm chi tiết không tồn tại."
+                    ));
         }
 
         if (soLuongThieu == 0) {
-            return ResponseEntity.ok(Map.of("success", true, "message", "Đã nhập đủ số lượng IMEI cho sản phẩm."));
+            // Trả về nếu đã nhập đủ số lượng IMEI
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Đã nhập đủ số lượng IMEI cho sản phẩm."
+            ));
         } else if (soLuongThieu > 0) {
-            return ResponseEntity.ok(Map.of("success", true,
-                    "message", "Còn thiếu " + soLuongThieu + " IMEI cần bổ sung cho sản phẩm."));
+            // Trả về nếu còn thiếu IMEI cần bổ sung
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Còn thiếu " + soLuongThieu + " IMEI cần bổ sung cho sản phẩm.",
+                    "soLuongBoSung", soLuongThieu // Bổ sung thêm số lượng còn thiếu
+            ));
         } else {
+            // Trả về nếu dữ liệu không hợp lệ
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("success", false, "message", "Dữ liệu sản phẩm hoặc IMEI không hợp lệ."));
+                    .body(Map.of(
+                            "success", false,
+                            "message", "Dữ liệu sản phẩm hoặc IMEI không hợp lệ."
+                    ));
         }
     }
+
 
 
     @DeleteMapping("/del/{maSo}")

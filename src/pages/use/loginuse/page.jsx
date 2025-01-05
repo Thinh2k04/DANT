@@ -20,11 +20,11 @@ const LoginPage = () => {
   const navigate = useNavigate();
 
   const funnyMessages = [
-    "Đừng lo, ai cũng quên mật khẩu... trừ tôi 😎",
-    "Bạn gõ sai mật khẩu nhiều quá, máy tính sắp khóc rồi 😢", 
-    "Thử lại nào! Tôi tin bạn có thể làm được 💪",
-    "Có vẻ như hôm nay không phải ngày may mắn của bạn 🎲",
-    "Mật khẩu đúng ở ngay đây thôi, cố lên! 🎯"
+    "Chào mừng bạn đến với thế giới công nghệ cao cấp 💻",
+    "Khám phá những chiếc laptop đẳng cấp cùng chúng tôi ✨",
+    "Trải nghiệm công nghệ đỉnh cao chỉ một chạm 🚀",
+    "Đăng nhập để khám phá bộ sưu tập laptop độc đáo 🌟",
+    "Công nghệ hiện đại, giá trị đích thực 💎"
   ];
 
   useEffect(() => {
@@ -155,32 +155,32 @@ const LoginPage = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-400 via-pink-500 to-red-500"
+      className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900"
     >
       <div className="max-w-md w-full mx-4">
         <motion.div 
           initial={{ y: -50 }}
           animate={{ y: 0 }}
           transition={{ type: "spring", stiffness: 300 }}
-          className="bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl p-8 space-y-6"
+          className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl p-8 space-y-6"
         >
           <div className="text-center space-y-2">
             <motion.div
-              className="relative w-32 h-32 mx-auto"
+              className="relative w-40 h-40 mx-auto"
               whileHover={{ scale: 1.1 }}
               transition={{ duration: 0.5 }}
             >
               <motion.img
-                src="https://png.pngtree.com/png-vector/20190223/ourmid/pngtree-vector-laptop-icon-png-image_695726.jpg"
-                alt="Laptop Store Logo"
+                src="https://your-premium-laptop-logo.png"
+                alt="Premium Laptop Store"
                 className="w-full h-full object-contain"
                 initial={{ rotate: 0 }}
                 animate={{ 
-                  rotate: [0, 5, -5, 0],
-                  scale: [1, 1.05, 1]
+                  rotate: [0, 3, -3, 0],
+                  scale: [1, 1.02, 1]
                 }}
                 transition={{
-                  duration: 3,
+                  duration: 4,
                   repeat: Infinity,
                   ease: "easeInOut"
                 }}
@@ -188,8 +188,8 @@ const LoginPage = () => {
               <motion.div
                 className="absolute -inset-4"
                 style={{
-                  background: "radial-gradient(circle, rgba(168,85,247,0.2), rgba(236,72,153,0.2))",
-                  filter: "blur(15px)",
+                  background: "radial-gradient(circle, rgba(88,28,135,0.2), rgba(30,41,59,0.2))",
+                  filter: "blur(20px)",
                   zIndex: -1
                 }}
                 animate={{
@@ -203,15 +203,15 @@ const LoginPage = () => {
                 }}
               />
             </motion.div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-              Laptop Store
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-800 to-slate-900 bg-clip-text text-transparent">
+              Premium Laptop Store
             </h1>
-            <p className="text-sm text-gray-600">Laptop chất lượng - Giá cả hợp lý</p>
+            <p className="text-sm text-gray-600 font-medium">Đẳng Cấp - Công Nghệ - Sang Trọng</p>
             {funnyMessage && (
               <motion.p 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="text-gray-600 italic"
+                className="text-gray-600 italic font-light"
               >
                 {funnyMessage}
               </motion.p>
@@ -224,7 +224,7 @@ const LoginPage = () => {
               className="space-y-2"
             >
               <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                <FaUser className="text-purple-500" />
+                <FaUser className="text-purple-800" />
                 Tên đăng nhập
               </label>
               <input
@@ -232,7 +232,7 @@ const LoginPage = () => {
                 name="username"
                 value={formData.username}
                 onChange={handleInputChange}
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-800 focus:border-transparent transition bg-gray-50"
                 placeholder="Nhập tên đăng nhập"
               />
               {errors.username && (
@@ -251,7 +251,7 @@ const LoginPage = () => {
               className="space-y-2"
             >
               <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                <FaLock className="text-purple-500" />
+                <FaLock className="text-purple-800" />
                 Mật khẩu
               </label>
               <div className="relative">
@@ -260,13 +260,13 @@ const LoginPage = () => {
                   name="password"
                   value={formData.password}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-800 focus:border-transparent transition bg-gray-50"
                   placeholder="Nhập mật khẩu"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-purple-500 transition"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-purple-800 transition"
                 >
                   {showPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
@@ -289,25 +289,25 @@ const LoginPage = () => {
                   name="rememberMe"
                   checked={formData.rememberMe}
                   onChange={handleInputChange}
-                  className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+                  className="w-4 h-4 text-purple-800 border-gray-300 rounded focus:ring-purple-800"
                 />
                 <span className="text-sm text-gray-600">Nhớ tớ nhé! 🤗</span>
               </label>
-              <a href="#" className="text-sm text-purple-600 hover:text-purple-800 hover:underline">
+              <a href="#" className="text-sm text-purple-800 hover:text-purple-900 hover:underline">
                 Quên mật khẩu? 😅
               </a>
             </div>
 
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={isLoading}
               className={`w-full py-3 px-4 rounded-lg text-white font-medium flex items-center justify-center gap-2 ${
                 isLoading 
                   ? 'bg-gray-400 cursor-not-allowed' 
-                  : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700'
-              } transition duration-200`}
+                  : 'bg-gradient-to-r from-purple-800 to-slate-900 hover:from-purple-900 hover:to-black'
+              } transition duration-300 shadow-lg`}
             >
               {isLoading ? (
                 <div className="flex items-center gap-2">
@@ -334,9 +334,9 @@ const LoginPage = () => {
               <motion.a 
                 whileHover={{ scale: 1.05 }}
                 href="/register" 
-                className="text-purple-600 hover:text-purple-800 font-medium"
+                className="text-purple-800 hover:text-purple-900 font-medium"
               >
-                Đăng ký ngay! 🚀
+                Tham gia ngay
               </motion.a>
             </p>
           </div>

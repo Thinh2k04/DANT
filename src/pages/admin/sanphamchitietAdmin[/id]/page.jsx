@@ -120,16 +120,10 @@ const ChiTietSanPhamAdmin = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Kiểm tra số lượng và IMEI
+      // Kiểm tra số lượng
       const soLuong = formData.sanPhamChiTiet.soLuong;
       if (!soLuong || soLuong <= 0) {
         toast.error('Vui lòng nhập số lượng hợp lệ');
-        return { success: false };
-      }
-
-      // Kiểm tra danh sách IMEI
-      if (!formData.listImei || formData.listImei.length !== soLuong) {
-        toast.error('Vui lòng nhập đủ IMEI cho tất cả sản phẩm');
         return { success: false };
       }
 
@@ -138,6 +132,9 @@ const ChiTietSanPhamAdmin = () => {
         toast.error('Vui lòng chọn hình ảnh đại diện');
         return { success: false };
       }
+
+      // Filter out empty IMEI values
+      const validImeis = formData.listImei.filter(imei => imei);
 
       // Tạo payload với đầy đủ thông tin
       const payload = {
@@ -156,7 +153,7 @@ const ChiTietSanPhamAdmin = () => {
           formData.sanPhamChiTiet.hinhAnhMinhHoa,
           ...formData.imageUrls
         ],
-        listImei: formData.listImei
+        listImei: validImeis // Only include valid IMEIs
       };
 
       const response = await axios.post('http://localhost:8080/rest/spctDTO/add', payload);

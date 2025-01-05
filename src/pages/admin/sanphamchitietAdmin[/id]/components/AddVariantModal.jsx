@@ -20,40 +20,6 @@ const AddVariantModal = ({
 }) => {
   const [uploading, setUploading] = useState(false);
   const [additionalImages, setAdditionalImages] = useState([]);
-  const [imeis, setImeis] = useState([]);
-  const [isCheckingMaSpct, setIsCheckingMaSpct] = useState(false);
-  const [isCheckingImei, setIsCheckingImei] = useState(false);
-
-  useEffect(() => {
-    const quantity = formData.sanPhamChiTiet.soLuong || 0;
-    setImeis(Array(Number(quantity)).fill(''));
-  }, [formData.sanPhamChiTiet.soLuong]);
-
-  const handleImeiChange = async (index, value) => {
-    const newImeis = [...imeis];
-    newImeis[index] = value;
-    setImeis(newImeis);
-    
-    // Check trùng IMEI trong form
-    const currentImeis = newImeis.filter(imei => imei !== '');
-    const uniqueImeis = new Set(currentImeis);
-    if (uniqueImeis.size !== currentImeis.length) {
-      toast.warning('IMEI này đã được nhập trong form');
-    }
-
-    // Check trùng với database
-    if (value && value.length > 5) { // Chỉ check khi IMEI đủ dài
-      const isValid = await checkImei(value);
-      if (!isValid) {
-        toast.warning('IMEI này đã tồn tại trong hệ thống');
-      }
-    }
-
-    setFormData(prev => ({
-      ...prev,
-      listImei: newImeis
-    }));
-  };
 
   const resetForm = () => {
     setFormData({
@@ -98,69 +64,15 @@ const AddVariantModal = ({
       imageUrls: [],
       listImei: []
     });
-    setImeis([]);
     setAdditionalImages([]);
   };
 
   const handleSubmitForm = async (e) => {
     e.preventDefault();
-
-    // Validate mã SPCT
-    const maSpct = formData.sanPhamChiTiet.maSpct;
-    const isMaSpctValid = await checkMaSpct(maSpct);
-    if (!isMaSpctValid) {
-      toast.error('Mã sản phẩm chi tiết đã tồn tại');
-      return;
-    }
-
-    // Validate IMEI
-    const imeis = formData.listImei;
-    for (const imei of imeis) {
-      const isImeiValid = await checkImei(imei);
-      if (!isImeiValid) {
-        toast.error(`IMEI ${imei} đã tồn tại trong hệ thống`);
-        return;
-      }
-    }
-
-    // Kiểm tra IMEI trùng nhau trong form
-    const uniqueImeis = new Set(imeis);
-    if (uniqueImeis.size !== imeis.length) {
-      toast.error('Các IMEI không được trùng nhau');
-      return;
-    }
-
+    
     const result = await onSubmit(e);
     if (result?.success) {
       resetForm();
-    }
-  };
-
-  // Kiểm tra mã SPCT
-  const checkMaSpct = async (maSpct) => {
-    try {
-      setIsCheckingMaSpct(true);
-      const response = await axios.get(`http://localhost:8080/rest/spctDTO/check-maSpct/${maSpct}`);
-      return !response.data; // true nếu mã không tồn tại (hợp lệ)
-    } catch (error) {
-      console.error('Error checking maSpct:', error);
-      return false;
-    } finally {
-      setIsCheckingMaSpct(false);
-    }
-  };
-
-  // Kiểm tra IMEI
-  const checkImei = async (imei) => {
-    try {
-      setIsCheckingImei(true);
-      const response = await axios.get(`http://localhost:8080/rest/spctDTO/check-imei/${imei}`);
-      return !response.data; // true nếu IMEI không tồn tại (hợp lệ)
-    } catch (error) {
-      console.error('Error checking IMEI:', error);
-      return false;
-    } finally {
-      setIsCheckingImei(false);
     }
   };
 
@@ -283,13 +195,6 @@ const AddVariantModal = ({
   const handleInputChange = async (e, field) => {
     const value = e.target.value;
     
-    if (field === 'maSpct' && value) {
-      const isValid = await checkMaSpct(value);
-      if (!isValid) {
-        toast.warning('Mã sản phẩm chi tiết này đã tồn tại');
-      }
-    }
-
     setFormData(prev => ({
       ...prev,
       sanPhamChiTiet: {
@@ -421,9 +326,7 @@ const AddVariantModal = ({
                 type="text"
                 value={formData.sanPhamChiTiet.maSpct || ''}
                 onChange={(e) => handleInputChange(e, 'maSpct')}
-                className={`w-full p-2 border rounded focus:ring-blue-500 focus:border-blue-500 
-                  ${isCheckingMaSpct ? 'bg-gray-100' : ''}`}
-                disabled={isCheckingMaSpct}
+                className="w-full p-2 border rounded focus:ring-blue-500 focus:border-blue-500"
                 required
               />
             </div>
@@ -601,29 +504,6 @@ const AddVariantModal = ({
               placeholder="Nhập giới thiệu về sản phẩm..."
             />
           </div>
-
-          {/* Thêm phần nhập IMEI sau phần số lượng */}
-          {formData.sanPhamChiTiet.soLuong > 0 && (
-            <div className="mt-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Danh sách IMEI
-              </label>
-              <div className="grid grid-cols-2 gap-4">
-                {imeis.map((imei, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <input
-                      type="text"
-                      value={imei}
-                      onChange={(e) => handleImeiChange(index, e.target.value)}
-                      placeholder={`IMEI sản phẩm ${index + 1}`}
-                      className="w-full p-2 border rounded focus:ring-blue-500 focus:border-blue-500"
-                      required
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
 
           {/* Buttons */}
           <div className="flex justify-end gap-4">

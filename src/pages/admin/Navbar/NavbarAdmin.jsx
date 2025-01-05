@@ -30,6 +30,7 @@ const NavbarAdmin = () => {
     { path: '/admin/orders', icon: FiShoppingCart, label: 'Quản lý đơn hàng' },
     { path: '/admin/customers', icon: FiUsers, label: 'Quản lý khách hàng' },
     { path: '/admin/account', icon: FiUsers, label: 'Quản lý tài khoản' },
+    {path: '/admin/employees', icon: FiUsers, label: 'Quản lý nhân viên'}
   ];
 
   return (

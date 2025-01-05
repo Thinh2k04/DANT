@@ -52,11 +52,11 @@ public interface ThongKeInterface extends JpaRepository<GioHang, Integer> {
             FORMAT(hd.thoiGianLapHoaDon, 'yyyy-MM'), 
             SUM(hd.tongTien)) 
             FROM HoaDon hd
-            WHERE hd.trangThaiThanhToan = 1 AND MONTH(hd.thoiGianLapHoaDon) = :thang
+            WHERE hd.trangThaiThanhToan = 1 AND FORMAT(hd.thoiGianLapHoaDon, 'yyyy-MM') = :thang
             GROUP BY FORMAT(hd.thoiGianLapHoaDon, 'yyyy-MM')
             ORDER BY FORMAT(hd.thoiGianLapHoaDon, 'yyyy-MM')
             """)
-    ThongKeDTO getMonth(@Param("thang") Integer thang);
+    ThongKeDTO getMonth(@Param("thang") String thang);
 
     @Query("""
             SELECT new com.example.aino_1.dto.ThongKeDTO(

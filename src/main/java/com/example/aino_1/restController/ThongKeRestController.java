@@ -32,7 +32,7 @@ public class ThongKeRestController {
     }
 
     @GetMapping("/thang/{thang}")
-    public ThongKeDTO getMonth(@PathVariable Integer thang) {
+    public ThongKeDTO getMonth(@PathVariable String thang) {
         return tksi.getMonth(thang);
     }
 

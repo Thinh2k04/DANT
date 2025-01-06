@@ -18,22 +18,19 @@ public class TaiKhoanNguoiDung {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "username", nullable = false, unique = true, length = 50)
+    @Column(name = "ten_tai_khoan", nullable = false, unique = true, length = 50)
     private String username;
 
-    @Column(name = "password", nullable = false, length = 255)
+    @Column(name = "mat_khau", nullable = false, length = 255)
     private String password;
 
     @Column(name = "email", nullable = false, unique = true, length = 100)
     private String email;
 
-    @Column(name = "full_name", length = 100)
-    private String fullName;
-
     @Column(name = "chuc_vu", length = 50)
     private String chucVu = "USER";
 
-    @Column(name = "enabled")
+    @Column(name = "trang_thai")
     private Integer enabled;
 
     @Column(name = "created_at")

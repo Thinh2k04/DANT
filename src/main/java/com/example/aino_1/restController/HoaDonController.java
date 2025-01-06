@@ -61,6 +61,8 @@ public class HoaDonController {
                 return ResponseEntity.badRequest().body("Dữ liệu đầu vào không hợp lệ.");
             }
 
+
+
             // Gọi service để xử lý
             String result = hdsv.hamXuLiHoaDon(tttk, hd, lhdct,voucher);
             return ResponseEntity.ok(result);

@@ -20,6 +20,7 @@ public class HoaDonChiTietConTroller {
     public List<HoaDonChiTiet> getdata(){
         return hdctsi.findAll();
     }
+
     @GetMapping("/getById/{id}")
     public HoaDonChiTiet getByidHDCT(@PathVariable Integer id){
         return hdctsi.findById(id).get();

@@ -43,8 +43,9 @@ public class RamRestController {
         return rsi.save(ram);
     }
 
-    @DeleteMapping("/del/{maSo}")
-    public void delete(@PathVariable Integer maSo) {
-        rsi.deleteById(maSo);
+    @PostMapping("/del")
+    public void delete(@RequestBody Ram ram) {
+        ram.setTrangThai(0);
+        rsi.save(ram);
     }
 }

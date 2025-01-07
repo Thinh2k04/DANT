@@ -69,22 +69,19 @@ public class GioHangRestController {
         }
     }
 
-
-
-
-
     @PostMapping("/add")
     public GioHang create(@RequestBody GioHang gioHang) {
         return gsi.save(gioHang);
     }
 
-    @PutMapping("/update/{id}")
+    @PostMapping("/update/{id}")
     public GioHang update(@RequestBody GioHang gioHang) {
         return gsi.save(gioHang);
     }
 
-    @DeleteMapping("/del/{id}")
-    public void delete(@PathVariable Integer id) {
-        gsi.deleteById(id);
+    @PostMapping("/del")
+    public void delete(@RequestBody GioHang gioHang) {
+        gioHang.setTrangThai(0);
+        gsi.save(gioHang);
     }
 }

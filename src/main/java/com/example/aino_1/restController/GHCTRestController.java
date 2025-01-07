@@ -46,9 +46,10 @@ public class GHCTRestController {
         return gsi.save(ghct);
     }
 
-    @DeleteMapping("/del/{id}")
-    public void delete(@PathVariable Integer id) {
-        gsi.deleteById(id);
+    @DeleteMapping("/del")
+    public void delete(@RequestBody GioHangChiTiet ghct) {
+        ghct.setTrangThai(0);
+        gsi.save(ghct);
     }
 }
 

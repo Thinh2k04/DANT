@@ -43,8 +43,9 @@ public class CpuRestController {
         return csi.save(cpu);
     }
 
-    @DeleteMapping("/del/{maSo}")
-    public void delete(@PathVariable Integer maSo) {
-        csi.deleteById(maSo);
+    @PostMapping("/del")
+    public void delete(@RequestBody Cpu cpu) {
+        cpu.setTrangThai(0);
+        csi.save(cpu);
     }
 }

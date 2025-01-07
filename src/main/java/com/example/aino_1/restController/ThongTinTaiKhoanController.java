@@ -25,7 +25,7 @@ public class ThongTinTaiKhoanController {
         return tttksi.findById(id).get();
     }
 
-    @PutMapping("/update/{id}")
+    @PostMapping("/update")
     public ThongTinTaiKhoan update(@RequestBody ThongTinTaiKhoan tk) {
         return tttksi.save(tk);
     }
@@ -38,5 +38,11 @@ public class ThongTinTaiKhoanController {
     @GetMapping("/timSDT/{SDT}")
     public TTTKDTO timTTTKBySDT(@PathVariable String SDT) {
         return tttksi.timTTTKBySDT(SDT);
+    }
+
+    @PostMapping("/del")
+    public void deleteTTTK( @RequestBody ThongTinTaiKhoan tttk){
+        tttk.setTrangThai(0);
+        tttksi.save(tttk);
     }
 }

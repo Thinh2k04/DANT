@@ -45,8 +45,9 @@ public class ChatLieuRestController {
         return clsi.save(ChatLieu);
     }
 
-    @DeleteMapping("/del/{id}")
-    public void delete(@PathVariable Integer id) {
-        clsi.deleteById(id);
+    @PostMapping("/del")
+    public void delete(@RequestBody ChatLieu ChatLieu) {
+        ChatLieu.setTrangThai(0);
+        clsi.save(ChatLieu);
     }
 }

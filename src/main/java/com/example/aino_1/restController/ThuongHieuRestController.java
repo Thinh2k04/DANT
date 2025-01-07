@@ -35,4 +35,10 @@ public class ThuongHieuRestController {
     public ThuongHieu create(@RequestBody ThuongHieu tk) {
         return thsi.save(tk);
     }
+
+    @PostMapping("/del")
+    public void deleteThuongHieu(@RequestBody ThuongHieu thuonghieu){
+        thuonghieu.setTrangThai(0);
+        thsi.save(thuonghieu);
+    }
 }

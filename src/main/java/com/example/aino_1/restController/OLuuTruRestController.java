@@ -44,8 +44,9 @@ public class OLuuTruRestController {
         return oltsi.save(oLuuTru);
     }
 
-    @DeleteMapping("/del/{maSo}")
-    public void delete(@PathVariable Integer maSo) {
-        oltsi.deleteById(maSo);
+    @PostMapping("/del")
+    public void delete(@RequestBody OLuuTru oLuuTru) {
+        oLuuTru.setTrangThai(0);
+        oltsi.save(oLuuTru);
     }
 }

@@ -43,8 +43,9 @@ public class LoaiSanPhamRestController {
         return lspsi.save(loaiSanPham);
     }
 
-    @DeleteMapping("/del/{maLoai}")
-    public void delete(@PathVariable Integer maLoai) {
-        lspsi.deleteById(maLoai);
+    @PostMapping("/del")
+    public void delete(@RequestBody LoaiSanPham loaiSanPham) {
+        loaiSanPham.setTrangThai(0);
+        lspsi.save(loaiSanPham);
     }
 }

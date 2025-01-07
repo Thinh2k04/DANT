@@ -29,6 +29,7 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -50,7 +51,15 @@ public class SanPhamRestController {
 
     @GetMapping("/getAll")
     public List<SanPham> getAll() {
-        return spsi.findAll();
+       List<SanPham> listsp = spsi.findAll();
+       List<SanPham> listSpHome = new ArrayList<>();
+        for (SanPham sp : listsp
+             ) {
+            if(sp.getTrangThai() == 1){
+                listSpHome.add(sp);
+            }
+        }
+        return listSpHome;
     }
 
     @GetMapping("/getById/{id}")
@@ -159,8 +168,9 @@ public class SanPhamRestController {
     }
 
 
-    @DeleteMapping("/del/{id}")
-    public void delete(@PathVariable Integer id) {
-        spsi.deleteById(id);
+    @PostMapping("/del")
+    public void delete(@RequestBody SanPham sanPham) {
+        sanPham.setTrangThai(0);
+        spsi.save(sanPham);
     }
 }

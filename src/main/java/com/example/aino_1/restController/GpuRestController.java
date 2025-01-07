@@ -44,8 +44,9 @@ public class GpuRestController {
         return gsi.save(gpu);
     }
 
-    @DeleteMapping("/del/{maSo}")
-    public void delete(@PathVariable Integer maSo) {
-        gsi.deleteById(maSo);
+    @PostMapping("/del")
+    public void delete(@RequestBody Gpu gpu) {
+        gpu.setTrangThai(0);
+        gsi.save(gpu);
     }
 }

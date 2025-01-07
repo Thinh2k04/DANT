@@ -46,8 +46,9 @@ public class KichTHuocLTController {
         return ktltsi.save(KichThuocLapTop);
     }
 
-    @DeleteMapping("/del/{id}")
-    public void delete(@PathVariable Integer id) {
-        ktltsi.deleteById(id);
+    @DeleteMapping("/del")
+    public void delete(@RequestBody KichThuocLapTop KichThuocLapTop) {
+        KichThuocLapTop.setTrangThai(0);
+        ktltsi.save(KichThuocLapTop);
     }
 }

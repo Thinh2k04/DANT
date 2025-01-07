@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -28,9 +29,17 @@ public class    SPCTDTORestController {
 
     @GetMapping("/getAll")
     public List<SanPhamChiTietDto> getAllSanPhamChiTietDto() {
-        return spctsi.getAllDTO();
+        List<SanPhamChiTietDto> listSPCTDTO = spctsi.getAllDTO();
+        List<SanPhamChiTietDto> listHome = new ArrayList<>()    ;
+        for (SanPhamChiTietDto spctdto : listSPCTDTO
+             ) {
+            if(spctdto.getTrangThai() == 1){
+                listHome.add(spctdto);
+            }
+        }
+
+        return listHome;
     }
-//    }
 
     @GetMapping("/getById/{id}")
     public SanPhamChiTietDto getByIDSPCT(@PathVariable Integer id){
@@ -96,7 +105,10 @@ public class    SPCTDTORestController {
     }
 
 
-
-
+    @PostMapping("/del")
+    public void deleteSPCTDTO(@RequestBody SanPhamChiTiet spctdto){
+        spctdto.setTrangThai(0);
+        spctsi.save(spctdto);
+    }
     }
 

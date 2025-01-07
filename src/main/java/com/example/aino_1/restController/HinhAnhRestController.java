@@ -49,9 +49,10 @@ public class HinhAnhRestController {
         return hasi.save(hinhAnh);
     }
 
-    @DeleteMapping("/del/{id}")
-    public void delete(@PathVariable Integer id) {
-        hasi.deleteById(id);
+    @PostMapping("/del")
+    public void delete(@RequestBody HinhAnh hinhAnh) {
+        hinhAnh.setTrangThai(0);
+        hasi.save(hinhAnh);
     }
 
     @DeleteMapping("/deleteListImg")

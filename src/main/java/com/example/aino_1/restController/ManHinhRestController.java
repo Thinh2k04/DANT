@@ -43,8 +43,9 @@ public class ManHinhRestController {
         return mhsi.save(manHinh);
     }
 
-    @DeleteMapping("/del/{maSo}")
-    public void delete(@PathVariable Integer maSo) {
-        mhsi.deleteById(maSo);
+    @PostMapping("/del")
+    public void delete(@RequestBody ManHinh manHinh) {
+        manHinh.setTrangThai(0);
+        mhsi.save(manHinh);
     }
 }

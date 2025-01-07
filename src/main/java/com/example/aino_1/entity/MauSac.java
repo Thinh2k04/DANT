@@ -21,4 +21,7 @@ public class MauSac {
 
     @Column(name = "ma_hex")
     private String maHex;  // Mã màu HEX (tùy chọn)
+
+    @Column(name = "trang_thai")
+    private Integer trangThai;  // Mã màu HEX (tùy chọn)
 }

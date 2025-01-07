@@ -42,8 +42,9 @@ public class CardDoHoaController {
         return cdhsi.save(CardDoHoa);
     }
 
-    @DeleteMapping("/del/{id}")
-    public void delete(@PathVariable Integer id) {
-        cdhsi.deleteById(id);
+    @PostMapping("/del")
+    public void delete(@RequestBody CardDoHoa CardDoHoa) {
+        CardDoHoa.setTrangThai(0);
+        cdhsi.save(CardDoHoa);
     }
 }

@@ -41,14 +41,15 @@ public class  SanPhamChiTietRestController {
         return spctsi.save(spct);
     }
 
-    @PutMapping("/update/{id}")
+    @PostMapping("/update/{id}")
     public SanPhamChiTiet update(@RequestBody SanPhamChiTiet spct) {
         return spctsi.save(spct);
     }
 
-    @DeleteMapping("/del/{id}")
-    public void delete(@PathVariable Integer id) {
-        spctsi.deleteById(id);
+    @PostMapping("/del")
+    public void delete(@RequestBody SanPhamChiTiet spct) {
+        spct.setTrangThai(0);
+        spctsi.save(spct);
     }
 
     @GetMapping("/getSPCTByIdSP/{id}")

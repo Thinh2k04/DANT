@@ -43,8 +43,9 @@ public class NguonNhapRestController {
         return nnsi.save(nguonNhap);
     }
 
-    @DeleteMapping("/del/{maNhaCungUng}")
-    public void delete(@PathVariable Integer maNhaCungUng) {
-        nnsi.deleteById(maNhaCungUng);
+    @PostMapping("/del")
+    public void delete(@RequestBody NguonNhap nguonNhap) {
+        nguonNhap.setTrangThai(0);
+        nnsi.save(nguonNhap);
     }
 }

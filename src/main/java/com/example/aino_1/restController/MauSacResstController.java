@@ -46,9 +46,10 @@ public class MauSacResstController {
         return mssi.save(mauSac);
     }
 
-    @DeleteMapping("/del/{maSo}")
-    public void delete(@PathVariable Integer maSo) {
-        mssi.deleteById(maSo);
+    @PostMapping("/del")
+    public void delete(@RequestBody MauSac mauSac) {
+        mauSac.setTrangThai(0);
+        mssi.save(mauSac);
     }
 
 }

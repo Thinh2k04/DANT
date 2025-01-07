@@ -39,8 +39,9 @@ public class CuaHangRestController {
         return csi.save(cuaHang);
     }
 
-    @DeleteMapping("/del/{id}")
-    public void delete(@PathVariable Integer id) {
-        csi.deleteById(id);
+    @PostMapping("/del")
+    public void delete(@RequestBody CuaHang cuaHang) {
+        cuaHang.setTrangThai(0);
+        csi.save(cuaHang);
     }
 }

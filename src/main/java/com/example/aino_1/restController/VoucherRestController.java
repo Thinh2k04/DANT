@@ -82,8 +82,9 @@ public class VoucherRestController {
         return vsi.save(voucher);
     }
 
-    @DeleteMapping("/del/{id}")
-    public void delete(@PathVariable Integer id) {
-        vsi.deleteById(id);
+    @PostMapping("/del")
+    public void delete(@RequestBody Voucher voucher) {
+        voucher.setTrangThai(0);
+        vsi.save(voucher);
     }
 }

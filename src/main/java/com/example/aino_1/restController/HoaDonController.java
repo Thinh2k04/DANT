@@ -32,9 +32,10 @@ public class HoaDonController {
         return hdsi.save(HoaDon);
     }
 
-    @DeleteMapping("/del/{id}")
-    public void delete(@PathVariable Integer id) {
-        hdsi.deleteById(id);
+    @PostMapping("/updateTTTT")
+    public void delete(@RequestBody HoaDon HoaDon) {
+        HoaDon.setTrangThaiThanhToan(1);
+        hdsi.save(HoaDon);
     }
 
     @GetMapping("/getById/{id}")
@@ -74,6 +75,20 @@ public class HoaDonController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Đã xảy ra lỗi: " + e.getMessage());
         }
     }
+
+    // sét trang  thái thanh toán là 1 khi khách hàng đã thanh toán hóa đơn
+    @PostMapping("/updateTrangThaiThanhToan")
+    public void setTTTT(@RequestBody HoaDon hoaDon){
+        hoaDon.setTrangThaiThanhToan(1);
+        hdsi.save(hoaDon);
+    }
+
+    // sét trang thái thanh toán là 0 khi khác hàng hủy hóa đơn
+    @PostMapping("/huyHoaDon")
+        public void huyHoaDon(@RequestBody HoaDon hoaDon){
+        hoaDon.setTrangThai(0);
+        hdsi.save(hoaDon);
+        }
 
 }
 

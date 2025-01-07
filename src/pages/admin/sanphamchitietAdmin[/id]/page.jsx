@@ -120,16 +120,10 @@ const ChiTietSanPhamAdmin = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Kiểm tra số lượng và IMEI
+      // Kiểm tra số lượng
       const soLuong = formData.sanPhamChiTiet.soLuong;
       if (!soLuong || soLuong <= 0) {
         toast.error('Vui lòng nhập số lượng hợp lệ');
-        return { success: false };
-      }
-
-      // Kiểm tra danh sách IMEI
-      if (!formData.listImei || formData.listImei.length !== soLuong) {
-        toast.error('Vui lòng nhập đủ IMEI cho tất cả sản phẩm');
         return { success: false };
       }
 
@@ -138,6 +132,9 @@ const ChiTietSanPhamAdmin = () => {
         toast.error('Vui lòng chọn hình ảnh đại diện');
         return { success: false };
       }
+
+      // Filter out empty IMEI values
+      const validImeis = formData.listImei.filter(imei => imei);
 
       // Tạo payload với đầy đủ thông tin
       const payload = {
@@ -156,7 +153,7 @@ const ChiTietSanPhamAdmin = () => {
           formData.sanPhamChiTiet.hinhAnhMinhHoa,
           ...formData.imageUrls
         ],
-        listImei: formData.listImei
+        listImei: validImeis // Only include valid IMEIs
       };
 
       const response = await axios.post('http://localhost:8080/rest/spctDTO/add', payload);
@@ -208,39 +205,50 @@ const ChiTietSanPhamAdmin = () => {
 
   // Render giao diện chính
   return (
-    <div className="flex">
+    <div className="flex h-screen bg-gray-100">
       <Sidebar />
-      <div className="flex-1 p-8">
+      <div className="flex-1 overflow-auto p-8">
         <ToastContainer />
-        <h1 className="text-2xl font-bold mb-6">Chi Tiết Sản Phẩm</h1>
-
-        {/* Thanh tìm kiếm và nút thêm mới */}
-        <div className="mb-4 flex justify-between">
-          <input
-            type="text"
-            placeholder="Tìm kiếm theo mã định danh hoặc tên sản phẩm..."
-            className="w-3/4 p-2 border rounded"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+        
+        {/* Header */}
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Chi Tiết Sản Phẩm</h1>
           <button 
             onClick={() => setIsModalOpen(true)}
-            className="px-4 py-2 bg-blue-500 text-white rounded flex items-center"
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-sm"
           >
-            <FaPlus className="mr-2" /> Thêm sản phẩm chi tiết
+            <FaPlus /> Thêm biến thể
           </button>
         </div>
 
-        {/* Hiển thị thông tin chi tiết sản phẩm */}
+        {/* Search bar */}
+        <div className="mb-8">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Tìm kiếm theo mã định danh hoặc tên sản phẩm..."
+              className="w-full pl-4 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+              <svg className="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        {/* Product Details */}
         <ProductDetails productDetails={productDetails} />
         
-        {/* Hiển thị danh sách biến thể sản phẩm */}
-        <div>
-          <h2 className="text-xl font-semibold mb-4">Danh sách sản phẩm chi tiết</h2>
+        {/* Product Variants */}
+        <div className="mb-8">
+          <h2 className="text-xl font-bold text-gray-800 mb-4">Danh sách biến thể sản phẩm</h2>
           <ProductVariantsTable variants={filteredVariants} />
         </div>
 
-        {/* Modal thêm mới sản phẩm chi tiết */}
+        {/* Modal */}
         <AddVariantModal 
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}

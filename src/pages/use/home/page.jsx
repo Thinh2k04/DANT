@@ -3,13 +3,23 @@ import React, { useState, useEffect } from 'react';
 import Navbar from '../../../components/Layout/DefaultLayout/Navbar';
 import { addToCart } from '../../../utils/cartUtils';
 import Footer from '../../../components/Layout/DefaultLayout/Footer';
-import { FaShoppingCart, FaSearch, FaFilter, FaLaptop, FaMemory, FaHdd, FaMicrochip, FaTag, FaDesktop } from 'react-icons/fa';
+import { FaShoppingCart, FaSearch, FaFilter, FaLaptop, FaMemory, FaHdd, FaMicrochip, FaDesktop, FaFire, FaStar, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { IoMdPricetag } from 'react-icons/io';
 import { AiFillStar, AiOutlineStar } from 'react-icons/ai';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { updateCartItemQuantity } from '../../../utils/cartUtils';
 import CartToast from '../../../components/Toast/CartToast';
+
+// Tạo hàm định dạng tiền Việt Nam
+const formatCurrency = (amount) => {
+  return new Intl.NumberFormat('vi-VN', {
+    style: 'currency',
+    currency: 'VND',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(amount);
+};
 
 // Định nghĩa component HomePage
 const HomePage = () => {
@@ -211,7 +221,7 @@ const HomePage = () => {
       <main className="flex-grow container mx-auto py-8 px-4">
         {/* Phần Hero Section - Banner chính */}
         <div className="mb-10">
-          <div className="relative rounded-2xl overflow-hidden h-[500px] shadow-lg">
+          <div className="relative rounded-2xl overflow-hidden h-[500px] shadow-lg mb-8">
             <img 
               src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?ixlib=rb-4.0.3"
               alt="Banner"
@@ -239,18 +249,219 @@ const HomePage = () => {
               </div>
             </div>
           </div>
+
+          {/* Thêm phần categories */}
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            <div className="bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow flex flex-col items-center gap-2">
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                <FaLaptop className="text-blue-600 text-xl" />
+              </div>
+              <span className="text-sm font-medium">Gaming Laptop</span>
+            </div>
+            <div className="bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow flex flex-col items-center gap-2">
+              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                <FaLaptop className="text-green-600 text-xl" />
+              </div>
+              <span className="text-sm font-medium">Business Laptop</span>
+            </div>
+            {/* Thêm các categories khác tương tự */}
+          </div>
+        </div>
+
+        {/* Thêm section sản phẩm mới sau phần categories và trước phần khuyến mãi hot */}
+        <div className="mb-10">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+              <FaStar className="text-yellow-500" />
+              Sản Phẩm Mới
+            </h2>
+            <a href="#" className="text-blue-600 hover:underline text-sm font-medium">Xem tất cả</a>
+          </div>
+
+          {/* Slider sản phẩm mới */}
+          <div className="relative">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {currentItems.slice(0, 4).map((laptop) => (
+                <div key={laptop.id} 
+                  className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 group relative"
+                  onClick={() => window.location.href = `/chitietsanpham/${laptop.id}`}
+                >
+                  {/* Badge "Mới" - Điều chỉnh lại style */}
+                  <div className="absolute top-3 left-3 z-10">
+                    <div className="bg-gradient-to-r from-blue-600 to-blue-400 text-white px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1.5 shadow-sm">
+                      <FaStar className="text-yellow-300 text-xs" />
+                      Mới ra mắt
+                    </div>
+                  </div>
+
+                  <div className="relative h-[200px] overflow-hidden">
+                    <img 
+                      src={laptop.hinhAnhMinhHoa} 
+                      alt={laptop.tenSanPhamChiTiet}
+                      className="w-full h-full object-contain p-4 group-hover:scale-110 transition-transform duration-500"
+                    />
+                  </div>
+
+                  <div className="p-4">
+                    <h3 className="font-bold text-base mb-2 line-clamp-2 min-h-[3rem] hover:text-blue-600 transition-colors">
+                      {laptop.tenSanPhamChiTiet}
+                    </h3>
+                    
+                    {/* Đánh giá sao */}
+                    <div className="flex items-center gap-0.5 mb-2">
+                      <AiFillStar className="text-yellow-400 text-sm" />
+                      <AiFillStar className="text-yellow-400 text-sm" />
+                      <AiFillStar className="text-yellow-400 text-sm" />
+                      <AiFillStar className="text-yellow-400 text-sm" />
+                      <AiOutlineStar className="text-yellow-400 text-sm" />
+                      <span className="text-xs text-gray-500 ml-1">(4.0)</span>
+                    </div>
+
+                    {/* Giá */}
+                    <div className="flex items-baseline gap-2 mb-3">
+                      <span className="text-xl font-bold text-red-600">
+                        {formatCurrency(laptop.donGia)}
+                      </span>
+                    </div>
+
+                    {/* Thông số kỹ thuật */}
+                    <div className="space-y-1.5 mb-4">
+                      {laptop.specs && laptop.specs.map((spec, index) => (
+                        <div key={index} className="flex items-center gap-1.5 text-gray-600">
+                          <span className="w-1 h-1 bg-blue-500 rounded-full"></span>
+                          <span className="text-xs">{spec}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Nút thêm vào giỏ hàng */}
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAddToCart(laptop);
+                      }}
+                      className="w-full py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-1.5"
+                    >
+                      <FaShoppingCart className="text-xs" />
+                      Thêm vào giỏ hàng
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Nút điều hướng (tùy chọn) */}
+            <button className="absolute -left-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-gray-50">
+              <FaChevronLeft className="text-gray-600" />
+            </button>
+            <button className="absolute -right-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-gray-50">
+              <FaChevronRight className="text-gray-600" />
+            </button>
+          </div>
+        </div>
+
+        {/* Thêm section khuyến mãi hot */}
+        <div className="mb-10">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+              <FaFire className="text-orange-500" />
+              Khuyến Mãi Hot
+            </h2>
+            <a href="#" className="text-blue-600 hover:underline text-sm font-medium">Xem tất cả</a>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Hiển thị 4 sản phẩm khuyến mãi hot */}
+            {currentItems.slice(0, 4).map((laptop) => (
+              <div key={laptop.id} 
+                className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 group"
+                onClick={() => window.location.href = `/chitietsanpham/${laptop.id}`}
+              >
+                <div className="relative h-[200px] overflow-hidden">
+                  <img 
+                    src={laptop.hinhAnhMinhHoa} 
+                    alt={laptop.tenSanPhamChiTiet}
+                    className="w-full h-full object-contain p-4 group-hover:scale-110 transition-transform duration-500"
+                  />
+                </div>
+
+                <div className="p-4">
+                  <h3 className="font-bold text-base mb-2 line-clamp-2 min-h-[3rem] hover:text-blue-600 transition-colors">
+                    {laptop.tenSanPhamChiTiet}
+                  </h3>
+                  
+                  <div className="flex items-center gap-0.5 mb-2">
+                    <AiFillStar className="text-yellow-400 text-sm" />
+                    <AiFillStar className="text-yellow-400 text-sm" />
+                    <AiFillStar className="text-yellow-400 text-sm" />
+                    <AiFillStar className="text-yellow-400 text-sm" />
+                    <AiOutlineStar className="text-yellow-400 text-sm" />
+                    <span className="text-xs text-gray-500 ml-1">(4.0)</span>
+                  </div>
+
+                  <div className="flex items-baseline gap-2 mb-3">
+                    <span className="text-xl font-bold text-red-600">
+                      {formatCurrency(laptop.donGia)}
+                    </span>
+                  </div>
+
+                  <div className="space-y-1.5 mb-4">
+                    {laptop.specs && laptop.specs.map((spec, index) => (
+                      <div key={index} className="flex items-center gap-1.5 text-gray-600">
+                        <span className="w-1 h-1 bg-blue-500 rounded-full"></span>
+                        <span className="text-xs">{spec}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      console.log("đã click vào nút thêm")
+                      handleAddToCart(laptop);
+                    }}
+                    className="w-full py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-1.5"
+                  >
+                    <FaShoppingCart className="text-xs" />
+                    Thêm vào giỏ hàng
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Thêm banner quảng cáo */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+          <div className="relative rounded-xl overflow-hidden h-[200px] shadow-sm group">
+            <img 
+              src="https://example.com/banner1.jpg" 
+              alt="Promo 1"
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent flex items-center p-8">
+              <div className="text-white">
+                <h3 className="text-2xl font-bold mb-2">Laptop Gaming</h3>
+                <p className="text-sm mb-4">Giảm đến 20% cho laptop gaming cao cấp</p>
+                <button className="px-4 py-2 bg-white text-black rounded-lg text-sm font-medium hover:bg-gray-100">
+                  Xem ngay
+                </button>
+              </div>
+            </div>
+          </div>
+          {/* Banner thứ 2 tương tự */}
         </div>
 
         <div className="grid grid-cols-12 gap-8">
           {/* Phần Sidebar chứa các bộ lọc */}
-          <div className="col-span-3">
-            <div className="bg-white rounded-xl shadow-sm p-6 sticky top-4">
-              <h3 className="text-xl font-bold mb-6 text-gray-800 flex items-center gap-2">
+          <div className="col-span-12">
+            <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
+              <h3 className="text-xl font-bold mb-4 text-gray-800 flex items-center gap-2">
                 <FaFilter className="text-blue-600" />
-                Bộ lọc
+                Bộ lọc tìm kiếm
               </h3>
               
-              <div className="space-y-5">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                 {/* Bộ lọc theo giá */}
                 <div>
                   <label className="text-sm font-medium text-gray-700 block mb-2 flex items-center gap-2">
@@ -258,7 +469,7 @@ const HomePage = () => {
                     Khoảng giá
                   </label>
                   <select 
-                    className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                     value={filters.priceRange}
                     onChange={(e) => handleFilterChange('priceRange', e.target.value)}
                   >
@@ -288,7 +499,7 @@ const HomePage = () => {
                   </select>
                 </div>
 
-                {/* Bộ lọc theo RAM */}
+                {/* Bộ lọc RAM */}
                 <div>
                   <label className="text-sm font-medium text-gray-700 block mb-2 flex items-center gap-2">
                     <FaMemory className="text-blue-600" />
@@ -306,7 +517,7 @@ const HomePage = () => {
                   </select>
                 </div>
 
-                {/* Bộ lọc theo ổ cứng */}
+                {/* Bộ lọc ổ cứng */}
                 <div>
                   <label className="text-sm font-medium text-gray-700 block mb-2 flex items-center gap-2">
                     <FaHdd className="text-blue-600" />
@@ -317,18 +528,18 @@ const HomePage = () => {
                     value={filters.oCung}
                     onChange={(e) => handleFilterChange('oCung', e.target.value)}
                   >
-                    <option value="">Tất cả dung lượng</option>
+                    <option value="">Tất cả ổ cứng</option>
                     {oCungs.map(oc => (
                       <option key={oc.id} value={oc.id}>{oc.dungLuong}</option>
                     ))}
                   </select>
                 </div>
 
-                {/* Bộ lọc theo CPU */}
+                {/* Bộ lọc CPU */}
                 <div>
                   <label className="text-sm font-medium text-gray-700 block mb-2 flex items-center gap-2">
                     <FaMicrochip className="text-blue-600" />
-                    Vi xử lý
+                    CPU
                   </label>
                   <select 
                     className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
@@ -342,7 +553,7 @@ const HomePage = () => {
                   </select>
                 </div>
 
-                {/* Bộ lọc theo màn hình */}
+                {/* Bộ lọc màn hình */}
                 <div>
                   <label className="text-sm font-medium text-gray-700 block mb-2 flex items-center gap-2">
                     <FaDesktop className="text-blue-600" />
@@ -364,84 +575,80 @@ const HomePage = () => {
           </div>
 
           {/* Phần hiển thị lưới sản phẩm */}
-          <div className="col-span-9">
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold text-gray-800">Laptop cao cấp chính hãng</h2>
-              <p className="text-gray-600 mt-2">Hiển thị {currentItems.length} trên {laptops.length} sản phẩm</p>
+          <div className="col-span-12">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-800">Laptop cao cấp chính hãng</h2>
+                <p className="text-gray-600 mt-2">Hiển thị {currentItems.length} trên {laptops.length} sản phẩm</p>
+              </div>
+              <div className="flex items-center gap-4">
+                <select className="p-2 border rounded-lg text-sm">
+                  <option>Mới nhất</option>
+                  <option>Giá thấp đến cao</option>
+                  <option>Giá cao đến thấp</option>
+                </select>
+              </div>
             </div>
 
-            {/* Hiển thị danh sách sản phẩm hoặc thông báo không tìm thấy */}
-            {currentItems.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {currentItems.map((laptop) => (
-                  <div key={laptop.id} 
-                    className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 group"
-                    onClick={() => window.location.href = `/chitietsanpham/${laptop.id}`}
-                  >
-                    <div className="relative h-[200px] overflow-hidden">
-                      <img 
-                        src={laptop.hinhAnhMinhHoa} 
-                        alt={laptop.tenSanPhamChiTiet}
-                        className="w-full h-full object-contain p-4 group-hover:scale-110 transition-transform duration-500"
-                      />
-                      <div className="absolute top-3 right-3 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1">
-                        <FaTag className="text-xs" />
-                        -10%
-                      </div>
-                    </div>
-
-                    <div className="p-4">
-                      <h3 className="font-bold text-base mb-2 line-clamp-2 min-h-[3rem] hover:text-blue-600 transition-colors">
-                        {laptop.tenSanPhamChiTiet}
-                      </h3>
-                      
-                      <div className="flex items-center gap-0.5 mb-2">
-                        <AiFillStar className="text-yellow-400 text-sm" />
-                        <AiFillStar className="text-yellow-400 text-sm" />
-                        <AiFillStar className="text-yellow-400 text-sm" />
-                        <AiFillStar className="text-yellow-400 text-sm" />
-                        <AiOutlineStar className="text-yellow-400 text-sm" />
-                        <span className="text-xs text-gray-500 ml-1">(4.0)</span>
-                      </div>
-
-                      <div className="flex items-baseline gap-2 mb-3">
-                        <span className="text-xl font-bold text-red-600">
-                          {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(laptop.donGia)}
-                        </span>
-                        <span className="text-xs text-gray-500 line-through">
-                          {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(laptop.donGia * 1.1)}
-                        </span>
-                      </div>
-
-                      <div className="space-y-1.5 mb-4">
-                        {laptop.specs && laptop.specs.map((spec, index) => (
-                          <div key={index} className="flex items-center gap-1.5 text-gray-600">
-                            <span className="w-1 h-1 bg-blue-500 rounded-full"></span>
-                            <span className="text-xs">{spec}</span>
-                          </div>
-                        ))}
-                      </div>
-
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          console.log("đã click vào nút thêm")
-                          handleAddToCart(laptop);
-                        }}
-                        className="w-full py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-1.5"
-                      >
-                        <FaShoppingCart className="text-xs" />
-                        Thêm vào giỏ hàng
-                      </button>
-                    </div>
+            {/* Grid sản phẩm */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {currentItems.map((laptop) => (
+                <div key={laptop.id} 
+                  className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 group"
+                  onClick={() => window.location.href = `/chitietsanpham/${laptop.id}`}
+                >
+                  <div className="relative h-[200px] overflow-hidden">
+                    <img 
+                      src={laptop.hinhAnhMinhHoa} 
+                      alt={laptop.tenSanPhamChiTiet}
+                      className="w-full h-full object-contain p-4 group-hover:scale-110 transition-transform duration-500"
+                    />
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center p-8 bg-white rounded-xl shadow-sm">
-                <p className="text-gray-600 text-lg">Không tìm thấy sản phẩm phù hợp</p>
-              </div>
-            )}
+
+                  <div className="p-4">
+                    <h3 className="font-bold text-base mb-2 line-clamp-2 min-h-[3rem] hover:text-blue-600 transition-colors">
+                      {laptop.tenSanPhamChiTiet}
+                    </h3>
+                    
+                    <div className="flex items-center gap-0.5 mb-2">
+                      <AiFillStar className="text-yellow-400 text-sm" />
+                      <AiFillStar className="text-yellow-400 text-sm" />
+                      <AiFillStar className="text-yellow-400 text-sm" />
+                      <AiFillStar className="text-yellow-400 text-sm" />
+                      <AiOutlineStar className="text-yellow-400 text-sm" />
+                      <span className="text-xs text-gray-500 ml-1">(4.0)</span>
+                    </div>
+
+                    <div className="flex items-baseline gap-2 mb-3">
+                      <span className="text-xl font-bold text-red-600">
+                        {formatCurrency(laptop.donGia)}
+                      </span>
+                    </div>
+
+                    <div className="space-y-1.5 mb-4">
+                      {laptop.specs && laptop.specs.map((spec, index) => (
+                        <div key={index} className="flex items-center gap-1.5 text-gray-600">
+                          <span className="w-1 h-1 bg-blue-500 rounded-full"></span>
+                          <span className="text-xs">{spec}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        console.log("đã click vào nút thêm")
+                        handleAddToCart(laptop);
+                      }}
+                      className="w-full py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-1.5"
+                    >
+                      <FaShoppingCart className="text-xs" />
+                      Thêm vào giỏ hàng
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
 
             {/* Nút "Xem thêm" */}
             {hasMore && (
@@ -457,6 +664,59 @@ const HomePage = () => {
                 </button>
               </div>
             )}
+          </div>
+        </div>
+
+        {/* Thêm section thương hiệu */}
+        <div className="mt-12 mb-10">
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">Thương Hiệu Nổi Bật</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+            <div className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow flex items-center justify-center group">
+              <img 
+                src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/ASUS_Logo.svg/2560px-ASUS_Logo.svg.png"
+                alt="Asus"
+                className="h-12 object-contain group-hover:scale-110 transition-transform duration-300"
+              />
+            </div>
+            <div className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow flex items-center justify-center group">
+              <img 
+                src="https://upload.wikimedia.org/wikipedia/commons/e/ec/Dell_Logo.svg"
+                alt="Dell"
+                className="h-12 object-contain group-hover:scale-110 transition-transform duration-300"
+              />
+            </div>
+
+            <div className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow flex items-center justify-center group">
+              <img 
+                src="https://upload.wikimedia.org/wikipedia/commons/e/ec/HP_New_Logo_2D.svg"
+                alt="HP"
+                className="h-12 object-contain group-hover:scale-110 transition-transform duration-300"
+              />
+            </div>
+
+            <div className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow flex items-center justify-center group">
+              <img 
+                src="https://upload.wikimedia.org/wikipedia/commons/e/ec/Lenovo_logo.svg"
+                alt="Lenovo"
+                className="h-12 object-contain group-hover:scale-110 transition-transform duration-300"
+              />
+            </div>
+
+            <div className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow flex items-center justify-center group">
+              <img 
+                src="https://upload.wikimedia.org/wikipedia/commons/e/ec/Acer_Logo.svg"
+                alt="Acer"
+                className="h-12 object-contain group-hover:scale-110 transition-transform duration-300"
+              />
+            </div>
+
+            <div className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow flex items-center justify-center group">
+              <img 
+                src="https://upload.wikimedia.org/wikipedia/commons/e/ec/MSI_Logo.svg"
+                alt="MSI"
+                className="h-12 object-contain group-hover:scale-110 transition-transform duration-300"
+              />
+            </div>
           </div>
         </div>
       </main>

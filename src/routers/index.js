@@ -14,7 +14,7 @@ import TrackOrder from '../pages/use/track order/page';
 import LoginPage from '../pages/use/loginuse/page';
 import RegisterPage from '../pages/use/register/page';
 import ProductAttributesPage from '../pages/admin/product-attributes/page';
-
+import VoucherPage from '../pages/admin/vocher/page';
 
 // Public routes
 const publicRoutes = [
@@ -39,6 +39,7 @@ const privateRoutes = [
   { path: '/admin/chitietsanpham/:idSanPham', component: ChiTietSanPhamAdmin },
   { path: '/admin/account', component: AccountManagement },
   { path: '/admin/product-attributes', component: ProductAttributesPage },
+  { path: '/admin/vouchers', component: VoucherPage },
 ];
 
 export { privateRoutes, publicRoutes };

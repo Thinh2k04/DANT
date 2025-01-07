@@ -124,7 +124,7 @@ function OrderSummary({
       
       // Gọi API tạo đơn hàng
       const response = await fetch('http://localhost:8080/rest/hoa_don/addHD', {
-        method: 'PUT',
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },

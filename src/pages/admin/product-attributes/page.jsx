@@ -1,24 +1,54 @@
 import React, { useState, useEffect } from 'react';
 import NavbarAdmin from '../Navbar/NavbarAdmin';
-import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
+import { FaPlus } from 'react-icons/fa';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import AttributeTable from './components/AttributeTable';
+import AddRamModal from './components/AddRamModal';
+import AddAttributeModal from './components/AddAttributeModal';
+import AddBrandModal from './components/AddBrandModal';
+import EditBrandModal from './components/EditBrandModal';
+import EditRamModal from './components/EditRamModal';
+import AddStorageModal from './components/AddStorageModal';
+import AddCpuModal from './components/AddCpuModal';
+import EditCpuModal from './components/EditCpuModal';
+import AddGpuModal from './components/AddGpuModal';
+import EditGpuModal from './components/EditGpuModal';
+import AddMaterialModal from './components/AddMaterialModal';
+import EditMaterialModal from './components/EditMaterialModal';
+import AddSizeModal from './components/AddSizeModal';
+import EditSizeModal from './components/EditSizeModal';
+import AddProductTypeModal from './components/AddProductTypeModal';
+import AddColorModal from './components/AddColorModal';
+import AddSupplierModal from './components/AddSupplierModal';
+import AddScreenModal from './components/AddScreenModal';
+import EditScreenModal from './components/EditScreenModal';
+import AddGraphicsCardModal from './components/AddGraphicsCardModal';
+import EditGraphicsCardModal from './components/EditGraphicsCardModal';
+import EditProductTypeModal from './components/EditProductTypeModal';
+import EditColorModal from './components/EditColorModal';
+import EditSupplierModal from './components/EditSupplierModal';
 
 const ProductAttributesPage = () => {
   const [activeTab, setActiveTab] = useState('thuongHieu');
   const [attributes, setAttributes] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [newAttribute, setNewAttribute] = useState('');
+  const [loading, setLoading] = useState(false);  const [showAddModal, setShowAddModal] = useState(false);
   const [editingAttribute, setEditingAttribute] = useState(null);
 
   const tabs = [
     { id: 'thuongHieu', label: 'Thương hiệu', endpoint: 'thuong-hieu' },
     { id: 'ram', label: 'RAM', endpoint: 'ram' },
-    { id: 'oCung', label: 'Ổ cứng', endpoint: 'o-cung' },
+    { id: 'oCung', label: 'Ổ cứng', endpoint: 'o_luu_tru' },
     { id: 'cpu', label: 'CPU', endpoint: 'cpu' },
-    { id: 'manHinh', label: 'Màn hình', endpoint: 'man-hinh' }
-  ];
+    { id: 'manHinh', label: 'Màn hình', endpoint: 'man_hinh' },
+    { id: 'gpu', label: 'GPU', endpoint: 'gpu' },
+    { id: 'cardManHinh', label: 'Card màn hình', endpoint: 'card_do_hoa' },
+    { id: 'chatLieu', label: 'Chất liệu', endpoint: 'chat_lieu' },
+    { id: 'kichThuoc', label: 'Kích thước', endpoint: 'ktlt' },
+    {id: 'loaisanpham', label: 'Loại sản phẩm', endpoint: 'loai_san_pham'},
+    {id: 'mausac', label: 'Màu sắc', endpoint: 'mau_sac'},
+    {id: 'nguon', label: 'Nguồn', endpoint: 'nguon_nhap'}
+  ]; 
 
   useEffect(() => {
     fetchAttributes();
@@ -38,44 +68,187 @@ const ProductAttributesPage = () => {
     setLoading(false);
   };
 
-  const handleAdd = async () => {
-    try {
-      const endpoint = tabs.find(tab => tab.id === activeTab).endpoint;
-      const response = await fetch(`http://localhost:8080/rest/${endpoint}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ ten: newAttribute }),
-      });
-
-      if (!response.ok) throw new Error('Failed to add');
-      
-      toast.success('Thêm thành công');
-      setShowAddModal(false);
-      setNewAttribute('');
-      fetchAttributes();
-    } catch (error) {
-      toast.error('Lỗi khi thêm');
-    }
-  };
-
   const handleEdit = async (id) => {
     try {
       const endpoint = tabs.find(tab => tab.id === activeTab).endpoint;
-      const response = await fetch(`http://localhost:8080/rest/${endpoint}/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ ten: editingAttribute.ten }),
-      });
-
-      if (!response.ok) throw new Error('Failed to update');
       
-      toast.success('Cập nhật thành công');
-      setEditingAttribute(null);
-      fetchAttributes();
+      if (activeTab === 'kichThuoc') {
+        const payload = {
+          ...editingAttribute,
+          kichThuoc: parseFloat(editingAttribute.kichThuoc)
+        };
+
+        const response = await fetch(`http://localhost:8080/rest/ktlt/update/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) throw new Error('Failed to update');
+        
+        toast.success('Cập nhật thành công');
+        setEditingAttribute(null);
+        fetchAttributes();
+      } else if (activeTab === 'oCung') {
+        const payload = {
+          id: editingAttribute.id,
+          dungLuong: editingAttribute.dungLuong,
+          loaiOCung: editingAttribute.loaiOCung,
+          trangThai: null
+        };
+
+        const response = await fetch(`http://localhost:8080/rest/${endpoint}/update/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) throw new Error('Failed to update');
+        
+        toast.success('Cập nhật thành công');
+        setEditingAttribute(null);
+        fetchAttributes();
+      } else if (activeTab === 'cpu') {
+        const payload = {
+          ...editingAttribute,
+          tocDoToiThieu: parseFloat(editingAttribute.tocDoToiThieu),
+          tocDoToiDa: parseFloat(editingAttribute.tocDoToiDa),
+          soNhan: parseInt(editingAttribute.soNhan),
+          soLuong: parseInt(editingAttribute.soLuong),
+          boNhoDem: parseInt(editingAttribute.boNhoDem)
+        };
+
+        const response = await fetch(`http://localhost:8080/rest/${endpoint}/update/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) throw new Error('Failed to update');
+        
+        toast.success('Cập nhật thành công');
+        setEditingAttribute(null);
+        fetchAttributes();
+      } else if (activeTab === 'gpu') {
+        const payload = {
+          ...editingAttribute,
+          xungNhipToiThieu: parseInt(editingAttribute.xungNhipToiThieu),
+          xungNhipToiDa: parseInt(editingAttribute.xungNhipToiDa),
+          vram: parseInt(editingAttribute.vram),
+          dienAp: parseInt(editingAttribute.dienAp)
+        };
+
+        const response = await fetch(`http://localhost:8080/rest/${endpoint}/update/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) throw new Error('Failed to update');
+        
+        toast.success('Cập nhật thành công');
+        setEditingAttribute(null);
+        fetchAttributes();
+      } else if (activeTab === 'manHinh') {
+        const payload = {
+          ...editingAttribute,
+          tanSoQuet: parseInt(editingAttribute.tanSoQuet),
+          doSang: parseInt(editingAttribute.doSang),
+          doPhuMau: parseFloat(editingAttribute.doPhuMau)
+        };
+
+        const response = await fetch(`http://localhost:8080/rest/man_hinh/update/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) throw new Error('Failed to update');
+        
+        toast.success('Cập nhật thành công');
+        setEditingAttribute(null);
+        fetchAttributes();
+      } else if (activeTab === 'cardManHinh') {
+        const response = await fetch(`http://localhost:8080/rest/card_do_hoa/update/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(editingAttribute),
+        });
+
+        if (!response.ok) throw new Error('Failed to update');
+        
+        toast.success('Cập nhật thành công');
+        setEditingAttribute(null);
+        fetchAttributes();
+      } else if (activeTab === 'chatLieu') {
+        const response = await fetch(`http://localhost:8080/rest/chat_lieu/update/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(editingAttribute),
+        });
+
+        if (!response.ok) throw new Error('Failed to update');
+        
+        toast.success('Cập nhật thành công');
+        setEditingAttribute(null);
+        fetchAttributes();
+      } else if (activeTab === 'loaisanpham') {
+        const response = await fetch(`http://localhost:8080/rest/loai_san_pham/update/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(editingAttribute),
+        });
+
+        if (!response.ok) throw new Error('Failed to update');
+        
+        toast.success('Cập nhật thành công');
+        setEditingAttribute(null);
+        fetchAttributes();
+      } else if (activeTab === 'mausac') {
+        const response = await fetch(`http://localhost:8080/rest/mau_sac/update/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(editingAttribute),
+        });
+
+        if (!response.ok) throw new Error('Failed to update');
+        
+        toast.success('Cập nhật thành công');
+        setEditingAttribute(null);
+        fetchAttributes();
+      } else if (activeTab === 'nguon') {
+        const response = await fetch(`http://localhost:8080/rest/nguon_nhap/update/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(editingAttribute),
+        });
+
+        if (!response.ok) throw new Error('Failed to update');
+        
+        toast.success('Cập nhật thành công');
+        setEditingAttribute(null);
+        fetchAttributes();
+      }
     } catch (error) {
       toast.error('Lỗi khi cập nhật');
     }
@@ -132,107 +305,197 @@ const ProductAttributesPage = () => {
           </button>
 
           {/* Attributes Table */}
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    ID
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Tên
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Thao tác
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {attributes.map((attr) => (
-                  <tr key={attr.id}>
-                    <td className="px-6 py-4 whitespace-nowrap">{attr.id}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {editingAttribute?.id === attr.id ? (
-                        <input
-                          type="text"
-                          value={editingAttribute.ten}
-                          onChange={(e) => setEditingAttribute({...editingAttribute, ten: e.target.value})}
-                          className="border rounded px-2 py-1"
-                        />
-                      ) : (
-                        attr.ten
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {editingAttribute?.id === attr.id ? (
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => handleEdit(attr.id)}
-                            className="text-green-600 hover:text-green-900"
-                          >
-                            Lưu
-                          </button>
-                          <button
-                            onClick={() => setEditingAttribute(null)}
-                            className="text-gray-600 hover:text-gray-900"
-                          >
-                            Hủy
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => setEditingAttribute(attr)}
-                            className="text-blue-600 hover:text-blue-900"
-                          >
-                            <FaEdit />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(attr.id)}
-                            className="text-red-600 hover:text-red-900"
-                          >
-                            <FaTrash />
-                          </button>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <AttributeTable 
+            attributes={attributes}
+            editingAttribute={editingAttribute}
+            setEditingAttribute={setEditingAttribute}
+            handleEdit={handleEdit}
+            handleDelete={handleDelete}
+            activeTab={activeTab}
+          />
+
+          {/* Add Modals */}
+          {activeTab === 'loaisanpham' ? (
+            <AddProductTypeModal
+              showModal={showAddModal}
+              setShowModal={setShowAddModal}
+              onSuccess={fetchAttributes}
+            />
+          ) : activeTab === 'kichThuoc' ? (
+            <AddSizeModal
+              showModal={showAddModal}
+              setShowModal={setShowAddModal}
+              onSuccess={fetchAttributes}
+            />
+          ) : activeTab === 'chatLieu' ? (
+            <AddMaterialModal
+              showModal={showAddModal}
+              setShowModal={setShowAddModal}
+              onSuccess={fetchAttributes}
+            />
+          ) : activeTab === 'ram' ? (
+            <AddRamModal 
+              showModal={showAddModal}
+              setShowModal={setShowAddModal}
+              onSuccess={fetchAttributes}
+            />
+          ) : activeTab === 'thuongHieu' ? (
+            <AddBrandModal
+              showModal={showAddModal}
+              setShowModal={setShowAddModal}
+              onSuccess={fetchAttributes}
+            />
+          ) : activeTab === 'oCung' ? (
+            <AddStorageModal
+              showModal={showAddModal}
+              setShowModal={setShowAddModal}
+              onSuccess={fetchAttributes}
+            />
+          ) : activeTab === 'cpu' ? (
+            <AddCpuModal
+              showModal={showAddModal}
+              setShowModal={setShowAddModal}
+              onSuccess={fetchAttributes}
+            />
+          ) : activeTab === 'gpu' ? (
+            <AddGpuModal
+              showModal={showAddModal}
+              setShowModal={setShowAddModal}
+              onSuccess={fetchAttributes}
+            />
+          ) : activeTab === 'mausac' ? (
+            <AddColorModal
+              showModal={showAddModal}
+              setShowModal={setShowAddModal}
+              onSuccess={fetchAttributes}
+            />
+          ) : activeTab === 'nguon' ? (
+            <AddSupplierModal
+              showModal={showAddModal}
+              setShowModal={setShowAddModal}
+              onSuccess={fetchAttributes}
+            />
+          ) : activeTab === 'manHinh' ? (
+            <AddScreenModal
+              showModal={showAddModal}
+              setShowModal={setShowAddModal}
+              onSuccess={fetchAttributes}
+            />
+          ) : activeTab === 'cardManHinh' ? (
+            <AddGraphicsCardModal
+              showModal={showAddModal}
+              setShowModal={setShowAddModal}
+              onSuccess={fetchAttributes}
+            />
+          ) : (
+            <AddAttributeModal 
+              showAddModal={showAddModal}
+              setShowModal={setShowAddModal}
+              activeTab={activeTab}
+              tabs={tabs}
+            />
+          )}
+
+          {/* Add EditRamModal */}
+          {activeTab === 'ram' && (
+            <EditRamModal
+              editingRam={editingAttribute}
+              setEditingRam={setEditingAttribute}
+              onSuccess={fetchAttributes}
+            />
+          )}
+
+          {/* Add EditBrandModal */}
+          {activeTab === 'thuongHieu' && (
+            <EditBrandModal
+              editingBrand={editingAttribute}
+              setEditingBrand={setEditingAttribute}
+              onSuccess={fetchAttributes}
+            />
+          )}
+
+          {/* Add EditCpuModal */}
+          {activeTab === 'cpu' && (
+            <EditCpuModal
+              editingCpu={editingAttribute}
+              setEditingCpu={setEditingAttribute}
+              onSuccess={fetchAttributes}
+            />
+          )}
+
+          {/* Add EditGpuModal */}
+          {activeTab === 'gpu' && (
+            <EditGpuModal
+              editingGpu={editingAttribute}
+              setEditingGpu={setEditingAttribute}
+              onSuccess={fetchAttributes}
+            />
+          )}
+
+          {/* Add EditMaterialModal */}
+          {activeTab === 'chatLieu' && (
+            <EditMaterialModal
+              editingMaterial={editingAttribute}
+              setEditingMaterial={setEditingAttribute}
+              onSuccess={fetchAttributes}
+            />
+          )}
+
+          {/* Add EditSizeModal */}
+          {activeTab === 'kichThuoc' && (
+            <EditSizeModal
+              editingSize={editingAttribute}
+              setEditingSize={setEditingAttribute}
+              onSuccess={fetchAttributes}
+            />
+          )}
+
+          {/* Add EditScreenModal */}
+          {activeTab === 'manHinh' && (
+            <EditScreenModal
+              editingScreen={editingAttribute}
+              setEditingScreen={setEditingAttribute}
+              onSuccess={fetchAttributes}
+            />
+          )}
+
+          {/* Add EditGraphicsCardModal */}
+          {activeTab === 'cardManHinh' && (
+            <EditGraphicsCardModal
+              editingCard={editingAttribute}
+              setEditingCard={setEditingAttribute}
+              onSuccess={fetchAttributes}
+            />
+          )}
+
+          {/* Add EditProductTypeModal */}
+          {activeTab === 'loaisanpham' && (
+            <EditProductTypeModal
+              editingProductType={editingAttribute}
+              setEditingProductType={setEditingAttribute}
+              onSuccess={fetchAttributes}
+            />
+          )}
+
+          {/* Add EditColorModal */}
+          {activeTab === 'mausac' && (
+            <EditColorModal
+              editingColor={editingAttribute}
+              setEditingColor={setEditingAttribute}
+              onSuccess={fetchAttributes}
+            />
+          )}
+
+          {/* Add EditSupplierModal */}
+          {activeTab === 'nguon' && (
+            <EditSupplierModal
+              editingSupplier={editingAttribute}
+              setEditingSupplier={setEditingAttribute}
+              onSuccess={fetchAttributes}
+            />
+          )}
         </div>
       </div>
-
-      {/* Add Modal */}
-      {showAddModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg w-96">
-            <h2 className="text-xl font-bold mb-4">Thêm {tabs.find(tab => tab.id === activeTab).label}</h2>
-            <input
-              type="text"
-              value={newAttribute}
-              onChange={(e) => setNewAttribute(e.target.value)}
-              className="w-full border rounded px-3 py-2 mb-4"
-              placeholder={`Nhập tên ${tabs.find(tab => tab.id === activeTab).label}`}
-            />
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-              >
-                Hủy
-              </button>
-              <button
-                onClick={handleAdd}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-              >
-                Thêm
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       <ToastContainer />
     </div>

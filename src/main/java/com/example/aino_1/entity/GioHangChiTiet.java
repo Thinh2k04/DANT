@@ -17,8 +17,8 @@ public class GioHangChiTiet {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "id_gio_hang", referencedColumnName = "id")
-    private GioHang gioHang;  // Liên kết với bảng gio_hang qua khóa ngoại
+    @JoinColumn(name = "id_tai_khoan", referencedColumnName = "id")
+    private TaiKhoanNguoiDung taiKhoanNguoiDung;  // Liên kết với bảng gio_hang qua khóa ngoại
 
     @ManyToOne
     @JoinColumn(name = "id_spct", referencedColumnName = "id")

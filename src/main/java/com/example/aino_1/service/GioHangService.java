@@ -26,38 +26,31 @@ public class GioHangService {
     @Autowired
     GioHangChiTietInterface gioHangChiTietInterface;
 
-    public Map<String, Object> checkGioHang(Integer idGioHang) {
-        // Kiểm tra xem giỏ hàng có tồn tại không
-        if (!gioHangInterface.existsById(idGioHang)) {
-            return Map.of(
-                    "success", false,
-                    "message", "Giỏ hàng không tồn tại."
-            );
-        }
+    public Map<String, Object> checkGioHang(String username) {
+        // Lấy danh sách giỏ hàng chi tiết theo username
+        List<GioHangChiTiet> gioHangChiTietList = gioHangChiTietInterface.findGioHangChiTietByTaiKhoanNguoiDungUsername(username);
 
-        // Kiểm tra xem giỏ hàng có giỏ hàng chi tiết nào không
-        boolean isEmpty = !gioHangChiTietInterface.existsByGioHangId(idGioHang);
-        if (isEmpty) {
+        // Kiểm tra xem danh sách giỏ hàng chi tiết có rỗng không
+        if (gioHangChiTietList.isEmpty()) {
             return Map.of(
                     "success", false,
                     "message", "Giỏ hàng chưa có sản phẩm nào."
             );
         }
 
-        // Lấy danh sách giỏ hàng chi tiết theo id giỏ hàng
-        List<GioHangChiTiet> gioHangChiTietList = gioHangChiTietInterface.findByGioHangId(idGioHang);
-
-        // Kiểm tra số lượng sản phẩm và IMEI
+        // Kiểm tra số lượng sản phẩm và số lượng IMEI
         for (GioHangChiTiet gioHangChiTiet : gioHangChiTietList) {
             SanPhamChiTiet spct = gioHangChiTiet.getSanPhamChiTiet();
-            Integer soLuongSanPham = spct.getSoLuong();
+            Integer soLuongSanPham = gioHangChiTiet.getSoLuong();
             Integer soLuongImei = imeiInterface.findBySpct(spct).size();
-            Integer soLuongThieu = soLuongSanPham - soLuongImei;
 
-            if (soLuongThieu < 0) {
+            if (soLuongSanPham > soLuongImei) {
                 return Map.of(
                         "success", false,
-                        "message", "IMEI của sản phẩm vượt quá số lượng cho phép."
+                        "message", String.format(
+                                "Sản phẩm %s không đủ số lượng IMEI (cần %d, có %d).",
+                                spct.getId(), soLuongSanPham, soLuongImei
+                        )
                 );
             }
         }
@@ -68,6 +61,7 @@ public class GioHangService {
                 "message", "Giỏ hàng hợp lệ. Số lượng IMEI phù hợp với sản phẩm."
         );
     }
+
 
 
     public List<Map<String, Object>> checkSPSoLuong(List<SanPhamChiTiet> listSPCT) {

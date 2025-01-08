@@ -1,12 +1,10 @@
 package com.example.aino_1.restController;
 
-import com.example.aino_1.config.JwtUtils;
+import com.example.aino_1.service.JwtUtils;
 import com.example.aino_1.entity.*;
 
 import com.example.aino_1.repository.TaiKhoanNguoiDungInterface;
 import com.example.aino_1.service.TaiKhoanService;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,15 +33,21 @@ public class TaiKhoanNguoiDungRestController {
     TaiKhoanService tkndsv;
     private final BCryptPasswordEncoder passwordEncoder;
 
+
+
     public TaiKhoanNguoiDungRestController(TaiKhoanNguoiDungInterface taiKhoanInterface) {
         this.taiKhoanInterface = taiKhoanInterface;
         this.passwordEncoder = new BCryptPasswordEncoder(12);
     }
 
-    @GetMapping("/getAll")
-    public List<TaiKhoanNguoiDung> getAll(@PathVariable String id) {
-        return taiKhoanInterface.findByChucVu(id); //
+    @GetMapping("/getAllNhanVien")
+    public ResponseEntity<?> getAll() {
+        List<Map<String, String>> danhSachThongTin = tkndsv.getTaiKhoan();
+        return ResponseEntity.ok(danhSachThongTin);
     }
+
+
+
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody TaiKhoanNguoiDung taiKhoanNguoiDung) {

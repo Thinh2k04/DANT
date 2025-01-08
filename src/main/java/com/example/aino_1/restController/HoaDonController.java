@@ -3,6 +3,7 @@ package com.example.aino_1.restController;
 import com.example.aino_1.entity.*;
 import com.example.aino_1.repository.HoaDonInterface;
 import com.example.aino_1.service.HoaDonService;
+import com.example.aino_1.service.JwtUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,9 @@ public class HoaDonController {
     HoaDonInterface hdsi;
     @Autowired
     HoaDonService hdsv;
+
+    @Autowired
+    JwtUtils jwtUtils;
 
     @GetMapping("/getAll")
     public List<HoaDon> getAll() {
@@ -48,24 +52,30 @@ public class HoaDonController {
     }
 
     @PostMapping("addHD")
-    public ResponseEntity<?> addHoaDon(@RequestBody Map<String, Object> requestData) {
+    public ResponseEntity<?> addHoaDon(@RequestHeader("Authorization") String token, @RequestBody Map<String, Object> requestData) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
+
+            // Giải mã token và lấy username
+            Map<String, Object> decodedToken = jwtUtils.validateToken(token.replace("Bearer ", ""));
+            if (decodedToken == null || !decodedToken.containsKey("username")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token không hợp lệ.");
+            }
+            String username = decodedToken.get("username").toString();
 
             // Ánh xạ dữ liệu từ requestData
             ThongTinTaiKhoan tttk = objectMapper.convertValue(requestData.get("tttk"), ThongTinTaiKhoan.class);
             HoaDon hd = objectMapper.convertValue(requestData.get("hd"), HoaDon.class);
             List<HoaDonChiTiet> lhdct = objectMapper.convertValue(requestData.get("lhdct"), new TypeReference<List<HoaDonChiTiet>>() {});
             Voucher voucher = objectMapper.convertValue(requestData.get("voucher"), Voucher.class);
+
             // Kiểm tra dữ liệu đầu vào
             if (tttk == null || hd == null || lhdct == null || lhdct.isEmpty()) {
                 return ResponseEntity.badRequest().body("Dữ liệu đầu vào không hợp lệ.");
             }
 
-
-
             // Gọi service để xử lý
-            String result = hdsv.hamXuLiHoaDon(tttk, hd, lhdct,voucher);
+            String result = hdsv.hamXuLiHoaDon(username, tttk, hd, lhdct, voucher);
             return ResponseEntity.ok(result);
 
         } catch (IllegalArgumentException e) {
@@ -75,6 +85,7 @@ public class HoaDonController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Đã xảy ra lỗi: " + e.getMessage());
         }
     }
+
 
     // sét trang  thái thanh toán là 1 khi khách hàng đã thanh toán hóa đơn
     @PostMapping("/updateTrangThaiThanhToan")

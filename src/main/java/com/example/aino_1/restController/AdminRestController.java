@@ -1,6 +1,6 @@
 package com.example.aino_1.restController;
 
-import com.example.aino_1.config.JwtUtils;
+import com.example.aino_1.service.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

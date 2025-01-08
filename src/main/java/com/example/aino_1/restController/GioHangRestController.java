@@ -42,9 +42,9 @@ public class GioHangRestController {
         return gsi.findById(id).get();
     }
 
-    @GetMapping("/check/{id}")
-    public ResponseEntity<?> checkGioHang(@PathVariable Integer id) {
-        Map<String, Object> result = gioHangService.checkGioHang(id);
+    @GetMapping("/check/{username}")
+    public ResponseEntity<?> checkGioHang(@PathVariable String username) {
+        Map<String, Object> result = gioHangService.checkGioHang(username);
 
         if ((boolean) result.get("success")) {
             return ResponseEntity.ok(result);
@@ -52,6 +52,7 @@ public class GioHangRestController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
         }
     }
+
 
     @GetMapping("/checkNotLogin")
     public ResponseEntity<?> checkGioHang(@RequestBody List<SanPhamChiTiet> listSPCT) {

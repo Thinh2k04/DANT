@@ -35,8 +35,11 @@ public class HoaDonService {
     @Autowired
     ImeiService imeiService;
 
+    @Autowired
+    GioHangChiTietInterface gioHangChiTietInterface;
+
     @Transactional
-    public String hamXuLiHoaDon(ThongTinTaiKhoan ttk, HoaDon hd, List<HoaDonChiTiet> lhdct, Voucher voucher) {
+    public String hamXuLiHoaDon(String username, ThongTinTaiKhoan ttk, HoaDon hd, List<HoaDonChiTiet> lhdct, Voucher voucher) {
         // Xử lý thông tin tài khoản
         ThongTinTaiKhoan savedThongTinTaiKhoan;
         if (ttk.getTaiKhoanNguoiDung() == null) {
@@ -58,6 +61,9 @@ public class HoaDonService {
         hd.setVoucher(voucher);
         HoaDon savedHoaDon = hdsi.save(hd);
 
+        // Lấy danh sách giỏ hàng chi tiết theo username
+        List<GioHangChiTiet> gioHangChiTietList = gioHangChiTietInterface.findGioHangChiTietByTaiKhoanNguoiDungUsername(username);
+
         // Xử lý danh sách chi tiết hóa đơn
         for (HoaDonChiTiet hdct : lhdct) {
             Integer idSanPhamChiTiet = hdct.getSanPhamChiTiet().getId();
@@ -75,11 +81,21 @@ public class HoaDonService {
                 imeiList.get(i).setHdct(hdct); // Liên kết IMEI với hóa đơn chi tiết
             }
             imeiRepository.saveAll(imeiList);
+
+            // Liên kết hóa đơn chi tiết với hóa đơn
             hdct.setHoaDon(savedHoaDon);
             hdctsi.save(hdct);
+
+            // Xóa sản phẩm chi tiết khỏi giỏ hàng
+            gioHangChiTietList.stream()
+                    .filter(gioHangChiTiet -> gioHangChiTiet.getSanPhamChiTiet().getId().equals(idSanPhamChiTiet))
+                    .findFirst()
+                    .ifPresent(gioHangChiTietInterface::delete); // Xóa giỏ hàng chi tiết tương ứng
         }
 
         return "Hóa đơn và chi tiết hóa đơn đã được xử lý thành công!";
     }
+
+
 
 }

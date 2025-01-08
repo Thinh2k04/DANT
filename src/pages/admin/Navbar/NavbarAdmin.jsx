@@ -67,13 +67,6 @@ const NavbarAdmin = () => {
       badge: null
     },
     { 
-      id: 'accounts',
-      path: '/admin/account', 
-      icon: FiUser, 
-      label: 'Quản lý tài khoản',
-      badge: null
-    },
-    { 
       id: 'employees',
       path: '/admin/employees', 
       icon: FiUsers, 

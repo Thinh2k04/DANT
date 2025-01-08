@@ -15,6 +15,7 @@ const CustomerManagement = () => {
   const [newCustomer, setNewCustomer] = useState({
     hoTen: '',
     diaChi: '',
+    soCCCD: '',
     soDienThoai: '',
     email: '',
     trangThai: 1
@@ -45,15 +46,23 @@ const CustomerManagement = () => {
         throw new Error('Customer not found');
       }
 
+      const updateData = {
+        ...customerToUpdate,
+        trangThai: 0,
+        taiKhoanNguoiDung: {
+          ...customerToUpdate.taiKhoanNguoiDung,
+          email: customerToUpdate.email,
+          chucVu: "USER",
+          enabled: 1
+        }
+      };
+
       const response = await fetch(`http://localhost:8080/rest/tttk/update/${id}`, {
-        method: 'PUT',
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          ...customerToUpdate,
-          trangThai: 0
-        })
+        body: JSON.stringify(updateData)
       });
 
       if (!response.ok) {
@@ -83,15 +92,23 @@ const CustomerManagement = () => {
         throw new Error('Customer not found');
       }
 
+      const updateData = {
+        ...customerToRestore,
+        trangThai: 1,
+        taiKhoanNguoiDung: {
+          ...customerToRestore.taiKhoanNguoiDung,
+          email: customerToRestore.email,
+          chucVu: "USER",
+          enabled: 1
+        }
+      };
+
       const response = await fetch(`http://localhost:8080/rest/tttk/update/${id}`, {
-        method: 'PUT',
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          ...customerToRestore,
-          trangThai: 1
-        })
+        body: JSON.stringify(updateData)
       });
 
       if (!response.ok) {
@@ -113,7 +130,16 @@ const CustomerManagement = () => {
     try {
       const customerData = {
         ...newCustomer,
-        trangThai: 1
+        trangThai: 1,
+        taiKhoanNguoiDung: {
+          username: newCustomer.email,
+          password: "defaultPassword",
+          email: newCustomer.email,
+          chucVu: "USER",
+          enabled: 1,
+          createdAt: null,
+          updatedAt: null
+        }
       };
       
       const response = await fetch('http://localhost:8080/rest/tttk/add', {
@@ -139,6 +165,7 @@ const CustomerManagement = () => {
       setNewCustomer({
         hoTen: '',
         diaChi: '',
+        soCCCD: '',
         soDienThoai: '',
         email: '',
         trangThai: 1
@@ -151,12 +178,22 @@ const CustomerManagement = () => {
   const handleEditCustomer = async (e) => {
     e.preventDefault();
     try {
+      const updateData = {
+        ...customerToEdit,
+        taiKhoanNguoiDung: {
+          ...customerToEdit.taiKhoanNguoiDung,
+          email: customerToEdit.email,
+          chucVu: "USER",
+          enabled: 1
+        }
+      };
+
       const response = await fetch(`http://localhost:8080/rest/tttk/update/${customerToEdit.id}`, {
-        method: 'PUT',
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(customerToEdit)
+        body: JSON.stringify(updateData)
       });
 
       if (!response.ok) {
@@ -204,6 +241,7 @@ const CustomerManagement = () => {
               <thead>
                 <tr className="bg-gray-50">
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 tracking-wider border-b">Tên</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 tracking-wider border-b">Số CCCD</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 tracking-wider border-b">Địa chỉ</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 tracking-wider border-b">Số điện thoại</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 tracking-wider border-b">Email</th>
@@ -214,6 +252,7 @@ const CustomerManagement = () => {
                 {customers.map(customer => (
                   <tr key={customer.id} className="hover:bg-gray-50 transition duration-200">
                     <td className="px-6 py-4 text-sm text-gray-800">{customer.hoTen}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600">{customer.soCCCD}</td>
                     <td className="px-6 py-4 text-sm text-gray-600">{customer.diaChi}</td>
                     <td className="px-6 py-4 text-sm text-gray-600">{customer.soDienThoai}</td>
                     <td className="px-6 py-4 text-sm text-gray-600">{customer.email}</td>
@@ -263,6 +302,7 @@ const CustomerManagement = () => {
                   <thead>
                     <tr className="bg-gray-50">
                       <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 tracking-wider border-b">Tên</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 tracking-wider border-b">Số CCCD</th>
                       <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 tracking-wider border-b">Địa chỉ</th>
                       <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 tracking-wider border-b">Số điện thoại</th>
                       <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 tracking-wider border-b">Email</th>
@@ -273,6 +313,7 @@ const CustomerManagement = () => {
                     {deletedCustomers.map(customer => (
                       <tr key={customer.id} className="hover:bg-gray-50 transition duration-200">
                         <td className="px-6 py-4 text-sm text-gray-800">{customer.hoTen}</td>
+                        <td className="px-6 py-4 text-sm text-gray-600">{customer.soCCCD}</td>
                         <td className="px-6 py-4 text-sm text-gray-600">{customer.diaChi}</td>
                         <td className="px-6 py-4 text-sm text-gray-600">{customer.soDienThoai}</td>
                         <td className="px-6 py-4 text-sm text-gray-600">{customer.email}</td>
@@ -337,6 +378,18 @@ const CustomerManagement = () => {
                     type="text"
                     value={newCustomer.hoTen}
                     onChange={(e) => setNewCustomer({...newCustomer, hoTen: e.target.value})}
+                    className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 text-sm font-bold mb-2">
+                    Số CCCD
+                  </label>
+                  <input
+                    type="text"
+                    value={newCustomer.soCCCD}
+                    onChange={(e) => setNewCustomer({...newCustomer, soCCCD: e.target.value})}
                     className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                     required
                   />
@@ -410,6 +463,18 @@ const CustomerManagement = () => {
                     type="text"
                     value={customerToEdit.hoTen}
                     onChange={(e) => setCustomerToEdit({...customerToEdit, hoTen: e.target.value})}
+                    className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 text-sm font-bold mb-2">
+                    Số CCCD
+                  </label>
+                  <input
+                    type="text"
+                    value={customerToEdit.soCCCD}
+                    onChange={(e) => setCustomerToEdit({...customerToEdit, soCCCD: e.target.value})}
                     className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                     required
                   />

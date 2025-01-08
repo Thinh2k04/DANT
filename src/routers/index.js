@@ -9,12 +9,13 @@ import ChiTietSanPham from '../pages/chitietsanpham[/id]/page';
 import CheckoutPage from '../pages/use/thanhtoan/page';
 import PaymentSuccess from '../components/GioHangComponenst/PaymentSuccess';
 import ChiTietSanPhamAdmin from '../pages/admin/sanphamchitietAdmin[/id]/page';
-import AccountManagement from '../pages/admin/account/page';
 import TrackOrder from '../pages/use/track order/page';
 import LoginPage from '../pages/use/loginuse/page';
 import RegisterPage from '../pages/use/register/page';
 import ProductAttributesPage from '../pages/admin/product-attributes/page';
 import VoucherPage from '../pages/admin/vocher/page';
+import EmployeePage from '../pages/admin/employee/page';
+
 
 // Public routes
 const publicRoutes = [
@@ -37,8 +38,8 @@ const privateRoutes = [
   { path: '/admin/customers', component: CustomerManagement },
   { path: '/admin/attributes', component: AttributeManagement },
   { path: '/admin/chitietsanpham/:idSanPham', component: ChiTietSanPhamAdmin },
-  { path: '/admin/account', component: AccountManagement },
   { path: '/admin/product-attributes', component: ProductAttributesPage },
+  { path: '/admin/employees', component: EmployeePage },
   { path: '/admin/vouchers', component: VoucherPage },
 ];
 

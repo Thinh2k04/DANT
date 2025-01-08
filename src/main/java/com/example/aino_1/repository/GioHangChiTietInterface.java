@@ -11,5 +11,5 @@ import java.util.List;
 public interface GioHangChiTietInterface extends JpaRepository<GioHangChiTiet, Integer> {
 //    boolean existsByGioHangId(Integer idGioHang);
     List<GioHangChiTiet> findGioHangChiTietByTaiKhoanNguoiDungUsername(String user);
-
+    GioHangChiTiet findGioHangChiTietByTaiKhoanNguoiDungUsernameAndSanPhamChiTiet_Id(String usname, Integer id);
 }

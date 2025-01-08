@@ -17,4 +17,7 @@ public interface ThongTinTaiKhoaninterface extends JpaRepository<ThongTinTaiKhoa
 
     )
     TTTKDTO timTTTKBySDT(@Param("SDT") String SDT);
+
+    // tìm kiếm thông tin tài khoản người dùng bằng username
+    ThongTinTaiKhoan findThongTinTaiKhoanByTaiKhoanNguoiDungUsername(String username);
 }

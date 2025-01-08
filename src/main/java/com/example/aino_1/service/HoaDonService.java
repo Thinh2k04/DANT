@@ -38,64 +38,75 @@ public class HoaDonService {
     @Autowired
     GioHangChiTietInterface gioHangChiTietInterface;
 
+    @Autowired
+    ThongTinTaiKhoaninterface thongTinTaiKhoaninterface;
+
     @Transactional
-    public String hamXuLiHoaDon(String username, ThongTinTaiKhoan ttk, HoaDon hd, List<HoaDonChiTiet> lhdct, Voucher voucher) {
-        // Xử lý thông tin tài khoản
-        ThongTinTaiKhoan savedThongTinTaiKhoan;
-        if (ttk.getTaiKhoanNguoiDung() == null) {
-            savedThongTinTaiKhoan = tttksi.save(ttk);
+    public String hamXuLiHoaDon(String username, ThongTinTaiKhoan tttk, HoaDon hd, List<HoaDonChiTiet> lhdct, Voucher voucher) {
+        if (username == null) {
+            System.out.println("Người dùng không đăng nhập mua hàng.");
         } else {
-            TaiKhoanNguoiDung savedTaiKhoanNguoiDung = tksi.save(ttk.getTaiKhoanNguoiDung());
-            ttk.setTaiKhoanNguoiDung(savedTaiKhoanNguoiDung);
-            savedThongTinTaiKhoan = tttksi.save(ttk);
-        }
-        hd.setThongTinTaiKhoan(savedThongTinTaiKhoan);
-
-        // Xử lý địa chỉ nhận hàng
-        if (hd.getDiaChiNhanHang() == null || hd.getDiaChiNhanHang().isEmpty()) {
-            String diaChiCuaHang = String.join(" ", hd.getCuaHang().getTinh(), hd.getCuaHang().getHuyen(),
-                    hd.getCuaHang().getPhuong(), hd.getCuaHang().getSoNha());
-            hd.setDiaChiNhanHang(diaChiCuaHang);
+            // Lấy tài khoản người dùng từ username
+            TaiKhoanNguoiDung tknd = tksi.findByUsername(username)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản với username: " + username));
+            // Gắn tài khoản người dùng vào thông tin tài khoản
+            tttk.setTaiKhoanNguoiDung(tknd);
+            System.out.println("Người dùng " + username + " đăng nhập mua hàng.");
         }
 
+        // Lưu thông tin tài khoản vào hóa đơn
+        ThongTinTaiKhoan tttkSaveToDB = tttksi.save(tttk);
+        hd.setThongTinTaiKhoan(tttkSaveToDB);
+
+        // Lưu voucher vào hóa đơn (nếu có)
         hd.setVoucher(voucher);
+
+        // Lưu hóa đơn
         HoaDon savedHoaDon = hdsi.save(hd);
 
-        // Lấy danh sách giỏ hàng chi tiết theo username
-        List<GioHangChiTiet> gioHangChiTietList = gioHangChiTietInterface.findGioHangChiTietByTaiKhoanNguoiDungUsername(username);
-
-        // Xử lý danh sách chi tiết hóa đơn
         for (HoaDonChiTiet hdct : lhdct) {
             Integer idSanPhamChiTiet = hdct.getSanPhamChiTiet().getId();
             Integer soLuong = hdct.getSoLuong();
 
-            // Lấy danh sách IMEI theo số lượng yêu cầu
-            List<Imei> imeiList = imeiRepository.findTopImeiBySanPhamChiTietIdAndTrangThaiNative(idSanPhamChiTiet);
-            if (imeiList.size() < soLuong) {
-                throw new RuntimeException("Không đủ IMEI để đáp ứng số lượng yêu cầu cho sản phẩm ID: " + idSanPhamChiTiet);
+            // Lấy danh sách IMEI khả dụng
+            List<Imei> listImei = imeiRepository.findAllBySpctIdAndTrangThai(idSanPhamChiTiet, 0);
+            if (soLuong > listImei.size()) {
+                throw new RuntimeException("Số lượng IMEI cho sản phẩm ID: " + idSanPhamChiTiet + " không đủ, hiện còn: " + listImei.size());
             }
 
-            // Cập nhật trạng thái của IMEI và liên kết với chi tiết hóa đơn
-            for (int i = 0; i < soLuong; i++) {
-                imeiList.get(i).setTrangThai(1);
-                imeiList.get(i).setHdct(hdct); // Liên kết IMEI với hóa đơn chi tiết
-            }
-            imeiRepository.saveAll(imeiList);
-
-            // Liên kết hóa đơn chi tiết với hóa đơn
             hdct.setHoaDon(savedHoaDon);
-            hdctsi.save(hdct);
+            HoaDonChiTiet hdcts = hdctsi.save(hdct);
 
-            // Xóa sản phẩm chi tiết khỏi giỏ hàng
-            gioHangChiTietList.stream()
-                    .filter(gioHangChiTiet -> gioHangChiTiet.getSanPhamChiTiet().getId().equals(idSanPhamChiTiet))
-                    .findFirst()
-                    .ifPresent(gioHangChiTietInterface::delete); // Xóa giỏ hàng chi tiết tương ứng
+            // Gán IMEI cho chi tiết hóa đơn và cập nhật trạng thái
+            List<Imei> imeisToUpdate = listImei.subList(0, soLuong);
+            for (Imei imei : imeisToUpdate) {
+                imei.setTrangThai(1); // Đã bán
+                imei.setHdct(hdcts); // Gắn IMEI với hóa đơn chi tiết
+                imeiRepository.save(imei); // Lưu trạng thái mới và liên kết
+            }
+
+            // Nếu người dùng đăng nhập, xóa giỏ hàng chi tiết
+            if (username != null) {
+                // Kiểm tra xem username và idSanPhamChiTiet có null không
+                if (idSanPhamChiTiet == null) {
+                    throw new IllegalArgumentException("idSanPhamChiTiet không được null.");
+                }
+
+                // Tìm giỏ hàng chi tiết theo username và idSanPhamChiTiet
+                GioHangChiTiet ghctUser = gioHangChiTietInterface.findGioHangChiTietByTaiKhoanNguoiDungUsernameAndSanPhamChiTiet_Id(username, idSanPhamChiTiet);
+
+                // Kiểm tra nếu không tìm thấy giỏ hàng chi tiết
+                if (ghctUser != null) {
+                    gioHangChiTietInterface.delete(ghctUser);
+                } else {
+                    // Xử lý khi không tìm thấy giỏ hàng chi tiết (nếu cần)
+                    System.out.println("Không tìm thấy giỏ hàng chi tiết cho user: " + username + " và sản phẩm ID: " + idSanPhamChiTiet);
+                }
+            }
+
         }
 
         return "Hóa đơn và chi tiết hóa đơn đã được xử lý thành công!";
     }
-
-
 
 }

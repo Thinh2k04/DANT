@@ -52,30 +52,36 @@ public class HoaDonController {
     }
 
     @PostMapping("addHD")
-    public ResponseEntity<?> addHoaDon(@RequestHeader("Authorization") String token, @RequestBody Map<String, Object> requestData) {
+    public ResponseEntity<?> addHoaDon(@RequestHeader(value = "Authorization", required = false) String token,
+                                       @RequestBody Map<String, Object> requestData) {
         try {
+            System.out.println("HOADONCONTROLLER: chạy vào phần try");
             ObjectMapper objectMapper = new ObjectMapper();
+            String username = null;
 
-            // Giải mã token và lấy username
-            Map<String, Object> decodedToken = jwtUtils.validateToken(token.replace("Bearer ", ""));
-            if (decodedToken == null || !decodedToken.containsKey("username")) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token không hợp lệ.");
+            // Lấy thông tin tài khoản từ token nếu có
+            if (token != null && !token.isEmpty()) {
+                Map<String, Object> decodedToken = jwtUtils.validateToken(token.replace("Bearer ", ""));
+                if (decodedToken == null || !decodedToken.containsKey("username")) {
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token không hợp lệ.");
+                }
+                username = decodedToken.get("username").toString();
             }
-            String username = decodedToken.get("username").toString();
 
+            System.out.println("HOADONCONTROLLER: chạy vào phần ánh xạ dữ liệu");
             // Ánh xạ dữ liệu từ requestData
-            ThongTinTaiKhoan tttk = objectMapper.convertValue(requestData.get("tttk"), ThongTinTaiKhoan.class);
+            ThongTinTaiKhoan thongTinTaiKhoan = objectMapper.convertValue(requestData.get("tttk"), ThongTinTaiKhoan.class);
             HoaDon hd = objectMapper.convertValue(requestData.get("hd"), HoaDon.class);
             List<HoaDonChiTiet> lhdct = objectMapper.convertValue(requestData.get("lhdct"), new TypeReference<List<HoaDonChiTiet>>() {});
-            Voucher voucher = objectMapper.convertValue(requestData.get("voucher"), Voucher.class);
+            Voucher voucher = objectMapper.convertValue(requestData.get("hd.voucher"), Voucher.class);
 
             // Kiểm tra dữ liệu đầu vào
-            if (tttk == null || hd == null || lhdct == null || lhdct.isEmpty()) {
+            if (hd == null || lhdct == null || lhdct.isEmpty()) {
                 return ResponseEntity.badRequest().body("Dữ liệu đầu vào không hợp lệ.");
             }
-
-            // Gọi service để xử lý
-            String result = hdsv.hamXuLiHoaDon(username, tttk, hd, lhdct, voucher);
+            System.out.println("Gọi hàm xử lí SERVICE CỦA HÓA ĐƠN CONTROLLER");
+            // Gọi service để xử lý hóa đơn
+            String result = hdsv.hamXuLiHoaDon(username, thongTinTaiKhoan, hd, lhdct, voucher);
             return ResponseEntity.ok(result);
 
         } catch (IllegalArgumentException e) {
@@ -85,6 +91,8 @@ public class HoaDonController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Đã xảy ra lỗi: " + e.getMessage());
         }
     }
+
+
 
 
     // sét trang  thái thanh toán là 1 khi khách hàng đã thanh toán hóa đơn

@@ -110,7 +110,7 @@ const NavbarAdmin = () => {
           {isSidebarOpen && (
             <Link to="/admin" className="flex items-center space-x-2">
               <div className="bg-white p-1 rounded">
-                <img src="/logo.png" alt="Logo" className="h-8 w-8" />
+                <img src="https://res.cloudinary.com/dmtek0eaq/image/upload/v1736320038/y3dz2geugbbnbrlq63mu.png" alt="Logo" className="h-8 w-8" />
               </div>
               <span className="font-bold text-xl text-white">LAPTOP</span>
             </Link>

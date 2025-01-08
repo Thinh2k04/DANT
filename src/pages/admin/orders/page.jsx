@@ -197,49 +197,58 @@ const OrderManagement = () => {
   };
 
   const generatePDF = (order, details) => {
-    const doc = new jsPDF();
-    
+    const doc = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4'
+    });
+
+    // Thiết lập font chữ hỗ trợtiếng Việt
     doc.setFont('helvetica');
     
-    doc.setFontSize(24);
+    // Header
+    doc.setFontSize(22);
     doc.setTextColor(44, 62, 80);
-    doc.text("LAPTOP SHOP", 105, 20, { align: "center" });
+    doc.text("LAPTOP SHOP", 105, 15, { align: "center" });
     
-    doc.setFontSize(18);
-    doc.text("HÓA ĐƠN BÁN HÀNG", 105, 30, { align: "center" });
-    doc.text(`#${order.id}`, 105, 38, { align: "center" });
+    doc.setFontSize(16);
+    doc.text("HÓA ĐƠN BÁN HÀNG", 105, 25, { align: "center" });
+    doc.text(`#${order.id}`, 105, 32, { align: "center" });
     
+    // Đường kẻ phân cách
     doc.setDrawColor(41, 128, 185);
     doc.setLineWidth(0.5);
-    doc.line(20, 42, 190, 42);
+    doc.line(15, 35, 195, 35);
     
+    // Thông tin công ty
     doc.setFontSize(10);
     doc.setTextColor(52, 73, 94);
     doc.text([
       "CÔNG TY TNHH LAPTOP SHOP",
-      "Địa chỉ: 123 Đường ABC, Quận XYZ, TP.HCM",
-      "Hotline: 0123.456.789 - Email: contact@laptopshop.com",
+      "Địa chỉ: 134/44 Nguyên Xá , Bắc từ liêm , Hà Nội",
+      "Hotline: 0123.456.789 - Email: shoplaptop@gmail.com",
       "MST: 0123456789"
-    ], 105, 50, { align: "center" });
+    ], 105, 45, { align: "center" });
 
+    // Thông tin khách hàng
     const customerInfo = {
-      startY: 70,
-      head: [['THÔNG TIN ĐƠN HÀNG']],
+      startY: 60,
+      head: [['THÔNG TIN KHÁCH HÀNG']],
       body: [
-        ['Khách hàng:', order.thongTinTaiKhoan?.hoTen],
-        ['Số điện thoại:', order.thongTinTaiKhoan?.soDienThoai],
-        ['Email:', order.thongTinTaiKhoan?.email],
-        ['Địa chỉ giao hàng:', order.diaChiNhanHang],
+        ['Khách hàng:', order.thongTinTaiKhoan?.hoTen ||'N/A'],
+        ['Số điện thoại:', order.thongTinTaiKhoan?.soDienThoai ||'N/A'],
+        ['Email:', order.thongTinTaiKhoan?.email ||'N/A'],
+        ['Địa chỉ giao hàng:', order.diaChiNhanHang ||'N/A'],
         ['Ngày đặt hàng:', new Date(order.thoiGianLapHoaDon).toLocaleString('vi-VN')],
-        ['Hình thức thanh toán:', order.hinhThucThanhToan?.tenHinhThuc],
-        ['Trạng thái đơn hàng:', order.trangThaiThanhToan === 0 ? 'Đã hủy' :
-                                 order.trangThaiThanhToan === 1 ? 'Thành công' :
-                                 'Chờ thanh toán']
+        ['Hình thức thanh toán:', order.hinhThucThanhToan?.tenHinhThuc ||'N/A'],
+        ['Trạng thái:', order.trangThaiThanhToan === 0 ? 'Đã hủy' :
+                       order.trangThaiThanhToan === 1 ? 'Thành công' :
+                       order.trangThaiThanhToan === 2 ? 'Chờ thanh toán' : 'N/A']
       ],
       theme: 'plain',
       styles: { 
         fontSize: 10,
-        cellPadding: 3,
+        cellPadding: 2,
       },
       headStyles: {
         fillColor: [41, 128, 185],
@@ -256,22 +265,23 @@ const OrderManagement = () => {
     
     doc.autoTable(customerInfo);
 
+    // Chi tiết sản phẩm
     const productDetails = {
-      startY: doc.lastAutoTable.finalY + 15,
-      head: [['STT', 'Sản phẩm', 'Thông số', 'SL', 'Đơn giá', 'Thành tiền']],
+      startY: doc.lastAutoTable.finalY + 10,
+      head: [['STT', 'Sản phẩm', 'Cấu hình', 'SL', 'Đơn giá', 'Thành tiền']],
       body: details.map((detail, index) => [
         index + 1,
-        detail.sanPhamChiTiet?.sanPham?.tenSanPham,
+        detail.sanPhamChiTiet?.sanPham?.tenSanPham ||'N/A',
         [
-          `CPU: ${detail.sanPhamChiTiet?.cpu?.ten}`,
-          `RAM: ${detail.sanPhamChiTiet?.ram?.dungLuong}GB`,
-          `Ổ cứng: ${detail.sanPhamChiTiet?.oluuTru?.dungLuong}GB ${detail.sanPhamChiTiet?.oluuTru?.loaiOCung}`,
-          `GPU: ${detail.sanPhamChiTiet?.gpu?.ten}`,
-          `Màn hình: ${detail.sanPhamChiTiet?.manHinh?.doPhanGiai}`
+          `CPU: ${detail.sanPhamChiTiet?.cpu?.ten ||'N/A'}`,
+          `RAM: ${detail.sanPhamChiTiet?.ram?.dungLuong ||'N/A'}GB`,
+          `Ổ cứng: ${detail.sanPhamChiTiet?.oluuTru?.dungLuong ||'N/A'}GB ${detail.sanPhamChiTiet?.oluuTru?.loaiOCung || ''}`,
+          `GPU: ${detail.sanPhamChiTiet?.gpu?.ten ||'N/A'}`,
+          `Màn hình: ${detail.sanPhamChiTiet?.manHinh?.doPhanGiai ||'N/A'}`
         ].join('\n'),
         detail.soLuong,
-        `${detail.gia?.toLocaleString()}₫`,
-        `${(detail.soLuong * detail.gia)?.toLocaleString()}₫`
+        `${detail.gia?.toLocaleString('vi-VN')}đ`,
+        `${(detail.soLuong * detail.gia)?.toLocaleString('vi-VN')}đ`
       ]),
       theme: 'striped',
       headStyles: {
@@ -283,55 +293,68 @@ const OrderManagement = () => {
       },
       styles: {
         fontSize: 9,
-        cellPadding: 3,
+        cellPadding: 2,
+        lineColor: [80, 80, 80],
+        lineWidth: 0.1,
       },
       columnStyles: {
         0: { cellWidth: 10, halign: 'center' },
-        1: { cellWidth: 40 },
-        2: { cellWidth: 70 },
+        1: { cellWidth: 35 },
+        2: { cellWidth: 65 },
         3: { cellWidth: 10, halign: 'center' },
         4: { cellWidth: 25, halign: 'right' },
-        5: { cellWidth: 25, halign: 'right' }
+        5: { cellWidth: 30, halign: 'right' }
       }
     };
 
     doc.autoTable(productDetails);
 
-    const summaryData = [];
-    if (order.voucher) {
-      summaryData.push([
-        'Tổng tiền hàng:',
-        `${order.tongTien?.toLocaleString()}₫`
-      ]);
-      summaryData.push([
-        `Voucher giảm giá (${order.voucher.maVoucher}):`,
-        `-${(order.tongTien * order.voucher.phanTramApDung)?.toLocaleString()}₫`
-      ]);
-    }
-    summaryData.push([
-      'Tổng thanh toán:',
-      `${(order.tongTien - (order.voucher ? order.tongTien * order.voucher.phanTramApDung : 0))?.toLocaleString()}₫`
-    ]);
-
-    doc.autoTable({
+    // Tổng tiền và giảm giá
+    const summaryData = {
       startY: doc.lastAutoTable.finalY + 5,
-      body: summaryData,
+      body: [],
       theme: 'plain',
-      styles: { fontSize: 10, cellPadding: 3 },
+      styles: { 
+        fontSize: 10,
+        cellPadding: 2
+      },
       columnStyles: {
         0: { cellWidth: 150, fontStyle: 'bold', halign: 'right' },
-        1: { cellWidth: 30, halign: 'right', fontStyle: 'bold', textColor: [41, 128, 185] }
+        1: { cellWidth: 30, halign: 'right', fontStyle: 'bold'}
       }
-    });
+    };
 
+    // Thêm thông tin tổng tiền vàvoucher
+    summaryData.body.push(['Tổng tiền hàng:', `${order.tongTien?.toLocaleString('vi-VN')}đ`]);
+    
+    if (order.voucher) {
+      const giamGia = order.tongTien * order.voucher.phanTramApDung;
+      summaryData.body.push([
+        `Voucher giảm giá (${order.voucher.maVoucher}):`,
+        `-${giamGia.toLocaleString('vi-VN')}đ`
+      ]);
+    }
+
+    const tongThanhToan = order.tongTien - (order.voucher ? order.tongTien * order.voucher.phanTramApDung : 0);
+    summaryData.body.push(['Tổng thanh toán:', `${tongThanhToan.toLocaleString('vi-VN')}đ`]);
+
+    doc.autoTable(summaryData);
+
+    // Footer
     doc.setDrawColor(41, 128, 185);
     doc.setLineWidth(0.5);
-    doc.line(20, doc.lastAutoTable.finalY + 10, 190, doc.lastAutoTable.finalY + 10);
+    doc.line(15, doc.lastAutoTable.finalY+ 10, 195, doc.lastAutoTable.finalY + 10);
 
     doc.setFontSize(10);
     doc.setTextColor(127, 140, 141);
-    const currentDate = new Date().toLocaleString('vi-VN');
-    doc.text(`Ngày in: ${currentDate}`, 20, doc.lastAutoTable.finalY + 20);
+    const currentDate = new Date().toLocaleString('vi-VN',{
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+    doc.text(`Ngày in: ${currentDate}`, 15, doc.lastAutoTable.finalY + 20);
 
     doc.setFontSize(10);
     doc.setTextColor(44, 62, 80);
@@ -340,7 +363,9 @@ const OrderManagement = () => {
       "Mọi thắc mắc xin vui lòng liên hệ Hotline: 0123.456.789"
     ], 105, doc.lastAutoTable.finalY + 20, { align: "center" });
 
-    doc.save(`hoa_don_${order.id}.pdf`);
+    // Lưu file PDF
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    doc.save(`hoa_don_${order.id}_${timestamp}.pdf`);
   };
 
   return (

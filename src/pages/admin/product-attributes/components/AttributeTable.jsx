@@ -28,10 +28,10 @@ const AttributeTable = ({
     if (activeTab === 'kichThuoc') {
       return (
         <>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
             Kích thước (inch)
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
             Trạng thái
           </th>
         </>
@@ -40,10 +40,10 @@ const AttributeTable = ({
     if (activeTab === 'chatLieu') {
       return (
         <>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
             Tên chất liệu
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
             Trạng thái
           </th>
         </>
@@ -52,10 +52,10 @@ const AttributeTable = ({
     if (activeTab === 'cardManHinh') {
       return (
         <>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
             Tên Card đồ họa
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
             Trạng thái
           </th>
         </>
@@ -64,22 +64,22 @@ const AttributeTable = ({
     if (activeTab === 'gpu') {
       return (
         <>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
             Tên GPU
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
             Hãng sản xuất
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
             Xung nhịp (MHz)
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
             VRAM (GB)
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Điện áp (V)
+          <th className="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+           Điện áp (V)
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
             Kiến trúc
           </th>
         </>
@@ -87,22 +87,22 @@ const AttributeTable = ({
     } else if (activeTab === 'cpu') {
       return (
         <>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
             Tên CPU
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
             Hãng sản xuất
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
             Kiến trúc
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
             Tốc độ (GHz)
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
             Nhân/Luồng
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
             Bộ nhớ đệm (MB)
           </th>
         </>
@@ -110,13 +110,13 @@ const AttributeTable = ({
     } else if (activeTab === 'oCung') {
       return (
         <>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
             Dung lượng (GB)
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
             Loại ổ cứng
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
             Trạng thái
           </th>
         </>
@@ -124,10 +124,10 @@ const AttributeTable = ({
     } else if (isBrandTab) {
       return (
         <>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
             Tên thương hiệu
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
             Trạng thái
           </th>
         </>
@@ -135,10 +135,10 @@ const AttributeTable = ({
     } else if (isRamTab) {
       return (
         <>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
             Dung lượng (GB)
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
             Tốc độ (MHz)
           </th>
         </>
@@ -146,19 +146,19 @@ const AttributeTable = ({
     } else if (isManHinhTab) {
       return (
         <>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Độ phân giải
+          <th className="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+           Độ phân giải
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
             Tần số quét (Hz)
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Độ sáng (nits)
+          <th className="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+           Độ sáng (nits)
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Độ phủ màu (%)
+          <th className="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+           Độ phủ màu (%)
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
             Tấm nền
           </th>
         </>
@@ -166,10 +166,10 @@ const AttributeTable = ({
     } else if (isLoaiSanPhamTab) {
       return (
         <>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
             Tên loại sản phẩm
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
             Trạng thái
           </th>
         </>
@@ -177,13 +177,13 @@ const AttributeTable = ({
     } else if (isMauSacTab) {
       return (
         <>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
             Tên màu
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
             Mã màu
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
             Màu hiển thị
           </th>
         </>
@@ -191,22 +191,22 @@ const AttributeTable = ({
     } else if (isNguonNhapTab) {
       return (
         <>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
             Tên nhà cung ứng
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
             Số điện thoại
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
             Email
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Địa chỉ
+          <th className="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+           Đ ịa chỉ
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
             Ghi chú
           </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
             Trạng thái
           </th>
         </>
@@ -218,7 +218,7 @@ const AttributeTable = ({
     if (activeTab === 'kichThuoc') {
       return (
         <>
-          <td className="px-6 py-4 whitespace-nowrap">
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
             {editingAttribute?.id === attr.id ? (
               <input
                 type="number"
@@ -236,7 +236,7 @@ const AttributeTable = ({
               attr.kichThuoc
             )}
           </td>
-          <td className="px-6 py-4 whitespace-nowrap">
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
             {editingAttribute?.id === attr.id ? (
               <select
                 value={editingAttribute.trangThai}
@@ -259,7 +259,7 @@ const AttributeTable = ({
     if (activeTab === 'chatLieu') {
       return (
         <>
-          <td className="px-6 py-4 whitespace-nowrap">
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
             {editingAttribute?.id === attr.id ? (
               <input
                 type="text"
@@ -275,7 +275,7 @@ const AttributeTable = ({
               attr.tenChatLieu
             )}
           </td>
-          <td className="px-6 py-4 whitespace-nowrap">
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
             {attr.trangThai === null ? 'Chưa có' : attr.trangThai}
           </td>
         </>
@@ -284,7 +284,7 @@ const AttributeTable = ({
     if (activeTab === 'cardManHinh') {
       return (
         <>
-          <td className="px-6 py-4 whitespace-nowrap">
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
             {editingAttribute?.id === attr.id ? (
               <input
                 type="text"
@@ -300,7 +300,7 @@ const AttributeTable = ({
               attr.tenCard
             )}
           </td>
-          <td className="px-6 py-4 whitespace-nowrap">
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
             {attr.trangThai === null ? 'Chưa có' : attr.trangThai}
           </td>
         </>
@@ -309,7 +309,7 @@ const AttributeTable = ({
     if (activeTab === 'gpu') {
       return (
         <>
-          <td className="px-6 py-4 whitespace-nowrap">
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
             {editingAttribute?.id === attr.id ? (
               <input
                 type="text"
@@ -325,7 +325,7 @@ const AttributeTable = ({
               attr.ten
             )}
           </td>
-          <td className="px-6 py-4 whitespace-nowrap">
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
             {editingAttribute?.id === attr.id ? (
               <input
                 type="text"
@@ -341,7 +341,7 @@ const AttributeTable = ({
               attr.hangSanXuat
             )}
           </td>
-          <td className="px-6 py-4 whitespace-nowrap">
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
             {editingAttribute?.id === attr.id ? (
               <div className="flex gap-1 items-center">
                 <input
@@ -370,7 +370,7 @@ const AttributeTable = ({
               `${attr.xungNhipToiThieu} - ${attr.xungNhipToiDa}`
             )}
           </td>
-          <td className="px-6 py-4 whitespace-nowrap">
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
             {editingAttribute?.id === attr.id ? (
               <input
                 type="number"
@@ -386,7 +386,7 @@ const AttributeTable = ({
               attr.vram
             )}
           </td>
-          <td className="px-6 py-4 whitespace-nowrap">
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
             {editingAttribute?.id === attr.id ? (
               <input
                 type="number"
@@ -402,7 +402,7 @@ const AttributeTable = ({
               attr.dienAp
             )}
           </td>
-          <td className="px-6 py-4 whitespace-nowrap">
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
             {editingAttribute?.id === attr.id ? (
               <input
                 type="text"
@@ -423,7 +423,7 @@ const AttributeTable = ({
     } else if (activeTab === 'cpu') {
       return (
         <>
-          <td className="px-6 py-4 whitespace-nowrap">
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
             {editingAttribute?.id === attr.id ? (
               <input
                 type="text"
@@ -438,7 +438,7 @@ const AttributeTable = ({
               attr.ten
             )}
           </td>
-          <td className="px-6 py-4 whitespace-nowrap">
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
             {editingAttribute?.id === attr.id ? (
               <input
                 type="text"
@@ -453,7 +453,7 @@ const AttributeTable = ({
               attr.hangSanXuat
             )}
           </td>
-          <td className="px-6 py-4 whitespace-nowrap">
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
             {editingAttribute?.id === attr.id ? (
               <input
                 type="text"
@@ -468,7 +468,7 @@ const AttributeTable = ({
               attr.kienTrucCongNghe
             )}
           </td>
-          <td className="px-6 py-4 whitespace-nowrap">
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
             {editingAttribute?.id === attr.id ? (
               <div className="flex gap-1 items-center">
                 <input
@@ -499,7 +499,7 @@ const AttributeTable = ({
               `${attr.tocDoToiThieu} - ${attr.tocDoToiDa}`
             )}
           </td>
-          <td className="px-6 py-4 whitespace-nowrap">
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
             {editingAttribute?.id === attr.id ? (
               <div className="flex gap-1 items-center">
                 <input
@@ -528,7 +528,7 @@ const AttributeTable = ({
               `${attr.soNhan}/${attr.soLuong}`
             )}
           </td>
-          <td className="px-6 py-4 whitespace-nowrap">
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
             {editingAttribute?.id === attr.id ? (
               <input
                 type="number"
@@ -549,7 +549,7 @@ const AttributeTable = ({
     } else if (activeTab === 'oCung') {
       return (
         <>
-          <td className="px-6 py-4 whitespace-nowrap">
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
             {editingAttribute?.id === attr.id ? (
               <input
                 type="number"
@@ -565,7 +565,7 @@ const AttributeTable = ({
               attr.dungLuong
             )}
           </td>
-          <td className="px-6 py-4 whitespace-nowrap">
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
             {editingAttribute?.id === attr.id ? (
               <select
                 value={editingAttribute.loaiOCung}
@@ -582,7 +582,7 @@ const AttributeTable = ({
               attr.loaiOCung
             )}
           </td>
-          <td className="px-6 py-4 whitespace-nowrap">
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
             {attr.trangThai === null ? 'Chưa có' : attr.trangThai}
           </td>
         </>
@@ -590,7 +590,7 @@ const AttributeTable = ({
     } else if (isBrandTab) {
       return (
         <>
-          <td className="px-6 py-4 whitespace-nowrap">
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
             {editingAttribute?.id === attr.id ? (
               <input
                 type="text"
@@ -605,7 +605,7 @@ const AttributeTable = ({
               attr.ten
             )}
           </td>
-          <td className="px-6 py-4 whitespace-nowrap">
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
             {editingAttribute?.id === attr.id ? (
               <select
                 value={editingAttribute.trangThai}
@@ -627,7 +627,7 @@ const AttributeTable = ({
     } else if (isRamTab) {
       return (
         <>
-          <td className="px-6 py-4 whitespace-nowrap">
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
             {editingAttribute?.id === attr.id ? (
               <input
                 type="number"
@@ -643,7 +643,7 @@ const AttributeTable = ({
               attr.dungLuong
             )}
           </td>
-          <td className="px-6 py-4 whitespace-nowrap">
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
             {editingAttribute?.id === attr.id ? (
               <input
                 type="number"
@@ -664,7 +664,7 @@ const AttributeTable = ({
     } else if (isManHinhTab) {
       return (
         <>
-          <td className="px-6 py-4 whitespace-nowrap">
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
             {editingAttribute?.id === attr.id ? (
               <input
                 type="text"
@@ -680,7 +680,7 @@ const AttributeTable = ({
               attr.doPhanGiai
             )}
           </td>
-          <td className="px-6 py-4 whitespace-nowrap">
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
             {editingAttribute?.id === attr.id ? (
               <input
                 type="number"
@@ -696,7 +696,7 @@ const AttributeTable = ({
               attr.tanSoQuet
             )}
           </td>
-          <td className="px-6 py-4 whitespace-nowrap">
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
             {editingAttribute?.id === attr.id ? (
               <input
                 type="number"
@@ -712,7 +712,7 @@ const AttributeTable = ({
               attr.doSang
             )}
           </td>
-          <td className="px-6 py-4 whitespace-nowrap">
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
             {editingAttribute?.id === attr.id ? (
               <input
                 type="number"
@@ -730,7 +730,7 @@ const AttributeTable = ({
               `${(attr.doPhuMau * 100).toFixed(0)}%`
             )}
           </td>
-          <td className="px-6 py-4 whitespace-nowrap">
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
             {editingAttribute?.id === attr.id ? (
               <select
                 value={editingAttribute.tamNen}
@@ -754,7 +754,7 @@ const AttributeTable = ({
     } else if (isLoaiSanPhamTab) {
       return (
         <>
-          <td className="px-6 py-4 whitespace-nowrap">
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
             {editingAttribute?.id === attr.id ? (
               <input
                 type="text"
@@ -770,7 +770,7 @@ const AttributeTable = ({
               attr.tenLoai
             )}
           </td>
-          <td className="px-6 py-4 whitespace-nowrap">
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
             {editingAttribute?.id === attr.id ? (
               <select
                 value={editingAttribute.trangThai}
@@ -792,7 +792,7 @@ const AttributeTable = ({
     } else if (isMauSacTab) {
       return (
         <>
-          <td className="px-6 py-4 whitespace-nowrap">
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
             {editingAttribute?.id === attr.id ? (
               <input
                 type="text"
@@ -808,7 +808,7 @@ const AttributeTable = ({
               attr.tenMau
             )}
           </td>
-          <td className="px-6 py-4 whitespace-nowrap">
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
             {editingAttribute?.id === attr.id ? (
               <input
                 type="text"
@@ -824,7 +824,7 @@ const AttributeTable = ({
               attr.maHex
             )}
           </td>
-          <td className="px-6 py-4 whitespace-nowrap">
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
             <div 
               className="w-8 h-8 rounded border"
               style={{ backgroundColor: attr.maHex }}
@@ -835,7 +835,7 @@ const AttributeTable = ({
     } else if (isNguonNhapTab) {
       return (
         <>
-          <td className="px-6 py-4 whitespace-nowrap">
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
             {editingAttribute?.id === attr.id ? (
               <input
                 type="text"
@@ -851,7 +851,7 @@ const AttributeTable = ({
               attr.tenNhaCungUng
             )}
           </td>
-          <td className="px-6 py-4 whitespace-nowrap">
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
             {editingAttribute?.id === attr.id ? (
               <input
                 type="text"
@@ -867,7 +867,7 @@ const AttributeTable = ({
               attr.sdt
             )}
           </td>
-          <td className="px-6 py-4 whitespace-nowrap">
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
             {editingAttribute?.id === attr.id ? (
               <input
                 type="email"
@@ -883,7 +883,7 @@ const AttributeTable = ({
               attr.email
             )}
           </td>
-          <td className="px-6 py-4 whitespace-nowrap">
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
             {editingAttribute?.id === attr.id ? (
               <input
                 type="text"
@@ -899,7 +899,7 @@ const AttributeTable = ({
               attr.diaChi
             )}
           </td>
-          <td className="px-6 py-4 whitespace-nowrap">
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
             {editingAttribute?.id === attr.id ? (
               <textarea
                 value={editingAttribute.ghiChu}
@@ -915,7 +915,7 @@ const AttributeTable = ({
               attr.ghiChu
             )}
           </td>
-          <td className="px-6 py-4 whitespace-nowrap">
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
             {editingAttribute?.id === attr.id ? (
               <select
                 value={editingAttribute.trangThai}
@@ -938,25 +938,25 @@ const AttributeTable = ({
   };
 
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               ID
             </th>
             {renderTableHeaders()}
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Thao tác
             </th>
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
           {attributes.map((attr) => (
-            <tr key={attr.id}>
-              <td className="px-6 py-4 whitespace-nowrap">{attr.id}</td>
+            <tr key={attr.id} className="hover:bg-gray-50 transition-colors duration-200">
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{attr.id}</td>
               {renderTableCells(attr)}
-              <td className="px-6 py-4 whitespace-nowrap">
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                 <div className="flex gap-2">
                   {editingAttribute?.id === attr.id ? (
                     <>

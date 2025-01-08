@@ -3,30 +3,37 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import NavbarAdmin from '../Navbar/NavbarAdmin';
 import ProductTable from './components/ProductTable';
-import ProductModal from './components/ProductModal';
+import AddProductModal from './components/AddProductModal';
+import EditProductModal from './components/EditProductModal';
 import ProductDetailModal from './components/ProductDetailModal';
-import EditProductModal from './components/AddProductModal';
 import { useProduct } from './hooks/useProduct';
 
 const ProductManagement = () => {
   const {
     products,
-    isModalOpen,
+    isAddModalOpen,
+    isEditModalOpen,
+    isDetailModalOpen,
     showDeleted,
     formData,
-    setIsModalOpen,
     setFormData,
-    setShowDeleted,
-    openProductForm,
-    handleToggleStatus,
-    handleViewDetail,
-    isEditing,
-    loading,
     spctData,
     setSpctData,
+    selectedProduct,
+    loading,
     imageUrls,
     setImageUrls,
     handleSubmit,
+    handleEdit,
+    handleToggleStatus,
+    handleViewDetail,
+    openAddModal,
+    closeAddModal,
+    openEditModal,
+    closeEditModal,
+    closeDetailModal,
+    setShowDeleted,
+    // Options data
     loaiSanPhams,
     nguonNhaps,
     chatLieus,
@@ -38,14 +45,7 @@ const ProductManagement = () => {
     gpus,
     mauSacs,
     cardDoHoas,
-    thuongHieus,
-    isEditModalOpen,
-    setIsEditModalOpen,
-    handleEdit,
-    openEditForm,
-    showDetailModal,
-    setShowDetailModal,
-    selectedProduct
+    thuongHieus
   } = useProduct();
 
   return (
@@ -53,42 +53,43 @@ const ProductManagement = () => {
       <NavbarAdmin />
       <main className="flex-1 bg-gray-100 p-6">
         <ToastContainer />
-
-        <h1 className="text-2xl font-bold mb-6">Quản lý sản phẩm</h1>
         
-        <div className="mb-4 flex justify-between">
-          <button 
-            onClick={() => openProductForm()} 
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-          >
-            Thêm sản phẩm
-          </button>
-          <button
-            onClick={() => setShowDeleted(!showDeleted)}
-            className={`px-4 py-2 ${
-              showDeleted ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600'
-            } text-white rounded transition-colors`}
-          >
-            {showDeleted ? 'Xem sản phẩm đang bán' : 'Xem sản phẩm đã ẩn'}
-          </button>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold">Quản lý sản phẩm</h1>
+          <div className="space-x-4">
+            <button
+              onClick={openAddModal}
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            >
+              Thêm sản phẩm
+            </button>
+            <button
+              onClick={() => setShowDeleted(!showDeleted)}
+              className={`px-4 py-2 ${
+                showDeleted ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600'
+              } text-white rounded`}
+            >
+              {showDeleted ? 'Xem sản phẩm đang bán' : 'Xem sản phẩm đã ẩn'}
+            </button>
+          </div>
         </div>
 
         <ProductTable 
           products={products}
           onToggleStatus={handleToggleStatus}
-          onEdit={openEditForm}
+          onEdit={openEditModal}
           onViewDetail={handleViewDetail}
           showDeleted={showDeleted}
         />
 
-        <ProductModal 
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
+        <AddProductModal
+          isOpen={isAddModalOpen}
+          onClose={closeAddModal}
+          onAdd={handleSubmit}
           formData={formData}
           setFormData={setFormData}
           spctData={spctData}
           setSpctData={setSpctData}
-          onSubmit={handleSubmit}
           loading={loading}
           imageUrls={imageUrls}
           setImageUrls={setImageUrls}
@@ -106,14 +107,14 @@ const ProductManagement = () => {
           thuongHieus={thuongHieus}
         />
 
-        <EditProductModal 
+        <EditProductModal
           isOpen={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
+          onClose={closeEditModal}
+          onSubmit={handleEdit}
           formData={formData}
           setFormData={setFormData}
           spctData={spctData}
           setSpctData={setSpctData}
-          onSubmit={handleEdit}
           loading={loading}
           imageUrls={imageUrls}
           setImageUrls={setImageUrls}
@@ -131,9 +132,9 @@ const ProductManagement = () => {
           thuongHieus={thuongHieus}
         />
 
-        <ProductDetailModal 
-          isOpen={showDetailModal}
-          onClose={() => setShowDetailModal(false)}
+        <ProductDetailModal
+          isOpen={isDetailModalOpen}
+          onClose={closeDetailModal}
           product={selectedProduct}
         />
       </main>

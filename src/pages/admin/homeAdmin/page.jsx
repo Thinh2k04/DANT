@@ -44,8 +44,19 @@ const AdminDashboard = () => {
   const [dailyStats, setDailyStats] = useState(null);
   const [selectedDate, setSelectedDate] = useState(currentDate.toISOString().split('T')[0]);
   const [totalRevenue, setTotalRevenue] = useState(0);
+  const [chartData, setChartData] = useState({
+    labels: [],
+    datasets: [{
+      label: 'Doanh thu (VND)',
+      data: [],
+      borderColor: 'rgb(53, 162, 235)',
+      backgroundColor: 'rgba(53, 162, 235, 0.5)',
+      tension: 0.4,
+      fill: true,
+    }]
+  });
 
-  const revenueChartOptions = {
+  const chartOptions = {
     responsive: true,
     plugins: {
       legend: {
@@ -53,7 +64,10 @@ const AdminDashboard = () => {
       },
       title: {
         display: true,
-        text: 'Doanh thu theo tháng',
+        text: `Doanh thu ${
+          viewType === 'day' ? 'theo ngày' : 
+          viewType === 'month' ? 'theo tháng' : 'theo năm'
+        }`,
         font: { size: 16 }
       }
     },
@@ -87,9 +101,12 @@ const AdminDashboard = () => {
         }));
 
         setMonthlyStats(response.data);
+      } else {
+        setMonthlyStats(null);
       }
     } catch (error) {
       console.error('Error fetching monthly statistics:', error);
+      setMonthlyStats(null);
     }
   };
 
@@ -130,6 +147,77 @@ const AdminDashboard = () => {
     }
   };
 
+  // Thêm hàm để cập nhật dữ liệu biểu đồ theo tháng
+  const updateMonthlyChartData = async (year) => {
+    try {
+      const labels = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'];
+      const data = Array(12).fill(0);
+
+      // Lấy dữ liệu cho t�ng tháng trong năm
+      for (let month = 1; month <= 12; month++) {
+        const formattedMonth = month.toString().padStart(2, '0');
+        try {
+          const response = await axios.get(`http://localhost:8080/rest/thong_ke/thang/${year}-${formattedMonth}`);
+          if (response.data && response.data.tongTien) {
+            data[month - 1] = response.data.tongTien;
+          }
+        } catch (err) {
+          console.error(`Error fetching data for month ${month}:`, err);
+        }
+      }
+
+      setChartData({
+        labels,
+        datasets: [{
+          label: 'Doanh thu (VND)',
+          data,
+          borderColor: 'rgb(53, 162, 235)',
+          backgroundColor: 'rgba(53, 162, 235, 0.5)',
+          tension: 0.4,
+          fill: true,
+        }]
+      });
+    } catch (error) {
+      console.error('Error fetching monthly chart data:', error);
+    }
+  };
+
+  // Thêm hàm để cập nhật dữ liệu biểu đồ theo năm
+  const updateYearlyChartData = async () => {
+    try {
+      // Lấy dữ liệu từ năm 2020 đến năm hiện tại
+      const currentYear = new Date().getFullYear();
+      const years = Array.from(
+        { length: currentYear - 2020 + 1 },
+        (_, i) => 2020 + i
+      );
+      
+      const data = [];
+      for (const year of years) {
+        try {
+          const response = await axios.get(`http://localhost:8080/rest/thong_ke/nam/${year}`);
+          data.push(response.data?.tongTien || 0);
+        } catch (err) {
+          data.push(0);
+        }
+      }
+
+      setChartData({
+        labels: years.map(year => year.toString()),
+        datasets: [{
+          label: 'Doanh thu (VND)',
+          data,
+          borderColor: 'rgb(53, 162, 235)',
+          backgroundColor: 'rgba(53, 162, 235, 0.5)',
+          tension: 0.4,
+          fill: true,
+        }]
+      });
+    } catch (error) {
+      console.error('Error fetching yearly chart data:', error);
+    }
+  };
+
   // Cập nhật useEffect
   useEffect(() => {
     if (viewType === 'day') {
@@ -145,6 +233,15 @@ const AdminDashboard = () => {
   useEffect(() => {
     fetchTotalRevenue();
   }, []);
+
+  // Cập nhật useEffect để load dữ liệu biểu đồ
+  useEffect(() => {
+    if (viewType === 'month') {
+      updateMonthlyChartData(selectedYear);
+    } else if (viewType === 'year') {
+      updateYearlyChartData();
+    }
+  }, [viewType, selectedYear]);
 
   // Tạo danh sách năm từ 2020 đến năm hiện tại
   const yearOptions = Array.from(
@@ -319,20 +416,29 @@ const AdminDashboard = () => {
                 )}
               </>
             ) : viewType === 'month' ? (
-              <div className="grid grid-cols-2 gap-8">
-                <div className="p-6 bg-gray-50 rounded-lg">
-                  <p className="text-gray-600 mb-2">Doanh thu tháng {selectedMonth}/{selectedYear}</p>
-                  <p className="text-2xl font-bold text-green-600">
-                    {monthlyStats ? monthlyStats.tongTien.toLocaleString('vi-VN') : '0'} VND
-                  </p>
+              <>
+                <div className="grid grid-cols-2 gap-8">
+                  <div className="p-6 bg-gray-50 rounded-lg">
+                    <p className="text-gray-600 mb-2">Doanh thu tháng {selectedMonth}/{selectedYear}</p>
+                    <p className={`text-2xl font-bold ${monthlyStats ? 'text-green-600' : 'text-orange-500'}`}>
+                      {monthlyStats ? `${monthlyStats.tongTien.toLocaleString('vi-VN')} VND` : 'Chưa có doanh thu'}
+                    </p>
+                  </div>
+                  <div className="p-6 bg-gray-50 rounded-lg">
+                    <p className="text-gray-600 mb-2">Thời gian</p>
+                    <p className="text-2xl font-bold text-blue-600">
+                      {monthlyStats ? monthlyStats.mocTG : '-'}
+                    </p>
+                  </div>
                 </div>
-                <div className="p-6 bg-gray-50 rounded-lg">
-                  <p className="text-gray-600 mb-2">Thời gian</p>
-                  <p className="text-2xl font-bold text-blue-600">
-                    {monthlyStats ? monthlyStats.mocTG : '-'}
-                  </p>
-                </div>
-              </div>
+                {!monthlyStats && (
+                  <div className="mt-4 p-4 bg-orange-50 border border-orange-200 text-orange-700 rounded-lg">
+                    <p className="text-center">
+                      Tháng {selectedMonth}/{selectedYear} chưa có doanh thu!
+                    </p>
+                  </div>
+                )}
+              </>
             ) : (
               <div className="grid grid-cols-2 gap-8">
                 <div className="p-6 bg-gray-50 rounded-lg">
@@ -353,9 +459,9 @@ const AdminDashboard = () => {
         </div>
 
         {/* Revenue Chart */}
-        {viewType === 'month' && (
+        {viewType !== 'day' && (
           <div className="bg-white rounded-xl shadow-sm p-6">
-            <Line data={revenueChartData} options={revenueChartOptions} />
+            <Line data={chartData} options={chartOptions} />
           </div>
         )}
       </main>

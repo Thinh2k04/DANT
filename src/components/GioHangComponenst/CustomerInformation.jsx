@@ -72,7 +72,7 @@ function CustomerInformation({
 
         <div className="relative">
           <label htmlFor="email" className="block text-lg font-semibold mb-2 text-gray-700">
-            Email:
+            Email: <span className="text-red-500">*</span>
           </label>
           <div className="relative">
             <FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -88,10 +88,11 @@ function CustomerInformation({
                 ${errors.email ? "border-red-500" : "border-gray-300"}`}
               maxLength={100}
               placeholder="Nhập email của bạn"
+              required
             />
           </div>
           <p className="text-gray-500 text-sm mt-1 italic">
-            Nhập email để nhận hóa đơn online (*Không bắt buộc)
+            Email dùng để nhận hóa đơn và theo dõi đơn hàng
           </p>
           {errors.email && (
             <p className="text-red-500 text-sm mt-1">{errors.email}</p>

@@ -122,6 +122,24 @@ function OrderSummary({
 
   // Hàm xử lý khi submit đơn hàng
   const handleOrderSubmit = async () => {
+    // Kiểm tra phương thức thanh toán trước
+    if (!paymentMethod) {
+      setErrors(prev => ({
+        ...prev,
+        paymentMethod: "Vui lòng chọn phương thức thanh toán"
+      }));
+      toast.error('Vui lòng chọn phương thức thanh toán trước khi đặt hàng', {
+        position: "top-center",
+        autoClose: 3000,
+      });
+      return;
+    }
+
+    // Validate tất cả các trường
+    if (!validateFields()) {
+      return;
+    }
+
     try {
       setIsProcessing(true);
       setIsButtonDisabled(true);
@@ -291,9 +309,34 @@ function OrderSummary({
       isValid = false;
     }
 
-    // Validate phương thức thanh toán
-    if (!paymentMethod || paymentMethod === "") {
+    // Validate phương thức thanh toán - thêm validation chặt chẽ hơn
+    if (!paymentMethod) {
       newErrors.paymentMethod = "Vui lòng chọn phương thức thanh toán";
+      isValid = false;
+      // Hiển thị toast thông báo
+      toast.error('Vui lòng chọn phương thức thanh toán trước khi đặt hàng', {
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+    } else if (!["1", "2"].includes(paymentMethod)) {
+      newErrors.paymentMethod = "Phương thức thanh toán không hợp lệ";
+      isValid = false;
+      toast.error('Phương thức thanh toán không hợp lệ', {
+        position: "top-center",
+        autoClose: 3000,
+      });
+    }
+
+    // Email validation (make it required)
+    if (!email?.trim()) {
+      newErrors.email = "Vui lòng nhập email";
+      isValid = false;
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      newErrors.email = "Email không hợp lệ";
       isValid = false;
     }
 
@@ -560,7 +603,10 @@ function OrderSummary({
           )}
 
           {errors.paymentMethod && (
-            <div className="text-red-500 text-sm mb-4">
+            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-4 flex items-center">
+              <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
               {errors.paymentMethod}
             </div>
           )}
@@ -571,14 +617,15 @@ function OrderSummary({
                 handleOrderSubmit();
               }
             }}
-            disabled={loading || isButtonDisabled || isProcessing}
+            disabled={loading || isButtonDisabled || isProcessing || !paymentMethod}
             className={`w-full py-4 bg-gradient-to-r from-green-500 to-green-600 text-white text-lg font-bold rounded-xl
               hover:from-green-600 hover:to-green-700 transform hover:-translate-y-0.5 transition-all
               focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2
-              ${(loading || isButtonDisabled || isProcessing) ? "opacity-50 cursor-not-allowed" : ""}`}
+              ${(loading || isButtonDisabled || isProcessing || !paymentMethod) ? "opacity-50 cursor-not-allowed" : ""}`}
           >
             {loading ? "Đang xử lý..." : 
              isProcessing ? "Vui lòng đợi..." :
+             !paymentMethod ? "Vui lòng chọn phương thức thanh toán" :
              isButtonDisabled ? "Vui lòng đợi" : 
              "Xác nhận đơn hàng"}
           </button>

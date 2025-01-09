@@ -4,6 +4,8 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ShippingInfo from './ShippingInfo';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { jsPDF } from 'jspdf';
 
 // Component OrderSummary để hiển thị và xử lý thông tin đơn hàng
 function OrderSummary({ 
@@ -29,7 +31,8 @@ function OrderSummary({
   paymentMethod, // Phương thức thanh toán
   selectedStore, // Cửa hàng đã chọn (cho pickup)
   stores, // Danh sách cửa hàng
-  pickupDate // Ngày nhận hàng (cho pickup)
+  pickupDate, // Ngày nhận hàng (cho pickup)
+  userEmail // Email của khách hàng
 }) {
   // Khởi tạo state cho modal QR và navigation
   const [showQrModal, setShowQrModal] = useState(false);
@@ -116,10 +119,7 @@ function OrderSummary({
   // Hàm xử lý khi submit đơn hàng
   const handleOrderSubmit = async () => {
     try {
-      // Disable nút ngay khi bắt đầu xử lý
       setIsButtonDisabled(true);
-      
-      // Chuẩn bị dữ liệu đơn hàng
       const orderData = prepareOrderData();
       
       // Gọi API tạo đơn hàng
@@ -135,17 +135,66 @@ function OrderSummary({
         throw new Error('Failed to create order');
       }
 
+      // Sau khi tạo đơn hàng thành công, gửi email
+      const pdfBlob = generatePDF();
+      const formData = new FormData();
+      
+      formData.append('to', email);
+      formData.append('subject', 'Xác nhận đơn hàng từ LaptopStore');
+      
+      // Tạo nội dung email
+      const emailText = `
+        Kính gửi ${customerName},
+
+        Cảm ơn quý khách đã đặt hàng tại LaptopStore!
+
+        THÔNG TIN ĐƠN HÀNG:
+        ${cartItems.map(item => 
+          `- ${item.tenSanPhamChiTiet}
+           Số lượng: ${quantities[item.id] || item.soLuong || 1}
+           Đơn giá: ${parseFloat(item.donGia).toLocaleString('vi-VN')}đ`
+        ).join('\n')}
+
+        Tổng tiền hàng: ${totalAmount.toLocaleString('vi-VN')}đ
+        Phí vận chuyển: ${(shippingFee || 0).toLocaleString('vi-VN')}đ
+        Tổng thanh toán: ${(totalAmount + (shippingFee || 0)).toLocaleString('vi-VN')}đ
+
+        Địa chỉ nhận hàng: ${orderData.hd.diaChiNhanHang}
+        Phương thức thanh toán: ${
+          paymentMethod === "1" ? "Thanh toán khi nhận hàng" : 
+          paymentMethod === "2" ? "Thanh toán qua MoMo" : 
+          "Thanh toán qua ZaloPay"
+        }
+
+        Mọi thắc mắc xin vui lòng liên hệ:
+        Hotline: 0123456789
+        Email: support@laptopstore.com
+        
+        Trân trọng,
+        LaptopStore
+      `;
+
+      formData.append('text', emailText);
+      formData.append('file', pdfBlob, 'hoadon.pdf');
+
+      // Gọi API gửi email
+      const emailResponse = await axios.post('http://localhost:8080/api/send-email', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      if (!emailResponse.data.success) {
+        console.error('Lỗi gửi email:', emailResponse.data.message);
+      }
+
       // Hiển thị thông báo thành công
       toast.success('Đặt hàng thành công!', {
         position: "top-center",
         autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
       });
 
-      // Chuyển hướng sau khi hiển thị toast
+      // Chuyển hướng sang trang PaymentSuccess sau khi hiển thị toast
       setTimeout(() => {
         navigate('/payment-success', { 
           state: { 
@@ -174,19 +223,14 @@ function OrderSummary({
           replace: true
         });
       }, 2000);
-
-      // Set timeout 10 giây trước khi enable lại nút
-      setTimeout(() => {
-        setIsButtonDisabled(false);
-      }, 10000);
-
+      
     } catch (error) {
-      console.error('Error creating order:', error);
-      toast.error('Có lỗi xảy ra khi tạo đơn hàng', {
+      console.error('Error:', error);
+      toast.error('Có lỗi xảy ra khi xử lý đơn hàng', {
         position: "top-center",
         autoClose: 2000
       });
-      // Enable lại nút nếu có lỗi
+    } finally {
       setIsButtonDisabled(false);
     }
   };
@@ -279,6 +323,101 @@ function OrderSummary({
 
     setErrors(newErrors);
     return isValid;
+  };
+
+  const generatePDF = () => {
+    const doc = new jsPDF();
+    
+    // Thiết lập font chữ để hỗ trợ tiếng Việt
+    doc.setFont('helvetica');
+    
+    // Thêm tiêu đề
+    doc.setFontSize(20);
+    doc.text('HÓA ĐƠN BÁN HÀNG', 105, 20, { align: 'center' });
+    
+    // Thông tin khách hàng
+    doc.setFontSize(12);
+    doc.text(`Khách hàng: ${customerName}`, 20, 40);
+    doc.text(`Số điện thoại: ${phoneNumber}`, 20, 50);
+    doc.text(`Email: ${email}`, 20, 60);
+    doc.text(`Địa chỉ: ${specificAddress || 'N/A'}`, 20, 70);
+    doc.text(`Ngày đặt hàng: ${new Date().toLocaleDateString('vi-VN')}`, 20, 80);
+
+    // Header cho bảng sản phẩm
+    doc.setFillColor(230, 230, 230);
+    doc.rect(20, 90, 170, 10, 'F');
+    doc.text('STT', 25, 97);
+    doc.text('Tên sản phẩm', 45, 97);
+    doc.text('Số lượng', 120, 97);
+    doc.text('Đơn giá', 145, 97);
+    doc.text('Thành tiền', 170, 97);
+
+    // Chi tiết sản phẩm
+    let yPos = 105;
+    cartItems.forEach((item, index) => {
+      doc.text(`${index + 1}`, 25, yPos);
+      doc.text(item.tenSanPhamChiTiet.substring(0, 40), 45, yPos);
+      doc.text(`${quantities[item.id] || item.soLuong || 1}`, 120, yPos);
+      doc.text(`${parseFloat(item.donGia).toLocaleString('vi-VN')}đ`, 145, yPos);
+      const thanhTien = (quantities[item.id] || item.soLuong || 1) * parseFloat(item.donGia);
+      doc.text(`${thanhTien.toLocaleString('vi-VN')}đ`, 170, yPos);
+      yPos += 10;
+    });
+
+    // Tổng tiền
+    yPos += 10;
+    doc.line(20, yPos - 5, 190, yPos - 5); // Vẽ đường kẻ
+    doc.text(`Tổng tiền hàng: ${totalAmount.toLocaleString('vi-VN')}đ`, 130, yPos);
+    doc.text(`Phí vận chuyển: ${(shippingFee || 0).toLocaleString('vi-VN')}đ`, 130, yPos + 10);
+    doc.text(`Tổng cộng: ${(totalAmount + (shippingFee || 0)).toLocaleString('vi-VN')}đ`, 130, yPos + 20);
+
+    // Chuyển PDF thành blob
+    return doc.output('blob');
+  };
+
+  const handleOrderConfirmation = async () => {
+    try {
+      const pdfBlob = generatePDF();
+      
+      const formData = new FormData();
+      formData.append('to', userEmail);
+      formData.append('subject', 'Xác nhận đơn hàng từ LaptopStore');
+      
+      // Tạo nội dung email
+      const emailText = `
+        Cảm ơn bạn đã đặt hàng tại LaptopStore!
+        
+        Chi tiết đơn hàng:
+        ${cartItems.map(item => `
+          - ${item.name}
+          Số lượng: ${item.quantity}
+          Giá: ${item.price.toLocaleString('vi-VN')}đ
+        `).join('\n')}
+        
+        Tổng tiền: ${totalAmount.toLocaleString('vi-VN')}đ
+        
+        Địa chỉ cửa hàng: [Địa chỉ của bạn]
+        Hotline: [Số điện thoại]
+      `;
+      
+      formData.append('text', emailText);
+      formData.append('file', pdfBlob, 'hoadon.pdf');
+
+      await axios.post('http://localhost:8080/api/send-email', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      // Hiển thị thông báo thành công
+      alert('Đơn hàng đã được xác nhận và email đã được gửi!');
+      
+      // Xử lý sau khi gửi email thành công (ví dụ: clear giỏ hàng, chuyển hướng...)
+
+    } catch (error) {
+      console.error('Lỗi khi gửi email:', error);
+      alert('Có lỗi xảy ra khi gửi email xác nhận đơn hàng');
+    }
   };
 
   // Render component

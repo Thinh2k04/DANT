@@ -43,6 +43,9 @@ function OrderSummary({
   // Thêm state để theo dõi trạng thái disable của nút
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
 
+  // Thêm state để quản lý trạng thái loading
+  const [isProcessing, setIsProcessing] = useState(false);
+
   // Hàm chuẩn bị dữ liệu đơn hàng để gửi lên server
   const prepareOrderData = () => {
     const now = new Date();
@@ -119,7 +122,10 @@ function OrderSummary({
   // Hàm xử lý khi submit đơn hàng
   const handleOrderSubmit = async () => {
     try {
+      // Set trạng thái đang xử lý
+      setIsProcessing(true);
       setIsButtonDisabled(true);
+      
       const orderData = prepareOrderData();
       
       // Gọi API tạo đơn hàng
@@ -134,6 +140,9 @@ function OrderSummary({
       if (!response.ok) {
         throw new Error('Failed to create order');
       }
+
+      // Thêm delay 2 giây sau khi API thành công
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
       // Sau khi tạo đơn hàng thành công, gửi email
       const pdfBlob = generatePDF();
@@ -177,16 +186,11 @@ function OrderSummary({
       formData.append('text', emailText);
       formData.append('file', pdfBlob, 'hoadon.pdf');
 
-      // Gọi API gửi email
-      const emailResponse = await axios.post('http://localhost:8080/api/send-email', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      // Thêm delay 1 giây sau khi gửi email
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
-      if (!emailResponse.data.success) {
-        console.error('Lỗi gửi email:', emailResponse.data.message);
-      }
+      // Xóa giỏ hàng sau khi đặt hàng thành công
+      clearCart();
 
       // Hiển thị thông báo thành công
       toast.success('Đặt hàng thành công!', {
@@ -194,10 +198,10 @@ function OrderSummary({
         autoClose: 2000,
       });
 
-      // Chuyển hướng sang trang PaymentSuccess sau khi hiển thị toast
+      // Chuyển hướng sau 2 giây
       setTimeout(() => {
-        navigate('/payment-success', { 
-          state: { 
+        navigate('/payment-success', {
+          state: {
             orderInfo: {
               tongTienHang: totalAmount,
               phiVanChuyen: shippingFee || 0,
@@ -231,7 +235,11 @@ function OrderSummary({
         autoClose: 2000
       });
     } finally {
-      setIsButtonDisabled(false);
+      // Thêm delay 1 giây trước khi reset trạng thái
+      setTimeout(() => {
+        setIsProcessing(false);
+        setIsButtonDisabled(false);
+      }, 1000);
     }
   };
 
@@ -420,6 +428,15 @@ function OrderSummary({
     }
   };
 
+  // Thêm hàm clearCart để xóa giỏ hàng
+  const clearCart = () => {
+    localStorage.removeItem('cartItems');
+    localStorage.removeItem('checkoutItems');
+    localStorage.removeItem('checkoutQuantities');
+    // Trigger event để cập nhật số lượng trong navbar
+    window.dispatchEvent(new Event('cartUpdated'));
+  };
+
   // Render component
   return (
     <>
@@ -570,13 +587,14 @@ function OrderSummary({
                 handleOrderSubmit();
               }
             }}
-            disabled={loading || isButtonDisabled}
+            disabled={loading || isButtonDisabled || isProcessing}
             className={`w-full py-4 bg-gradient-to-r from-green-500 to-green-600 text-white text-lg font-bold rounded-xl
               hover:from-green-600 hover:to-green-700 transform hover:-translate-y-0.5 transition-all
               focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2
-              ${(loading || isButtonDisabled) ? "opacity-50 cursor-not-allowed" : ""}`}
+              ${(loading || isButtonDisabled || isProcessing) ? "opacity-50 cursor-not-allowed" : ""}`}
           >
             {loading ? "Đang xử lý..." : 
+             isProcessing ? "Vui lòng đợi..." :
              isButtonDisabled ? "Vui lòng đợi" : 
              "Xác nhận đơn hàng"}
           </button>

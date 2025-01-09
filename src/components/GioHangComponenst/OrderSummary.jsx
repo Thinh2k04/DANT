@@ -6,6 +6,7 @@ import ShippingInfo from './ShippingInfo';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { jsPDF } from 'jspdf';
+import { sendOrderConfirmationEmail } from './EmailOrder';
 
 // Component OrderSummary để hiển thị và xử lý thông tin đơn hàng
 function OrderSummary({ 
@@ -122,7 +123,6 @@ function OrderSummary({
   // Hàm xử lý khi submit đơn hàng
   const handleOrderSubmit = async () => {
     try {
-      // Set trạng thái đang xử lý
       setIsProcessing(true);
       setIsButtonDisabled(true);
       
@@ -141,64 +141,33 @@ function OrderSummary({
         throw new Error('Failed to create order');
       }
 
-      // Thêm delay 2 giây sau khi API thành công
       await new Promise(resolve => setTimeout(resolve, 2000));
 
-      // Sau khi tạo đơn hàng thành công, gửi email
-      const pdfBlob = generatePDF();
-      const formData = new FormData();
-      
-      formData.append('to', email);
-      formData.append('subject', 'Xác nhận đơn hàng từ LaptopStore');
-      
-      // Tạo nội dung email
-      const emailText = `
-        Kính gửi ${customerName},
+      try {
+        // Gọi hàm gửi email từ EmailOrder
+        await sendOrderConfirmationEmail({
+          email,
+          customerName,
+          cartItems,
+          quantities,
+          totalAmount,
+          shippingFee,
+          orderData,
+          paymentMethod
+        });
+      } catch (emailError) {
+        console.error('Lỗi khi gửi email:', emailError);
+      }
 
-        Cảm ơn quý khách đã đặt hàng tại LaptopStore!
-
-        THÔNG TIN ĐƠN HÀNG:
-        ${cartItems.map(item => 
-          `- ${item.tenSanPhamChiTiet}
-           Số lượng: ${quantities[item.id] || item.soLuong || 1}
-           Đơn giá: ${parseFloat(item.donGia).toLocaleString('vi-VN')}đ`
-        ).join('\n')}
-
-        Tổng tiền hàng: ${totalAmount.toLocaleString('vi-VN')}đ
-        Phí vận chuyển: ${(shippingFee || 0).toLocaleString('vi-VN')}đ
-        Tổng thanh toán: ${(totalAmount + (shippingFee || 0)).toLocaleString('vi-VN')}đ
-
-        Địa chỉ nhận hàng: ${orderData.hd.diaChiNhanHang}
-        Phương thức thanh toán: ${
-          paymentMethod === "1" ? "Thanh toán khi nhận hàng" : 
-          paymentMethod === "2" ? "Thanh toán qua MoMo" : 
-          "Thanh toán qua ZaloPay"
-        }
-
-        Mọi thắc mắc xin vui lòng liên hệ:
-        Hotline: 0123456789
-        Email: support@laptopstore.com
-        
-        Trân trọng,
-        LaptopStore
-      `;
-
-      formData.append('text', emailText);
-      formData.append('file', pdfBlob, 'hoadon.pdf');
-
-      // Thêm delay 1 giây sau khi gửi email
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // Xóa giỏ hàng sau khi đặt hàng thành công
       clearCart();
 
-      // Hiển thị thông báo thành công
       toast.success('Đặt hàng thành công!', {
         position: "top-center",
         autoClose: 2000,
       });
 
-      // Chuyển hướng sau 2 giây
       setTimeout(() => {
         navigate('/payment-success', {
           state: {
@@ -235,7 +204,6 @@ function OrderSummary({
         autoClose: 2000
       });
     } finally {
-      // Thêm delay 1 giây trước khi reset trạng thái
       setTimeout(() => {
         setIsProcessing(false);
         setIsButtonDisabled(false);

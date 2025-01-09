@@ -21,7 +21,5 @@ public interface ImeiInterface extends JpaRepository<Imei, Integer> {
 
     List<Imei> findBySpct(SanPhamChiTiet spct);
 
-
-
     List<Imei> findAllBySpctIdAndTrangThai(Integer spctId, Integer trangThai);
 }

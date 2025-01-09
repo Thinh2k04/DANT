@@ -26,7 +26,7 @@ public class GpuRestController {
 
     @GetMapping("/getAll")
     public List<Gpu> getAll() {
-        return gsi.findAll();
+        return gsi.findAllByTrangThai(1);
     }
 
     @GetMapping("/getByID/{id}")
@@ -48,5 +48,9 @@ public class GpuRestController {
     public void delete(@RequestBody Gpu gpu) {
         gpu.setTrangThai(0);
         gsi.save(gpu);
+    }
+    @GetMapping("/getThungRac")
+    public void getThungRac(){
+        gsi.findAllByTrangThai(0);
     }
 }

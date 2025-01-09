@@ -24,7 +24,7 @@ public class CardDoHoaController {
 
     @GetMapping("/getAll")
     public List<CardDoHoa> getAll() {
-        return cdhsi.findAll();
+        return cdhsi.findAllByTrangThai(1);
     }
 
     @GetMapping("/getByID/{id}")
@@ -46,5 +46,10 @@ public class CardDoHoaController {
     public void delete(@RequestBody CardDoHoa CardDoHoa) {
         CardDoHoa.setTrangThai(0);
         cdhsi.save(CardDoHoa);
+    }
+
+    @GetMapping("/getThungRac")
+    public void getThungRac(){
+        cdhsi.findAllByTrangThai(0);
     }
 }

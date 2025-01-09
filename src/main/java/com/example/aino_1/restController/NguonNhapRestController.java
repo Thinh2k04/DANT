@@ -25,7 +25,7 @@ public class NguonNhapRestController {
 
     @GetMapping("/getAll")
     public List<NguonNhap> getAll() {
-        return nnsi.findAll();
+        return nnsi.findAllByTrangThai(1);
     }
 
     @GetMapping("/getByID/{id}")
@@ -47,5 +47,9 @@ public class NguonNhapRestController {
     public void delete(@RequestBody NguonNhap nguonNhap) {
         nguonNhap.setTrangThai(0);
         nnsi.save(nguonNhap);
+    }
+    @GetMapping("/getThungRac")
+    public void getThungRac(){
+        nnsi.findAllByTrangThai(0);
     }
 }

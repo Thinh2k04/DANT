@@ -51,16 +51,15 @@ public class SanPhamRestController {
 
     @GetMapping("/getAll")
     public List<SanPham> getAll() {
-       List<SanPham> listsp = spsi.findAll();
-       List<SanPham> listSpHome = new ArrayList<>();
-        for (SanPham sp : listsp
-             ) {
-            if(sp.getTrangThai() == 1){
-                listSpHome.add(sp);
-            }
-        }
-        return listSpHome;
+       return spsv.getListForHome();
     }
+
+    @GetMapping("/ThungRac")
+    public List<SanPham> getThungRac() {
+        return spsv.getListThungRac();
+    }
+
+
 
     @GetMapping("/getById/{id}")
     public SanPham getById(@PathVariable Integer id) {

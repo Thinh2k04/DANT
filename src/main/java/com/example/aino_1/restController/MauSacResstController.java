@@ -28,7 +28,7 @@ public class MauSacResstController {
 
     @GetMapping("/getAll")
     public List<MauSac> getAll() {
-        return mssi.findAll();
+        return mssi.findAllByTrangThai(1);
     }
 
     @GetMapping("/getByID/{id}")
@@ -50,6 +50,10 @@ public class MauSacResstController {
     public void delete(@RequestBody MauSac mauSac) {
         mauSac.setTrangThai(0);
         mssi.save(mauSac);
+    }
+    @GetMapping("/getThungRac")
+    public void getThungRac(){
+        mssi.findAllByTrangThai(0);
     }
 
 }

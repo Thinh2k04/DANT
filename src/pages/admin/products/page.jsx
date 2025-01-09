@@ -56,20 +56,72 @@ const ProductManagement = () => {
         
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Quản lý sản phẩm</h1>
-          <div className="space-x-4">
-            <button
-              onClick={openAddModal}
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-            >
-              Thêm sản phẩm
-            </button>
+          <div className="flex items-center gap-3">
+            {!showDeleted && (
+              <button
+                onClick={openAddModal}
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2"
+              >
+                <svg 
+                  className="w-5 h-5" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    strokeWidth={2} 
+                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                  />
+                </svg>
+                Thêm sản phẩm
+              </button>
+            )}
+            
             <button
               onClick={() => setShowDeleted(!showDeleted)}
-              className={`px-4 py-2 ${
-                showDeleted ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600'
-              } text-white rounded`}
+              className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${
+                showDeleted 
+                  ? 'bg-blue-500 hover:bg-blue-600 text-white' 
+                  : 'bg-red-500 hover:bg-red-600 text-white'
+              }`}
             >
-              {showDeleted ? 'Xem sản phẩm đang bán' : 'Xem sản phẩm đã ẩn'}
+              {showDeleted ? (
+                <>
+                  <svg 
+                    className="w-5 h-5" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round" 
+                      strokeWidth={2} 
+                      d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                    />
+                  </svg>
+                  Quay lại
+                </>
+              ) : (
+                <>
+                  <svg 
+                    className="w-5 h-5" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round" 
+                      strokeWidth={2} 
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                    />
+                  </svg>
+                  Thùng rác
+                </>
+              )}
             </button>
           </div>
         </div>

@@ -398,11 +398,27 @@ function OrderSummary({
 
   // Thêm hàm clearCart để xóa giỏ hàng
   const clearCart = () => {
-    localStorage.removeItem('cartItems');
-    localStorage.removeItem('checkoutItems');
-    localStorage.removeItem('checkoutQuantities');
-    // Trigger event để cập nhật số lượng trong navbar
-    window.dispatchEvent(new Event('cartUpdated'));
+    try {
+      // Lấy danh sách sản phẩm hiện tại trong giỏ hàng
+      const currentCartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+      
+      // Lọc ra các sản phẩm không nằm trong đơn hàng hiện tại
+      const remainingItems = currentCartItems.filter(cartItem => 
+        !cartItems.some(orderItem => orderItem.id === cartItem.id)
+      );
+
+      // Cập nhật lại localStorage với các sản phẩm còn lại
+      if (remainingItems.length > 0) {
+        localStorage.setItem('cartItems', JSON.stringify(remainingItems));
+      } else {
+        localStorage.removeItem('cartItems');
+      }
+
+      // Trigger event để cập nhật số lượng trong navbar
+      window.dispatchEvent(new Event('cartUpdated'));
+    } catch (error) {
+      console.error('Error clearing cart:', error);
+    }
   };
 
   // Render component

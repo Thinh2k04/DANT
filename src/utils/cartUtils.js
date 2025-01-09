@@ -138,6 +138,7 @@ export const processCheckout = (cartItems, selectedItems, quantities) => {
       return { success: false };
     }
 
+    // Lưu thông tin đầy đủ của sản phẩm được chọn
     const checkoutData = itemsToCheckout.map(item => ({
       ...item,
       id: item.id,
@@ -151,6 +152,7 @@ export const processCheckout = (cartItems, selectedItems, quantities) => {
       quantityData[item.id] = item.soLuong;
     });
 
+    // Lưu danh sách sản phẩm được chọn để checkout
     localStorage.setItem('checkoutItems', JSON.stringify(checkoutData));
     localStorage.setItem('checkoutQuantities', JSON.stringify(quantityData));
 

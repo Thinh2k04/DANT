@@ -57,7 +57,7 @@ const NavbarAdmin = () => {
       path: '/admin/orders', 
       icon: FiShoppingCart, 
       label: 'Quản lý đơn hàng',
-      badge: '12'
+      badge: null
     },
     { 
       id: 'customers',
@@ -174,11 +174,6 @@ const NavbarAdmin = () => {
                     {isSidebarOpen && (
                       <>
                         <span>{item.label}</span>
-                        {item.badge && (
-                          <span className="absolute right-4 bg-red-500 text-white text-xs px-2 py-1 rounded-full animate-pulse">
-                            {item.badge}
-                          </span>
-                        )}
                       </>
                     )}
                   </Link>

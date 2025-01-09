@@ -435,7 +435,7 @@ const HomePage = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
           <div className="relative rounded-xl overflow-hidden h-[200px] shadow-sm group">
             <img 
-              src="https://example.com/banner1.jpg" 
+              src="https://res.cloudinary.com/dmtek0eaq/image/upload/v1736440677/u9hh2q6oqqeqeaewwnvl.png" 
               alt="Promo 1"
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
@@ -680,7 +680,7 @@ const HomePage = () => {
             </div>
             <div className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow flex items-center justify-center group">
               <img 
-                src="https://upload.wikimedia.org/wikipedia/commons/e/ec/Dell_Logo.svg"
+                src="https://res.cloudinary.com/dmtek0eaq/image/upload/v1736440454/ukjuluivcnngv6e8t6jd.png"
                 alt="Dell"
                 className="h-12 object-contain group-hover:scale-110 transition-transform duration-300"
               />
@@ -688,7 +688,7 @@ const HomePage = () => {
 
             <div className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow flex items-center justify-center group">
               <img 
-                src="https://upload.wikimedia.org/wikipedia/commons/e/ec/HP_New_Logo_2D.svg"
+                src="https://res.cloudinary.com/dmtek0eaq/image/upload/v1736440454/ygfawyv2nd9d5tsfoid2.jpg"
                 alt="HP"
                 className="h-12 object-contain group-hover:scale-110 transition-transform duration-300"
               />
@@ -696,7 +696,7 @@ const HomePage = () => {
 
             <div className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow flex items-center justify-center group">
               <img 
-                src="https://upload.wikimedia.org/wikipedia/commons/e/ec/Lenovo_logo.svg"
+                src="https://res.cloudinary.com/dmtek0eaq/image/upload/v1736440455/aftzvc9xhze9icwgpeb7.jpg"
                 alt="Lenovo"
                 className="h-12 object-contain group-hover:scale-110 transition-transform duration-300"
               />
@@ -704,7 +704,7 @@ const HomePage = () => {
 
             <div className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow flex items-center justify-center group">
               <img 
-                src="https://upload.wikimedia.org/wikipedia/commons/e/ec/Acer_Logo.svg"
+                src="https://res.cloudinary.com/dmtek0eaq/image/upload/v1736440454/t4yutphliecvhkthczsu.jpg"
                 alt="Acer"
                 className="h-12 object-contain group-hover:scale-110 transition-transform duration-300"
               />
@@ -712,7 +712,7 @@ const HomePage = () => {
 
             <div className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow flex items-center justify-center group">
               <img 
-                src="https://upload.wikimedia.org/wikipedia/commons/e/ec/MSI_Logo.svg"
+                src="https://res.cloudinary.com/dmtek0eaq/image/upload/v1736440455/tmyjpkdwq3hawxj59o2s.png"
                 alt="MSI"
                 className="h-12 object-contain group-hover:scale-110 transition-transform duration-300"
               />

@@ -2,7 +2,6 @@ package com.example.aino_1.dto;
 
 import lombok.*;
 
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -24,6 +23,8 @@ public class SanPhamChiTietDto {
     private String maSpct;
     private String hinhAnhMinhHoa;
     private Float donGia;
+    private Float discountedPrice;
+    private Integer discountPercentage;
     private Integer idSanPham;
     private String gpu;
     private Float trongLuong;
@@ -31,5 +32,6 @@ public class SanPhamChiTietDto {
     private String thoiHanBaoHanh;
     private Integer trangThai;
     private String thuongHieu;
-    public String tenSanPhamChiTiet;
+    private String tenSanPhamChiTiet;
 }
+

@@ -26,6 +26,11 @@ public class  SanPhamChiTietRestController {
         return spctsi.findAll();
     }
 
+    @GetMapping("/getAllDTO")
+    public List<SanPhamChiTietDto> getAllDTO() {
+        return spctsi.getAllDTO();
+    }
+
     @GetMapping("/getById/{id}")
     public SanPhamChiTiet getById(@PathVariable Integer id) {
         return spctsi.findById(id).get();

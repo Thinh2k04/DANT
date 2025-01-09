@@ -1,0 +1,225 @@
+package com.example.aino_1.service;
+
+import com.example.aino_1.dto.ProductDiscountDTO;
+import com.example.aino_1.dto.SanPhamChiTietDto;
+import com.example.aino_1.entity.DiscountCampaign;
+import com.example.aino_1.entity.ProductDiscount;
+import com.example.aino_1.entity.SanPhamChiTiet;
+import com.example.aino_1.repository.DiscountCampaignInterface;
+import com.example.aino_1.repository.ProductDiscountInterface;
+import com.example.aino_1.repository.SanPhamChiTietInterface;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
+
+@Service
+public class DiscountService {
+    @Autowired
+    private DiscountCampaignInterface discountCampaignInterface;
+
+    @Autowired
+    private SanPhamChiTietInterface sanPhamChiTietInterface;
+
+    @Autowired
+    private ProductDiscountInterface productDiscountInterface;
+
+    public List<Object> getActiveDiscountsOrProducts() {
+        LocalDateTime now = LocalDateTime.now();
+
+        // Lấy danh sách chiến dịch giảm giá
+        List<DiscountCampaign> campaigns = discountCampaignInterface
+                .findByActiveTrueAndStartDateBeforeAndEndDateAfter(now, now);
+
+        if (campaigns == null || campaigns.isEmpty()) {
+            // Lấy danh sách sản phẩm từ repository
+            List<SanPhamChiTietDto> products = sanPhamChiTietInterface.getAllDTO();
+            System.out.println("No active campaigns found. Returning all products.");
+            return new ArrayList<>(products); // Trả về danh sách sản phẩm
+        }
+
+        return new ArrayList<>(campaigns); // Trả về danh sách chiến dịch giảm giá
+    }
+
+    // Cron Job cho ProductDiscount
+    @Scheduled(fixedRate = 60000) // Chạy mỗi 60 giây
+    public void updateActiveStatusesForProductDiscount() {
+        updateActiveBasedOnRealTimeForProductDiscount();
+    }
+
+    // updateActive cho ProductDiscount
+    @Transactional
+    public void updateActiveBasedOnRealTimeForProductDiscount() {
+        LocalDateTime now = LocalDateTime.now();
+
+        // Lấy danh sách tất cả ProductDiscount
+        List<ProductDiscount> productDiscounts = productDiscountInterface.findAll();
+
+        for (ProductDiscount productDiscount : productDiscounts) {
+            DiscountCampaign discountCampaign = productDiscount.getDiscountCampaign();
+
+            // Kiểm tra thời gian bắt đầu và kết thúc của chiến dịch giảm giá
+            if (discountCampaign.getStartDate().isBefore(now) && discountCampaign.getEndDate().isAfter(now)) {
+                // Nếu trong khoảng thời gian hoạt động, set active = 1
+                productDiscount.setActive(1);
+            } else {
+                // Nếu ngoài khoảng thời gian hoạt động, set active = 0
+                productDiscount.setActive(0);
+            }
+        }
+
+        // Lưu danh sách đã cập nhật
+        productDiscountInterface.saveAll(productDiscounts);
+    }
+
+
+    @Scheduled(fixedRate = 60000) // Cập nhật mỗi 60 giây
+    public void updateActiveCampaigns() {
+        updateActiveDiscountCampaigns();
+    }
+
+    @Transactional
+    public void updateActiveDiscountCampaigns() {
+        LocalDateTime now = LocalDateTime.now();
+
+        // Lấy danh sách tất cả các DiscountCampaign
+        List<DiscountCampaign> campaigns = discountCampaignInterface.findAll();
+
+        for (DiscountCampaign campaign : campaigns) {
+            if (campaign.getStartDate().isBefore(now) && campaign.getEndDate().isAfter(now)) {
+                // Trong khoảng thời gian hoạt động, set active = true
+                campaign.setActive(1);
+            } else {
+                // Ngoài khoảng thời gian hoạt động, set active = false
+                campaign.setActive(0);
+            }
+        }
+
+        // Lưu danh sách đã cập nhật
+        discountCampaignInterface.saveAll(campaigns);
+    }
+
+
+    public List<SanPhamChiTietDto> getSanPhamWithDiscounts(Integer discountCampaignId) {
+        // Lấy danh sách sản phẩm chi tiết DTO
+        List<SanPhamChiTietDto> sanPhamList = sanPhamChiTietInterface.getAllDTO();
+
+        // Lấy danh sách giảm giá từ discountCampaignId
+        List<ProductDiscount> discounts = productDiscountInterface.findByDiscountCampaignId(discountCampaignId);
+
+        // Kiểm tra trạng thái của chiến dịch khuyến mãi
+        Optional<DiscountCampaign> campaignOpt = discountCampaignInterface.findById(discountCampaignId);
+        if (campaignOpt.isPresent()) {
+            DiscountCampaign campaign = campaignOpt.get();
+            LocalDateTime now = LocalDateTime.now();
+            if (campaign.getEndDate().isBefore(now) || campaign.getStartDate().isAfter(now)) {
+                discounts = Collections.emptyList(); // Nếu campaign không hợp lệ
+            }
+        } else {
+            discounts = Collections.emptyList(); // Campaign không tồn tại
+        }
+
+        // Ánh xạ giảm giá theo ID sản phẩm
+        Map<Integer, ProductDiscount> discountMap = discounts.stream()
+                .collect(Collectors.toMap(discount -> discount.getProduct().getId(), discount -> discount));
+
+        // Duyệt qua danh sách sản phẩm để tính giá sau giảm
+        sanPhamList.forEach(sanPham -> {
+            Integer productId = sanPham.getId();
+
+            if (discountMap.containsKey(productId)) {
+                // Có giảm giá áp dụng
+                ProductDiscount discount = discountMap.get(productId);
+                Integer discountPercentage = discount.getDiscountCampaign().getDiscountPercentage();
+
+                BigDecimal originalPrice = BigDecimal.valueOf(sanPham.getDonGia());
+                BigDecimal discountAmount = originalPrice.multiply(
+                        BigDecimal.valueOf(discountPercentage).divide(BigDecimal.valueOf(100)));
+                BigDecimal discountedPrice = originalPrice.subtract(discountAmount);
+
+                sanPham.setDiscountedPrice(discountedPrice.floatValue()); // Giá sau giảm
+                sanPham.setDiscountPercentage(discountPercentage); // Phần trăm giảm giá
+            } else {
+                // Không có giảm giá
+                sanPham.setDiscountedPrice(sanPham.getDonGia().floatValue()); // Giá gốc
+                sanPham.setDiscountPercentage(0); // Không có giảm giá
+            }
+        });
+
+        return sanPhamList;
+    }
+
+
+
+
+    public DiscountCampaign addDiscountCampaign(DiscountCampaign discountCampaign) {
+        return discountCampaignInterface.save(discountCampaign);
+    }
+
+    public DiscountCampaign updateDiscountCampaign(Integer id, DiscountCampaign updatedCampaign) {
+        return discountCampaignInterface.findById(id).map(existingCampaign -> {
+            existingCampaign.setName(updatedCampaign.getName());
+            existingCampaign.setDiscountPercentage(updatedCampaign.getDiscountPercentage());
+            existingCampaign.setStartDate(updatedCampaign.getStartDate());
+            existingCampaign.setEndDate(updatedCampaign.getEndDate());
+            existingCampaign.setActive(updatedCampaign.getActive());
+            return discountCampaignInterface.save(existingCampaign);
+        }).orElseThrow(() -> new EntityNotFoundException("Discount campaign not found"));
+    }
+
+    public void deleteDiscountCampaign(Integer id) {
+        if (discountCampaignInterface.existsById(id)) {
+            discountCampaignInterface.deleteById(id);
+        } else {
+            throw new EntityNotFoundException("Discount campaign not found");
+        }
+    }
+
+    public ProductDiscount createProductDiscount(Integer productId, Integer campaignId, ProductDiscount productDiscount) {
+        SanPhamChiTiet product = sanPhamChiTietInterface.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+        DiscountCampaign campaign = discountCampaignInterface.findById(campaignId)
+                .orElseThrow(() -> new RuntimeException("Discount Campaign not found"));
+
+        productDiscount.setProduct(product);
+        productDiscount.setDiscountCampaign(campaign);
+        productDiscount.setActive(1); // Đặt mặc định là "active"
+
+        return productDiscountInterface.save(productDiscount);
+    }
+
+    // Sửa ProductDiscount
+    public ProductDiscount updateProductDiscount(Integer discountId, ProductDiscount updatedProductDiscount) {
+        ProductDiscount existingProductDiscount = productDiscountInterface.findById(discountId)
+                .orElseThrow(() -> new RuntimeException("Product Discount not found"));
+
+        existingProductDiscount.setProduct(updatedProductDiscount.getProduct());
+        existingProductDiscount.setActive(updatedProductDiscount.getActive());
+        return productDiscountInterface.save(existingProductDiscount);
+    }
+
+    // Xóa ProductDiscount
+    public void deleteProductDiscount(Integer discountId) {
+        if (!productDiscountInterface.existsById(discountId)) {
+            throw new RuntimeException("Product Discount not found");
+        }
+        productDiscountInterface.deleteById(discountId);
+    }
+    // Lấy danh sách ProductDiscount theo Campaign ID
+    public List<ProductDiscount> getProductDiscountsByCampaign(Integer campaignId) {
+        return productDiscountInterface.findByDiscountCampaignId(campaignId);
+    }
+
+    // Lấy danh sách ProductDiscount theo Product ID
+    public List<ProductDiscount> getProductDiscountsByProduct(Integer productId) {
+        return productDiscountInterface.findByProductId(productId);
+    }
+
+}
+

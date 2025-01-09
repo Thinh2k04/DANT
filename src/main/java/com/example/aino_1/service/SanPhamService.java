@@ -95,6 +95,30 @@ public class SanPhamService {
         }
     }
 
+    public List<SanPham> getListForHome(){
+        List<SanPham> listsp = spsi.findAll();
+        List<SanPham> listSpHome = new ArrayList<>();
+        for (SanPham sp : listsp
+        ) {
+            if(sp.getTrangThai() == 1){
+                listSpHome.add(sp);
+            }
+        }
+        return listSpHome;
+    }
+
+    public List<SanPham> getListThungRac(){
+        List<SanPham> listsp = spsi.findAll();
+        List<SanPham> listSpHome = new ArrayList<>();
+        for (SanPham sp : listsp
+        ) {
+            if(sp.getTrangThai() == 0){
+                listSpHome.add(sp);
+            }
+        }
+        return listSpHome;
+    }
+
 
 }
 

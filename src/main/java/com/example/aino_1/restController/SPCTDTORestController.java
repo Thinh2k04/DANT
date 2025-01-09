@@ -29,16 +29,12 @@ public class    SPCTDTORestController {
 
     @GetMapping("/getAll")
     public List<SanPhamChiTietDto> getAllSanPhamChiTietDto() {
-        List<SanPhamChiTietDto> listSPCTDTO = spctsi.getAllDTO();
-        List<SanPhamChiTietDto> listHome = new ArrayList<>()    ;
-        for (SanPhamChiTietDto spctdto : listSPCTDTO
-             ) {
-            if(spctdto.getTrangThai() == 1){
-                listHome.add(spctdto);
-            }
-        }
+        return spctsv.getListForHome();
+    }
 
-        return listHome;
+    @GetMapping("/getThungRac")
+    public List<SanPhamChiTietDto> getAllSanPhamChiTietDtoThungRac() {
+        return spctsv.getListThungRac();
     }
 
     @GetMapping("/getById/{id}")
@@ -104,11 +100,11 @@ public class    SPCTDTORestController {
         }
     }
 
-
     @PostMapping("/del")
     public void deleteSPCTDTO(@RequestBody SanPhamChiTiet spctdto){
         spctdto.setTrangThai(0);
         spctsi.save(spctdto);
     }
+
     }
 

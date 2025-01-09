@@ -13,6 +13,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -141,6 +142,30 @@ public class SanPhamChiTietService {
             }
         }
 
+    }
+
+    public List<SanPhamChiTietDto> getListForHome(){
+        List<SanPhamChiTietDto> listSPCTDTO = spctsi.getAllDTO();
+        List<SanPhamChiTietDto> listHome = new ArrayList<>()    ;
+        for (SanPhamChiTietDto spctdto : listSPCTDTO
+        ) {
+            if(spctdto.getTrangThai() == 1){
+                listHome.add(spctdto);
+            }
+        }
+        return listHome;
+    }
+
+    public List<SanPhamChiTietDto> getListThungRac(){
+        List<SanPhamChiTietDto> listSPCTDTO = spctsi.getAllDTO();
+        List<SanPhamChiTietDto> listHome = new ArrayList<>()    ;
+        for (SanPhamChiTietDto spctdto : listSPCTDTO
+        ) {
+            if(spctdto.getTrangThai() == 0){
+                listHome.add(spctdto);
+            }
+        }
+        return listHome;
     }
 
 

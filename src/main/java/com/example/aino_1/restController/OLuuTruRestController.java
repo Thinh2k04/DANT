@@ -26,7 +26,7 @@ public class OLuuTruRestController {
 
     @GetMapping("/getAll")
     public List<OLuuTru> getAll() {
-        return oltsi.findAll();
+        return oltsi.findAllByTrangThai(1);
     }
 
     @GetMapping("/getByID/{id}")
@@ -48,5 +48,9 @@ public class OLuuTruRestController {
     public void delete(@RequestBody OLuuTru oLuuTru) {
         oLuuTru.setTrangThai(0);
         oltsi.save(oLuuTru);
+    }
+    @GetMapping("/getThungRac")
+    public void getThungRac(){
+        oltsi.findAllByTrangThai(0);
     }
 }

@@ -13,6 +13,7 @@ import java.util.List;
 
 @Repository
 public interface SanPhamChiTietInterface extends JpaRepository<SanPhamChiTiet, Integer> {
+
     @Query(
             """
                     SELECT new com.example.aino_1.dto.SanPhamChiTietDto(

@@ -25,7 +25,7 @@ public class ManHinhRestController {
 
     @GetMapping("/getAll")
     public List<ManHinh> getAll() {
-        return mhsi.findAll();
+        return mhsi.findAllByTrangThai(1);
     }
 
     @GetMapping("/getByID/{id}")
@@ -47,5 +47,9 @@ public class ManHinhRestController {
     public void delete(@RequestBody ManHinh manHinh) {
         manHinh.setTrangThai(0);
         mhsi.save(manHinh);
+    }
+    @GetMapping("/getThungRac")
+    public void getThungRac(){
+        mhsi.findAllByTrangThai(0);
     }
 }

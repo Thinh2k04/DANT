@@ -25,7 +25,7 @@ public class CpuRestController {
 
     @GetMapping("/getAll")
     public List<Cpu> getAll() {
-        return csi.findAll();
+        return csi.findAllByTrangThai(1);
     }
 
     @GetMapping("/getByID/{id}")
@@ -47,5 +47,9 @@ public class CpuRestController {
     public void delete(@RequestBody Cpu cpu) {
         cpu.setTrangThai(0);
         csi.save(cpu);
+    }
+    @GetMapping("/getThungRac")
+    public void getThungRac(){
+        csi.findAllByTrangThai(0);
     }
 }

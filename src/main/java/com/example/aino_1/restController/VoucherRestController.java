@@ -33,7 +33,7 @@ public class VoucherRestController {
 
     @GetMapping("/getAll")
     public List<Voucher> getAll() {
-        return vsi.findAll();
+        return vsi.findAllByTrangThai(1);
     }
 
     @PostMapping("/add")
@@ -86,5 +86,9 @@ public class VoucherRestController {
     public void delete(@RequestBody Voucher voucher) {
         voucher.setTrangThai(0);
         vsi.save(voucher);
+    }
+    @GetMapping("/getThungRac")
+    public void getThungRac(){
+        vsi.findAllByTrangThai(0);
     }
 }

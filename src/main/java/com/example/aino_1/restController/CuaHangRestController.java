@@ -20,7 +20,7 @@ public class CuaHangRestController {
 
     @GetMapping("/getAll")
     public List<CuaHang> getAll() {
-        return csi.findAll();
+        return csi.findAllByTrangThai(1);
     }
 
 
@@ -43,5 +43,9 @@ public class CuaHangRestController {
     public void delete(@RequestBody CuaHang cuaHang) {
         cuaHang.setTrangThai(0);
         csi.save(cuaHang);
+    }
+    @GetMapping("/getThungRac")
+    public void getThungRac(){
+        csi.findAllByTrangThai(0);
     }
 }

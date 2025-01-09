@@ -13,6 +13,8 @@ import java.util.List;
 @Repository
 public interface SanPhamInterface extends JpaRepository<SanPham, Integer> {
 
+    List<SanPham> findAllByTrangThai(int trangThai);
+
 //    @Transactional
 //    @Modifying
 //    @Query(" select new com.example.aino_1.dto.SanPhamDTO(sp.tenSanPham,sp.namSanXuat,sp.trongLuong,ha.duongDanHinhAnh,lsp.tenLoai) " +

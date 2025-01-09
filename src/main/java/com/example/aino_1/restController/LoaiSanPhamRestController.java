@@ -25,7 +25,7 @@ public class LoaiSanPhamRestController {
 
     @GetMapping("/getAll")
     public List<LoaiSanPham> getAll() {
-        return lspsi.findAll();
+        return lspsi.findAllByTrangThai(1);
     }
 
     @GetMapping("/getByID/{id}")
@@ -47,5 +47,9 @@ public class LoaiSanPhamRestController {
     public void delete(@RequestBody LoaiSanPham loaiSanPham) {
         loaiSanPham.setTrangThai(0);
         lspsi.save(loaiSanPham);
+    }
+    @GetMapping("/getThungRac")
+    public void getThungRac(){
+        lspsi.findAllByTrangThai(0);
     }
 }

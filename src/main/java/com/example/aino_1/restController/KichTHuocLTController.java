@@ -28,7 +28,7 @@ public class KichTHuocLTController {
 
     @GetMapping("/getAll")
     public List<KichThuocLapTop> getAll() {
-        return ktltsi.findAll();
+        return ktltsi.findAllByTrangThai(1);
     }
 
     @GetMapping("/getByID/{id}")
@@ -50,5 +50,9 @@ public class KichTHuocLTController {
     public void delete(@RequestBody KichThuocLapTop KichThuocLapTop) {
         KichThuocLapTop.setTrangThai(0);
         ktltsi.save(KichThuocLapTop);
+    }
+    @GetMapping("/getThungRac")
+    public void getThungRac(){
+        ktltsi.findAllByTrangThai(0);
     }
 }

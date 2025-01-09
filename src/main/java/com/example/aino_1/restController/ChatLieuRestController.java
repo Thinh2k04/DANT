@@ -27,7 +27,7 @@ public class ChatLieuRestController {
 
     @GetMapping("/getAll")
     public List<ChatLieu> getAll() {
-        return clsi.findAll();
+        return clsi.findAllByTrangThai(1);
     }
 
     @GetMapping("/getByID/{id}")
@@ -49,5 +49,10 @@ public class ChatLieuRestController {
     public void delete(@RequestBody ChatLieu ChatLieu) {
         ChatLieu.setTrangThai(0);
         clsi.save(ChatLieu);
+    }
+
+    @GetMapping("/getThungRac")
+    public void getThungRac(){
+        clsi.findAllByTrangThai(0);
     }
 }

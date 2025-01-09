@@ -25,7 +25,7 @@ public class RamRestController {
 
     @GetMapping("/getAll")
     public List<Ram> getAll() {
-        return rsi.findAll();
+        return rsi.findAllByTrangThai(1);
     }
 
     @GetMapping("/getByID/{id}")
@@ -47,5 +47,9 @@ public class RamRestController {
     public void delete(@RequestBody Ram ram) {
         ram.setTrangThai(0);
         rsi.save(ram);
+    }
+    @GetMapping("/getThungRac")
+    public void getThungRac(){
+        rsi.findAllByTrangThai(0);
     }
 }

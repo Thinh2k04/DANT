@@ -20,18 +20,22 @@ public class EmailController {
             @RequestParam String to,
             @RequestParam String subject,
             @RequestParam String text,
-            @RequestParam MultipartFile file) {
+            @RequestParam(required = false) MultipartFile file) { // Make 'file' parameter optional
         try {
-            // Lấy nội dung file từ request
-            byte[] fileBytes = file.getBytes();
-            String fileName = file.getOriginalFilename();
+            // Lấy nội dung file từ request (kiểm tra nếu file có được đính kèm)
+            byte[] fileBytes = null;
+            String fileName = null;
+            if (file != null && !file.isEmpty()) {
+                fileBytes = file.getBytes();
+                fileName = file.getOriginalFilename();
+            }
 
-            // Gửi email kèm file
+            // Gửi email kèm file (kiểm tra nếu fileBytes != null)
             emailService.sendEmailWithAttachment(to, subject, text, fileBytes, fileName);
             return "Email được gửi thành công";
         } catch (Exception e) {
             e.printStackTrace();
-            return "lỗi khi gửi mail";
+            return "Lỗi khi gửi mail";
         }
     }
 

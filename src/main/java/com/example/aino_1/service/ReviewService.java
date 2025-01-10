@@ -4,7 +4,6 @@ import com.example.aino_1.entity.HoaDonChiTiet;
 import com.example.aino_1.entity.Review;
 import com.example.aino_1.entity.TaiKhoanNguoiDung;
 import com.example.aino_1.repository.HDCTInterFace;
-import com.example.aino_1.repository.HoaDonInterface;
 import com.example.aino_1.repository.ReviewInterface;
 import com.example.aino_1.repository.TaiKhoanNguoiDungInterface;
 import org.springframework.beans.factory.annotation.Autowired;

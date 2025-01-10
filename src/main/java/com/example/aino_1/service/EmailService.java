@@ -26,8 +26,10 @@ public class EmailService {
             helper.setSubject(subject);
             helper.setText(text);
 
-            // Đính kèm file
-            helper.addAttachment(fileName, new ByteArrayResource(fileBytes));
+            // Đính kèm file nếu có
+            if (fileBytes != null && !fileName.isEmpty()) {
+                helper.addAttachment(fileName, new ByteArrayResource(fileBytes));
+            }
 
             mailSender.send(message);
         } catch (Exception e) {

@@ -5,6 +5,8 @@ import com.example.aino_1.dto.SanPhamChiTietDto;
 import com.example.aino_1.entity.DiscountCampaign;
 import com.example.aino_1.entity.ProductDiscount;
 import com.example.aino_1.entity.SanPhamChiTiet;
+import com.example.aino_1.repository.DiscountCampaignInterface;
+import com.example.aino_1.repository.ProductDiscountInterface;
 import com.example.aino_1.service.DiscountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -23,9 +25,25 @@ public class DiscountRestController {
     @Autowired
     private DiscountService discountService;
 
+    @Autowired
+    private DiscountCampaignInterface discountCampaignInterface;
+
+    @Autowired
+    private ProductDiscountInterface productDiscountInterface;
+
     @GetMapping("/active")
     public List<SanPhamChiTietDto> getActiveDiscounts() {
         return discountService.getActiveDiscountsOrProducts();
+    }
+
+    @GetMapping("/getAllCampaign")
+    public List<DiscountCampaign> getAllDiscountCampaign(){
+        return discountCampaignInterface.findAll();
+    }
+
+    @GetMapping("/getAllProductDiscount")
+    public List<ProductDiscount> getAllProductDiscount(){
+        return productDiscountInterface.findAll();
     }
 
 
@@ -40,6 +58,11 @@ public class DiscountRestController {
     @PutMapping("/updateDiscount/{id}")
     public DiscountCampaign updateDiscountCampaign(@PathVariable Integer id, @RequestBody DiscountCampaign updatedCampaign) {
         return discountService.updateDiscountCampaign(id, updatedCampaign);
+    }
+
+    @PutMapping("/updateDiscountForRealTime/{id}")
+    public DiscountCampaign updateDiscountCampaignForRealTime(@PathVariable Integer id) {
+        return discountService.updateDiscountCampaignForRealTime(id);
     }
 
     // API thêm ProductDiscount

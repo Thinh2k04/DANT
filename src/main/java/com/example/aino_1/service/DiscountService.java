@@ -205,6 +205,22 @@ public class DiscountService {
         }).orElseThrow(() -> new EntityNotFoundException("Discount campaign not found"));
     }
 
+    public DiscountCampaign updateDiscountCampaignForRealTime(Integer id) {
+        return discountCampaignInterface.findById(id).map(existingCampaign -> {
+            LocalDateTime now = LocalDateTime.now();
+
+            // Cập nhật thời gian kết thúc thành thời gian hiện tại
+            existingCampaign.setEndDate(now);
+
+            // Nếu endTime đã vượt qua now, tự động set active = 0
+            existingCampaign.setActive(0); // Tắt chiến dịch
+
+            return discountCampaignInterface.save(existingCampaign);
+        }).orElseThrow(() -> new EntityNotFoundException("Discount campaign not found"));
+    }
+
+
+
     public void deleteDiscountCampaign(Integer id) {
         if (discountCampaignInterface.existsById(id)) {
             discountCampaignInterface.deleteById(id);
@@ -214,17 +230,40 @@ public class DiscountService {
     }
 
     public ProductDiscount createProductDiscount(Integer productId, Integer campaignId, ProductDiscount productDiscount) {
+        // Tìm sản phẩm
         SanPhamChiTiet product = sanPhamChiTietInterface.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        // Tìm chiến dịch khuyến mãi
         DiscountCampaign campaign = discountCampaignInterface.findById(campaignId)
                 .orElseThrow(() -> new RuntimeException("Discount Campaign not found"));
 
+        // Kiểm tra xem sản phẩm có đang thuộc đợt khuyến mãi nào khác không
+        Optional<ProductDiscount> existingDiscount = productDiscountInterface
+                    .findByProductAndActive(product, 1); // Kiểm tra active = 1
+
+        if (existingDiscount.isPresent()) {
+            ProductDiscount activeDiscount = existingDiscount.get();
+            DiscountCampaign activeCampaign = activeDiscount.getDiscountCampaign();
+
+            // Nếu chiến dịch cũ đang hoạt động, ném ngoại lệ
+            if (activeCampaign.getEndDate().isAfter(LocalDateTime.now())) {
+                throw new RuntimeException("Product is already in an active discount campaign.");
+            }
+
+            // Nếu chiến dịch cũ đã hết hạn, vô hiệu hóa
+            activeDiscount.setActive(0);
+            productDiscountInterface.save(activeDiscount);
+        }
+
+        // Tạo mới ProductDiscount
         productDiscount.setProduct(product);
         productDiscount.setDiscountCampaign(campaign);
         productDiscount.setActive(1); // Đặt mặc định là "active"
 
         return productDiscountInterface.save(productDiscount);
     }
+
 
     // Sửa ProductDiscount
     public ProductDiscount updateProductDiscount(Integer discountId, ProductDiscount updatedProductDiscount) {

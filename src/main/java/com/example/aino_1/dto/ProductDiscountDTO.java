@@ -11,7 +11,6 @@ import java.math.BigDecimal;
 
 public class ProductDiscountDTO {
     private Integer productId;
-    private BigDecimal discountedPrice;
-    private Integer discountPercentage;
+    private Integer discountCampaignID;
 }
 

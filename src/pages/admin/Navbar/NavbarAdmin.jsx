@@ -12,7 +12,8 @@ import {
   FiChevronDown,
   FiChevronRight,
   FiUser,
-  FiGrid
+  FiGrid,
+  FiPercent
 } from 'react-icons/fi';
 
 const NavbarAdmin = () => {
@@ -78,6 +79,13 @@ const NavbarAdmin = () => {
       path: '/admin/vouchers', 
       icon: FiGift, 
       label: 'Quản lý voucher',
+      badge: null
+    },
+    {
+      id: 'promotions',
+      path: '/admin/promotion-period',
+      icon: FiPercent,
+      label: 'Quản lý khuyến mại',
       badge: null
     }
   ];

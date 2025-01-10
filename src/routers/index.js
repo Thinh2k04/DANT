@@ -15,6 +15,7 @@ import RegisterPage from '../pages/use/register/page';
 import ProductAttributesPage from '../pages/admin/product-attributes/page';
 import VoucherPage from '../pages/admin/vocher/page';
 import EmployeePage from '../pages/admin/employee/page';
+import PromotionPeriodPage from '../pages/admin/promotionperiod/page';
 
 
 // Public routes
@@ -41,6 +42,7 @@ const privateRoutes = [
   { path: '/admin/product-attributes', component: ProductAttributesPage },
   { path: '/admin/employees', component: EmployeePage },
   { path: '/admin/vouchers', component: VoucherPage },
+  { path: '/admin/promotion-period', component: PromotionPeriodPage },
 ];
 
 export { privateRoutes, publicRoutes };

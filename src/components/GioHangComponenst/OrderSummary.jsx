@@ -123,12 +123,10 @@ function OrderSummary({
         const orderResult = await handleOrderSubmit(orderData);
 
         if (orderResult.success) {
-            const pdfBlob = generatePDF();
             const emailSuccess = await sendOrderEmail({
                 email: userEmail,
                 subject: "Order Confirmation",
-                body: "Your order has been confirmed.",
-                attachment: pdfBlob,
+                body: "Your order has been confirmed."
             });
 
             if (emailSuccess) {

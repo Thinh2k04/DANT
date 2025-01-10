@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { jsPDF } from 'jspdf';
 
 const generateOrderPDF = ({
@@ -18,7 +17,7 @@ const generateOrderPDF = ({
   
   doc.setFontSize(12);
   doc.text(`Khách hàng: ${customerName}`, 20, 40);
-  doc.text(`Địa chỉ: ${orderData.hd.diaChiNhanHang}`, 20, 50);
+  doc.text(`Địa chỉ: ${orderData.diaChiNhanHang || 'N/A'}`, 20, 50);
   doc.text(`Ngày đặt hàng: ${new Date().toLocaleDateString('vi-VN')}`, 20, 60);
 
   // Header cho bảng sản phẩm
@@ -34,9 +33,9 @@ const generateOrderPDF = ({
   cartItems.forEach((item, index) => {
     doc.text(`${index + 1}`, 25, yPos);
     doc.text(item.tenSanPhamChiTiet.substring(0, 40), 45, yPos);
-    doc.text(`${quantities[item.id] || item.soLuong || 1}`, 120, yPos);
+    doc.text(`${quantities[item.id] || 1}`, 120, yPos);
     doc.text(`${parseFloat(item.donGia).toLocaleString('vi-VN')}đ`, 145, yPos);
-    const thanhTien = (quantities[item.id] || item.soLuong || 1) * parseFloat(item.donGia);
+    const thanhTien = (quantities[item.id] || 1) * parseFloat(item.donGia);
     doc.text(`${thanhTien.toLocaleString('vi-VN')}đ`, 170, yPos);
     yPos += 10;
   });
@@ -61,7 +60,7 @@ export const sendOrderConfirmationEmail = async ({
   paymentMethod
 }) => {
   try {
-    const pdfBlob = generateOrderPDF({
+    const pdfBlob = await generateOrderPDF({
       customerName,
       cartItems,
       quantities,
@@ -73,55 +72,63 @@ export const sendOrderConfirmationEmail = async ({
 
     const formData = new FormData();
     formData.append('to', email);
-    formData.append('subject', 'Xác nhận đơn hàng từ LaptopStore');
+    formData.append('subject', 'THÔNG TIN HÓA ĐƠN - LaptopStore - Đơn hàng của bạn');
     
-    const emailText = `
-      Kính gửi ${customerName},
-
-      Cảm ơn quý khách đã đặt hàng tại LaptopStore!
-
-      THÔNG TIN ĐƠN HÀNG:
-      ${cartItems.map(item => 
-        `- ${item.tenSanPhamChiTiet}
-         Số lượng: ${quantities[item.id] || item.soLuong || 1}
-         Đơn giá: ${parseFloat(item.donGia).toLocaleString('vi-VN')}đ`
-      ).join('\n')}
-
-      Tổng tiền hàng: ${totalAmount.toLocaleString('vi-VN')}đ
-      Phí vận chuyển: ${(shippingFee || 0).toLocaleString('vi-VN')}đ
-      Tổng thanh toán: ${(totalAmount + (shippingFee || 0)).toLocaleString('vi-VN')}đ
-
-      Địa chỉ nhận hàng: ${orderData.hd.diaChiNhanHang}
-      Phương thức thanh toán: ${
-        paymentMethod === "1" ? "Thanh toán khi nhận hàng" : 
-        paymentMethod === "2" ? "Thanh toán qua MoMo" : 
-        "Thanh toán qua ZaloPay"
-      }
-
-      Mọi thắc mắc xin vui lòng liên hệ:
-      Hotline: 0123456789
-      Email: support@laptopstore.com
-      
-      Trân trọng,
-      LaptopStore
+    const emailHtml = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #2c3e50;">Xác nhận đơn hàng</h2>
+        <p style="color: #7f8c8d;">Mã đơn hàng: #${orderData?.id || 'N/A'}</p>
+        <p>Kính gửi ${customerName},</p>
+        <p>Cảm ơn quý khách đã đặt hàng tại LaptopStore. Dưới đây là chi tiết đơn hàng của quý khách:</p>
+        
+        <div style="margin: 20px 0; border: 1px solid #eee; padding: 15px;">
+          <h3 style="color: #2c3e50;">Chi tiết đơn hàng:</h3>
+          ${cartItems.map(item => `
+            <div style="margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+              <p style="margin: 5px 0;"><strong>${item.tenSanPhamChiTiet}</strong></p>
+              <p style="margin: 5px 0;">Số lượng: ${quantities[item.id] || 1}</p>
+              <p style="margin: 5px 0;">Đơn giá: ${parseFloat(item.donGia).toLocaleString('vi-VN')}đ</p>
+            </div>
+          `).join('')}
+          
+          <div style="margin-top: 15px;">
+            <p><strong>Tổng tiền hàng:</strong> ${totalAmount.toLocaleString('vi-VN')}đ</p>
+            <p><strong>Phí vận chuyển:</strong> ${(shippingFee || 0).toLocaleString('vi-VN')}đ</p>
+            <p style="font-size: 18px; color: #e74c3c;"><strong>Tổng thanh toán:</strong> ${(totalAmount + (shippingFee || 0)).toLocaleString('vi-VN')}đ</p>
+          </div>
+        </div>
+        
+        <div style="margin: 20px 0;">
+          <p><strong>Địa chỉ nhận hàng:</strong> ${orderData?.diaChiNhanHang || 'Chưa cập nhật'}</p>
+          <p><strong>Phương thức thanh toán:</strong> ${paymentMethod === "1" ? "Thanh toán khi nhận hàng" : "Thanh toán qua ZaloPay"}</p>
+        </div>
+        
+        <div style="margin-top: 30px; color: #7f8c8d;">
+          <p>Mọi thắc mắc xin vui lòng liên hệ:</p>
+          <p>Hotline: 0123456789</p>
+          <p>Email: support@laptopstore.com</p>
+        </div>
+      </div>
     `;
 
-    formData.append('text', emailText);
-    formData.append('file', pdfBlob, 'hoadon.pdf');
+    formData.append('text', 'THÔNG TIN HÓA ĐƠN - LaptopStore - Đơn hàng của bạn');
+    formData.append('html', emailHtml);
+    formData.append('file', new File([pdfBlob], 'hoadon.pdf', { type: 'application/pdf' }));
 
-    const response = await axios.post('http://localhost:8080/api/send-email', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+    const response = await fetch('http://localhost:8080/api/send-email', {
+      method: 'POST',
+      body: formData
     });
 
-    return response.data;
+    if (!response.ok) {
+      throw new Error('Failed to send email');
+    }
 
+    return true;
   } catch (error) {
-    console.error('Lỗi khi gửi email:', error);
+    console.error('Email error:', error);
     throw error;
   }
 };
 
-// Export các hàm
 export { generateOrderPDF }; 

@@ -33,10 +33,8 @@ const PaymentSuccess = () => {
 
       const result = await response.json();
       
-      // Check if result contains order_url and open in new tab
       if (result.order_url) {
         window.open(result.order_url, '_blank');
-        // Navigate to home page after opening bank URL
         navigate('/home');
       }
 
@@ -61,7 +59,6 @@ const PaymentSuccess = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-green-50 to-white py-12">
       <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-green-100">
-        {/* Header */}
         <div className="bg-gradient-to-r from-green-500 to-green-600 p-8 text-center">
           <div className="relative">
             <FaCheckCircle className="text-white text-7xl mx-auto mb-4 animate-bounce" />

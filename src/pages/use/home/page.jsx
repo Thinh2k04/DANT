@@ -10,6 +10,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { updateCartItemQuantity } from '../../../utils/cartUtils';
 import CartToast from '../../../components/Toast/CartToast';
+import { webSocketService } from '../../../utils/websocket';
 
 // Tạo hàm định dạng tiền Việt Nam
 const formatCurrency = (amount) => {
@@ -24,10 +25,10 @@ const formatCurrency = (amount) => {
 // Định nghĩa component HomePage
 const HomePage = () => {
   // Khai báo các state cần thiết
-  const [laptops, setLaptops] = useState([]); // State lưu trữ danh sách laptop
+  const [products, setProducts] = useState([]); // State lưu trữ danh sách sản phẩm
   const [currentPage, setCurrentPage] = useState(1); // State quản lý trang hiện tại
   const itemsPerPage = 12; // Số sản phẩm hiển thị trên mỗi trang
-  const [loading, setLoading] = useState(false); // State quản lý trạng thái loading
+  const [loading, setLoading] = useState(true); // State quản lý trạng thái loading
   const [hasMore, setHasMore] = useState(true); // State kiểm tra còn sản phẩm để load không
   const [filters, setFilters] = useState({ // State quản lý các bộ lọc
     priceRange: '',
@@ -46,58 +47,42 @@ const HomePage = () => {
   const [cpus, setCpus] = useState([]); // State cho CPU
   const [manHinhs, setManHinhs] = useState([]); // State cho màn hình
 
-  // useEffect hook để fetch dữ liệu laptop và các options cho bộ lọc khi component mount
+  // Hàm fetch dữ liệu sản phẩm
+  const fetchProducts = async () => {
+    try {
+      const response = await fetch('http://localhost:8080/rest/spctDTO/getAll');
+      if (!response.ok) throw new Error('Failed to fetch products');
+      const data = await response.json();
+      setProducts(data);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      toast.error('Có lỗi xảy ra khi tải dữ liệu sản phẩm!');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        
-        // Fetch danh sách laptop
-        const laptopsResponse = await fetch('http://localhost:8080/rest/spctDTO/getAll');
-        if (!laptopsResponse.ok) throw new Error('Failed to fetch laptops');
-        const laptopsData = await laptopsResponse.json();
-        setLaptops(laptopsData);
-        setHasMore(laptopsData.length > itemsPerPage);
+    // Fetch dữ liệu ban đầu
+    fetchProducts();
 
-        // Fetch danh sách thương hiệu
-        const thuongHieuResponse = await fetch('http://localhost:8080/rest/thuong-hieu/getAll');
-        if (!thuongHieuResponse.ok) throw new Error('Failed to fetch brands');
-        const thuongHieuData = await thuongHieuResponse.json();
-        setThuongHieus(thuongHieuData);
+    // Kết nối WebSocket
+    webSocketService.connect().then(() => {
+      // Subscribe để nhận cập nhật sản phẩm
+      webSocketService.subscribe('/topic/products', (data) => {
+        // Cập nhật danh sách sản phẩm khi có thay đổi
+        setProducts(data);
+        toast.info('Danh sách sản phẩm đã được cập nhật!');
+      });
+    }).catch(error => {
+      console.error('WebSocket connection error:', error);
+    });
 
-        // Fetch danh sách RAM
-        const ramResponse = await fetch('http://localhost:8080/rest/ram/getAll');
-        if (!ramResponse.ok) throw new Error('Failed to fetch RAM');
-        const ramData = await ramResponse.json();
-        setRams(ramData);
-
-        // Fetch danh sách ổ cứng
-        const oCungResponse = await fetch('http://localhost:8080/rest/o_luu_tru/getAll');
-        if (!oCungResponse.ok) throw new Error('Failed to fetch storage');
-        const oCungData = await oCungResponse.json();
-        setOCungs(oCungData);
-
-        // Fetch danh sách CPU
-        const cpuResponse = await fetch('http://localhost:8080/rest/cpu/getAll');
-        if (!cpuResponse.ok) throw new Error('Failed to fetch CPUs');
-        const cpuData = await cpuResponse.json();
-        setCpus(cpuData);
-
-        // Fetch danh sách màn hình
-        const manHinhResponse = await fetch('http://localhost:8080/rest/man_hinh/getAll');
-        if (!manHinhResponse.ok) throw new Error('Failed to fetch screens');
-        const manHinhData = await manHinhResponse.json();
-        setManHinhs(manHinhData);
-
-      } catch (error) {
-        console.error('Error fetching data:', error);
-        toast.error('Có lỗi xảy ra khi tải dữ liệu!');
-      } finally {
-        setLoading(false);
-      }
+    // Cleanup khi component unmount
+    return () => {
+      webSocketService.unsubscribe('/topic/products');
+      webSocketService.disconnect();
     };
-
-    fetchData();
   }, []);
 
   // Hàm tìm kiếm laptop
@@ -113,7 +98,7 @@ const HomePage = () => {
         }
         if (!response.ok) throw new Error('Failed to search laptops');
         const searchResults = await response.json();
-        setLaptops(searchResults);
+        setProducts(searchResults);
         setCurrentPage(1);
         setHasMore(searchResults.length > itemsPerPage);
       } catch (error) {
@@ -148,7 +133,7 @@ const HomePage = () => {
       if (!response.ok) throw new Error('Failed to filter laptops');
       
       const filteredData = await response.json();
-      setLaptops(filteredData);
+      setProducts(filteredData);
       setCurrentPage(1);
       setHasMore(filteredData.length > itemsPerPage);
       
@@ -162,8 +147,8 @@ const HomePage = () => {
 
   // Xử lý dữ liệu để hiển thị
   const indexOfLastItem = currentPage * itemsPerPage;
-  const currentItems = laptops.slice(0, indexOfLastItem);
-  const totalPages = Math.ceil(laptops.length / itemsPerPage);
+  const currentItems = products.slice(0, indexOfLastItem);
+  const totalPages = Math.ceil(products.length / itemsPerPage);
 
   // Hàm xử lý khi click nút "Xem thêm"
   const handleLoadMore = () => {
@@ -579,7 +564,7 @@ const HomePage = () => {
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-2xl font-bold text-gray-800">Laptop cao cấp chính hãng</h2>
-                <p className="text-gray-600 mt-2">Hiển thị {currentItems.length} trên {laptops.length} sản phẩm</p>
+                <p className="text-gray-600 mt-2">Hiển thị {currentItems.length} trên {products.length} sản phẩm</p>
               </div>
               <div className="flex items-center gap-4">
                 <select className="p-2 border rounded-lg text-sm">

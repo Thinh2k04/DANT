@@ -52,11 +52,21 @@ export const removeFromCart = (id) => {
 // Hàm cập nhật số lượng sản phẩm
 export const updateCartItemQuantity = async (id, newQuantity) => {
   try {
-    // Kiểm tra số lượng trong database
-    const response = await fetch(`http://localhost:8080/rest/spctDTO/getById/${id}`);
-    const dbProduct = await response.json();
+    // Kiểm tra số lượng trong giỏ hàng qua API
+    const response = await fetch('http://localhost:8080/rest/ghct/changQuantity', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        productId: id,
+        quantityChange: newQuantity
+      })
+    });
 
-    if (newQuantity > 0 && newQuantity <= dbProduct.soLuong) {
+    const result = await response.json();
+    
+    if (result.success) {
       const currentCart = JSON.parse(localStorage.getItem('cartItems')) || [];
       const existingItemIndex = currentCart.findIndex(item => item.id === id);
 
@@ -68,6 +78,8 @@ export const updateCartItemQuantity = async (id, newQuantity) => {
         };
       } else {
         // Thêm sản phẩm mới với số lượng được chỉ định
+        const productResponse = await fetch(`http://localhost:8080/rest/san_pham_chi_tiet/getById/${id}`);
+        const dbProduct = await productResponse.json();
         currentCart.push({ ...dbProduct, quantity: newQuantity });
       }
       
@@ -78,7 +90,7 @@ export const updateCartItemQuantity = async (id, newQuantity) => {
       
       return { success: true };
     } else {
-      toast.error(`Số lượng sản phẩm không được vượt quá số lượng trong kho (${dbProduct.soLuong})`);
+      toast.error(result.message || 'Không thể cập nhật số lượng sản phẩm');
       return { success: false };
     }
   } catch (error) {

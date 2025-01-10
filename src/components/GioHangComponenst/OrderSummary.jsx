@@ -7,6 +7,10 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { jsPDF } from 'jspdf';
 import { sendOrderConfirmationEmail } from './EmailOrder';
+import { useOrder } from './hooks/useOrder';
+import { useValidation } from './hooks/useValidation';
+import { useShipping } from './hooks/useShipping';
+import { useEmail } from './hooks/useEmail';
 
 // Component OrderSummary để hiển thị và xử lý thông tin đơn hàng
 function OrderSummary({ 
@@ -33,7 +37,8 @@ function OrderSummary({
   selectedStore, // Cửa hàng đã chọn (cho pickup)
   stores, // Danh sách cửa hàng
   pickupDate, // Ngày nhận hàng (cho pickup)
-  userEmail // Email của khách hàng
+  userEmail, // Email của khách hàng
+  setShippingFee
 }) {
   // Khởi tạo state cho modal QR và navigation
   const [showQrModal, setShowQrModal] = useState(false);
@@ -47,302 +52,16 @@ function OrderSummary({
   // Thêm state để quản lý trạng thái loading
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // Hàm chuẩn bị dữ liệu đơn hàng để gửi lên server
-  const prepareOrderData = () => {
-    const now = new Date();
-    // Lấy tên tỉnh/thành phố từ mã code
-    const selectedProvinceName = provinces.find(
-      p => p.code === parseInt(selectedProvince)
-    )?.name || '';
- 
-    // Lấy tên quận/huyện từ mã code
-    const selectedDistrictName = districts.find(
-      d => d.code === parseInt(selectedDistrict)
-    )?.name || '';
-
-    // Xác định địa chỉ nhận hàng dựa trên phương thức giao hàng
-    let deliveryAddress;
-    
-    // Nếu là pickup thì lấy địa chỉ cửa hàng
-    if (deliveryMethod === "pickup") {
-      const selectedStoreInfo = stores.find(store => store.id === parseInt(selectedStore));
-      if (selectedStoreInfo) {
-        deliveryAddress = `${selectedStoreInfo.tenCuaHang}, ${selectedStoreInfo.phuong}, ${selectedStoreInfo.huyen}, ${selectedStoreInfo.tinh}`;
-      }
-    } else {
-      // Nếu là giao hàng thì sử dụng địa chỉ khách hàng nhập
-      deliveryAddress = `${specificAddress || ''}, ${selectedWard || ''}, ${selectedDistrictName}, ${selectedProvinceName}`;
-    }
-
-    // Tạo object chứa thông tin đơn hàng
-    const orderData = {
-      // Thông tin tài khoản khách hàng
-      tttk: {
-        id: "",
-        hoTen: customerName || '',
-        diaChi: specificAddress || '',
-        soCCCD: "",
-        soDienThoai: phoneNumber || '',
-        email: email || '',
-        taiKhoanNguoiDung: null,
-        trangThai: null
-      },
-      // Thông tin hóa đơn
-      hd: {
-        thoiGianLapHoaDon: now.toISOString(),
-        tongTien: totalAmount + (shippingFee || 0),
-        hinhThucThanhToan: {
-          id: parseInt(paymentMethod) || 1
-        },
-        diaChiNhanHang: deliveryAddress,
-        cuaHang: {
-          id: deliveryMethod === "pickup" ? parseInt(selectedStore) : 1,
-          trangThai: 1
-        },
-        voucher: null,
-        trangThaiThanhToan: 2,
-        trangThai: 0
-      },
-      // Chi tiết hóa đơn
-      lhdct: cartItems.map(item => ({
-        hoaDon: {
-          id: ""
-        },
-        sanPhamChiTiet: {
-          id: item?.id?.toString() || ''
-        },
-        soLuong: quantities[item?.id] || item?.soLuong || 1,
-        gia: parseFloat(item?.donGia || 0)
-      }))
-    };
-    return orderData;
-  };
-  console.log('hiển thị danh sách các phần tử trong hóa dơn chi tiết ')
-  console.log(cartItems);
-
-  // Hàm xử lý khi submit đơn hàng
-  const handleOrderSubmit = async () => {
-    // Kiểm tra phương thức thanh toán trước
-    if (!paymentMethod) {
-      setErrors(prev => ({
-        ...prev,
-        paymentMethod: "Vui lòng chọn phương thức thanh toán"
-      }));
-      toast.error('Vui lòng chọn phương thức thanh toán trước khi đặt hàng', {
-        position: "top-center",
-        autoClose: 3000,
-      });
-      return;
-    }
-
-    // Validate tất cả các trường
-    if (!validateFields()) {
-      return;
-    }
-
-    try {
-      setIsProcessing(true);
-      setIsButtonDisabled(true);
-      
-      const orderData = prepareOrderData();
-      
-      // Gọi API tạo đơn hàng
-      const response = await fetch('http://localhost:8080/rest/hoa_don/addHD', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(orderData)
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to create order');
-      }
-
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      try {
-        // Gọi hàm gửi email từ EmailOrder
-        await sendOrderConfirmationEmail({
-          email,
-          customerName,
-          cartItems,
-          quantities,
-          totalAmount,
-          shippingFee,
-          orderData,
-          paymentMethod
-        });
-      } catch (emailError) {
-        console.error('Lỗi khi gửi email:', emailError);
-      }
-
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      clearCart();
-
-      toast.success('Đặt hàng thành công!', {
-        position: "top-center",
-        autoClose: 2000,
-      });
-
-      setTimeout(() => {
-        navigate('/payment-success', {
-          state: {
-            orderInfo: {
-              tongTienHang: totalAmount,
-              phiVanChuyen: shippingFee || 0,
-              tttk: {
-                hoTen: customerName,
-                soDienThoai: phoneNumber,
-                email: email
-              },
-              diaChiNhanHang: `${specificAddress}, ${wards.find(w => w.code === parseInt(selectedWard))?.name || ''}, ${districts.find(d => d.code === parseInt(selectedDistrict))?.name || ''}, ${provinces.find(p => p.code === parseInt(selectedProvince))?.name || ''}`,
-              hinhThucThanhToan: {
-                id: parseInt(paymentMethod),
-                tenHinhThuc: paymentMethod === "1" ? "Thanh toán khi nhận hàng" : 
-                            paymentMethod === "2" ? "Thanh toán qua MoMo" : 
-                            "Thanh toán qua ZaloPay"
-              },
-              trangThaiDonHang: "Chờ xác nhận",
-              cartItems: cartItems.map(item => ({
-                ...item,
-                soLuong: quantities[item?.id] || item?.soLuong || 1
-              }))
-            }
-          },
-          replace: true
-        });
-      }, 2000);
-      
-    } catch (error) {
-      console.error('Error:', error);
-      toast.error('Có lỗi xảy ra khi xử lý đơn hàng', {
-        position: "top-center",
-        autoClose: 2000
-      });
-    } finally {
-      setTimeout(() => {
-        setIsProcessing(false);
-        setIsButtonDisabled(false);
-      }, 1000);
-    }
-  };
-
-  // Hàm validate các trường dữ liệu
-  const validateFields = () => {
-    const newErrors = {};
-    let isValid = true;
-
-    // Validate họ tên
-    if (!customerName?.trim()) {
-      newErrors.name = "Vui lòng nhập họ tên";
-      isValid = false;
-    } else if (!/^[a-zA-ZÀ-ỹ\s]+$/.test(customerName)) {
-      newErrors.name = "Họ tên chỉ được chứa chữ cái và khoảng trắng";
-      isValid = false;
-    } else if (customerName.trim().length < 2) {
-      newErrors.name = "Họ tên phải có ít nhất 2 ký tự";
-      isValid = false;
-    } else if (customerName.trim().length > 50) {
-      newErrors.name = "Họ tên không được vượt quá 50 ký tự";
-      isValid = false;
-    }
-
-    // Validate số điện thoại
-    if (!phoneNumber) {
-      newErrors.phone = "Vui lòng nhập số điện thoại";
-      isValid = false;
-    } else if (!/^(0[3|5|7|8|9])+([0-9]{8})\b/.test(phoneNumber)) {
-      newErrors.phone = "Số điện thoại không hợp lệ";
-      isValid = false;
-    }
-
-    // Validate email (nếu có nhập)
-    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      newErrors.email = "Email không hợp lệ";
-      isValid = false;
-    }
-
-    // Validate phương thức nhận hàng
-    if (deliveryMethod === "pickup") {
-      if (!selectedStore) {
-        newErrors.store = "Vui lòng chọn cửa hàng";
-        isValid = false;
-      }
-      if (!pickupDate) {
-        newErrors.pickupDate = "Vui lòng chọn ngày nhận hàng";
-        isValid = false;
-      } else {
-        const selectedDate = new Date(pickupDate);
-        const today = new Date();
-        if (selectedDate < today) {
-          newErrors.pickupDate = "Ngày nhận hàng không được là ngày trong quá khứ";
-          isValid = false;
-        }
-      }
-    } else if (deliveryMethod === "shipping") {
-      if (!selectedProvince) {
-        newErrors.province = "Vui lòng chọn tỉnh/thành";
-        isValid = false;
-      }
-      if (!selectedDistrict) {
-        newErrors.district = "Vui lòng chọn quận/huyện";
-        isValid = false;
-      }
-      if (!selectedWard) {
-        newErrors.ward = "Vui lòng chọn phường/xã";
-        isValid = false;
-      }
-      if (!specificAddress?.trim()) {
-        newErrors.address = "Vui lòng nhập địa chỉ cụ thể";
-        isValid = false;
-      } else if (specificAddress.trim().length > 200) {
-        newErrors.address = "Địa chỉ không được vượt quá 200 ký tự";
-        isValid = false;
-      }
-    }
-
-    // Validate giỏ hàng
-    if (!cartItems || cartItems.length === 0) {
-      newErrors.cart = "Giỏ hàng không được để trống";
-      isValid = false;
-    }
-
-    // Validate phương thức thanh toán - thêm validation chặt chẽ hơn
-    if (!paymentMethod) {
-      newErrors.paymentMethod = "Vui lòng chọn phương thức thanh toán";
-      isValid = false;
-      // Hiển thị toast thông báo
-      toast.error('Vui lòng chọn phương thức thanh toán trước khi đặt hàng', {
-        position: "top-center",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
-    } else if (!["1", "2"].includes(paymentMethod)) {
-      newErrors.paymentMethod = "Phương thức thanh toán không hợp lệ";
-      isValid = false;
-      toast.error('Phương thức thanh toán không hợp lệ', {
-        position: "top-center",
-        autoClose: 3000,
-      });
-    }
-
-    // Email validation (make it required)
-    if (!email?.trim()) {
-      newErrors.email = "Vui lòng nhập email";
-      isValid = false;
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      newErrors.email = "Email không hợp lệ";
-      isValid = false;
-    }
-
-    setErrors(newErrors);
-    return isValid;
-  };
+  const { 
+    isProcessing: orderProcessing, 
+    isButtonDisabled: orderButtonDisabled, 
+    prepareOrderData, 
+    handleOrderSubmit 
+  } = useOrder();
+  
+  const { validateFields } = useValidation(setErrors);
+  const { calculateShippingFee } = useShipping(setShippingFee);
+  const { sendOrderEmail } = useEmail();
 
   const generatePDF = () => {
     const doc = new jsPDF();
@@ -394,48 +113,37 @@ function OrderSummary({
     return doc.output('blob');
   };
 
+  const handleBankPayment = async () => {
+    // ... rest of handleBankPayment code
+  };
+
   const handleOrderConfirmation = async () => {
     try {
-      const pdfBlob = generatePDF();
-      
-      const formData = new FormData();
-      formData.append('to', userEmail);
-      formData.append('subject', 'Xác nhận đơn hàng từ LaptopStore');
-      
-      // Tạo nội dung email
-      const emailText = `
-        Cảm ơn bạn đã đặt hàng tại LaptopStore!
-        
-        Chi tiết đơn hàng:
-        ${cartItems.map(item => `
-          - ${item.name}
-          Số lượng: ${item.quantity}
-          Giá: ${item.price.toLocaleString('vi-VN')}đ
-        `).join('\n')}
-        
-        Tổng tiền: ${totalAmount.toLocaleString('vi-VN')}đ
-        
-        Địa chỉ cửa hàng: [Địa chỉ của bạn]
-        Hotline: [Số điện thoại]
-      `;
-      
-      formData.append('text', emailText);
-      formData.append('file', pdfBlob, 'hoadon.pdf');
+        const orderData = prepareOrderData();
+        const orderResult = await handleOrderSubmit(orderData);
 
-      await axios.post('http://localhost:8080/api/send-email', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+        if (orderResult.success) {
+            const pdfBlob = generatePDF();
+            const emailSuccess = await sendOrderEmail({
+                email: userEmail,
+                subject: "Order Confirmation",
+                body: "Your order has been confirmed.",
+                attachment: pdfBlob,
+            });
 
-      // Hiển thị thông báo thành công
-      alert('Đơn hàng đã được xác nhận và email đã được gửi!');
-      
-      // Xử lý sau khi gửi email thành công (ví dụ: clear giỏ hàng, chuyển hướng...)
+            if (emailSuccess) {
+                toast.success("Order confirmed and email sent!");
+            } else {
+                toast.error("Order confirmed but email failed to send.");
+            }
 
+            navigate('/payment-success');
+        } else {
+            toast.error("Failed to process order.");
+        }
     } catch (error) {
-      console.error('Lỗi khi gửi email:', error);
-      alert('Có lỗi xảy ra khi gửi email xác nhận đơn hàng');
+        console.error('Order processing error:', error);
+        toast.error("Error processing order.");
     }
   };
 
@@ -462,6 +170,59 @@ function OrderSummary({
     } catch (error) {
       console.error('Error clearing cart:', error);
     }
+  };
+
+  // Sử dụng các hooks trong component
+  const handleOrder = async () => {
+    if (!validateFields({
+      customerName,
+      phoneNumber,
+      email,
+      deliveryMethod,
+      selectedStore,
+      pickupDate,
+      selectedProvince,
+      selectedDistrict,
+      selectedWard,
+      specificAddress,
+      cartItems,
+      paymentMethod
+    })) {
+      return;
+    }
+
+    const orderData = prepareOrderData({
+      customerName,
+      phoneNumber,
+      email,
+      deliveryMethod,
+      selectedStore,
+      stores,
+      selectedProvince,
+      selectedDistrict,
+      selectedWard,
+      specificAddress,
+      provinces,
+      districts,
+      cartItems,
+      quantities,
+      totalAmount,
+      shippingFee,
+      paymentMethod
+    });
+
+    await handleOrderSubmit(
+      orderData,
+      email,
+      customerName,
+      cartItems,
+      quantities,
+      totalAmount,
+      shippingFee,
+      paymentMethod,
+      phoneNumber,
+      specificAddress
+    );
   };
 
   // Render component
@@ -613,8 +374,21 @@ function OrderSummary({
 
           <button
             onClick={() => {
-              if (validateFields()) {
-                handleOrderSubmit();
+              if (validateFields({
+                customerName,
+                phoneNumber,
+                email,
+                deliveryMethod,
+                selectedStore,
+                pickupDate,
+                selectedProvince,
+                selectedDistrict,
+                selectedWard,
+                specificAddress,
+                cartItems,
+                paymentMethod
+              })) {
+                handleOrder();
               }
             }}
             disabled={loading || isButtonDisabled || isProcessing || !paymentMethod}

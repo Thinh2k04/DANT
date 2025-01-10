@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -31,6 +32,8 @@ public class SanPhamChiTietService {
 
     @Autowired
     HinhAnhInterface hasi;
+    @Autowired
+    private ImeiInterface imeiInterface;
 
     public Boolean saveSanPhamChiTietWithImage(SanPhamChiTiet spct, SanPham sp, List<String> urlImg) {
         try {
@@ -167,6 +170,5 @@ public class SanPhamChiTietService {
         }
         return listHome;
     }
-
 
 }

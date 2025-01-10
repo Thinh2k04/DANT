@@ -5,20 +5,11 @@ import com.example.aino_1.entity.GioHangChiTiet;
 import com.example.aino_1.entity.Gpu;
 import com.example.aino_1.entity.SanPhamChiTiet;
 import com.example.aino_1.repository.GioHangChiTietInterface;
-import com.example.aino_1.repository.GioHangInterface;
 import com.example.aino_1.service.GioHangChiTietService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -60,31 +51,64 @@ public class GHCTRestController {
         gsi.save(ghct);
     }
 
-    @GetMapping("/check/{username}")
-    public ResponseEntity<?> checkGioHang(@PathVariable String username) {
-        Map<String, Object> result = gioHangChiTietService.checkGioHang(username);
 
-        if ((boolean) result.get("success")) {
-            return ResponseEntity.ok(result);
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
+    // hàm dành cho nút mua hàng, check giỏi hàng trước khi đẩy qua màn xác nhận đơn hàng
+    @PostMapping("/check")
+    public ResponseEntity<?> checkGioHang(
+            @RequestHeader(value = "Authorization", required = false) String token,
+            @RequestBody(required = false) List<SanPhamChiTiet> listSPCT) {
+        try {
+            // Gọi service kiểm tra giỏ hàng (truyền token và danh sách sản phẩm)
+            Map<String, Object> result = gioHangChiTietService.checkGioHang(token, listSPCT);
+
+            if ((boolean) result.get("success")) {
+                return ResponseEntity.ok(result);
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Đã xảy ra lỗi: " + e.getMessage());
         }
     }
 
-    @GetMapping("/checkNotLogin")
-    public ResponseEntity<?> checkGioHang(@RequestBody List<SanPhamChiTiet> listSPCT) {
-        // Gọi phương thức kiểm tra số lượng
-        List<Map<String, Object>> resultList = gioHangChiTietService.checkSPSoLuong(listSPCT);
 
-        // Kiểm tra nếu tất cả sản phẩm đủ số lượng
-        boolean allSufficient = resultList.stream()
-                .allMatch(record -> (boolean) record.get("message")); // Kiểm tra giá trị "message"
+    @PostMapping("/changQuantity")
+    public ResponseEntity<?> updateProductQuantityInCart(
+            @RequestHeader(value = "Authorization", required = false) String token,
+            @RequestBody Map<String, Object> requestData) {
+        try {
+            Integer productId = (Integer) requestData.get("productId");
+            Integer quantityChange = (Integer) requestData.get("quantityChange"); // 1 để thêm, -1 để giảm
 
-        if (allSufficient) {
-            return ResponseEntity.ok("Tất cả sản phẩm đủ số lượng.");
-        } else {
-            return ResponseEntity.badRequest().body(resultList);
+            if (productId == null || quantityChange == null) {
+                return ResponseEntity.badRequest().body(Map.of(
+                        "success", false,
+                        "productId", productId,
+                        "soLuongTonKho", null,
+                        "message", "Dữ liệu không hợp lệ: sản phẩm hoặc thay đổi số lượng không hợp lệ."
+                ));
+            }
+
+            Map<String, Object> response = gioHangChiTietService.updateProductQuantityInCart(token, productId, quantityChange);
+
+            if ((boolean) response.get("success")) {
+                return ResponseEntity.ok(response);
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
+                    "success", false,
+                    "productId", null,
+                    "soLuongTonKho", null,
+                    "message", "Lỗi khi cập nhật giỏ hàng: " + e.getMessage()
+            ));
         }
     }
+
+
+
+
 }
 

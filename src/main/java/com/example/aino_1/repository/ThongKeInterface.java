@@ -2,7 +2,7 @@
 package com.example.aino_1.repository;
 
 import com.example.aino_1.dto.ThongKeDTO;
-import com.example.aino_1.entity.GioHang;
+import com.example.aino_1.entity.GioHangChiTiet;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface ThongKeInterface extends JpaRepository<GioHang, Integer> {
+public interface ThongKeInterface extends JpaRepository<GioHangChiTiet, Integer> {
     // Thống kê doanh thu theo ngày hôm nay
     @Query("""
     SELECT new com.example.aino_1.dto.ThongKeDTO(

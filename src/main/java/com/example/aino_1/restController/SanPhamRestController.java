@@ -40,6 +40,7 @@ public class SanPhamRestController {
 
     @Autowired
     SanPhamInterface spsi;
+
     @Autowired
     SanPhamService spsv;
 

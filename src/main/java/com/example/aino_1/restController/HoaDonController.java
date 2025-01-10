@@ -95,6 +95,7 @@ public class HoaDonController {
 
 
 
+    // sủa lại apapi dưới sang phái admin
     // sét trang  thái thanh toán là 1 khi khách hàng đã thanh toán hóa đơn
     @PostMapping("/updateTrangThaiThanhToan")
     public void setTTTT(@RequestBody HoaDon hoaDon){

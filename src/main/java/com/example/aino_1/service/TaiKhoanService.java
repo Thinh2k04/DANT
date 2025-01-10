@@ -1,7 +1,7 @@
 package com.example.aino_1.service;
 
 import com.example.aino_1.entity.*;
-import com.example.aino_1.repository.GioHangInterface;
+import com.example.aino_1.repository.GioHangChiTietInterface;
 import com.example.aino_1.repository.TaiKhoanNguoiDungInterface;
 import com.example.aino_1.repository.ThongTinTaiKhoaninterface;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +24,7 @@ public class TaiKhoanService {
 
 
     @Autowired
-    GioHangInterface ghsi;
+    GioHangChiTietInterface gioHangChiTietInterface;
 
     public Boolean addTaiKhoan(TaiKhoanNguoiDung tknd) {
         try {
@@ -34,9 +34,9 @@ public class TaiKhoanService {
             }
             TaiKhoanNguoiDung saveTKNG = taiKhoanNguoiDungInterface.save(tknd);
 
-            GioHang gioHang = new GioHang();
-            gioHang.setTaiKhoanNguoiDung(tknd);
-            GioHang saveGioHang = ghsi.save(gioHang);
+            GioHangChiTiet ghct = new GioHangChiTiet();
+            ghct.setTaiKhoanNguoiDung(tknd);
+            GioHangChiTiet saveGioHangChiTiet = gioHangChiTietInterface.save(ghct);
 
 
             return true; // Thành công

@@ -37,7 +37,7 @@ public class    SPCTDTORestController {
         return spctsv.getListThungRac();
     }
 
-    @GetMapping("/getById/{id}")
+    @GetMapping("/getById")
     public SanPhamChiTietDto getByIDSPCT(@PathVariable Integer id){
         return spctsi.getSanPhamChiTietById(id);
     }
@@ -71,7 +71,7 @@ public class    SPCTDTORestController {
         }
     }
 
-    @PostMapping("/Update")
+    @PostMapping("/update")
     public ResponseEntity<String> update(@RequestBody Map<String, Object> requestData) {
         try {
             // Lấy thông tin sản phẩm từ JSON
@@ -105,6 +105,5 @@ public class    SPCTDTORestController {
         spctdto.setTrangThai(0);
         spctsi.save(spctdto);
     }
-
     }
 

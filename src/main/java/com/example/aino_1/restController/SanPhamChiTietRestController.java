@@ -41,7 +41,7 @@ public class  SanPhamChiTietRestController {
         return spctsi.save(spct);
     }
 
-    @PostMapping("/update/{id}")
+    @PostMapping("/update")
     public SanPhamChiTiet update(@RequestBody SanPhamChiTiet spct) {
         return spctsi.save(spct);
     }

@@ -3,9 +3,11 @@ package com.example.aino_1.service;
 import com.example.aino_1.dto.ProductDiscountDTO;
 import com.example.aino_1.dto.SanPhamChiTietDto;
 import com.example.aino_1.entity.DiscountCampaign;
+import com.example.aino_1.entity.Imei;
 import com.example.aino_1.entity.ProductDiscount;
 import com.example.aino_1.entity.SanPhamChiTiet;
 import com.example.aino_1.repository.DiscountCampaignInterface;
+import com.example.aino_1.repository.ImeiInterface;
 import com.example.aino_1.repository.ProductDiscountInterface;
 import com.example.aino_1.repository.SanPhamChiTietInterface;
 import jakarta.persistence.EntityNotFoundException;
@@ -30,25 +32,46 @@ public class DiscountService {
     @Autowired
     private ProductDiscountInterface productDiscountInterface;
 
-    public List<Object> getActiveDiscountsOrProducts() {
+    @Autowired
+    private ImeiService imeiService;
+
+    public List<SanPhamChiTietDto> getActiveDiscountsOrProducts() {
         LocalDateTime now = LocalDateTime.now();
 
-        // Lấy danh sách chiến dịch giảm giá
+        updateActiveStatusesForProductDiscount();
+        updateActiveDiscountCampaigns();
+
+        // Lấy danh sách chiến dịch giảm giá đang hoạt động
         List<DiscountCampaign> campaigns = discountCampaignInterface
                 .findByActiveTrueAndStartDateBeforeAndEndDateAfter(now, now);
 
-        if (campaigns == null || campaigns.isEmpty()) {
-            // Lấy danh sách sản phẩm từ repository
-            List<SanPhamChiTietDto> products = sanPhamChiTietInterface.getAllDTO();
-            System.out.println("No active campaigns found. Returning all products.");
-            return new ArrayList<>(products); // Trả về danh sách sản phẩm
+        List<SanPhamChiTietDto> list = new ArrayList<>();
+
+        for (DiscountCampaign discountCampaign : campaigns){
+            list = getSanPhamWithDiscounts(discountCampaign.getId());
         }
 
-        return new ArrayList<>(campaigns); // Trả về danh sách chiến dịch giảm giá
+        if (campaigns == null || campaigns.isEmpty()) {
+            // Không có chiến dịch giảm giá đang hoạt động, lấy danh sách sản phẩm
+            List<SanPhamChiTietDto> products = sanPhamChiTietInterface.getAllDTO();
+
+            // Xóa thông tin giảm giá trên sản phẩm
+            for (SanPhamChiTietDto product : products) {
+                product.setDiscountedPrice(product.getDonGia()); // Giá giảm = Giá gốc
+                product.setDiscountPercentage(0); // Không có giảm giá
+            }
+
+            System.out.println("No active campaigns found. Returning all products.");
+            return new ArrayList<>(products);
+        }
+
+        // Trả về danh sách chiến dịch giảm giá đang hoạt động
+        return list;
     }
 
+
     // Cron Job cho ProductDiscount
-    @Scheduled(fixedRate = 60000) // Chạy mỗi 60 giây
+    @Scheduled(fixedRate =1000) // Chạy mỗi 60 giây
     public void updateActiveStatusesForProductDiscount() {
         updateActiveBasedOnRealTimeForProductDiscount();
     }
@@ -63,6 +86,16 @@ public class DiscountService {
 
         for (ProductDiscount productDiscount : productDiscounts) {
             DiscountCampaign discountCampaign = productDiscount.getDiscountCampaign();
+
+//            SanPhamChiTiet product = productDiscount.getProduct();
+//
+//            Integer sIMEISPCT = imeiService.getListImeibySPCT(product.getId()).size();
+//            // Kiểm tra số lượng tồn kho của sản phẩm
+//            if(sIMEISPCT== 0) {
+//                // Nếu sản phẩm hết hàng, set active = 0
+//                productDiscount.setActive(0);
+//                continue; // Bỏ qua các bước kiểm tra khác
+//            }
 
             // Kiểm tra thời gian bắt đầu và kết thúc của chiến dịch giảm giá
             if (discountCampaign.getStartDate().isBefore(now) && discountCampaign.getEndDate().isAfter(now)) {
@@ -79,9 +112,10 @@ public class DiscountService {
     }
 
 
-    @Scheduled(fixedRate = 60000) // Cập nhật mỗi 60 giây
+    @Scheduled(fixedRate = 1000) // Cập nhật mỗi 60 giây
     public void updateActiveCampaigns() {
         updateActiveDiscountCampaigns();
+
     }
 
     @Transactional
@@ -154,8 +188,6 @@ public class DiscountService {
 
         return sanPhamList;
     }
-
-
 
 
     public DiscountCampaign addDiscountCampaign(DiscountCampaign discountCampaign) {

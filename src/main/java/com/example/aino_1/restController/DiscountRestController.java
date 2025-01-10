@@ -24,21 +24,11 @@ public class DiscountRestController {
     private DiscountService discountService;
 
     @GetMapping("/active")
-    public List<Object> getActiveDiscounts() {
+    public List<SanPhamChiTietDto> getActiveDiscounts() {
         return discountService.getActiveDiscountsOrProducts();
     }
 
-    @PostMapping("/update-active")
-    public ResponseEntity<String> updateActiveStatus() {
-        discountService.updateActiveStatusesForProductDiscount();
-        discountService.updateActiveDiscountCampaigns();
-        return ResponseEntity.ok("Updated active status based on real-time.");
-    }
 
-    @GetMapping("/calculate/{discountChampaignId}")
-    public List<SanPhamChiTietDto> calculateDiscountedPrice(@PathVariable Integer discountChampaignId) {
-        return discountService.getSanPhamWithDiscounts(discountChampaignId);
-    }
 
     // Thêm đợt giảm giá
     @PostMapping("/addDiscount")

@@ -2,7 +2,6 @@ package com.example.aino_1.service;
 
 import com.example.aino_1.dto.SanPhamChiTietDto;
 import com.example.aino_1.entity.HinhAnh;
-import com.example.aino_1.entity.Imei;
 import com.example.aino_1.entity.SanPham;
 import com.example.aino_1.entity.SanPhamChiTiet;
 import com.example.aino_1.repository.HinhAnhInterface;
@@ -15,8 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+
 
 @Service
 public class SanPhamChiTietService {

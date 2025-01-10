@@ -12,4 +12,6 @@ import java.util.List;
 public interface HDCTInterFace  extends JpaRepository<HoaDonChiTiet, Integer> {
     @Query("SELECT hdct FROM HoaDon hd JOIN HoaDonChiTiet hdct on hd.id = hdct.hoaDon.id WHERE hd.id = :id")
     List<HoaDonChiTiet> findHoaDonWithDetailsById(@Param("id") Integer id);
+
+
 }

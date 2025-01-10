@@ -89,6 +89,10 @@ public class ImeiService {
     }
 
 
+    public List<Imei> getListImeibySPCT(Integer idSPCT){
+         List<Imei> listispct = imif.findAllBySpctIdAndTrangThai(idSPCT,0);
+         return listispct;
+    }
 
     public Integer checkImeiIDSPCT(Integer idSPCT) {
         // Kiểm tra sản phẩm chi tiết (SPCT) có tồn tại hay không

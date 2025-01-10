@@ -75,44 +75,44 @@ const ChiTietSanPhamAdmin = () => {
     listImei: []
   });
 
+  const fetchData = async () => {
+    try {
+      // Fetch thông tin chi tiết sản phẩm
+      const productResponse = await axios.get(`http://localhost:8080/rest/san_pham/getById/${idSanPham}`);
+      setProductDetails(productResponse.data);
+
+      // Fetch danh sách biến thể sản phẩm
+      const variantsResponse = await axios.get(`http://localhost:8080/rest/san_pham_chi_tiet/getSPCTByIdSP/${idSanPham}`);
+      setProductVariants(variantsResponse.data);
+
+      // Fetch danh sách các thành phần
+      const ramsResponse = await axios.get('http://localhost:8080/rest/ram/getAll');
+      setRams(ramsResponse.data);
+
+      const cpusResponse = await axios.get('http://localhost:8080/rest/cpu/getAll'); 
+      setCpus(cpusResponse.data);
+
+      const gpusResponse = await axios.get('http://localhost:8080/rest/gpu/getAll');
+      setGpus(gpusResponse.data);
+
+      const storagesResponse = await axios.get('http://localhost:8080/rest/o_luu_tru/getAll');
+      setStorages(storagesResponse.data);
+
+      const displaysResponse = await axios.get('http://localhost:8080/rest/man_hinh/getAll');
+      setDisplays(displaysResponse.data);
+
+      const colorsResponse = await axios.get('http://localhost:8080/rest/mau_sac/getAll');
+      setColors(colorsResponse.data);
+      
+      setLoading(false);
+    } catch (err) {
+      setError('Có lỗi xảy ra khi tải thông tin sản phẩm');
+      setLoading(false);
+    }
+  };
+
   // useEffect để fetch dữ liệu khi component mount
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Fetch thông tin chi tiết sản phẩm
-        const productResponse = await axios.get(`http://localhost:8080/rest/san_pham/getById/${idSanPham}`);
-        setProductDetails(productResponse.data);
-
-        // Fetch danh sách biến thể sản phẩm
-        const variantsResponse = await axios.get(`http://localhost:8080/rest/san_pham_chi_tiet/getSPCTByIdSP/${idSanPham}`);
-        setProductVariants(variantsResponse.data);
-
-        // Fetch danh sách các thành phần
-        const ramsResponse = await axios.get('http://localhost:8080/rest/ram/getAll');
-        setRams(ramsResponse.data);
-
-        const cpusResponse = await axios.get('http://localhost:8080/rest/cpu/getAll'); 
-        setCpus(cpusResponse.data);
-
-        const gpusResponse = await axios.get('http://localhost:8080/rest/gpu/getAll');
-        setGpus(gpusResponse.data);
-
-        const storagesResponse = await axios.get('http://localhost:8080/rest/o_luu_tru/getAll');
-        setStorages(storagesResponse.data);
-
-        const displaysResponse = await axios.get('http://localhost:8080/rest/man_hinh/getAll');
-        setDisplays(displaysResponse.data);
-
-        const colorsResponse = await axios.get('http://localhost:8080/rest/mau_sac/getAll');
-        setColors(colorsResponse.data);
-        
-        setLoading(false);
-      } catch (err) {
-        setError('Có lỗi xảy ra khi tải thông tin sản phẩm');
-        setLoading(false);
-      }
-    };
-
     fetchData();
   }, [idSanPham]);
 
@@ -173,11 +173,18 @@ const ChiTietSanPhamAdmin = () => {
     }
   };
 
-  // Lọc danh sách biến thể theo từ khóa tìm kiếm
-  const filteredVariants = productVariants.filter(variant =>
-    (variant.maSpct?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-    (variant.sanPham?.tenSanPham?.toLowerCase() || '').includes(searchTerm.toLowerCase())
-  );
+  // Lọc danh sách biến thể theo từ khóa tìm kiếm và trạng thái
+  const filteredVariants = productVariants
+    .filter(variant => {
+      // Chỉ hiện sản phẩm có trạng thái 1
+      const isActive = variant.trangThai === 1;
+      // Kiểm tra từ khóa tìm kiếm
+      const matchesSearch = searchTerm === '' || 
+        (variant.maSpct?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+        (variant.sanPham?.tenSanPham?.toLowerCase() || '').includes(searchTerm.toLowerCase());
+      
+      return isActive && matchesSearch;
+    });
 
   // Hiển thị loading khi đang tải dữ liệu
   if (loading) {
@@ -245,7 +252,7 @@ const ChiTietSanPhamAdmin = () => {
         {/* Product Variants */}
         <div className="mb-8">
           <h2 className="text-xl font-bold text-gray-800 mb-4">Danh sách biến thể sản phẩm</h2>
-          <ProductVariantsTable variants={filteredVariants} />
+          <ProductVariantsTable variants={filteredVariants} fetchData={fetchData} />
         </div>
 
         {/* Modal */}

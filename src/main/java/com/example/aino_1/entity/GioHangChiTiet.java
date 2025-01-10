@@ -24,10 +24,10 @@ public class GioHangChiTiet {
     @JoinColumn(name = "id_spct", referencedColumnName = "id")
     private SanPhamChiTiet sanPhamChiTiet;  // Liên kết với bảng san_pham_chi_tiet qua khóa ngoại
 
-    @Column(name = "so_luong", nullable = false)
+    @Column(name = "so_luong")
     private Integer soLuong;  // Số lượng của sản phẩm chi tiết trong giỏ hàng
 
-    @Column(name = "don_gia", nullable = false)
+    @Column(name = "don_gia")
     private Float donGia;  // Đơn giá của sản phẩm chi tiết trong giỏ hàng
 
     @Column(name = "trang_thai")

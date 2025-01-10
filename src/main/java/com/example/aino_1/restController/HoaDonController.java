@@ -17,6 +17,7 @@ import java.util.Map;
 @CrossOrigin("*") //cho phép tất cả các miền khác truy cập tài nguyên server (end point api)
 @RestController
 @RequestMapping("/rest/hoa_don") //đường dẫn chung cho các phương thức http bên dưới
+
 public class HoaDonController {
     @Autowired
     HoaDonInterface hdsi;
@@ -63,32 +64,48 @@ public class HoaDonController {
             if (token != null && !token.isEmpty()) {
                 Map<String, Object> decodedToken = jwtUtils.validateToken(token.replace("Bearer ", ""));
                 if (decodedToken == null || !decodedToken.containsKey("username")) {
-                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token không hợp lệ.");
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(
+                            "success", false,
+                            "message", "Token không hợp lệ."
+                    ));
                 }
                 username = decodedToken.get("username").toString();
             }
 
-            System.out.println("HOADONCONTROLLER: chạy vào phần ánh xạ dữ liệu");
             // Ánh xạ dữ liệu từ requestData
             ThongTinTaiKhoan thongTinTaiKhoan = objectMapper.convertValue(requestData.get("tttk"), ThongTinTaiKhoan.class);
             HoaDon hd = objectMapper.convertValue(requestData.get("hd"), HoaDon.class);
             List<HoaDonChiTiet> lhdct = objectMapper.convertValue(requestData.get("lhdct"), new TypeReference<List<HoaDonChiTiet>>() {});
             Voucher voucher = objectMapper.convertValue(requestData.get("hd.voucher"), Voucher.class);
 
-            // Kiểm tra dữ liệu đầu vào
             if (hd == null || lhdct == null || lhdct.isEmpty()) {
-                return ResponseEntity.badRequest().body("Dữ liệu đầu vào không hợp lệ.");
+                return ResponseEntity.badRequest().body(Map.of(
+                        "success", false,
+                        "message", "Dữ liệu đầu vào không hợp lệ."
+                ));
             }
-            System.out.println("Gọi hàm xử lí SERVICE CỦA HÓA ĐƠN CONTROLLER");
+
             // Gọi service để xử lý hóa đơn
-            String result = hdsv.hamXuLiHoaDon(username, thongTinTaiKhoan, hd, lhdct, voucher);
-            return ResponseEntity.ok(result);
+            Map<String, Object> result = hdsv.hamXuLiHoaDon(username, thongTinTaiKhoan, hd, lhdct, voucher);
+
+            // Trả về kết quả dựa trên trạng thái
+            if ((boolean) result.get("success")) {
+                return ResponseEntity.ok(result);
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
+            }
 
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body("Lỗi dữ liệu đầu vào: " + e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            ));
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Đã xảy ra lỗi: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
+                    "success", false,
+                    "message", "Đã xảy ra lỗi: " + e.getMessage()
+            ));
         }
     }
 

@@ -12,7 +12,7 @@ import java.util.Date;
 @AllArgsConstructor
 @Entity
 @Table(name = "hoa_don")
-public class HoaDon {
+public class  HoaDon {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -34,6 +34,9 @@ public class HoaDon {
 
     @Column(name = "dia_chi_nhan_hang", nullable = true, length = 255)
     private String diaChiNhanHang;  // Địa chỉ nhận hàng
+
+    @Column(name = "ma_hoa_don", nullable = true, length = 255)
+    private String maHoaDon;  // Mã hóa đơn của đơn hàng
 
     @ManyToOne
     @JoinColumn(name = "id_cua_hang", nullable = false)

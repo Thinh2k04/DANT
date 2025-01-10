@@ -1,8 +1,6 @@
 package com.example.aino_1.restController;
 
-import com.example.aino_1.entity.ChatLieu;
 import com.example.aino_1.entity.GioHangChiTiet;
-import com.example.aino_1.entity.Gpu;
 import com.example.aino_1.entity.SanPhamChiTiet;
 import com.example.aino_1.repository.GioHangChiTietInterface;
 import com.example.aino_1.service.GioHangChiTietService;

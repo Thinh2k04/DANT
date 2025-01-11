@@ -171,7 +171,6 @@ const LoginPage = () => {
               transition={{ duration: 0.5 }}
             >
               <motion.img
-                src="https://your-premium-laptop-logo.png"
                 alt="Premium Laptop Store"
                 className="w-full h-full object-contain"
                 initial={{ rotate: 0 }}

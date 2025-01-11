@@ -57,7 +57,7 @@ const HomePage = () => {
   // Hàm fetch dữ liệu sản phẩm
   const fetchProducts = async () => {
     try {
-      const response = await fetch('http://localhost:8080/rest/discount/active');
+      const response = await fetch('http://localhost:8080/rest/spctDTO/getAll');
       if (!response.ok) throw new Error('Failed to fetch products');
       const data = await response.json();
       setProducts(data);

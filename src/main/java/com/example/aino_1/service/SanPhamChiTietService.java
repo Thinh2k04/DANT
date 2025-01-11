@@ -155,7 +155,7 @@ public class SanPhamChiTietService {
                 listHome.add(spctdto);
             }
         }
-        return null;
+        return listHome;
     }
 
     public List<SanPhamChiTietDto> getListThungRac(){

@@ -50,6 +50,7 @@ public class SanPhamRestController {
 
 
 
+    //Hàm này dành cho danh sách sản phẩm
     @GetMapping("/getAll")
     public List<SanPham> getAll() {
        return spsv.getListForHome();

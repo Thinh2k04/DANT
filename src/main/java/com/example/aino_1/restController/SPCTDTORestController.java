@@ -37,7 +37,7 @@ public class    SPCTDTORestController {
         return spctsv.getListThungRac();
     }
 
-    @GetMapping("/getById/{id}")
+    @GetMapping("/getById")
     public SanPhamChiTietDto getByIDSPCT(@PathVariable Integer id){
         return spctsi.getSanPhamChiTietById(id);
     }

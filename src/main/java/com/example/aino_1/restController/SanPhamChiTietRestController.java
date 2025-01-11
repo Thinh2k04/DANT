@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/rest/san_pham_chi_tiet") //đường dẫn chung cho các phương thức http bên dưới
 public class  SanPhamChiTietRestController {
-
     @Autowired
     SanPhamChiTietInterface spctsi;
     SanPhamChiTietService spctsv;

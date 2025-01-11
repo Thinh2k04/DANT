@@ -36,7 +36,7 @@ public class  HoaDon {
     private String diaChiNhanHang;  // Địa chỉ nhận hàng
 
     @Column(name = "ma_hoa_don", nullable = true, length = 255)
-    private String maHoaDon;  // Mã hóa đơn của đơn hàng
+    private String maHoaDon;  // Mã hóa đơn của đơn han
 
     @ManyToOne
     @JoinColumn(name = "id_cua_hang", nullable = false)

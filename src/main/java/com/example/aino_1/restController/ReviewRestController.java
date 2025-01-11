@@ -1,12 +1,14 @@
 package com.example.aino_1.restController;
 
 
+import com.example.aino_1.entity.Review;
 import com.example.aino_1.service.ReviewService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @CrossOrigin("*") //cho phép tất cả các miền khác truy cập tài nguyên server (end point api)
@@ -33,4 +35,12 @@ public class ReviewRestController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi khi thêm đánh giá: " + e.getMessage());
         }
     }
+
+    // Hiển thị đánh giá cho spct
+    @GetMapping("for/{id}")
+    public List<Review> getReview(@PathVariable int id) {
+       return reviewService.getReviewList(id);
+    }
+
+
 }

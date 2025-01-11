@@ -23,7 +23,7 @@ public class SanPhamChiTietService {
     SanPhamInterface spsi;
 
     @Autowired
-    SanPhamChiTietInterface spctsi;
+    SanPhamChiTietInterface sanPhamChiTietInterface;
 
     @Autowired
     ImeiInterface imsi;
@@ -52,7 +52,7 @@ public class SanPhamChiTietService {
 
             // Gán sản phẩm vào sản phẩm chi tiết và lưu
             spct.setSanPham(sanPham);
-            SanPhamChiTiet savedSpct = spctsi.save(spct);
+            SanPhamChiTiet savedSpct = sanPhamChiTietInterface.save(spct);
 
             // Lưu hình ảnh nếu danh sách URL hợp lệ
             if (urlImg != null && !urlImg.isEmpty()) {
@@ -127,7 +127,7 @@ public class SanPhamChiTietService {
         // Lưu thông tin sản phẩm đã cập nhật vào cơ sở dữ liệu
 //            SanPham updatedSanPham = sanPhamInterface.save(existingSanPham);
 
-        spctsi.save(sp);
+        sanPhamChiTietInterface.save(sp);
 
         // Nếu có danh sách URL hình ảnh mới, cập nhật hình ảnh
         if (urlImg != null && !urlImg.isEmpty()) {
@@ -146,19 +146,20 @@ public class SanPhamChiTietService {
     }
 
     public List<SanPhamChiTietDto> getListForHome(){
-        List<SanPhamChiTietDto> listSPCTDTO = spctsi.getAllDTO();
+        List<SanPhamChiTietDto> listSPCTDTO = sanPhamChiTietInterface.getAllDTO();
         List<SanPhamChiTietDto> listHome = new ArrayList<>()    ;
         for (SanPhamChiTietDto spctdto : listSPCTDTO
         ) {
+            System.out.println("Trạng Thái của SPCT DTO: " + spctdto.getTrangThai());
             if(spctdto.getTrangThai() == 1){
                 listHome.add(spctdto);
             }
         }
-        return listHome;
+        return null;
     }
 
     public List<SanPhamChiTietDto> getListThungRac(){
-        List<SanPhamChiTietDto> listSPCTDTO = spctsi.getAllDTO();
+        List<SanPhamChiTietDto> listSPCTDTO = sanPhamChiTietInterface.getAllDTO();
         List<SanPhamChiTietDto> listHome = new ArrayList<>()    ;
         for (SanPhamChiTietDto spctdto : listSPCTDTO
         ) {
@@ -167,6 +168,17 @@ public class SanPhamChiTietService {
             }
         }
         return listHome;
+    }
+
+    public SanPhamChiTietDto getSanPhamChiTietById(Integer id) {
+        List<SanPhamChiTietDto> listSPCTDTO = sanPhamChiTietInterface.getAllDTO();
+        for (SanPhamChiTietDto spctdto : listSPCTDTO
+        ) {
+            if(spctdto.getId() == id){
+               return spctdto;
+            }
+        }
+        return null;
     }
 
 }

@@ -74,7 +74,7 @@ public class DiscountService {
 
 
     // Cron Job cho ProductDiscount
-    @Scheduled(fixedRate =1000) // Chạy mỗi 60 giây
+//    @Scheduled(fixedRate =1000000000) // Chạy mỗi 60 giây
     public void updateActiveStatusesForProductDiscount() {
         updateActiveBasedOnRealTimeForProductDiscount();
     }
@@ -115,7 +115,7 @@ public class DiscountService {
     }
 
 
-    @Scheduled(fixedRate = 1000) // Cập nhật mỗi 60 giây
+    @Scheduled(fixedRate = 100000000) // Cập nhật mỗi 60 giây
     public void updateActiveCampaigns() {
         updateActiveDiscountCampaigns();
 

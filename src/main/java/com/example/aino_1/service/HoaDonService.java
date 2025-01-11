@@ -1,6 +1,7 @@
 package com.example.aino_1.service;
 
 
+import com.example.aino_1.dto.SanPhamChiTietDto;
 import com.example.aino_1.entity.*;
 import com.example.aino_1.repository.*;
 import jakarta.transaction.Transactional;
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -43,7 +45,16 @@ public class HoaDonService {
     ThongTinTaiKhoaninterface thongTinTaiKhoaninterface;
 
     @Autowired
+    HinhThucThanhToanInterface hinhThucThanhToanInterface;
+
+    @Autowired
     OrderCodeGenerator orderCodeGenerator;
+
+    @Autowired
+    SanPhamChiTietInterface sanPhamChiTietInterface;
+
+    @Autowired
+    SanPhamChiTietService sanPhamChiTietService;
 
     @Transactional
     public Map<String, Object> hamXuLiHoaDon(String username, ThongTinTaiKhoan tttk, HoaDon hd, List<HoaDonChiTiet> lhdct, Voucher voucher) {
@@ -59,6 +70,9 @@ public class HoaDonService {
                 System.out.println("Người dùng " + username + " đăng nhập mua hàng.");
             }
 
+            HinhThucThanhToan httt = hinhThucThanhToanInterface.findByid(hd.getHinhThucThanhToan().getId());
+            hd.setHinhThucThanhToan(httt);
+
             // Lưu thông tin tài khoản vào hóa đơn
             ThongTinTaiKhoan tttkSaveToDB = tttksi.save(tttk);
             hd.setThongTinTaiKhoan(tttkSaveToDB);
@@ -72,6 +86,8 @@ public class HoaDonService {
             // Lưu hóa đơn
             HoaDon savedHoaDon = hdsi.save(hd);
 
+            List<SanPhamChiTietDto> listspctFeetback = new ArrayList<>();
+
             for (HoaDonChiTiet hdct : lhdct) {
                 Integer idSanPhamChiTiet = hdct.getSanPhamChiTiet().getId();
                 Integer soLuong = hdct.getSoLuong();
@@ -84,6 +100,17 @@ public class HoaDonService {
 
                 hdct.setHoaDon(savedHoaDon);
                 HoaDonChiTiet hdcts = hdctsi.save(hdct);
+                int idSPCT = hdcts.getSanPhamChiTiet().getId();
+
+                SanPhamChiTietDto spctDTO = sanPhamChiTietService.getSanPhamChiTietById(idSPCT);
+
+                if (spctDTO != null) {
+                    spctDTO.setSoLuong(hdcts.getSoLuong());
+                    listspctFeetback.add(spctDTO);
+                    System.out.println("Số lượng là: " + spctDTO.getSoLuong());
+                } else {
+                    System.err.println("Không tìm thấy sản phẩm có ID: " + idSPCT);
+                }
 
                 // Gán IMEI cho chi tiết hóa đơn và cập nhật trạng thái
                 List<Imei> imeisToUpdate = listImei.subList(0, soLuong);
@@ -91,6 +118,17 @@ public class HoaDonService {
                     imei.setTrangThai(1); // Đã bán
                     imei.setHdct(hdcts); // Gắn IMEI với hóa đơn chi tiết
                     imeiRepository.save(imei); // Lưu trạng thái mới và liên kết
+                }
+
+                // Kiểm tra nếu số lượng IMEI khả dụng bằng 0 sau khi bán
+                if (imeiService.checkTinhTrang(idSanPhamChiTiet)) {
+                    System.out.println("chạy hàm kiểm tra hết hàng");
+                    // Cập nhật trạng thái sản phẩm chi tiết thành 0 (hết hàng)
+                    SanPhamChiTiet spct = sanPhamChiTietInterface.findById(idSanPhamChiTiet)
+                            .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm chi tiết với ID: " + idSanPhamChiTiet));
+                    spct.setTrangThai(0); // Đặt trạng thái thành hết hàng
+                    sanPhamChiTietInterface.save(spct);
+                    System.out.println("Đã cập nhật trạng thái sản phẩm chi tiết ID: " + idSanPhamChiTiet + " thành hết hàng.");
                 }
 
                 // Nếu người dùng đăng nhập, xóa giỏ hàng chi tiết
@@ -105,7 +143,8 @@ public class HoaDonService {
             // Trả về trạng thái thành công và thông tin hóa đơn
             return Map.of(
                     "success", true,
-                    "hoaDon", savedHoaDon
+                    "hoaDon", savedHoaDon,
+                    "listHDCT",listspctFeetback
             );
 
         } catch (Exception e) {
@@ -117,5 +156,11 @@ public class HoaDonService {
             );
         }
     }
+
+    public List<HoaDon> findListHoaDon(String soDienThoai, String maHoaDon) {
+        // Tìm kiếm hóa đơn theo thông tin
+        return hdsi.findHoaDonByThongTinTaiKhoan_SoDienThoaiOrMaHoaDon(soDienThoai, maHoaDon);
+    }
+
 
 }

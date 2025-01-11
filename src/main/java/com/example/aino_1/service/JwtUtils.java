@@ -40,6 +40,7 @@ public class JwtUtils {
      * @param token JWT token cần xác thực
      * @return Map<String, Object> thông tin giải mã hoặc null nếu token không hợp lệ
      */
+
     public Map<String, Object> validateToken(String token) {
         DecodedJWT decodedJWT = jwtDecoder.decodeToken(token); // Sử dụng JwtDecoder để giải mã token
         if (decodedJWT == null) {

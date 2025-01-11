@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Date;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -27,6 +28,7 @@ public class ReviewService {
     @Autowired
     TaiKhoanNguoiDungInterface taiKhoanNguoiDungRepository;
 
+    // Thêm đánh giá cho hóa đơn đã mua hàng
     public String addReview(String token, Map<String, Object> requestData) {
         // Giải mã token để lấy username
         String username = jwtUtils.validateToken(token.replace("Bearer ", ""))
@@ -76,6 +78,11 @@ public class ReviewService {
 
         reviewRepository.save(review);
         return "Đánh giá đã được thêm thành công.";
+    }
+
+    public List<Review> getReviewList(Integer idSPCT) {
+         List<Review> list = reviewRepository.findAllByHoaDonChiTiet_SanPhamChiTietId(idSPCT);
+         return list;
     }
 
 }

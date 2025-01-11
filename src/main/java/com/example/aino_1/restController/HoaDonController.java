@@ -121,10 +121,34 @@ public class HoaDonController {
     }
 
     // sét trang thái thanh toán là 0 khi khác hàng hủy hóa đơn
-    @PostMapping("/huyHoaDon")
+        @PostMapping("/huyHoaDon")
         public void huyHoaDon(@RequestBody HoaDon hoaDon){
         hoaDon.setTrangThai(0);
         hdsi.save(hoaDon);
+        }
+
+        // Tra cứu hóa đơn
+        @GetMapping("/traCuu")
+        public ResponseEntity<?> traCuuDonHang(
+                @RequestParam(required = false) String soDienThoai,
+                @RequestParam(required = false) String maHoaDon) {
+
+            // Xác thực tham số đầu vào
+            if ((soDienThoai == null || soDienThoai.isBlank()) && (maHoaDon == null || maHoaDon.isBlank())) {
+                return ResponseEntity.badRequest().body("Vui lòng cung cấp ít nhất một thông tin: số điện thoại hoặc mã hóa đơn.");
+            }
+
+            // Gọi service để tìm kiếm hóa đơn
+            List<HoaDon> listHoaDon = hdsv.findListHoaDon(soDienThoai, maHoaDon);
+
+            // Xử lý nếu không tìm thấy dữ liệu
+            if (listHoaDon.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("Không tìm thấy hóa đơn với thông tin đã cung cấp.");
+            }
+
+            // Trả về kết quả
+            return ResponseEntity.ok(listHoaDon);
         }
 
 }

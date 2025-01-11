@@ -16,11 +16,11 @@ public class ProductDiscount {
     private Integer id;
 
     @OneToOne
-    @JoinColumn(name = "product_id", nullable = false)
+    @JoinColumn(name = "product_id", nullable = true)
     private SanPhamChiTiet product;
 
     @ManyToOne
-    @JoinColumn(name = "discount_campaign_id", nullable = false)
+    @JoinColumn(name = "discount_campaign_id", nullable = true)
     private DiscountCampaign discountCampaign;
 
     @Column(name = "active", nullable = false)

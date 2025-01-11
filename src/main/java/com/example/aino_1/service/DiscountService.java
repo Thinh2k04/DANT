@@ -35,6 +35,9 @@ public class DiscountService {
     @Autowired
     private ImeiService imeiService;
 
+    @Autowired
+    private SanPhamChiTietService sanPhamChiTietService;
+
     public List<SanPhamChiTietDto> getActiveDiscountsOrProducts() {
         LocalDateTime now = LocalDateTime.now();
 
@@ -53,7 +56,7 @@ public class DiscountService {
 
         if (campaigns == null || campaigns.isEmpty()) {
             // Không có chiến dịch giảm giá đang hoạt động, lấy danh sách sản phẩm
-            List<SanPhamChiTietDto> products = sanPhamChiTietInterface.getAllDTO();
+            List<SanPhamChiTietDto> products = sanPhamChiTietService.getListForHome();
 
             // Xóa thông tin giảm giá trên sản phẩm
             for (SanPhamChiTietDto product : products) {

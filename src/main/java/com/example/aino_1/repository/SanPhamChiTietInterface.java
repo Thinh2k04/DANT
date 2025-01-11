@@ -45,7 +45,7 @@ public interface SanPhamChiTietInterface extends JpaRepository<SanPhamChiTiet, I
                     thuongHieu.ten,
                     CONCAT('Laptop ', sp.tenSanPham, ' (', cpu.ten, ', ', ram.dungLuong, 'GB, ', olt.dungLuong, 'GB, ',
                             ktlt.kichThuoc, ', ', mh.doPhanGiai, ', Win11)')
-                )
+                    )
                     FROM SanPhamChiTiet spct
                     JOIN SanPham sp ON spct.sanPham.id = sp.id
                     INNER JOIN ChatLieu cl ON cl.id = sp.chatLieu.id
@@ -57,8 +57,8 @@ public interface SanPhamChiTietInterface extends JpaRepository<SanPhamChiTiet, I
                     INNER JOIN OLuuTru olt ON olt.id = spct.oLuuTru.id
                     INNER JOIN Cpu cpu ON cpu.id = spct.cpu.id
                     INNER JOIN Gpu gpu ON gpu.id = spct.gpu.id
-                    INNER JOIN ProductDiscount pd ON pd.product.id = spct.id
-                    INNER JOIN DiscountCampaign dc ON dc.id = pd.discountCampaign.id
+                    LEFT JOIN ProductDiscount pd ON pd.product.id = spct.id
+                    LEFT JOIN DiscountCampaign dc ON dc.id = pd.discountCampaign.id
                     INNER JOIN ThuongHieu thuongHieu ON thuongHieu.id = sp.thuongHieu.id
                     """
     )
@@ -108,8 +108,8 @@ public interface SanPhamChiTietInterface extends JpaRepository<SanPhamChiTiet, I
                     INNER JOIN OLuuTru olt ON olt.id = spct.oLuuTru.id
                     INNER JOIN Cpu cpu ON cpu.id = spct.cpu.id
                     INNER JOIN Gpu gpu ON gpu.id = spct.gpu.id
-                    INNER JOIN ProductDiscount pd ON pd.product.id = spct.id
-                    INNER JOIN DiscountCampaign dc ON dc.id = pd.discountCampaign.id
+                    LEFT JOIN ProductDiscount pd ON pd.product.id = spct.id
+                    LEFT JOIN DiscountCampaign dc ON dc.id = pd.discountCampaign.id
                     INNER JOIN ThuongHieu thuongHieu ON thuongHieu.id = sp.thuongHieu.id
                 where spct.id = :id
                 """
@@ -147,7 +147,7 @@ public interface SanPhamChiTietInterface extends JpaRepository<SanPhamChiTiet, I
                     thuongHieu.ten,
                     CONCAT('Laptop ', sp.tenSanPham, ' (', cpu.ten, ', ', ram.dungLuong, 'GB, ', olt.dungLuong, 'GB, ',
                             ktlt.kichThuoc, ', ', mh.doPhanGiai, ', Win11)')
-                )
+                    )
                     FROM SanPhamChiTiet spct
                     JOIN SanPham sp ON spct.sanPham.id = sp.id
                     INNER JOIN ChatLieu cl ON cl.id = sp.chatLieu.id
@@ -159,8 +159,8 @@ public interface SanPhamChiTietInterface extends JpaRepository<SanPhamChiTiet, I
                     INNER JOIN OLuuTru olt ON olt.id = spct.oLuuTru.id
                     INNER JOIN Cpu cpu ON cpu.id = spct.cpu.id
                     INNER JOIN Gpu gpu ON gpu.id = spct.gpu.id
-                    INNER JOIN ProductDiscount pd ON pd.product.id = spct.id
-                    INNER JOIN DiscountCampaign dc ON dc.id = pd.discountCampaign.id
+                    LEFT JOIN ProductDiscount pd ON pd.product.id = spct.id
+                    LEFT JOIN DiscountCampaign dc ON dc.id = pd.discountCampaign.id
                     INNER JOIN ThuongHieu thuongHieu ON thuongHieu.id = sp.thuongHieu.id                                                  
                 where sp.id = :id
                  """
@@ -215,8 +215,8 @@ public interface SanPhamChiTietInterface extends JpaRepository<SanPhamChiTiet, I
                     INNER JOIN OLuuTru olt ON olt.id = spct.oLuuTru.id
                     INNER JOIN Cpu cpu ON cpu.id = spct.cpu.id
                     INNER JOIN Gpu gpu ON gpu.id = spct.gpu.id
-                    INNER JOIN ProductDiscount pd ON pd.product.id = spct.id
-                    INNER JOIN DiscountCampaign dc ON dc.id = pd.discountCampaign.id
+                    LEFT JOIN ProductDiscount pd ON pd.product.id = spct.id
+                    LEFT JOIN DiscountCampaign dc ON dc.id = pd.discountCampaign.id
                     INNER JOIN ThuongHieu thuongHieu ON thuongHieu.id = sp.thuongHieu.id
                 WHERE sp.tenSanPham LIKE %:tuKhoaTimKiem%
                 OR CAST(ram.dungLuong AS string) LIKE %:tuKhoaTimKiem%
@@ -280,8 +280,8 @@ public interface SanPhamChiTietInterface extends JpaRepository<SanPhamChiTiet, I
                     INNER JOIN OLuuTru olt ON olt.id = spct.oLuuTru.id
                     INNER JOIN Cpu cpu ON cpu.id = spct.cpu.id
                     INNER JOIN Gpu gpu ON gpu.id = spct.gpu.id
-                    INNER JOIN ProductDiscount pd ON pd.product.id = spct.id
-                    INNER JOIN DiscountCampaign dc ON dc.id = pd.discountCampaign.id
+                    LEFT JOIN ProductDiscount pd ON pd.product.id = spct.id
+                    LEFT JOIN DiscountCampaign dc ON dc.id = pd.discountCampaign.id
                     INNER JOIN ThuongHieu thuongHieu ON thuongHieu.id = sp.thuongHieu.id
                     WHERE (:minPrice IS NULL OR spct.donGia >= :minPrice)
                           AND (:maxPrice IS NULL OR spct.donGia <= :maxPrice)
@@ -302,128 +302,5 @@ public interface SanPhamChiTietInterface extends JpaRepository<SanPhamChiTiet, I
             @Param("manHinh") Integer manHinh
     );
 
-//    @Query(
-//            """
-//                    SELECT new com.example.aino_1.dto.SanPhamChiTietDto(
-//                    spct.id, spct.soLuong, sp.tenSanPham, cl.tenChatLieu, spct.gioiThieu,
-//                    ram.dungLuong, olt.dungLuong, mh.doPhanGiai, ktlt.kichThuoc,
-//                    mh.tamNen, mh.tanSoQuet, cpu.soNhan, gpu.kienTrucCongNghe,
-//                    cpu.ten, spct.maSpct, spct.hinhAnhMinhHoa, spct.donGia, sp.id, gpu.ten,
-//                    sp.trongLuong, sp.pin, sp.thoiHanBaoHanh, spct.trangThai, thuongHieu.ten,
-//                    CONCAT(
-//                        'Laptop ', sp.tenSanPham, ' (', cpu.ten, ', ',
-//                        ram.dungLuong, 'GB, ', olt.dungLuong, 'GB, ',
-//                        ktlt.kichThuoc, ', ', mh.doPhanGiai, ', Win11)'
-//                    )
-//                    )
-//                    FROM SanPhamChiTiet spct
-//                     JOIN SanPham sp ON spct.sanPham.id = sp.id
-//                     INNER JOIN ChatLieu cl ON cl.id = sp.chatLieu.id
-//                     INNER JOIN LoaiSanPham lsp ON lsp.id = sp.loaiSanPham.id
-//                     INNER JOIN KichThuocLapTop ktlt ON ktlt.id = sp.kichThuocLaptop.id
-//                     INNER JOIN NguonNhap nn ON nn.id = sp.nguonNhap.id
-//                     INNER JOIN ManHinh mh ON mh.id = spct.manHinh.id
-//                     INNER JOIN Ram ram ON ram.id = spct.ram.id
-//                     INNER JOIN OLuuTru olt ON olt.id = spct.oLuuTru.id
-//                     INNER JOIN Cpu cpu ON cpu.id = spct.cpu.id
-//                     INNER JOIN Gpu gpu ON gpu.id = spct.gpu.id
-//                     inner join ThuongHieu thuongHieu on thuongHieu.id = sp.thuongHieu.id
-//                    WHERE thuongHieu.ten = :hangSanXuat
-//
-//"""
-//    )
-//    List<SanPhamChiTietDto> locTheoHangSanXuat(@Param("hangSanXuat") String hangSanXuat);
-//
-//    @Query(
-//            """
-//            SELECT new com.example.aino_1.dto.SanPhamChiTietDto(
-//            spct.id, spct.soLuong, sp.tenSanPham, cl.tenChatLieu, spct.gioiThieu,
-//            ram.dungLuong, olt.dungLuong, mh.doPhanGiai, ktlt.kichThuoc,
-//            mh.tamNen, mh.tanSoQuet, cpu.soNhan, gpu.kienTrucCongNghe,
-//            cpu.ten, spct.maSpct, spct.hinhAnhMinhHoa, spct.donGia, sp.id, gpu.ten,
-//            sp.trongLuong, sp.pin, sp.thoiHanBaoHanh, spct.trangThai, thuongHieu.ten,
-//                CONCAT(
-//                        'Laptop ', sp.tenSanPham, ' (', cpu.ten, ', ',
-//                ram.dungLuong, 'GB, ', olt.dungLuong, 'GB, ',
-//                ktlt.kichThuoc, ', ', mh.doPhanGiai, ', Win11)'
-//                )
-//            )
-//            FROM SanPhamChiTiet spct
-//            JOIN SanPham sp ON spct.sanPham.id = sp.id
-//            INNER JOIN ChatLieu cl ON cl.id = sp.chatLieu.id
-//            INNER JOIN LoaiSanPham lsp ON lsp.id = sp.loaiSanPham.id
-//            INNER JOIN KichThuocLapTop ktlt ON ktlt.id = sp.kichThuocLaptop.id
-//            INNER JOIN NguonNhap nn ON nn.id = sp.nguonNhap.id
-//            INNER JOIN ManHinh mh ON mh.id = spct.manHinh.id
-//            INNER JOIN Ram ram ON ram.id = spct.ram.id
-//            INNER JOIN OLuuTru olt ON olt.id = spct.oLuuTru.id
-//            INNER JOIN Cpu cpu ON cpu.id = spct.cpu.id
-//            INNER JOIN Gpu gpu ON gpu.id = spct.gpu.id
-//            inner join ThuongHieu thuongHieu on thuongHieu.id = sp.thuongHieu.id
-//            WHERE olt.dungLuong = :oLuuTru
-//    """
-//    )
-//    List<SanPhamChiTietDto> locTheoOLuuTru(@Param("oLuuTru") Integer oLuuTru);
-//
-//    @Query(
-//            """
-//                    SELECT new com.example.aino_1.dto.SanPhamChiTietDto(
-//                    spct.id, spct.soLuong, sp.tenSanPham, cl.tenChatLieu, spct.gioiThieu,
-//                    ram.dungLuong, olt.dungLuong, mh.doPhanGiai, ktlt.kichThuoc,
-//                    mh.tamNen, mh.tanSoQuet, cpu.soNhan, gpu.kienTrucCongNghe,
-//                    cpu.ten, spct.maSpct, spct.hinhAnhMinhHoa, spct.donGia, sp.id, gpu.ten,
-//                    sp.trongLuong, sp.pin, sp.thoiHanBaoHanh, spct.trangThai, thuongHieu.ten,
-//                    CONCAT(
-//                        'Laptop ', sp.tenSanPham, ' (', cpu.ten, ', ',
-//                        ram.dungLuong, 'GB, ', olt.dungLuong, 'GB, ',
-//                        ktlt.kichThuoc, ', ', mh.doPhanGiai, ', Win11)'
-//                    )
-//                    )
-//                    FROM SanPhamChiTiet spct
-//                     JOIN SanPham sp ON spct.sanPham.id = sp.id
-//                     INNER JOIN ChatLieu cl ON cl.id = sp.chatLieu.id
-//                     INNER JOIN LoaiSanPham lsp ON lsp.id = sp.loaiSanPham.id
-//                     INNER JOIN KichThuocLapTop ktlt ON ktlt.id = sp.kichThuocLaptop.id
-//                     INNER JOIN NguonNhap nn ON nn.id = sp.nguonNhap.id
-//                     INNER JOIN ManHinh mh ON mh.id = spct.manHinh.id
-//                     INNER JOIN Ram ram ON ram.id = spct.ram.id
-//                     INNER JOIN OLuuTru olt ON olt.id = spct.oLuuTru.id
-//                     INNER JOIN Cpu cpu ON cpu.id = spct.cpu.id
-//                     INNER JOIN Gpu gpu ON gpu.id = spct.gpu.id
-//                     inner join ThuongHieu thuongHieu on thuongHieu.id = sp.thuongHieu.id
-//                    WHERE cpu.ten = :congNgheCPU
-//                    """
-//    )
-//    List<SanPhamChiTietDto> locTheoCongNgheCPU(@Param("congNgheCPU") String congNgheCPU);
-//
-//    @Query(
-//            """
-//                    SELECT new com.example.aino_1.dto.SanPhamChiTietDto(
-//                    spct.id, spct.soLuong, sp.tenSanPham, cl.tenChatLieu, spct.gioiThieu,
-//                    ram.dungLuong, olt.dungLuong, mh.doPhanGiai, ktlt.kichThuoc,
-//                    mh.tamNen, mh.tanSoQuet, cpu.soNhan, gpu.kienTrucCongNghe,
-//                    cpu.ten, spct.maSpct, spct.hinhAnhMinhHoa, spct.donGia, sp.id, gpu.ten,
-//                    sp.trongLuong, sp.pin, sp.thoiHanBaoHanh, spct.trangThai, thuongHieu.ten,
-//                    CONCAT(
-//                        'Laptop ', sp.tenSanPham, ' (', cpu.ten, ', ',
-//                        ram.dungLuong, 'GB, ', olt.dungLuong, 'GB, ',
-//                        ktlt.kichThuoc, ', ', mh.doPhanGiai, ', Win11)'
-//                    )
-//                    )
-//                    FROM SanPhamChiTiet spct
-//                     JOIN SanPham sp ON spct.sanPham.id = sp.id
-//                     INNER JOIN ChatLieu cl ON cl.id = sp.chatLieu.id
-//                     INNER JOIN LoaiSanPham lsp ON lsp.id = sp.loaiSanPham.id
-//                     INNER JOIN KichThuocLapTop ktlt ON ktlt.id = sp.kichThuocLaptop.id
-//                     INNER JOIN NguonNhap nn ON nn.id = sp.nguonNhap.id
-//                     INNER JOIN ManHinh mh ON mh.id = spct.manHinh.id
-//                     INNER JOIN Ram ram ON ram.id = spct.ram.id
-//                     INNER JOIN OLuuTru olt ON olt.id = spct.oLuuTru.id
-//                     INNER JOIN Cpu cpu ON cpu.id = spct.cpu.id
-//                     INNER JOIN Gpu gpu ON gpu.id = spct.gpu.id
-//                     inner join ThuongHieu thuongHieu on thuongHieu.id = sp.thuongHieu.id
-//                    WHERE ram.dungLuong = :ram
-//                    """
-//    )
-//    List<SanPhamChiTietDto> locTheoRam(@Param("ram") Integer ram);
+
 }

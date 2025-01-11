@@ -153,7 +153,7 @@ const AdminDashboard = () => {
       const labels = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'];
       const data = Array(12).fill(0);
 
-      // Lấy dữ liệu cho t�ng tháng trong năm
+      // Lấy dữ liệu cho từng tháng trong năm
       for (let month = 1; month <= 12; month++) {
         const formattedMonth = month.toString().padStart(2, '0');
         try {
@@ -285,185 +285,162 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex bg-gray-100">
       <NavbarAdmin />
-      <main className="flex-1 bg-gray-50 p-8">
-        {/* Header Section */}
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h2 className="text-3xl font-bold text-gray-800">Thống kê doanh thu</h2>
-            <p className="text-gray-600 mt-1">
-              Ngày hiện tại: {currentDate.toLocaleDateString('vi-VN')}
-            </p>
-          </div>
-          <div className="bg-white rounded-lg shadow-sm p-4">
-            <p className="text-sm text-gray-600 mb-1">Tổng doanh thu</p>
-            <p className="text-2xl font-bold text-green-600">
-              {totalRevenue.toLocaleString('vi-VN')} VND
-            </p>
-          </div>
-        </div>
-
-        {/* View Type Selection */}
-        <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
-          <div className="flex flex-col sm:flex-row gap-6">
-            <div className="flex gap-3">
-              <button
-                onClick={() => setViewType('day')}
-                className={`px-6 py-2.5 rounded-lg transition-all duration-200 ${
-                  viewType === 'day'
-                    ? 'bg-blue-600 text-white shadow-md'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                Theo ngày
-              </button>
-              <button
-                onClick={() => setViewType('month')}
-                className={`px-6 py-2.5 rounded-lg transition-all duration-200 ${
-                  viewType === 'month'
-                    ? 'bg-blue-600 text-white shadow-md'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                Theo tháng
-              </button>
-              <button
-                onClick={() => setViewType('year')}
-                className={`px-6 py-2.5 rounded-lg transition-all duration-200 ${
-                  viewType === 'year'
-                    ? 'bg-blue-600 text-white shadow-md'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                Theo năm
-              </button>
+      <main className="flex-1 p-8 overflow-hidden">
+        <div className="max-w-7xl mx-auto">
+          {/* Header Section */}
+          <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+              <div>
+                <h1 className="text-2xl font-bold text-gray-800">Thống kê doanh thu</h1>
+                <p className="text-sm text-gray-500 mt-1">
+                  Ngày hiện tại: {currentDate.toLocaleDateString('vi-VN')}
+                </p>
+              </div>
+              <div className="bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-lg p-4 text-white">
+                <p className="text-sm opacity-90 mb-1">Tổng doanh thu</p>
+                <p className="text-2xl font-bold">
+                  {totalRevenue.toLocaleString('vi-VN')} VND
+                </p>
+              </div>
             </div>
+          </div>
 
-            <div className="flex gap-4 items-center">
-              {viewType === 'day' ? (
-                <div className="flex items-center gap-3">
-                  <label className="font-medium text-gray-700">Chọn ngày:</label>
-                  <input
-                    type="date"
-                    value={selectedDate}
-                    onChange={(e) => setSelectedDate(e.target.value)}
-                    max={currentDate.toISOString().split('T')[0]}
-                    className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-              ) : (
-                <>
+          {/* View Type Selection */}
+          <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <div className="flex flex-col lg:flex-row gap-6">
+              <div className="flex gap-2">
+                {['day', 'month', 'year'].map((type) => (
+                  <button
+                    key={type}
+                    onClick={() => setViewType(type)}
+                    className={`px-6 py-2.5 rounded-lg transition-all duration-200 text-sm font-medium ${
+                      viewType === type
+                        ? 'bg-indigo-600 text-white shadow-md'
+                        : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                    }`}
+                  >
+                    {type === 'day' ? 'Theo ngày' : type === 'month' ? 'Theo tháng' : 'Theo năm'}
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex flex-wrap gap-4 items-center">
+                {viewType === 'day' ? (
                   <div className="flex items-center gap-3">
-                    <label className="font-medium text-gray-700">Năm:</label>
-                    <select 
-                      value={selectedYear}
-                      onChange={handleYearChange}
-                      className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                      {yearOptions.map(year => (
-                        <option key={year} value={year}>{year}</option>
-                      ))}
-                    </select>
+                    <span className="text-sm font-medium text-gray-700">Chọn ngày:</span>
+                    <input
+                      type="date"
+                      value={selectedDate}
+                      onChange={(e) => setSelectedDate(e.target.value)}
+                      max={currentDate.toISOString().split('T')[0]}
+                      className="border border-gray-200 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    />
                   </div>
-                  
-                  {viewType === 'month' && (
+                ) : (
+                  <>
                     <div className="flex items-center gap-3">
-                      <label className="font-medium text-gray-700">Tháng:</label>
+                      <span className="text-sm font-medium text-gray-700">Năm:</span>
                       <select 
-                        value={selectedMonth}
-                        onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
-                        className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        value={selectedYear}
+                        onChange={handleYearChange}
+                        className="border border-gray-200 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
                       >
-                        {getMonthOptions(selectedYear).map(month => (
-                          <option key={month.value} value={month.value}>{month.label}</option>
+                        {yearOptions.map(year => (
+                          <option key={year} value={year}>{year}</option>
                         ))}
                       </select>
                     </div>
-                  )}
-                </>
-              )}
+                    
+                    {viewType === 'month' && (
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm font-medium text-gray-700">Tháng:</span>
+                        <select 
+                          value={selectedMonth}
+                          onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
+                          className="border border-gray-200 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
+                        >
+                          {getMonthOptions(selectedYear).map(month => (
+                            <option key={month.value} value={month.value}>{month.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Statistics Details */}
-        <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
-          <h3 className="text-xl font-semibold text-gray-800 mb-6">Chi tiết doanh thu</h3>
-          <div className="space-y-6">
-            {viewType === 'day' ? (
-              <>
-                <div className="grid grid-cols-2 gap-8">
-                  <div className="p-6 bg-gray-50 rounded-lg">
-                    <p className="text-gray-600 mb-2">Doanh thu ngày</p>
-                    <p className={`text-2xl font-bold ${dailyStats ? 'text-green-600' : 'text-orange-500'}`}>
-                      {dailyStats ? `${dailyStats.tongTien.toLocaleString('vi-VN')} VND` : 'Chưa có doanh thu'}
-                    </p>
-                  </div>
-                  <div className="p-6 bg-gray-50 rounded-lg">
-                    <p className="text-gray-600 mb-2">Thời gian</p>
-                    <p className="text-2xl font-bold text-blue-600">
-                      {new Date(selectedDate).toLocaleDateString('vi-VN')}
-                    </p>
-                  </div>
-                </div>
-                {!dailyStats && (
-                  <div className="mt-4 p-4 bg-orange-50 border border-orange-200 text-orange-700 rounded-lg">
-                    <p className="text-center">
-                      Ngày {new Date(selectedDate).toLocaleDateString('vi-VN')} chưa bán được sản phẩm nào!
-                    </p>
-                  </div>
-                )}
-              </>
-            ) : viewType === 'month' ? (
-              <>
-                <div className="grid grid-cols-2 gap-8">
-                  <div className="p-6 bg-gray-50 rounded-lg">
-                    <p className="text-gray-600 mb-2">Doanh thu tháng {selectedMonth}/{selectedYear}</p>
-                    <p className={`text-2xl font-bold ${monthlyStats ? 'text-green-600' : 'text-orange-500'}`}>
-                      {monthlyStats ? `${monthlyStats.tongTien.toLocaleString('vi-VN')} VND` : 'Chưa có doanh thu'}
-                    </p>
-                  </div>
-                  <div className="p-6 bg-gray-50 rounded-lg">
-                    <p className="text-gray-600 mb-2">Thời gian</p>
-                    <p className="text-2xl font-bold text-blue-600">
-                      {monthlyStats ? monthlyStats.mocTG : '-'}
-                    </p>
-                  </div>
-                </div>
-                {!monthlyStats && (
-                  <div className="mt-4 p-4 bg-orange-50 border border-orange-200 text-orange-700 rounded-lg">
-                    <p className="text-center">
-                      Tháng {selectedMonth}/{selectedYear} chưa có doanh thu!
-                    </p>
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="grid grid-cols-2 gap-8">
-                <div className="p-6 bg-gray-50 rounded-lg">
-                  <p className="text-gray-600 mb-2">Doanh thu năm {selectedYear}</p>
-                  <p className="text-2xl font-bold text-green-600">
-                    {yearlyStats ? yearlyStats.tongTien.toLocaleString('vi-VN') : '0'} VND
-                  </p>
-                </div>
-                <div className="p-6 bg-gray-50 rounded-lg">
-                  <p className="text-gray-600 mb-2">Năm</p>
-                  <p className="text-2xl font-bold text-blue-600">
-                    {yearlyStats ? yearlyStats.mocTG : '-'}
-                  </p>
-                </div>
+          {/* Statistics Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div className="bg-white rounded-xl shadow-sm p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-800">
+                  {viewType === 'day' ? 'Doanh thu ngày' : 
+                   viewType === 'month' ? `Doanh thu tháng ${selectedMonth}/${selectedYear}` :
+                   `Doanh thu năm ${selectedYear}`}
+                </h3>
+                <span className="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-1 rounded-full">
+                  Thống kê
+                </span>
               </div>
-            )}
-          </div>
-        </div>
+              <p className={`text-3xl font-bold ${
+                viewType === 'day' ? 
+                  (dailyStats ? 'text-green-600' : 'text-orange-500') :
+                viewType === 'month' ?
+                  (monthlyStats ? 'text-green-600' : 'text-orange-500') :
+                  'text-green-600'
+              }`}>
+                {viewType === 'day' ? 
+                  (dailyStats ? `${dailyStats.tongTien.toLocaleString('vi-VN')}` : '0') :
+                viewType === 'month' ?
+                  (monthlyStats ? `${monthlyStats.tongTien.toLocaleString('vi-VN')}` : '0') :
+                  (yearlyStats ? yearlyStats.tongTien.toLocaleString('vi-VN') : '0')} VND
+              </p>
+            </div>
 
-        {/* Revenue Chart */}
-        {viewType !== 'day' && (
-          <div className="bg-white rounded-xl shadow-sm p-6">
-            <Line data={chartData} options={chartOptions} />
+            <div className="bg-white rounded-xl shadow-sm p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-800">Thời gian</h3>
+                <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-1 rounded-full">
+                  Khoảng thời gian
+                </span>
+              </div>
+              <p className="text-3xl font-bold text-blue-600">
+                {viewType === 'day' ? 
+                  new Date(selectedDate).toLocaleDateString('vi-VN') :
+                viewType === 'month' ?
+                  (monthlyStats ? monthlyStats.mocTG : '-') :
+                  (yearlyStats ? yearlyStats.mocTG : '-')}
+              </p>
+            </div>
           </div>
-        )}
+
+          {/* Warning Message */}
+          {((viewType === 'day' && !dailyStats) || (viewType === 'month' && !monthlyStats)) && (
+            <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 mb-6">
+              <div className="flex items-center gap-3">
+                <svg className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <p className="text-sm text-orange-700">
+                  {viewType === 'day' ? 
+                    `Ngày ${new Date(selectedDate).toLocaleDateString('vi-VN')} chưa có doanh thu!` :
+                    `Tháng ${selectedMonth}/${selectedYear} chưa có doanh thu!`}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Revenue Chart */}
+          {viewType !== 'day' && (
+            <div className="bg-white rounded-xl shadow-sm p-6">
+              <Line data={chartData} options={chartOptions} />
+            </div>
+          )}
+        </div>
       </main>
     </div>
   );

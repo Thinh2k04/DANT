@@ -17,6 +17,10 @@ const BanHangTaiQuay = () => {
     soDienThoai: '',
     email: ''
   });
+  const [stores, setStores] = useState([]);
+  const [selectedStore, setSelectedStore] = useState(null);
+  const [voucherCode, setVoucherCode] = useState('');
+  const [voucherInfo, setVoucherInfo] = useState(null);
 
   // Fetch sản phẩm từ API
   useEffect(() => {
@@ -90,8 +94,10 @@ const BanHangTaiQuay = () => {
           thoiGianLapHoaDon: new Date().toISOString(),
           tongTien: calculateTotal(),
           hinhThucThanhToan: {
-            id: 1 // Thanh toán tiền mặt
+            id: 1
           },
+          cuaHang: selectedStore,
+          voucher: voucherInfo,
           trangThaiThanhToan: 1,
           trangThai: 1
         },
@@ -104,7 +110,7 @@ const BanHangTaiQuay = () => {
         }))
       };
 
-      const response = await axios.put('http://localhost:8080/rest/hoa_don/addHD', orderData);
+      const response = await axios.post('http://localhost:8080/rest/hoa_don/addHD', orderData);
       
       if (response.status === 200) {
         toast.success('Thanh toán thành công!');
@@ -149,46 +155,91 @@ const BanHangTaiQuay = () => {
     }
   };
 
+  // Thêm useEffect để fetch danh sách cửa hàng
+  useEffect(() => {
+    const fetchStores = async () => {
+      try {
+        const response = await axios.get('http://localhost:8080/rest/cuaHang/getAll');
+        setStores(response.data);
+        if (response.data.length > 0) {
+          setSelectedStore(response.data[0]); // Mặc định chọn cửa hàng đầu tiên
+        }
+      } catch (error) {
+        console.error('Error fetching stores:', error);
+        toast.error('Lỗi khi tải danh sách cửa hàng');
+      }
+    };
+    fetchStores();
+  }, []);
+
+  // Thêm hàm check voucher
+  const checkVoucher = async (code) => {
+    try {
+      const response = await axios.get(`http://localhost:8080/rest/voucher/${code}`);
+      if (response.data) {
+        setVoucherInfo(response.data);
+        toast.success('Áp dụng voucher thành công!');
+      }
+    } catch (error) {
+      toast.error('Voucher không hợp lệ hoặc đã hết hạn');
+      setVoucherInfo(null);
+    }
+  };
+
   return (
-    <div className="min-h-screen flex bg-[#f0f2f5]">
+    <div className="flex h-screen bg-[#f0f2f5] overflow-hidden">
       <NavbarAdmin />
       <ToastContainer />
-      <main className="flex-1 p-8">
-        {/* Header Section */}
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
-              <BiLaptop className="text-blue-600" />
-              Bán Hàng Tại Quầy
-            </h1>
-            <p className="text-gray-500 mt-2">Quản lý bán laptop trực tiếp tại cửa hàng</p>
-          </div>
+      
+      {/* Main Content */}
+      <main className="flex-1 overflow-hidden">
+        {/* Header */}
+        <div className="p-6 border-b bg-white">
+          <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+            <BiLaptop className="text-blue-600" />
+            Bán Hàng Tại Quầy
+          </h1>
+          <p className="text-gray-500 mt-1">Quản lý bán laptop trực tiếp tại cửa hàng</p>
         </div>
 
-        <div className="grid grid-cols-4 gap-8">
-          <div className="col-span-3">
+        {/* Content Area */}
+        <div className="flex h-[calc(100vh-116px)]">
+          {/* Product Section */}
+          <div className="flex-1 overflow-y-auto p-6">
             <SearchBar 
               searchTerm={searchTerm} 
               setSearchTerm={setSearchTerm} 
             />
-            <ProductGrid 
-              products={products}
-              searchTerm={searchTerm}
-              addToCart={addToCart}
-            />
+            <div className="mt-6">
+              <ProductGrid 
+                products={products}
+                searchTerm={searchTerm}
+                addToCart={addToCart}
+              />
+            </div>
           </div>
 
-          <ShoppingCart 
-            cart={cart}
-            customerInfo={customerInfo}
-            setCustomerInfo={setCustomerInfo}
-            updateQuantity={updateQuantity}
-            removeFromCart={removeFromCart}
-            calculateTotal={calculateTotal}
-            handleCheckout={handleCheckout}
-            loading={loading}
-            checkCustomerInfo={checkCustomerInfo}
-          />
+          {/* Cart Section - Fixed width */}
+          <div className="w-[380px] border-l bg-white overflow-y-auto">
+            <ShoppingCart 
+              cart={cart}
+              customerInfo={customerInfo}
+              setCustomerInfo={setCustomerInfo}
+              updateQuantity={updateQuantity}
+              removeFromCart={removeFromCart}
+              calculateTotal={calculateTotal}
+              handleCheckout={handleCheckout}
+              loading={loading}
+              checkCustomerInfo={checkCustomerInfo}
+              stores={stores}
+              selectedStore={selectedStore}
+              setSelectedStore={setSelectedStore}
+              voucherCode={voucherCode}
+              setVoucherCode={setVoucherCode}
+              checkVoucher={checkVoucher}
+              voucherInfo={voucherInfo}
+            />
+          </div>
         </div>
       </main>
     </div>

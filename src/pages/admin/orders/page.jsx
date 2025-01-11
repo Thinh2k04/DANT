@@ -5,7 +5,6 @@ import NavbarAdmin from '../Navbar/NavbarAdmin';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import { webSocketService } from '../../../utils/websocket';
 
 const OrderManagement = () => {
   const [orders, setOrders] = useState([]);
@@ -13,87 +12,47 @@ const OrderManagement = () => {
   const [orderDetails, setOrderDetails] = useState([]);
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState(null);
+  const [isPolling, setIsPolling] = useState(true);
 
   useEffect(() => {
-    let isSubscribed = true;
-
-    const initializeWebSocket = async () => {
+    const fetchOrders = async () => {
       try {
-        await webSocketService.connect();
-        
-        if (isSubscribed) {
-          await webSocketService.subscribe('/topic/orders', (data) => {
-            const sortedOrders = data.sort((a, b) => 
-              new Date(b.thoiGianLapHoaDon) - new Date(a.thoiGianLapHoaDon)
-            );
-            setOrders(sortedOrders);
-            toast.info('Danh sách đơn hàng đã được cập nhật!', {
-              position: "top-right",
-              autoClose: 2000
-            });
-          });
-        }
+        const response = await fetch('http://localhost:8080/rest/hoa_don/getAll');
+        if (!response.ok) throw new Error('Failed to fetch orders');
+        const data = await response.json();
+        const sortedOrders = data.sort((a, b) => 
+          new Date(b.thoiGianLapHoaDon) - new Date(a.thoiGianLapHoaDon)
+        );
+        setOrders(sortedOrders);
       } catch (error) {
-        console.error('Error initializing WebSocket:', error);
-        toast.error('Không thể kết nối tới server', {
+        console.error('Error fetching orders:', error);
+        toast.error('Không thể tải danh sách đơn hàng', {
           position: "top-right",
           autoClose: 3000
         });
       }
     };
 
-    // Fetch initial data
-    const fetchOrders = async () => {
-      try {
-        const response = await fetch('http://localhost:8080/rest/hoa_don/getAll');
-        if (!response.ok) throw new Error('Failed to fetch orders');
-        const data = await response.json();
-        if (isSubscribed) {
-          const sortedOrders = data.sort((a, b) => 
-            new Date(b.thoiGianLapHoaDon) - new Date(a.thoiGianLapHoaDon)
-          );
-          setOrders(sortedOrders);
-        }
-      } catch (error) {
-        console.error('Error fetching orders:', error);
-        if (isSubscribed) {
-          toast.error('Không thể tải danh sách đơn hàng', {
-            position: "top-right",
-            autoClose: 3000
-          });
-        }
-      }
-    };
-
     fetchOrders();
-    initializeWebSocket();
+
+    let pollInterval;
+    if (isPolling) {
+      pollInterval = setInterval(fetchOrders, 10000);
+    }
 
     return () => {
-      isSubscribed = false;
-      webSocketService.unsubscribe('/topic/orders');
-      webSocketService.disconnect();
-    };
-  }, []);
-
-  useEffect(() => {
-    const handleWebSocket = async () => {
-      if (showStatusModal) {
-        webSocketService.unsubscribe('/topic/orders');
-      } else {
-        try {
-          await webSocketService.subscribe('/topic/orders', (data) => {
-            const sortedOrders = data.sort((a, b) => 
-              new Date(b.thoiGianLapHoaDon) - new Date(a.thoiGianLapHoaDon)
-            );
-            setOrders(sortedOrders);
-          });
-        } catch (error) {
-          console.error('Error handling WebSocket subscription:', error);
-        }
+      if (pollInterval) {
+        clearInterval(pollInterval);
       }
     };
+  }, [isPolling]);
 
-    handleWebSocket();
+  useEffect(() => {
+    if (showStatusModal) {
+      setIsPolling(false);
+    } else {
+      setIsPolling(true);
+    }
   }, [showStatusModal]);
 
   const handleOrderClick = async (orderId) => {
@@ -123,6 +82,26 @@ const OrderManagement = () => {
       return;
     }
 
+    if (selectedOrder.trangThaiThanhToan === 0) {
+      toast.error('Không thể cập nhật đơn hàng đã hủy', {
+        position: "top-right",
+        autoClose: 3000
+      });
+      setShowStatusModal(false);
+      setSelectedStatus(null);
+      return;
+    }
+
+    if (selectedOrder.trangThaiThanhToan === 1) {
+      toast.error('Không thể cập nhật đơn hàng đã thành công', {
+        position: "top-right",
+        autoClose: 3000
+      });
+      setShowStatusModal(false);
+      setSelectedStatus(null);
+      return;
+    }
+
     try {
       const response = await fetch(`http://localhost:8080/rest/hoa_don/update/${selectedOrder.id}`, {
         method: 'PUT',
@@ -137,9 +116,17 @@ const OrderManagement = () => {
 
       if (!response.ok) throw new Error('Failed to update status');
 
+      setOrders(orders.map(order => 
+        order.id === selectedOrder.id 
+          ? {...order, trangThaiThanhToan: selectedStatus}
+          : order
+      ));
+      
+      setSelectedOrder({...selectedOrder, trangThaiThanhToan: selectedStatus});
       setShowStatusModal(false);
       setSelectedStatus(null);
       setOrderDetails([]);
+      setIsPolling(true);
 
       toast.success('Cập nhật trạng thái đơn hàng thành công', {
         position: "top-right",
@@ -160,6 +147,7 @@ const OrderManagement = () => {
     setSelectedStatus(null);
     setSelectedOrder(null);
     setOrderDetails([]);
+    setIsPolling(true);
   };
 
   const exportToExcel = () => {

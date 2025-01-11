@@ -28,6 +28,7 @@ import EditGraphicsCardModal from './components/EditGraphicsCardModal';
 import EditProductTypeModal from './components/EditProductTypeModal';
 import EditColorModal from './components/EditColorModal';
 import EditSupplierModal from './components/EditSupplierModal';
+import AttributeTab from './components/AttributeTab';
 
 const ProductAttributesPage = () => {
   const [activeTab, setActiveTab] = useState('thuongHieu');
@@ -272,232 +273,263 @@ const ProductAttributesPage = () => {
     }
   };
 
+  const handleAddClick = () => {
+    setShowAddModal(true);
+  };
+
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="min-h-screen flex bg-gray-100">
       <NavbarAdmin />
-      <div className="flex-1 overflow-auto p-8">
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h1 className="text-2xl font-bold mb-6">Quản lý thuộc tính sản phẩm</h1>
-          
-          {/* Tabs */}
-          <div className="flex space-x-4 mb-6">
-            {tabs.map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`px-4 py-2 rounded-lg ${
-                  activeTab === tab.id
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-200 hover:bg-gray-300'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
+      <main className="flex-1 p-8 overflow-hidden">
+        <div className="max-w-7xl mx-auto">
+          {/* Header Section */}
+          <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+              <div>
+                <h1 className="text-2xl font-bold text-gray-800">Thuộc tính sản phẩm</h1>
+                <p className="text-sm text-gray-500 mt-1">
+                  Quản lý các thuộc tính của sản phẩm trong hệ thống
+                </p>
+              </div>
+            </div>
           </div>
 
-          {/* Add Button */}
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="mb-4 px-4 py-2 bg-green-600 text-white rounded-lg flex items-center gap-2 hover:bg-green-700"
-          >
-            <FaPlus /> Thêm mới
-          </button>
+          {/* Tabs Section */}
+          <div className="bg-white rounded-xl shadow-sm p-6">
+            <AttributeTab 
+              tabs={tabs} 
+              activeTab={activeTab} 
+              setActiveTab={setActiveTab}
+            />
 
-          {/* Attributes Table */}
-          <AttributeTable 
-            attributes={attributes}
-            editingAttribute={editingAttribute}
-            setEditingAttribute={setEditingAttribute}
-            handleEdit={handleEdit}
-            handleDelete={handleDelete}
-            activeTab={activeTab}
-          />
+            {/* Content Section */}
+            <div className="mt-6">
+              <div className="flex justify-between items-center mb-6">
+                <div className="flex-1">
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Tìm kiếm thuộc tính..."
+                      className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    />
+                    <svg
+                      className="absolute left-3 top-3 h-4 w-4 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </div>
+                </div>
+                <div className="ml-4">
+                  <button
+                    onClick={handleAddClick}
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition duration-200 flex items-center gap-2 text-sm font-medium"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    Thêm mới
+                  </button>
+                </div>
+              </div>
 
-          {/* Add Modals */}
-          {activeTab === 'loaisanpham' ? (
-            <AddProductTypeModal
-              showModal={showAddModal}
-              setShowModal={setShowAddModal}
-              onSuccess={fetchAttributes}
-            />
-          ) : activeTab === 'kichThuoc' ? (
-            <AddSizeModal
-              showModal={showAddModal}
-              setShowModal={setShowAddModal}
-              onSuccess={fetchAttributes}
-            />
-          ) : activeTab === 'chatLieu' ? (
-            <AddMaterialModal
-              showModal={showAddModal}
-              setShowModal={setShowAddModal}
-              onSuccess={fetchAttributes}
-            />
-          ) : activeTab === 'ram' ? (
-            <AddRamModal 
-              showModal={showAddModal}
-              setShowModal={setShowAddModal}
-              onSuccess={fetchAttributes}
-            />
-          ) : activeTab === 'thuongHieu' ? (
-            <AddBrandModal
-              showModal={showAddModal}
-              setShowModal={setShowAddModal}
-              onSuccess={fetchAttributes}
-            />
-          ) : activeTab === 'oCung' ? (
-            <AddStorageModal
-              showModal={showAddModal}
-              setShowModal={setShowAddModal}
-              onSuccess={fetchAttributes}
-            />
-          ) : activeTab === 'cpu' ? (
-            <AddCpuModal
-              showModal={showAddModal}
-              setShowModal={setShowAddModal}
-              onSuccess={fetchAttributes}
-            />
-          ) : activeTab === 'gpu' ? (
-            <AddGpuModal
-              showModal={showAddModal}
-              setShowModal={setShowAddModal}
-              onSuccess={fetchAttributes}
-            />
-          ) : activeTab === 'mausac' ? (
-            <AddColorModal
-              showModal={showAddModal}
-              setShowModal={setShowAddModal}
-              onSuccess={fetchAttributes}
-            />
-          ) : activeTab === 'nguon' ? (
-            <AddSupplierModal
-              showModal={showAddModal}
-              setShowModal={setShowAddModal}
-              onSuccess={fetchAttributes}
-            />
-          ) : activeTab === 'manHinh' ? (
-            <AddScreenModal
-              showModal={showAddModal}
-              setShowModal={setShowAddModal}
-              onSuccess={fetchAttributes}
-            />
-          ) : activeTab === 'cardManHinh' ? (
-            <AddGraphicsCardModal
-              showModal={showAddModal}
-              setShowModal={setShowAddModal}
-              onSuccess={fetchAttributes}
-            />
-          ) : (
-            <AddAttributeModal 
-              showAddModal={showAddModal}
-              setShowModal={setShowAddModal}
-              activeTab={activeTab}
-              tabs={tabs}
-            />
-          )}
-
-          {/* Add EditRamModal */}
-          {activeTab === 'ram' && (
-            <EditRamModal
-              editingRam={editingAttribute}
-              setEditingRam={setEditingAttribute}
-              onSuccess={fetchAttributes}
-            />
-          )}
-
-          {/* Add EditBrandModal */}
-          {activeTab === 'thuongHieu' && (
-            <EditBrandModal
-              editingBrand={editingAttribute}
-              setEditingBrand={setEditingAttribute}
-              onSuccess={fetchAttributes}
-            />
-          )}
-
-          {/* Add EditCpuModal */}
-          {activeTab === 'cpu' && (
-            <EditCpuModal
-              editingCpu={editingAttribute}
-              setEditingCpu={setEditingAttribute}
-              onSuccess={fetchAttributes}
-            />
-          )}
-
-          {/* Add EditGpuModal */}
-          {activeTab === 'gpu' && (
-            <EditGpuModal
-              editingGpu={editingAttribute}
-              setEditingGpu={setEditingAttribute}
-              onSuccess={fetchAttributes}
-            />
-          )}
-
-          {/* Add EditMaterialModal */}
-          {activeTab === 'chatLieu' && (
-            <EditMaterialModal
-              editingMaterial={editingAttribute}
-              setEditingMaterial={setEditingAttribute}
-              onSuccess={fetchAttributes}
-            />
-          )}
-
-          {/* Add EditSizeModal */}
-          {activeTab === 'kichThuoc' && (
-            <EditSizeModal
-              editingSize={editingAttribute}
-              setEditingSize={setEditingAttribute}
-              onSuccess={fetchAttributes}
-            />
-          )}
-
-          {/* Add EditScreenModal */}
-          {activeTab === 'manHinh' && (
-            <EditScreenModal
-              editingScreen={editingAttribute}
-              setEditingScreen={setEditingAttribute}
-              onSuccess={fetchAttributes}
-            />
-          )}
-
-          {/* Add EditGraphicsCardModal */}
-          {activeTab === 'cardManHinh' && (
-            <EditGraphicsCardModal
-              editingCard={editingAttribute}
-              setEditingCard={setEditingAttribute}
-              onSuccess={fetchAttributes}
-            />
-          )}
-
-          {/* Add EditProductTypeModal */}
-          {activeTab === 'loaisanpham' && (
-            <EditProductTypeModal
-              editingProductType={editingAttribute}
-              setEditingProductType={setEditingAttribute}
-              onSuccess={fetchAttributes}
-            />
-          )}
-
-          {/* Add EditColorModal */}
-          {activeTab === 'mausac' && (
-            <EditColorModal
-              editingColor={editingAttribute}
-              setEditingColor={setEditingAttribute}
-              onSuccess={fetchAttributes}
-            />
-          )}
-
-          {/* Add EditSupplierModal */}
-          {activeTab === 'nguon' && (
-            <EditSupplierModal
-              editingSupplier={editingAttribute}
-              setEditingSupplier={setEditingAttribute}
-              onSuccess={fetchAttributes}
-            />
-          )}
+              <AttributeTable
+                attributes={attributes}
+                editingAttribute={editingAttribute}
+                setEditingAttribute={setEditingAttribute}
+                handleEdit={handleEdit}
+                handleDelete={handleDelete}
+                activeTab={activeTab}
+              />
+            </div>
+          </div>
         </div>
-      </div>
 
-      <ToastContainer />
+        {/* Modals */}
+        {activeTab === 'loaisanpham' ? (
+          <AddProductTypeModal
+            showModal={showAddModal}
+            setShowModal={setShowAddModal}
+            onSuccess={fetchAttributes}
+          />
+        ) : activeTab === 'kichThuoc' ? (
+          <AddSizeModal
+            showModal={showAddModal}
+            setShowModal={setShowAddModal}
+            onSuccess={fetchAttributes}
+          />
+        ) : activeTab === 'chatLieu' ? (
+          <AddMaterialModal
+            showModal={showAddModal}
+            setShowModal={setShowAddModal}
+            onSuccess={fetchAttributes}
+          />
+        ) : activeTab === 'ram' ? (
+          <AddRamModal 
+            showModal={showAddModal}
+            setShowModal={setShowAddModal}
+            onSuccess={fetchAttributes}
+          />
+        ) : activeTab === 'thuongHieu' ? (
+          <AddBrandModal
+            showModal={showAddModal}
+            setShowModal={setShowAddModal}
+            onSuccess={fetchAttributes}
+          />
+        ) : activeTab === 'oCung' ? (
+          <AddStorageModal
+            showModal={showAddModal}
+            setShowModal={setShowAddModal}
+            onSuccess={fetchAttributes}
+          />
+        ) : activeTab === 'cpu' ? (
+          <AddCpuModal
+            showModal={showAddModal}
+            setShowModal={setShowAddModal}
+            onSuccess={fetchAttributes}
+          />
+        ) : activeTab === 'gpu' ? (
+          <AddGpuModal
+            showModal={showAddModal}
+            setShowModal={setShowAddModal}
+            onSuccess={fetchAttributes}
+          />
+        ) : activeTab === 'mausac' ? (
+          <AddColorModal
+            showModal={showAddModal}
+            setShowModal={setShowAddModal}
+            onSuccess={fetchAttributes}
+          />
+        ) : activeTab === 'nguon' ? (
+          <AddSupplierModal
+            showModal={showAddModal}
+            setShowModal={setShowAddModal}
+            onSuccess={fetchAttributes}
+          />
+        ) : activeTab === 'manHinh' ? (
+          <AddScreenModal
+            showModal={showAddModal}
+            setShowModal={setShowAddModal}
+            onSuccess={fetchAttributes}
+          />
+        ) : activeTab === 'cardManHinh' ? (
+          <AddGraphicsCardModal
+            showModal={showAddModal}
+            setShowModal={setShowAddModal}
+            onSuccess={fetchAttributes}
+          />
+        ) : (
+          <AddAttributeModal 
+            showAddModal={showAddModal}
+            setShowModal={setShowAddModal}
+            activeTab={activeTab}
+            tabs={tabs}
+          />
+        )}
+
+        {/* Add EditRamModal */}
+        {activeTab === 'ram' && (
+          <EditRamModal
+            editingRam={editingAttribute}
+            setEditingRam={setEditingAttribute}
+            onSuccess={fetchAttributes}
+          />
+        )}
+
+        {/* Add EditBrandModal */}
+        {activeTab === 'thuongHieu' && (
+          <EditBrandModal
+            editingBrand={editingAttribute}
+            setEditingBrand={setEditingAttribute}
+            onSuccess={fetchAttributes}
+          />
+        )}
+
+        {/* Add EditCpuModal */}
+        {activeTab === 'cpu' && (
+          <EditCpuModal
+            editingCpu={editingAttribute}
+            setEditingCpu={setEditingAttribute}
+            onSuccess={fetchAttributes}
+          />
+        )}
+
+        {/* Add EditGpuModal */}
+        {activeTab === 'gpu' && (
+          <EditGpuModal
+            editingGpu={editingAttribute}
+            setEditingGpu={setEditingAttribute}
+            onSuccess={fetchAttributes}
+          />
+        )}
+
+        {/* Add EditMaterialModal */}
+        {activeTab === 'chatLieu' && (
+          <EditMaterialModal
+            editingMaterial={editingAttribute}
+            setEditingMaterial={setEditingAttribute}
+            onSuccess={fetchAttributes}
+          />
+        )}
+
+        {/* Add EditSizeModal */}
+        {activeTab === 'kichThuoc' && (
+          <EditSizeModal
+            editingSize={editingAttribute}
+            setEditingSize={setEditingAttribute}
+            onSuccess={fetchAttributes}
+          />
+        )}
+
+        {/* Add EditScreenModal */}
+        {activeTab === 'manHinh' && (
+          <EditScreenModal
+            editingScreen={editingAttribute}
+            setEditingScreen={setEditingAttribute}
+            onSuccess={fetchAttributes}
+          />
+        )}
+
+        {/* Add EditGraphicsCardModal */}
+        {activeTab === 'cardManHinh' && (
+          <EditGraphicsCardModal
+            editingCard={editingAttribute}
+            setEditingCard={setEditingAttribute}
+            onSuccess={fetchAttributes}
+          />
+        )}
+
+        {/* Add EditProductTypeModal */}
+        {activeTab === 'loaisanpham' && (
+          <EditProductTypeModal
+            editingProductType={editingAttribute}
+            setEditingProductType={setEditingAttribute}
+            onSuccess={fetchAttributes}
+          />
+        )}
+
+        {/* Add EditColorModal */}
+        {activeTab === 'mausac' && (
+          <EditColorModal
+            editingColor={editingAttribute}
+            setEditingColor={setEditingAttribute}
+            onSuccess={fetchAttributes}
+          />
+        )}
+
+        {/* Add EditSupplierModal */}
+        {activeTab === 'nguon' && (
+          <EditSupplierModal
+            editingSupplier={editingAttribute}
+            setEditingSupplier={setEditingAttribute}
+            onSuccess={fetchAttributes}
+          />
+        )}
+
+        <ToastContainer />
+      </main>
     </div>
   );
 };

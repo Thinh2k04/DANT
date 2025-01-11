@@ -10,7 +10,6 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { updateCartItemQuantity } from '../../../utils/cartUtils';
 import CartToast from '../../../components/Toast/CartToast';
-import { webSocketService } from '../../../utils/websocket';
 
 // Tạo hàm định dạng tiền Việt Nam
 const formatCurrency = (amount) => {
@@ -50,7 +49,7 @@ const HomePage = () => {
   // Hàm fetch dữ liệu sản phẩm
   const fetchProducts = async () => {
     try {
-      const response = await fetch('http://localhost:8080/rest/spctDTO/getAll');
+      const response = await fetch('http://localhost:8080/rest/discount/active');
       if (!response.ok) throw new Error('Failed to fetch products');
       const data = await response.json();
       setProducts(data);
@@ -63,26 +62,7 @@ const HomePage = () => {
   };
 
   useEffect(() => {
-    // Fetch dữ liệu ban đầu
     fetchProducts();
-
-    // Kết nối WebSocket
-    webSocketService.connect().then(() => {
-      // Subscribe để nhận cập nhật sản phẩm
-      webSocketService.subscribe('/topic/products', (data) => {
-        // Cập nhật danh sách sản phẩm khi có thay đổi
-        setProducts(data);
-        toast.info('Danh sách sản phẩm đã được cập nhật!');
-      });
-    }).catch(error => {
-      console.error('WebSocket connection error:', error);
-    });
-
-    // Cleanup khi component unmount
-    return () => {
-      webSocketService.unsubscribe('/topic/products');
-      webSocketService.disconnect();
-    };
   }, []);
 
   // Hàm tìm kiếm laptop
@@ -304,9 +284,23 @@ const HomePage = () => {
 
                     {/* Giá */}
                     <div className="flex items-baseline gap-2 mb-3">
-                      <span className="text-xl font-bold text-red-600">
-                        {formatCurrency(laptop.donGia)}
-                      </span>
+                      {laptop.discountPercentage > 0 ? (
+                        <>
+                          <span className="text-xl font-bold text-red-600">
+                            {formatCurrency(laptop.discountedPrice)}
+                          </span>
+                          <span className="text-sm text-gray-500 line-through">
+                            {formatCurrency(laptop.donGia)}
+                          </span>
+                          <span className="text-sm font-medium text-green-600 bg-green-100 px-2 py-1 rounded">
+                            -{laptop.discountPercentage}%
+                          </span>
+                        </>
+                      ) : (
+                        <span className="text-xl font-bold text-red-600">
+                          {formatCurrency(laptop.donGia)}
+                        </span>
+                      )}
                     </div>
 
                     {/* Thông số kỹ thuật */}
@@ -385,9 +379,23 @@ const HomePage = () => {
                   </div>
 
                   <div className="flex items-baseline gap-2 mb-3">
-                    <span className="text-xl font-bold text-red-600">
-                      {formatCurrency(laptop.donGia)}
-                    </span>
+                    {laptop.discountPercentage > 0 ? (
+                      <>
+                        <span className="text-xl font-bold text-red-600">
+                          {formatCurrency(laptop.discountedPrice)}
+                        </span>
+                        <span className="text-sm text-gray-500 line-through">
+                          {formatCurrency(laptop.donGia)}
+                        </span>
+                        <span className="text-sm font-medium text-green-600 bg-green-100 px-2 py-1 rounded">
+                          -{laptop.discountPercentage}%
+                        </span>
+                      </>
+                    ) : (
+                      <span className="text-xl font-bold text-red-600">
+                        {formatCurrency(laptop.donGia)}
+                      </span>
+                    )}
                   </div>
 
                   <div className="space-y-1.5 mb-4">
@@ -605,9 +613,23 @@ const HomePage = () => {
                     </div>
 
                     <div className="flex items-baseline gap-2 mb-3">
-                      <span className="text-xl font-bold text-red-600">
-                        {formatCurrency(laptop.donGia)}
-                      </span>
+                      {laptop.discountPercentage > 0 ? (
+                        <>
+                          <span className="text-xl font-bold text-red-600">
+                            {formatCurrency(laptop.discountedPrice)}
+                          </span>
+                          <span className="text-sm text-gray-500 line-through">
+                            {formatCurrency(laptop.donGia)}
+                          </span>
+                          <span className="text-sm font-medium text-green-600 bg-green-100 px-2 py-1 rounded">
+                            -{laptop.discountPercentage}%
+                          </span>
+                        </>
+                      ) : (
+                        <span className="text-xl font-bold text-red-600">
+                          {formatCurrency(laptop.donGia)}
+                        </span>
+                      )}
                     </div>
 
                     <div className="space-y-1.5 mb-4">

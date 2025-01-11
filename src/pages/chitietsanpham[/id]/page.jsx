@@ -239,11 +239,16 @@ const ChiTietSanPham = () => {
                                 
                                 <div className="flex items-center gap-4 mb-6">
                                     <span className="text-3xl font-bold text-red-600">
-                                        {formatPrice(selectedConfig.donGia)} VNĐ
+                                        {formatPrice(selectedConfig.discountedPrice)} VNĐ
                                     </span>
                                     <span className="text-sm text-gray-500 line-through">
-                                        {formatPrice(selectedConfig.donGia * 1.1)} VNĐ
+                                        {formatPrice(selectedConfig.donGia)} VNĐ
                                     </span>
+                                    {selectedConfig.discountPercentage > 0 && (
+                                        <span className="bg-red-100 text-red-600 px-2 py-1 rounded-full text-sm">
+                                            -{selectedConfig.discountPercentage}%
+                                        </span>
+                                    )}
                                 </div>
 
                                 <div className="grid grid-cols-3 gap-4 mb-6">
@@ -359,9 +364,21 @@ const ChiTietSanPham = () => {
                                         <h3 className="font-medium text-gray-900 mb-2 line-clamp-2 min-h-[2.5rem]">
                                             {relatedProduct.tenSanPhamChiTiet}
                                         </h3>
-                                        <p className="text-red-600 font-bold text-lg mb-3">
-                                            {formatPrice(relatedProduct.donGia)} VNĐ
-                                        </p>
+                                        <div className="flex items-center gap-2 mb-3">
+                                            <p className="text-red-600 font-bold text-lg">
+                                                {formatPrice(relatedProduct.discountedPrice)} VNĐ
+                                            </p>
+                                            {relatedProduct.discountPercentage > 0 && (
+                                                <>
+                                                    <p className="text-gray-500 text-sm line-through">
+                                                        {formatPrice(relatedProduct.donGia)} VNĐ
+                                                    </p>
+                                                    <span className="bg-red-100 text-red-600 px-2 py-1 rounded-full text-sm">
+                                                        -{relatedProduct.discountPercentage}%
+                                                    </span>
+                                                </>
+                                            )}
+                                        </div>
                                         <button 
                                             onClick={(e) => {
                                                 e.stopPropagation();

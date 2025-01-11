@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import NavbarAdmin from '../Navbar/NavbarAdmin';
 import { FiTrash2 } from 'react-icons/fi';
+import Toast from '../../../components/Toast';
 
 const CustomerManagement = () => {
   const [customers, setCustomers] = useState([]);
   const [deletedCustomers, setDeletedCustomers] = useState([]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
-  const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showTrashModal, setShowTrashModal] = useState(false);
   const [customerToDelete, setCustomerToDelete] = useState(null);
@@ -15,10 +15,14 @@ const CustomerManagement = () => {
   const [newCustomer, setNewCustomer] = useState({
     hoTen: '',
     diaChi: '',
-    soCCCD: '',
     soDienThoai: '',
     email: '',
     trangThai: 1
+  });
+  const [toast, setToast] = useState({
+    show: false,
+    message: '',
+    type: 'success'
   });
 
   useEffect(() => {
@@ -47,17 +51,15 @@ const CustomerManagement = () => {
       }
 
       const updateData = {
-        ...customerToUpdate,
-        trangThai: 0,
-        taiKhoanNguoiDung: {
-          ...customerToUpdate.taiKhoanNguoiDung,
-          email: customerToUpdate.email,
-          chucVu: "USER",
-          enabled: 1
-        }
+        id: customerToUpdate.id,
+        hoTen: customerToUpdate.hoTen,
+        diaChi: customerToUpdate.diaChi,
+        soDienThoai: customerToUpdate.soDienThoai,
+        email: customerToUpdate.email,
+        trangThai: 0
       };
 
-      const response = await fetch(`http://localhost:8080/rest/tttk/update/${id}`, {
+      const response = await fetch(`http://localhost:8080/rest/tttk/update`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -75,13 +77,11 @@ const CustomerManagement = () => {
       setCustomers(updatedCustomers);
       setDeletedCustomers([...deletedCustomers, {...deletedCustomer, trangThai: 0}]);
       
-      setShowDeleteSuccess(true);
       setShowDeleteConfirm(false);
-      setTimeout(() => {
-        setShowDeleteSuccess(false);
-      }, 3000);
+      showToast('Xóa khách hàng thành công!', 'success');
     } catch (error) {
       console.error('Error deleting customer:', error);
+      showToast('Có lỗi xảy ra khi xóa khách hàng!', 'error');
     }
   };
 
@@ -93,17 +93,15 @@ const CustomerManagement = () => {
       }
 
       const updateData = {
-        ...customerToRestore,
-        trangThai: 1,
-        taiKhoanNguoiDung: {
-          ...customerToRestore.taiKhoanNguoiDung,
-          email: customerToRestore.email,
-          chucVu: "USER",
-          enabled: 1
-        }
+        id: customerToRestore.id,
+        hoTen: customerToRestore.hoTen,
+        diaChi: customerToRestore.diaChi,
+        soDienThoai: customerToRestore.soDienThoai,
+        email: customerToRestore.email,
+        trangThai: 1
       };
 
-      const response = await fetch(`http://localhost:8080/rest/tttk/update/${id}`, {
+      const response = await fetch(`http://localhost:8080/rest/tttk/update`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -120,34 +118,32 @@ const CustomerManagement = () => {
       
       setDeletedCustomers(updatedDeletedCustomers);
       setCustomers([...customers, {...restoredCustomer, trangThai: 1}]);
+
+      showToast('Khôi phục khách hàng thành công!', 'success');
     } catch (error) {
       console.error('Error restoring customer:', error);
+      showToast('Có lỗi xảy ra khi khôi phục khách hàng!', 'error');
     }
+  };
+
+  const checkPhoneNumberExists = (phoneNumber) => {
+    return customers.some(customer => customer.soDienThoai === phoneNumber);
   };
 
   const handleAddCustomer = async (e) => {
     e.preventDefault();
     try {
-      const customerData = {
-        ...newCustomer,
-        trangThai: 1,
-        taiKhoanNguoiDung: {
-          username: newCustomer.email,
-          password: "defaultPassword",
-          email: newCustomer.email,
-          chucVu: "USER",
-          enabled: 1,
-          createdAt: null,
-          updatedAt: null
-        }
-      };
-      
+      if (checkPhoneNumberExists(newCustomer.soDienThoai)) {
+        showToast('Số điện thoại này đã được đăng ký! Vui lòng sử dụng số điện thoại khác.', 'error');
+        return;
+      }
+
       const response = await fetch('http://localhost:8080/rest/tttk/add', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(customerData)
+        body: JSON.stringify(newCustomer)
       });
 
       if (!response.ok) {
@@ -155,23 +151,21 @@ const CustomerManagement = () => {
       }
 
       const addedCustomer = await response.json();
-      
-      if (!addedCustomer || !addedCustomer.id) {
-        throw new Error('Invalid response data');
-      }
-
       setCustomers([...customers, addedCustomer]);
       setShowAddForm(false);
+      
       setNewCustomer({
         hoTen: '',
         diaChi: '',
-        soCCCD: '',
         soDienThoai: '',
         email: '',
         trangThai: 1
       });
+
+      showToast('Thêm khách hàng thành công!', 'success');
     } catch (error) {
       console.error('Error adding customer:', error);
+      showToast('Có lỗi xảy ra khi thêm khách hàng. Vui lòng thử lại!', 'error');
     }
   };
 
@@ -179,16 +173,15 @@ const CustomerManagement = () => {
     e.preventDefault();
     try {
       const updateData = {
-        ...customerToEdit,
-        taiKhoanNguoiDung: {
-          ...customerToEdit.taiKhoanNguoiDung,
-          email: customerToEdit.email,
-          chucVu: "USER",
-          enabled: 1
-        }
+        id: customerToEdit.id,
+        hoTen: customerToEdit.hoTen,
+        diaChi: customerToEdit.diaChi,
+        soDienThoai: customerToEdit.soDienThoai,
+        email: customerToEdit.email,
+        trangThai: customerToEdit.trangThai
       };
 
-      const response = await fetch(`http://localhost:8080/rest/tttk/update/${customerToEdit.id}`, {
+      const response = await fetch(`http://localhost:8080/rest/tttk/update`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -206,82 +199,173 @@ const CustomerManagement = () => {
       ));
       setShowEditForm(false);
       setCustomerToEdit(null);
+
+      showToast('Cập nhật thông tin khách hàng thành công!', 'success');
     } catch (error) {
       console.error('Error updating customer:', error);
+      showToast('Có lỗi xảy ra khi cập nhật thông tin!', 'error');
     }
   };
 
+  const showToast = (message, type = 'success') => {
+    setToast({
+      show: true,
+      message,
+      type
+    });
+  };
+
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex bg-gray-100">
       <NavbarAdmin />
-      <main className="flex-1 bg-gray-100 p-8">
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-800">Quản lý khách hàng</h1>
-            <div className="flex gap-4">
-              <button
-                onClick={() => setShowAddForm(true)}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-5 rounded-lg transition duration-200 flex items-center"
-              >
-                <span className="mr-2">+</span>
-                Thêm khách hàng
-              </button>
-              <button
-                onClick={() => setShowTrashModal(true)}
-                className="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2.5 px-5 rounded-lg transition duration-200 flex items-center"
-              >
-                <FiTrash2 className="mr-2" />
-                Thùng rác ({deletedCustomers.length})
-              </button>
+      <main className="flex-1 p-8 overflow-hidden">
+        <div className="max-w-7xl mx-auto">
+          <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+              <div>
+                <h1 className="text-2xl font-bold text-gray-800">Quản lý khách hàng</h1>
+                <p className="text-sm text-gray-500 mt-1">
+                  Quản lý thông tin khách hàng trong hệ thống
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setShowAddForm(true)}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition duration-200 flex items-center gap-2 text-sm font-medium"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                  Thêm khách hàng
+                </button>
+                <button
+                  onClick={() => setShowTrashModal(true)}
+                  className="bg-gray-100 text-gray-700 hover:bg-gray-200 px-4 py-2 rounded-lg transition duration-200 flex items-center gap-2 text-sm font-medium"
+                >
+                  <FiTrash2 className="w-5 h-5" />
+                  Thùng rác ({deletedCustomers.length})
+                </button>
+              </div>
             </div>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full table-auto">
-              <thead>
-                <tr className="bg-gray-50">
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 tracking-wider border-b">Tên</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 tracking-wider border-b">Số CCCD</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 tracking-wider border-b">Địa chỉ</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 tracking-wider border-b">Số điện thoại</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 tracking-wider border-b">Email</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 tracking-wider border-b">Hành động</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {customers.map(customer => (
-                  <tr key={customer.id} className="hover:bg-gray-50 transition duration-200">
-                    <td className="px-6 py-4 text-sm text-gray-800">{customer.hoTen}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600">{customer.soCCCD}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600">{customer.diaChi}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600">{customer.soDienThoai}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600">{customer.email}</td>
-                    <td className="px-6 py-4">
-                      <div className="flex gap-3">
-                        <button
-                          onClick={() => {
-                            setCustomerToEdit(customer);
-                            setShowEditForm(true);
-                          }}
-                          className="bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold py-2 px-4 rounded-lg transition duration-200"
-                        >
-                          Sửa
-                        </button>
-                        <button 
-                          onClick={() => {
-                            setCustomerToDelete(customer.id);
-                            setShowDeleteConfirm(true);
-                          }}
-                          className="bg-red-500 hover:bg-red-600 text-white text-sm font-semibold py-2 px-4 rounded-lg transition duration-200"
-                        >
-                          Xóa
-                        </button>
-                      </div>
-                    </td>
+          <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1">
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Tìm kiếm khách hàng..."
+                    className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  />
+                  <svg
+                    className="absolute left-3 top-3 h-4 w-4 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+              </div>
+              <div className="flex gap-4">
+                <select className="text-sm border border-gray-200 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white">
+                  <option value="">Trạng thái</option>
+                  <option value="active">Đang hoạt động</option>
+                  <option value="inactive">Đã khóa</option>
+                </select>
+                <select className="text-sm border border-gray-200 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white">
+                  <option value="">Sắp xếp theo</option>
+                  <option value="name">Tên</option>
+                  <option value="date">Ngày tạo</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-gray-50">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Tên khách hàng
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Địa chỉ
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Số điện thoại
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Email
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Thao tác
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {customers.map(customer => (
+                    <tr key={customer.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="h-10 w-10 flex-shrink-0">
+                            <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
+                              <span className="text-indigo-600 font-medium">{customer.hoTen.charAt(0)}</span>
+                            </div>
+                          </div>
+                          <div className="ml-4">
+                            <div className="text-sm font-medium text-gray-900">{customer.hoTen}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {customer.diaChi}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {customer.soDienThoai}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {customer.email}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <div className="flex justify-end space-x-2">
+                          <button
+                            onClick={() => {
+                              setCustomerToEdit(customer);
+                              setShowEditForm(true);
+                            }}
+                            className="text-indigo-600 hover:text-indigo-900"
+                          >
+                            <span className="flex items-center bg-indigo-50 px-3 py-1.5 rounded-lg hover:bg-indigo-100">
+                              <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                              </svg>
+                              Sửa
+                            </span>
+                          </button>
+                          <button
+                            onClick={() => {
+                              setCustomerToDelete(customer.id);
+                              setShowDeleteConfirm(true);
+                            }}
+                            className="text-red-600 hover:text-red-900"
+                          >
+                            <span className="flex items-center bg-red-50 px-3 py-1.5 rounded-lg hover:bg-red-100">
+                              <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                              Xóa
+                            </span>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 
@@ -302,7 +386,6 @@ const CustomerManagement = () => {
                   <thead>
                     <tr className="bg-gray-50">
                       <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 tracking-wider border-b">Tên</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 tracking-wider border-b">Số CCCD</th>
                       <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 tracking-wider border-b">Địa chỉ</th>
                       <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 tracking-wider border-b">Số điện thoại</th>
                       <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 tracking-wider border-b">Email</th>
@@ -313,7 +396,6 @@ const CustomerManagement = () => {
                     {deletedCustomers.map(customer => (
                       <tr key={customer.id} className="hover:bg-gray-50 transition duration-200">
                         <td className="px-6 py-4 text-sm text-gray-800">{customer.hoTen}</td>
-                        <td className="px-6 py-4 text-sm text-gray-600">{customer.soCCCD}</td>
                         <td className="px-6 py-4 text-sm text-gray-600">{customer.diaChi}</td>
                         <td className="px-6 py-4 text-sm text-gray-600">{customer.soDienThoai}</td>
                         <td className="px-6 py-4 text-sm text-gray-600">{customer.email}</td>
@@ -330,14 +412,6 @@ const CustomerManagement = () => {
                   </tbody>
                 </table>
               </div>
-            </div>
-          </div>
-        )}
-
-        {showDeleteSuccess && (
-          <div className="fixed inset-0 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-xl shadow-lg border-2 border-green-500">
-              <p className="text-green-500 font-semibold text-lg">Xóa khách hàng thành công!</p>
             </div>
           </div>
         )}
@@ -378,18 +452,6 @@ const CustomerManagement = () => {
                     type="text"
                     value={newCustomer.hoTen}
                     onChange={(e) => setNewCustomer({...newCustomer, hoTen: e.target.value})}
-                    className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-gray-700 text-sm font-bold mb-2">
-                    Số CCCD
-                  </label>
-                  <input
-                    type="text"
-                    value={newCustomer.soCCCD}
-                    onChange={(e) => setNewCustomer({...newCustomer, soCCCD: e.target.value})}
                     className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                     required
                   />
@@ -469,18 +531,6 @@ const CustomerManagement = () => {
                 </div>
                 <div>
                   <label className="block text-gray-700 text-sm font-bold mb-2">
-                    Số CCCD
-                  </label>
-                  <input
-                    type="text"
-                    value={customerToEdit.soCCCD}
-                    onChange={(e) => setCustomerToEdit({...customerToEdit, soCCCD: e.target.value})}
-                    className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-gray-700 text-sm font-bold mb-2">
                     Địa chỉ
                   </label>
                   <input
@@ -536,6 +586,14 @@ const CustomerManagement = () => {
               </form>
             </div>
           </div>
+        )}
+
+        {toast.show && (
+          <Toast
+            message={toast.message}
+            type={toast.type}
+            onClose={() => setToast({ ...toast, show: false })}
+          />
         )}
       </main>
     </div>

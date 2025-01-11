@@ -212,50 +212,105 @@ const ChiTietSanPhamAdmin = () => {
 
   // Render giao diện chính
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="min-h-screen flex bg-gray-100">
       <Sidebar />
-      <div className="flex-1 overflow-auto p-8">
+      <div className="flex-1 p-8 overflow-hidden">
         <ToastContainer />
         
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Chi Tiết Sản Phẩm</h1>
-          <button 
-            onClick={() => setIsModalOpen(true)}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-sm"
-          >
-            <FaPlus /> Thêm biến thể
-          </button>
-        </div>
-
-        {/* Search bar */}
-        <div className="mb-8">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Tìm kiếm theo mã định danh hoặc tên sản phẩm..."
-              className="w-full pl-4 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-              <svg className="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
-              </svg>
+        <div className="max-w-7xl mx-auto">
+          {/* Header Section */}
+          <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+              <div>
+                <h1 className="text-2xl font-bold text-gray-800">Chi tiết sản phẩm</h1>
+                <p className="text-sm text-gray-500 mt-1">
+                  Quản lý thông tin và biến thể sản phẩm
+                </p>
+              </div>
+              <button 
+                onClick={() => setIsModalOpen(true)}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition duration-200 flex items-center gap-2 text-sm font-medium"
+              >
+                <FaPlus className="w-4 h-4" />
+                Thêm biến thể mới
+              </button>
             </div>
+          </div>
+
+          {/* Search Section */}
+          <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1">
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Tìm kiếm theo mã định danh, tên sản phẩm..."
+                    className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                  <svg
+                    className="absolute left-3 top-3 h-4 w-4 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+              </div>
+              <div className="flex gap-4">
+                <select className="text-sm border border-gray-200 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white">
+                  <option value="">Trạng thái</option>
+                  <option value="1">Đang bán</option>
+                  <option value="0">Đã ẩn</option>
+                </select>
+                <select className="text-sm border border-gray-200 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white">
+                  <option value="">Sắp xếp theo</option>
+                  <option value="price_asc">Giá tăng dần</option>
+                  <option value="price_desc">Giá giảm dần</option>
+                  <option value="quantity">Số lượng</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Product Details Card */}
+          <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="p-2 bg-indigo-100 rounded-lg">
+                <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-gray-800">Thông tin sản phẩm</h2>
+                <p className="text-sm text-gray-500">Chi tiết và thông số kỹ thuật</p>
+              </div>
+            </div>
+            <ProductDetails productDetails={productDetails} />
+          </div>
+
+          {/* Product Variants Section */}
+          <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div className="p-6 border-b border-gray-200">
+              <div className="flex items-center gap-4">
+                <div className="p-2 bg-green-100 rounded-lg">
+                  <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-800">Danh sách biến thể</h2>
+                  <p className="text-sm text-gray-500">Quản lý các phiên bản sản phẩm</p>
+                </div>
+              </div>
+            </div>
+            <ProductVariantsTable variants={filteredVariants} fetchData={fetchData} />
           </div>
         </div>
 
-        {/* Product Details */}
-        <ProductDetails productDetails={productDetails} />
-        
-        {/* Product Variants */}
-        <div className="mb-8">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">Danh sách biến thể sản phẩm</h2>
-          <ProductVariantsTable variants={filteredVariants} fetchData={fetchData} />
-        </div>
-
-        {/* Modal */}
+        {/* Modals */}
         <AddVariantModal 
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}

@@ -82,6 +82,62 @@ const resources = {
       "addedToCart": "Added to cart successfully",
       "errorOccurred": "An error occurred",
       "orderSuccess": "Order placed successfully",
+      
+      // AI Chat related
+      "aiChatPlaceholder": "Type your message here...",
+      "aiChatSend": "Send",
+      "aiChatThinking": "AI is thinking...",
+      "aiChatWelcome": "Hello! How can I help you today?",
+      
+      // User profile
+      "myProfile": "My Profile",
+      "editProfile": "Edit Profile",
+      "accountSettings": "Account Settings",
+      "myOrders": "My Orders",
+      "wishlist": "Wishlist",
+      "logout": "Logout",
+      
+      // Search
+      "searchPlaceholder": "Search for products...",
+      "noResults": "No results found",
+      "popularSearches": "Popular Searches",
+      
+      // Product filters
+      "filters": "Filters",
+      "clearAll": "Clear All",
+      "apply": "Apply",
+      "inStock": "In Stock",
+      "outOfStock": "Out of Stock",
+      
+      // Order tracking
+      "orderTracking": "Order Tracking",
+      "orderNumber": "Order Number",
+      "trackOrder": "Track Order",
+      "orderStatus": "Order Status",
+      "orderDate": "Order Date",
+      "estimatedDelivery": "Estimated Delivery",
+      
+      // Reviews
+      "writeReview": "Write a Review",
+      "rating": "Rating",
+      "comment": "Comment",
+      "submitReview": "Submit Review",
+      "reviewSuccess": "Review submitted successfully",
+      
+      // Authentication
+      "emailAddress": "Email Address",
+      "password": "Password",
+      "forgotPassword": "Forgot Password?",
+      "confirmPassword": "Confirm Password",
+      "createAccount": "Create Account",
+      "alreadyHaveAccount": "Already have an account?",
+      "dontHaveAccount": "Don't have an account?",
+      
+      // Error messages
+      "requiredField": "This field is required",
+      "invalidEmail": "Invalid email address",
+      "passwordMismatch": "Passwords do not match",
+      "networkError": "Network error occurred",
     }
   },
   vi: {
@@ -163,6 +219,62 @@ const resources = {
       "addedToCart": "Đã thêm vào giỏ hàng",
       "errorOccurred": "Đã xảy ra lỗi",
       "orderSuccess": "Đặt hàng thành công",
+      
+      // AI Chat related
+      "aiChatPlaceholder": "Nhập tin nhắn của bạn...",
+      "aiChatSend": "Gửi",
+      "aiChatThinking": "AI đang suy nghĩ...",
+      "aiChatWelcome": "Xin chào! Tôi có thể giúp gì cho bạn?",
+      
+      // User profile
+      "myProfile": "Hồ sơ của tôi",
+      "editProfile": "Chỉnh sửa hồ sơ",
+      "accountSettings": "Cài đặt tài khoản",
+      "myOrders": "Đơn hàng của tôi",
+      "wishlist": "Danh sách yêu thích",
+      "logout": "Đăng xuất",
+      
+      // Search
+      "searchPlaceholder": "Tìm kiếm sản phẩm...",
+      "noResults": "Không tìm thấy kết quả",
+      "popularSearches": "Tìm kiếm phổ biến",
+      
+      // Product filters
+      "filters": "Bộ lọc",
+      "clearAll": "Xóa tất cả",
+      "apply": "Áp dụng",
+      "inStock": "Còn hàng",
+      "outOfStock": "Hết hàng",
+      
+      // Order tracking
+      "orderTracking": "Theo dõi đơn hàng",
+      "orderNumber": "Mã đơn hàng",
+      "trackOrder": "Theo dõi",
+      "orderStatus": "Trạng thái đơn hàng",
+      "orderDate": "Ngày đặt hàng",
+      "estimatedDelivery": "Dự kiến giao hàng",
+      
+      // Reviews
+      "writeReview": "Viết đánh giá",
+      "rating": "Xếp hạng",
+      "comment": "Bình luận",
+      "submitReview": "Gửi đánh giá",
+      "reviewSuccess": "Đã gửi đánh giá thành công",
+      
+      // Authentication
+      "emailAddress": "Địa chỉ email",
+      "password": "Mật khẩu",
+      "forgotPassword": "Quên mật khẩu?",
+      "confirmPassword": "Xác nhận mật khẩu",
+      "createAccount": "Tạo tài khoản",
+      "alreadyHaveAccount": "Đã có tài khoản?",
+      "dontHaveAccount": "Chưa có tài khoản?",
+      
+      // Error messages
+      "requiredField": "Trường này là bắt buộc",
+      "invalidEmail": "Địa chỉ email không hợp lệ",
+      "passwordMismatch": "Mật khẩu không khớp",
+      "networkError": "Đã xảy ra lỗi mạng",
     }
   }
 };

@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { FiShoppingCart, FiUser, FiSearch, FiPackage } from 'react-icons/fi';
+import { HiOutlineFire } from 'react-icons/hi';
 
 const Navbar = () => {
+  const { t, i18n } = useTranslation();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [scrollText, setScrollText] = useState('');
   const [cartItemCount, setCartItemCount] = useState(0);
   const user = {name: ''};
 
   useEffect(() => {
-    const text = "🔥 Siêu sale laptop - Giảm giá đến 50% - Số lượng có hạn 🔥";
+    const text = "🔥 Siêu sale laptop - Giảm giá đến 50% - Số lượng có hạn 🔥                                                                                                ";
     let position = 0;
     const speed = 200;
 
@@ -37,53 +41,128 @@ const Navbar = () => {
     };
   }, []);
 
-  return (
-    <header className="bg-gray-900 text-white py-4">
-      <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center space-x-8">
-            <img src="https://res.cloudinary.com/dmtek0eaq/image/upload/v1736440677/u9hh2q6oqqeqeaewwnvl.png" alt="logo" className="w-10 h-10" />
-            <Link to="/" className="text-2xl font-bold">AINO</Link>
-            <nav className="flex space-x-6">
-              <Link to="/track-order" className="hover:text-blue-400 transition">Tra cứu đơn hàng</Link>
-              <Link to="/accessories" className="hover:text-blue-400 transition">Giảm giá SỐC</Link>
-            </nav>
-          </div>
+  const changeLanguage = (lng) => {
+    i18n.changeLanguage(lng);
+  };
 
-          <div className="flex-1 mx-4 overflow-hidden">
-            <div className="text-yellow-400 font-medium whitespace-nowrap">
+  return (
+    <div className="w-full">
+      {/* Top banner with scrolling text */}
+      <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-2 px-4">
+        <div className="container mx-auto">
+          <div className="overflow-hidden">
+            <div className="text-sm font-medium whitespace-nowrap animate-scroll">
               {scrollText}
             </div>
           </div>
-          
-          <div className="flex items-center space-x-6">
-            <Link to="/cart" className="flex items-center space-x-2 bg-blue-600 px-4 py-2 rounded-full hover:bg-blue-700 transition relative">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" />
-              </svg>
-              <span>Giỏ hàng</span>
-              {cartItemCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  {cartItemCount}
-                </span>
-              )}
-            </Link>
-            
-            {isAuthenticated ? (
-              <div className="flex items-center space-x-2 hover:text-blue-400 transition">
-                <i className="fas fa-user mr-2"></i>
-                <Link to="/profile">{user.name}</Link>
-              </div>
-            ) : (
-              <Link to="/login" className="hover:text-blue-400 transition">
-                <i className="fas fa-user mr-2"></i>
-                Đăng Nhập
-              </Link>
-            )}
-          </div>
         </div>
       </div>
-    </header>
+
+      {/* Main navbar */}
+      <header className="bg-white shadow-sm">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo and primary navigation */}
+            <div className="flex items-center gap-8">
+              <Link to="/" className="flex items-center gap-2">
+                <img 
+                  src="https://res.cloudinary.com/dmtek0eaq/image/upload/v1736440677/u9hh2q6oqqeqeaewwnvl.png" 
+                  alt="logo" 
+                  className="w-8 h-8"
+                />
+                <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 text-transparent bg-clip-text">
+                  AINO
+                </span>
+              </Link>
+
+              <nav className="hidden md:flex items-center gap-6">
+                <Link 
+                  to="/track-order" 
+                  className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors"
+                >
+                  <FiPackage className="w-4 h-4" />
+                  <span className="text-sm font-medium">{t('searchOrder')}</span>
+                </Link>
+                <Link 
+                  to="/accessories" 
+                  className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors"
+                >
+                  <HiOutlineFire className="w-4 h-4" />
+                  <span className="text-sm font-medium">{t('hotDeals')}</span>
+                </Link>
+              </nav>
+            </div>
+
+            {/* Right side actions */}
+            <div className="flex items-center gap-4">
+              {/* Cart */}
+              <Link 
+                to="/cart" 
+                className="relative p-2 text-gray-600 hover:text-blue-600 transition-colors"
+              >
+                <FiShoppingCart className="w-6 h-6" />
+                {cartItemCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                    {cartItemCount}
+                  </span>
+                )}
+              </Link>
+
+              {/* Authentication */}
+              {isAuthenticated ? (
+                <div className="flex items-center gap-2">
+                  <img
+                    src="https://ui-avatars.com/api/?name=User"
+                    alt="User"
+                    className="w-8 h-8 rounded-full"
+                  />
+                  <Link 
+                    to="/profile"
+                    className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors"
+                  >
+                    {user.name}
+                  </Link>
+                </div>
+              ) : (
+                <Link 
+                  to="/login"
+                  className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors"
+                >
+                  <FiUser className="w-6 h-6" />
+                  <span className="text-sm font-medium hidden md:inline">
+                    {t('login')}
+                  </span>
+                </Link>
+              )}
+
+              {/* Language switcher */}
+              <div className="flex items-center gap-2 ml-4">
+                <button
+                  onClick={() => changeLanguage('en')}
+                  className={`px-2 py-1 text-sm font-medium rounded-md transition-colors ${
+                    i18n.language === 'en'
+                      ? 'bg-blue-100 text-blue-600'
+                      : 'text-gray-500 hover:bg-gray-100'
+                  }`}
+                >
+                  EN
+                </button>
+                <button
+                  onClick={() => changeLanguage('vi')}
+                  className={`px-2 py-1 text-sm font-medium rounded-md transition-colors ${
+                    i18n.language === 'vi'
+                      ? 'bg-blue-100 text-blue-600'
+                      : 'text-gray-500 hover:bg-gray-100'
+                  }`}
+                >
+                  VI
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+    </div>
   );
 };
 

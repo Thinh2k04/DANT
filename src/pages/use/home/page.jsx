@@ -11,6 +11,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { updateCartItemQuantity } from '../../../utils/cartUtils';
 import CartToast from '../../../components/Toast/CartToast';
 import AIChatBubble from '../../../components/AIChatBubble/AIChatBubble';
+import { useTranslation } from 'react-i18next';
 
 // Tạo hàm định dạng tiền Việt Nam
 const formatCurrency = (amount) => {
@@ -24,6 +25,12 @@ const formatCurrency = (amount) => {
 
 // Định nghĩa component HomePage
 const HomePage = () => {
+  const { t, i18n } = useTranslation();
+
+  const changeLanguage = (lng) => {
+    i18n.changeLanguage(lng);
+  };
+
   // Khai báo các state cần thiết
   const [products, setProducts] = useState([]); // State lưu trữ danh sách sản phẩm
   const [currentPage, setCurrentPage] = useState(1); // State quản lý trang hiện tại
@@ -325,7 +332,7 @@ const HomePage = () => {
                       className="w-full py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-1.5"
                     >
                       <FaShoppingCart className="text-xs" />
-                      Thêm vào giỏ hàng
+                      {t('addToCart')}
                     </button>
                   </div>
                 </div>
@@ -653,7 +660,7 @@ const HomePage = () => {
                       className="w-full py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-1.5"
                     >
                       <FaShoppingCart className="text-xs" />
-                      Thêm vào giỏ hàng
+                      {t('addToCart')}
                     </button>
                   </div>
                 </div>
@@ -679,7 +686,7 @@ const HomePage = () => {
 
         {/* Thêm section thương hiệu */}
         <div className="mt-12 mb-10">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">Thương Hiệu Nổi Bật</h2>
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">{t('featuredBrands')}</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
             <div className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow flex items-center justify-center group">
               <img 

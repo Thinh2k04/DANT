@@ -1,3 +1,4 @@
+import '../i18n/i18n';
 import HomePage from '../pages/use/home/page';
 import CartPage from '../pages/use/giohang/page';
 import AdminDashboard from '../pages/admin/homeAdmin/page';

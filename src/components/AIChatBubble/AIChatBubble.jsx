@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaRobot, FaTimes, FaPaperPlane } from 'react-icons/fa';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
@@ -7,6 +7,24 @@ const AIChatBubble = () => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [productData, setProductData] = useState([]);
+
+  // Fetch dữ liệu sản phẩm khi component mount
+  useEffect(() => {
+    fetchProductData();
+  }, []);
+
+  // Hàm fetch dữ liệu sản phẩm
+  const fetchProductData = async () => {
+    try {
+      const response = await fetch('http://localhost:8080/rest/spctDTO/getAll');
+      if (!response.ok) throw new Error('Failed to fetch product data');
+      const data = await response.json();
+      setProductData(data);
+    } catch (error) {
+      console.error('Error fetching product data:', error);
+    }
+  };
 
   const handleSendMessage = async () => {
     if (!newMessage.trim()) return;
@@ -16,10 +34,19 @@ const AIChatBubble = () => {
       // Thêm tin nhắn người dùng
       setMessages(prev => [...prev, { text: newMessage, sender: 'user' }]);
       
-      // Tạo prompt yêu cầu AI trả lời bằng tiếng Việt
+      // Tạo context cho AI từ dữ liệu sản phẩm
+      const productContext = JSON.stringify(productData);
+      
+      // Tạo prompt với context
       const prompt = `
-        Hãy trả lời câu hỏi sau bằng tiếng Việt một cách thân thiện và chuyên nghiệp:
-        ${newMessage}
+        Bạn là trợ lý AI của cửa hàng laptop. Chỉ trả lời các câu hỏi liên quan đến dữ liệu sản phẩm sau đây:
+        ${productContext}
+
+        Nếu câu hỏi không liên quan đến dữ liệu sản phẩm, hãy trả lời: "Xin lỗi, tôi chỉ có thể trả lời các câu hỏi về sản phẩm laptop trong cửa hàng."
+
+        Câu hỏi của khách hàng: ${newMessage}
+
+        Hãy trả lời bằng tiếng Việt, ngắn gọn và chuyên nghiệp.
       `;
       
       // Gọi API AI

@@ -15,4 +15,5 @@ public interface DiscountCampaignInterface extends JpaRepository<DiscountCampaig
             LocalDateTime endDate
     );
 
+    boolean existsByName(String name);
 }

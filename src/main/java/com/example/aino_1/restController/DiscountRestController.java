@@ -2,12 +2,13 @@ package com.example.aino_1.restController;
 
 import com.example.aino_1.dto.ProductDiscountDTO;
 import com.example.aino_1.dto.SanPhamChiTietDto;
-import com.example.aino_1.entity.DiscountCampaign;
-import com.example.aino_1.entity.ProductDiscount;
-import com.example.aino_1.entity.SanPhamChiTiet;
+import com.example.aino_1.entity.*;
 import com.example.aino_1.repository.DiscountCampaignInterface;
 import com.example.aino_1.repository.ProductDiscountInterface;
 import com.example.aino_1.service.DiscountService;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @RestController
@@ -50,9 +52,26 @@ public class DiscountRestController {
 
     // Thêm đợt giảm giá
     @PostMapping("/addDiscount")
-    public DiscountCampaign addDiscountCampaign(@RequestBody DiscountCampaign discountCampaign) {
-        return discountService.addDiscountCampaign(discountCampaign);
+    public ResponseEntity<Map<String, Object>> addDiscountCampaign(
+            @RequestHeader("Authorization") String token,
+            @RequestBody Map<String, Object> discountCampaignRequest
+    ) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule()); // Đăng ký xử lý LocalDateTime
+
+        DiscountCampaign discountCampaign = objectMapper.convertValue(discountCampaignRequest.get("campaigns"), DiscountCampaign.class);
+        List<Integer> productIds = objectMapper.convertValue(discountCampaignRequest.get("products"), new TypeReference<List<Integer>>() {});
+
+        Map<String, Object> result = discountService.addDiscountCampaign(token, discountCampaign, productIds);
+
+        if (result.containsKey("Lỗi")) {
+            return ResponseEntity.badRequest().body(result);
+        }
+
+        return ResponseEntity.ok(result);
     }
+
+
 
     // Sửa đợt giảm giá
     @PutMapping("/updateDiscount/{id}")

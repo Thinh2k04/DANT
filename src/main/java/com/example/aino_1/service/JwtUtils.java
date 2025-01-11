@@ -73,4 +73,12 @@ public class JwtUtils {
 
         return tokenDetails;
     }
+
+    public boolean isAdmin(String token) {
+        Map<String, Object> tokenDetails = validateToken(token);
+        if (tokenDetails == null) {
+            return false; // Token không hợp lệ
+        }
+        return "ADMIN".equalsIgnoreCase((String) tokenDetails.get("role"));
+    }
 }

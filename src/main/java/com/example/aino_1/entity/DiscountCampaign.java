@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -24,9 +25,11 @@ public class DiscountCampaign {
     private Integer discountPercentage;
 
     @Column(name = "start_date", nullable = false)
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.sss")
     private LocalDateTime startDate;
 
     @Column(name = "end_date", nullable = false)
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.sss")
     private LocalDateTime endDate;
 
     @Column(name = "active", nullable = false)

@@ -67,6 +67,15 @@ export const updateCartItemQuantity = async (id, newQuantity) => {
     const result = await response.json();
     
     if (result.success) {
+      // Kiểm tra số lượng tồn kho
+      const stockResponse = await fetch(`http://localhost:8080/rest/san_pham_chi_tiet/getById/${id}`);
+      const stockData = await stockResponse.json();
+      
+      if (newQuantity > stockData.soLuong) {
+        toast.warning(`Số lượng vượt quá hàng tồn kho (${stockData.soLuong} sản phẩm)!`);
+        return { success: false };
+      }
+
       const currentCart = JSON.parse(localStorage.getItem('cartItems')) || [];
       const existingItemIndex = currentCart.findIndex(item => item.id === id);
 
@@ -78,8 +87,7 @@ export const updateCartItemQuantity = async (id, newQuantity) => {
         };
       } else {
         // Thêm sản phẩm mới với số lượng được chỉ định
-        const productResponse = await fetch(`http://localhost:8080/rest/san_pham_chi_tiet/getById/${id}`);
-        const dbProduct = await productResponse.json();
+        const dbProduct = stockData;
         currentCart.push({ ...dbProduct, quantity: newQuantity });
       }
       

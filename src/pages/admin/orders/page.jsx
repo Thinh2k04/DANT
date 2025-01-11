@@ -203,165 +203,167 @@ const OrderManagement = () => {
       format: 'a4'
     });
 
-    // Thiết lập font chữ hỗ trợtiếng Việt
-    doc.setFont('helvetica');
+    // Thiết lập font Times New Roman
+    doc.setFont('times', 'normal');
     
     // Header
-    doc.setFontSize(22);
-    doc.setTextColor(44, 62, 80);
-    doc.text("LAPTOP SHOP", 105, 15, { align: "center" });
+    doc.setFontSize(24);
+    doc.setTextColor(0, 0, 0);
+    doc.text("LAPTOP SHOP", 105, 20, { align: "center" });
     
     doc.setFontSize(16);
-    doc.text("HÓA ĐƠN BÁN HÀNG", 105, 25, { align: "center" });
-    doc.text(`#${order.id}`, 105, 32, { align: "center" });
+    doc.setFont('times', 'bold');
+    doc.text("H O A   D O N   B A N   H A N G", 105, 30, { align: "center" });
+    doc.text(`#${order.id}`, 105, 37, { align: "center" });
     
     // Đường kẻ phân cách
-    doc.setDrawColor(41, 128, 185);
+    doc.setDrawColor(0, 0, 0);
     doc.setLineWidth(0.5);
-    doc.line(15, 35, 195, 35);
+    doc.line(15, 45, 195, 45);
     
     // Thông tin công ty
-    doc.setFontSize(10);
-    doc.setTextColor(52, 73, 94);
+    doc.setFontSize(11);
+    doc.setFont('times', 'normal');
     doc.text([
-      "CÔNG TY TNHH LAPTOP SHOP",
-      "Địa chỉ: 134/44 Nguyên Xá , Bắc từ liêm , Hà Nội",
+      "CONG TY TNHH LAPTOP SHOP",
+      "So nha 6 ngo 134/44 Nguyen xa - Bac tu liem - Ha noi",
       "Hotline: 0123.456.789 - Email: shoplaptop@gmail.com",
       "MST: 0123456789"
-    ], 105, 45, { align: "center" });
+    ], 105, 55, { align: "center" });
 
     // Thông tin khách hàng
     const customerInfo = {
-      startY: 60,
-      head: [['THÔNG TIN KHÁCH HÀNG']],
+      startY: 75,
+      head: [['THONG TIN KHACH HANG']], 
       body: [
-        ['Khách hàng:', order.thongTinTaiKhoan?.hoTen ||'N/A'],
-        ['Số điện thoại:', order.thongTinTaiKhoan?.soDienThoai ||'N/A'],
-        ['Email:', order.thongTinTaiKhoan?.email ||'N/A'],
-        ['Địa chỉ giao hàng:', order.diaChiNhanHang ||'N/A'],
-        ['Ngày đặt hàng:', new Date(order.thoiGianLapHoaDon).toLocaleString('vi-VN')],
-        ['Hình thức thanh toán:', order.hinhThucThanhToan?.tenHinhThuc ||'N/A'],
-        ['Trạng thái:', order.trangThaiThanhToan === 0 ? 'Đã hủy' :
-                       order.trangThaiThanhToan === 1 ? 'Thành công' :
-                       order.trangThaiThanhToan === 2 ? 'Chờ thanh toán' : 'N/A']
+        ['Khach hang:', order.thongTinTaiKhoan?.hoTen || 'N/A'],
+        ['So dien thoai:', order.thongTinTaiKhoan?.soDienThoai || 'N/A'],
+        ['Email:', order.thongTinTaiKhoan?.email || 'N/A'],
+        ['Dia diem giao hang:', order.diaChiNhanHang || 'LAPTOP SHOP'],
+        ['Ngay xac nhan:', new Date(order.thoiGianLapHoaDon).toLocaleDateString('vi-VN')],
+        ['Hinh thuc thanh toan:', 'Thanh toan khi nhan hang'],
+        ['Trang thai:', order.trangThaiThanhToan === 0 ? 'Da huy' :
+                       order.trangThaiThanhToan === 1 ? 'Da xac nhan' :
+                       order.trangThaiThanhToan === 2 ? 'Cho xac nhan' : 'N/A']
       ],
       theme: 'plain',
       styles: { 
-        fontSize: 10,
-        cellPadding: 2,
+        fontSize: 11,
+        cellPadding: 4,
+        font: 'times',
+        textColor: [0, 0, 0]
       },
       headStyles: {
-        fillColor: [41, 128, 185],
+        fillColor: [0, 0, 0],
         textColor: 255,
-        fontSize: 12,
+        fontSize: 13,
         fontStyle: 'bold',
-        halign: 'center'
+        halign: 'left',
+        font: 'times'
       },
       columnStyles: {
-        0: { cellWidth: 40, fontStyle: 'bold' },
+        0: { cellWidth: 45, fontStyle: 'bold' },
         1: { cellWidth: 100 }
       }
     };
-    
+
     doc.autoTable(customerInfo);
 
     // Chi tiết sản phẩm
     const productDetails = {
       startY: doc.lastAutoTable.finalY + 10,
-      head: [['STT', 'Sản phẩm', 'Cấu hình', 'SL', 'Đơn giá', 'Thành tiền']],
+      head: [['STT', 'San pham', 'Cau hinh', 'SL', 'Don gia', 'Thanh tien']],
       body: details.map((detail, index) => [
         index + 1,
-        detail.sanPhamChiTiet?.sanPham?.tenSanPham ||'N/A',
+        detail.sanPhamChiTiet?.sanPham?.tenSanPham || 'N/A',
         [
-          `CPU: ${detail.sanPhamChiTiet?.cpu?.ten ||'N/A'}`,
-          `RAM: ${detail.sanPhamChiTiet?.ram?.dungLuong ||'N/A'}GB`,
-          `Ổ cứng: ${detail.sanPhamChiTiet?.oluuTru?.dungLuong ||'N/A'}GB ${detail.sanPhamChiTiet?.oluuTru?.loaiOCung || ''}`,
-          `GPU: ${detail.sanPhamChiTiet?.gpu?.ten ||'N/A'}`,
-          `Màn hình: ${detail.sanPhamChiTiet?.manHinh?.doPhanGiai ||'N/A'}`
+          `CPU: ${detail.sanPhamChiTiet?.cpu?.ten || 'N/A'}`,
+          `RAM: ${detail.sanPhamChiTiet?.ram?.dungLuong || 'N/A'}GB`,
+          `O cung: ${detail.sanPhamChiTiet?.oluuTru?.dungLuong || 'N/A'}GB`,
+          `GPU: ${detail.sanPhamChiTiet?.gpu?.ten || 'N/A'}`,
+          `Man hinh: ${detail.sanPhamChiTiet?.manHinh?.doPhanGiai || 'N/A'}`
         ].join('\n'),
         detail.soLuong,
-        `${detail.gia?.toLocaleString('vi-VN')}đ`,
-        `${(detail.soLuong * detail.gia)?.toLocaleString('vi-VN')}đ`
+        detail.gia?.toLocaleString('vi-VN'),
+        (detail.soLuong * detail.gia)?.toLocaleString('vi-VN')
       ]),
-      theme: 'striped',
+      theme: 'grid',
       headStyles: {
-        fillColor: [41, 128, 185],
+        fillColor: [0, 0, 0],
         textColor: 255,
-        fontSize: 10,
+        fontSize: 11,
         fontStyle: 'bold',
-        halign: 'center'
+        halign: 'center',
+        font: 'times'
       },
       styles: {
-        fontSize: 9,
-        cellPadding: 2,
-        lineColor: [80, 80, 80],
+        fontSize: 11,
+        cellPadding: 4,
+        lineColor: [0, 0, 0],
         lineWidth: 0.1,
+        font: 'times',
+        textColor: [0, 0, 0]
       },
       columnStyles: {
-        0: { cellWidth: 10, halign: 'center' },
-        1: { cellWidth: 35 },
-        2: { cellWidth: 65 },
-        3: { cellWidth: 10, halign: 'center' },
-        4: { cellWidth: 25, halign: 'right' },
+        0: { cellWidth: 15, halign: 'center' },
+        1: { cellWidth: 40 },
+        2: { cellWidth: 60 },
+        3: { cellWidth: 15, halign: 'center' },
+        4: { cellWidth: 30, halign: 'right' },
         5: { cellWidth: 30, halign: 'right' }
       }
     };
 
     doc.autoTable(productDetails);
 
-    // Tổng tiền và giảm giá
+    // Tổng tiền
     const summaryData = {
       startY: doc.lastAutoTable.finalY + 5,
       body: [],
       theme: 'plain',
       styles: { 
-        fontSize: 10,
-        cellPadding: 2
+        fontSize: 11,
+        cellPadding: 4,
+        font: 'times',
+        textColor: [0, 0, 0]
       },
       columnStyles: {
-        0: { cellWidth: 150, fontStyle: 'bold', halign: 'right' },
+        0: { cellWidth: 160, fontStyle: 'bold', halign: 'right' },
         1: { cellWidth: 30, halign: 'right', fontStyle: 'bold'}
       }
     };
 
-    // Thêm thông tin tổng tiền vàvoucher
-    summaryData.body.push(['Tổng tiền hàng:', `${order.tongTien?.toLocaleString('vi-VN')}đ`]);
-    
-    if (order.voucher) {
-      const giamGia = order.tongTien * order.voucher.phanTramApDung;
-      summaryData.body.push([
-        `Voucher giảm giá (${order.voucher.maVoucher}):`,
-        `-${giamGia.toLocaleString('vi-VN')}đ`
-      ]);
-    }
-
-    const tongThanhToan = order.tongTien - (order.voucher ? order.tongTien * order.voucher.phanTramApDung : 0);
-    summaryData.body.push(['Tổng thanh toán:', `${tongThanhToan.toLocaleString('vi-VN')}đ`]);
+    summaryData.body.push(
+      ['Tong tien hang:', order.tongTien?.toLocaleString('vi-VN')],
+      ['Tong thanh toan:', order.tongTien?.toLocaleString('vi-VN')]
+    );
 
     doc.autoTable(summaryData);
 
     // Footer
-    doc.setDrawColor(41, 128, 185);
+    doc.setDrawColor(0, 0, 0);
     doc.setLineWidth(0.5);
-    doc.line(15, doc.lastAutoTable.finalY+ 10, 195, doc.lastAutoTable.finalY + 10);
+    doc.line(15, doc.lastAutoTable.finalY + 10, 195, doc.lastAutoTable.finalY + 10);
 
-    doc.setFontSize(10);
-    doc.setTextColor(127, 140, 141);
-    const currentDate = new Date().toLocaleString('vi-VN',{
+    // Thông tin thời gian in
+    doc.setFontSize(11);
+    doc.setFont('times', 'normal');
+    const currentDate = new Date().toLocaleString('vi-VN', {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',
       hour: '2-digit',
       minute: '2-digit'
     });
-    doc.text(`Ngày in: ${currentDate}`, 15, doc.lastAutoTable.finalY + 20);
+    doc.text(`Ngay in: ${currentDate}`, 15, doc.lastAutoTable.finalY + 20);
 
-    doc.setFontSize(10);
-    doc.setTextColor(44, 62, 80);
-    doc.text([
-      "Cảm ơn quý khách đã mua hàng!",
-      "Mọi thắc mắc xin vui lòng liên hệ Hotline: 0123.456.789"
-    ], 105, doc.lastAutoTable.finalY + 20, { align: "center" });
+    // Lời cảm ơn
+    doc.setFontSize(11);
+    doc.setFont('times', 'normal');
+    doc.text(
+      "Cam on quy khach da tin tuong va mua san pham o LAPTOP SHOP",
+      105, doc.lastAutoTable.finalY + 20, { align: "center" }
+    );
 
     // Lưu file PDF
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
@@ -607,7 +609,7 @@ const OrderManagement = () => {
                           <td className="px-6 py-4">
                             <p className="text-sm mb-1"><span className="font-semibold">CPU:</span> {detail.sanPhamChiTiet?.cpu?.hangSanXuat} {detail.sanPhamChiTiet?.cpu?.ten}</p>
                             <p className="text-sm mb-1"><span className="font-semibold">RAM:</span> {detail.sanPhamChiTiet?.ram?.dungLuong}GB</p>
-                            <p className="text-sm mb-1"><span className="font-semibold">Ổ cứng:</span> {detail.sanPhamChiTiet?.oluuTru?.dungLuong}GB {detail.sanPhamChiTiet?.oluuTru?.loaiOCung}</p>
+                            <p className="text-sm mb-1"><span className="font-semibold">Ổ cứng:</span> {detail.sanPhamChiTiet?.oluuTru?.dungLuong}GB</p>
                             <p className="text-sm mb-1"><span className="font-semibold">GPU:</span> {detail.sanPhamChiTiet?.gpu?.hangSanXuat} {detail.sanPhamChiTiet?.gpu?.ten}</p>
                             <p className="text-sm"><span className="font-semibold">Màn hình:</span> {detail.sanPhamChiTiet?.manHinh?.doPhanGiai}, {detail.sanPhamChiTiet?.manHinh?.tanSoQuet}Hz</p>
                           </td>

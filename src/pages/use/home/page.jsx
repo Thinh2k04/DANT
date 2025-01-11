@@ -10,6 +10,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { updateCartItemQuantity } from '../../../utils/cartUtils';
 import CartToast from '../../../components/Toast/CartToast';
+import AIChatBubble from '../../../components/AIChatBubble/AIChatBubble';
 
 // Tạo hàm định dạng tiền Việt Nam
 const formatCurrency = (amount) => {
@@ -183,6 +184,8 @@ const HomePage = () => {
         onClose={() => setShowToast(false)}
         product={selectedProduct}
       />
+      <AIChatBubble />
+      
       <main className="flex-grow container mx-auto py-8 px-4">
         {/* Phần Hero Section - Banner chính */}
         <div className="mb-10">

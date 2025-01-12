@@ -1,4 +1,4 @@
-import { format } from 'date-fns';
+import { format, isValid } from 'date-fns';
 import { FiEdit2, FiTrash2, FiEye } from 'react-icons/fi';
 
 const PromotionTable = ({
@@ -10,6 +10,19 @@ const PromotionTable = ({
   handleDelete,
   handleUpdate
 }) => {
+  const formatDate = (dateString) => {
+    try {
+      const date = new Date(dateString);
+      if (!isValid(date)) {
+        return 'Invalid date';
+      }
+      return format(date, 'dd/MM/yyyy HH:mm');
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Invalid date';
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -57,8 +70,7 @@ const PromotionTable = ({
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="text-sm text-gray-900">
-                  {format(new Date(campaign.startDate), 'dd/MM/yyyy HH:mm')} - 
-                  {format(new Date(campaign.endDate), 'dd/MM/yyyy HH:mm')}
+                  {formatDate(campaign.startDate)} - {formatDate(campaign.endDate)}
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">

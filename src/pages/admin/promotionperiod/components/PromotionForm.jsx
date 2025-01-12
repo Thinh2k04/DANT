@@ -1,3 +1,5 @@
+import { format, parseISO } from 'date-fns';
+
 const PromotionForm = ({
   showModal,
   formData,
@@ -7,6 +9,18 @@ const PromotionForm = ({
   handleCloseModal,
   setFormData
 }) => {
+  // Hàm format date từ ISO string sang định dạng datetime-local
+  const formatDateForInput = (dateString) => {
+    if (!dateString) return '';
+    try {
+      const date = parseISO(dateString);
+      return format(date, "yyyy-MM-dd'T'HH:mm");
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return '';
+    }
+  };
+
   if (!showModal) return null;
 
   return (
@@ -46,8 +60,8 @@ const PromotionForm = ({
                 required
                 min={new Date().toISOString().slice(0, 16)}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                value={formData.startDate}
-                onChange={(e) => setFormData({...formData, startDate: e.target.value})}
+                value={formatDateForInput(formData.startDate)}
+                onChange={(e) => setFormData({...formData, startDate: new Date(e.target.value).toISOString()})}
               />
             </div>
             <div className="mb-4">
@@ -55,10 +69,10 @@ const PromotionForm = ({
               <input
                 type="datetime-local"
                 required
-                min={formData.startDate || new Date().toISOString().slice(0, 16)}
+                min={formData.startDate ? formatDateForInput(formData.startDate) : new Date().toISOString().slice(0, 16)}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                value={formData.endDate}
-                onChange={(e) => setFormData({...formData, endDate: e.target.value})}
+                value={formatDateForInput(formData.endDate)}
+                onChange={(e) => setFormData({...formData, endDate: new Date(e.target.value).toISOString()})}
               />
             </div>
             <div className="mt-4 flex justify-end">

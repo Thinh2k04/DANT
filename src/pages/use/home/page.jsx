@@ -11,6 +11,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { updateCartItemQuantity } from '../../../utils/cartUtils';
 import CartToast from '../../../components/Toast/CartToast';
 import AIChatBubble from '../../../components/AIChatBubble/AIChatBubble';
+import CustomerChatBubble from '../../../components/CustomerChatBubble/CustomerChatBubble';
 import { useTranslation } from 'react-i18next';
 
 // Tạo hàm định dạng tiền Việt Nam
@@ -191,7 +192,16 @@ const HomePage = () => {
         onClose={() => setShowToast(false)}
         product={selectedProduct}
       />
-      <AIChatBubble />
+      
+      {/* Container cho các nút chat - CustomerChat trên, AIChat dưới */}
+      <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-4">
+        <div> {/* Customer Chat ở trên */}
+          <CustomerChatBubble />
+        </div>
+        <div> {/* AI Chat ở dưới */}
+          <AIChatBubble />
+        </div>
+      </div>
       
       <main className="flex-grow container mx-auto py-8 px-4">
         {/* Phần Hero Section - Banner chính */}

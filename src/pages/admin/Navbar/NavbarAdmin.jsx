@@ -13,7 +13,8 @@ import {
   FiChevronRight,
   FiUser,
   FiGrid,
-  FiPercent
+  FiPercent,
+  FiMessageSquare
 } from 'react-icons/fi';
 
 const NavbarAdmin = () => {
@@ -86,6 +87,13 @@ const NavbarAdmin = () => {
       path: '/admin/promotion-period',
       icon: FiPercent,
       label: 'Quản lý khuyến mại',
+      badge: null
+    },
+    {
+      id: 'chat',
+      path: '/admin/chat',
+      icon: FiMessageSquare,
+      label: 'Chat với khách hàng',
       badge: null
     }
   ];

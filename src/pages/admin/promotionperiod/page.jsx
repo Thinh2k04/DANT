@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { FiPlus, FiEdit2, FiTrash2, FiCalendar, FiCheck, FiX, FiAlertCircle, FiRefreshCw, FiEye } from 'react-icons/fi';
-import { format } from 'date-fns';
+import { format, isValid } from 'date-fns';
 import { toast } from 'react-toastify';
 import NavbarAdmin from '../Navbar/NavbarAdmin';
 import ConfirmDialog from './components/ConfirmDialog';
@@ -144,10 +144,17 @@ const PromotionPeriodPage = () => {
     }
   };
 
-  const formatDateToISO = (date) => {
-    if (!date) return '';
-    const formattedDate = new Date(date);
-    return formattedDate.toISOString().split('.')[0];
+  const formatDate = (dateString) => {
+    try {
+      const date = new Date(dateString);
+      if (!isValid(date)) {
+        return 'Invalid date';
+      }
+      return format(date, 'dd/MM/yyyy HH:mm');
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Invalid date';
+    }
   };
 
   const handleEdit = (campaign) => {
@@ -155,8 +162,8 @@ const PromotionPeriodPage = () => {
     setFormData({
       name: campaign.name,
       discountPercentage: campaign.discountPercentage,
-      startDate: campaign.startDate.slice(0, 16),
-      endDate: campaign.endDate.slice(0, 16),
+      startDate: campaign.startDate,
+      endDate: campaign.endDate,
       active: campaign.active
     });
     setShowModal(true);
@@ -168,12 +175,20 @@ const PromotionPeriodPage = () => {
       const formattedData = {
         name: formData.name,
         discountPercentage: parseInt(formData.discountPercentage),
-        startDate: formatDateToISO(formData.startDate),
-        endDate: formatDateToISO(formData.endDate),
+        startDate: formData.startDate,
+        endDate: formData.endDate,
         active: 1
       };
 
-      if (new Date(formattedData.endDate) <= new Date(formattedData.startDate)) {
+      if (!formattedData.startDate || !formattedData.endDate) {
+        warningToast('Ngày bắt đầu và ngày kết thúc không được để trống!');
+        return;
+      }
+
+      const startDate = new Date(formattedData.startDate);
+      const endDate = new Date(formattedData.endDate);
+
+      if (endDate <= startDate) {
         warningToast('Ngày kết thúc phải sau ngày bắt đầu!');
         return;
       }
@@ -375,8 +390,7 @@ const PromotionPeriodPage = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
-                        {format(new Date(campaign.startDate), 'dd/MM/yyyy HH:mm')} - 
-                        {format(new Date(campaign.endDate), 'dd/MM/yyyy HH:mm')}
+                        {formatDate(campaign.startDate)} - {formatDate(campaign.endDate)}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">

@@ -70,17 +70,20 @@ const AIChatBubble = () => {
   };
 
   return (
-    <div className="fixed bottom-4 right-4 z-50">
+    <div className="relative">
       {/* Nút chat */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-14 h-14 rounded-full bg-indigo-600 text-white flex items-center justify-center shadow-lg hover:bg-indigo-700 transition-all duration-300 ${isOpen ? 'scale-0' : 'scale-100'}`}
+        className={`w-16 h-16 rounded-full bg-indigo-600 text-white flex items-center justify-center shadow-lg hover:bg-indigo-700 transition-all duration-300 relative ${isOpen ? 'opacity-0' : 'opacity-100'}`}
       >
         <FaRobot className="text-2xl" />
+        <span className="absolute w-full h-full rounded-full animate-ping bg-indigo-400 opacity-75"></span>
       </button>
 
       {/* Cửa sổ chat */}
-      <div className={`${isOpen ? 'scale-100' : 'scale-0'} origin-bottom-right transition-transform duration-300 absolute bottom-0 right-0 w-96 h-[500px] bg-white rounded-lg shadow-xl flex flex-col`}>
+      <div className={`${
+        isOpen ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0 pointer-events-none'
+      } transition-all duration-300 absolute bottom-0 right-0 w-[380px] bg-white rounded-lg shadow-2xl flex flex-col overflow-hidden`}>
         {/* Phần header */}
         <div className="p-4 bg-indigo-600 rounded-t-lg flex items-center justify-between">
           <div className="flex items-center gap-2">

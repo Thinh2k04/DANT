@@ -5,7 +5,16 @@ import EditProductVariantModal from './EditProductVariantModal';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
-const ProductVariantsTable = ({ variants, fetchData }) => {
+const ProductVariantsTable = ({ 
+  variants, 
+  fetchData,
+  rams,
+  cpus,
+  gpus,
+  storages,
+  displays,
+  colors
+}) => {
   const [isImeiModalOpen, setIsImeiModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedVariant, setSelectedVariant] = useState(null);
@@ -239,6 +248,12 @@ const ProductVariantsTable = ({ variants, fetchData }) => {
           fetchData();
           setIsEditModalOpen(false);
         }}
+        rams={rams}
+        cpus={cpus}
+        gpus={gpus}
+        storages={storages}
+        displays={displays}
+        colors={colors}
       />
     </>
   );

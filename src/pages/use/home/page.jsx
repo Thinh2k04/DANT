@@ -55,23 +55,50 @@ const HomePage = () => {
   const [cpus, setCpus] = useState([]); // State cho CPU
   const [manHinhs, setManHinhs] = useState([]); // State cho màn hình
 
-  // Hàm fetch dữ liệu sản phẩm
-  const fetchProducts = async () => {
+  // Hàm fetch dữ liệu sản phẩm và các thuộc tính lọc
+  const fetchProductsAndAttributes = async () => {
     try {
-      const response = await fetch('http://localhost:8080/rest/spctDTO/getAll');
-      if (!response.ok) throw new Error('Failed to fetch products');
-      const data = await response.json();
-      setProducts(data);
+      const productResponse = await fetch('http://localhost:8080/rest/spctDTO/getAll');
+      if (!productResponse.ok) throw new Error('Failed to fetch products');
+      const productsData = await productResponse.json();
+      setProducts(productsData);
+
+      // Fetch distinct values for filters
+      const thuongHieuResponse = await fetch('http://localhost:8080/rest/thuong-hieu/getAll');
+      if (!thuongHieuResponse.ok) throw new Error('Failed to fetch brands');
+      const thuongHieuData = await thuongHieuResponse.json();
+      setThuongHieus(thuongHieuData);
+
+      const ramResponse = await fetch('http://localhost:8080/rest/ram/getAll');
+      if (!ramResponse.ok) throw new Error('Failed to fetch RAM');
+      const ramData = await ramResponse.json();
+      setRams(ramData);
+
+      const oCungResponse = await fetch('http://localhost:8080/rest/o_luu_tru/getAll');
+      if (!oCungResponse.ok) throw new Error('Failed to fetch storage');
+      const oCungData = await oCungResponse.json();
+      setOCungs(oCungData);
+
+      const cpuResponse = await fetch('http://localhost:8080/rest/cpu/getAll');
+      if (!cpuResponse.ok) throw new Error('Failed to fetch CPUs');
+      const cpuData = await cpuResponse.json();
+      setCpus(cpuData);
+
+      const manHinhResponse = await fetch('http://localhost:8080/rest/man_hinh/getAll');
+      if (!manHinhResponse.ok) throw new Error('Failed to fetch screens');
+      const manHinhData = await manHinhResponse.json();
+      setManHinhs(manHinhData);
+
     } catch (error) {
-      console.error('Error fetching products:', error);
-      toast.error('Có lỗi xảy ra khi tải dữ liệu sản phẩm!');
+      console.error('Error fetching data:', error);
+      toast.error('Có lỗi xảy ra khi tải dữ liệu!');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchProducts();
+    fetchProductsAndAttributes();
   }, []);
 
   // Hàm tìm kiếm laptop
@@ -222,15 +249,6 @@ const HomePage = () => {
                 <p className="text-xl text-gray-200">
                   Khám phá bộ sưu tập laptop cao cấp với công nghệ mới nhất
                 </p>
-                <div className="flex items-center gap-4">
-                  <input
-                    type="text"
-                    placeholder="Tìm kiếm laptop..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="px-6 py-3 rounded-full w-96 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
               </div>
             </div>
           </div>
@@ -583,6 +601,20 @@ const HomePage = () => {
                     ))}
                   </select>
                 </div>
+              </div>
+            </div>
+
+            {/* Thêm input tìm kiếm ở đây */}
+            <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
+              <div className="flex items-center gap-2">
+                <FaSearch className="text-blue-600 text-xl" />
+                <input
+                  type="text"
+                  placeholder="Tìm kiếm laptop..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full px-6 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
               </div>
             </div>
           </div>

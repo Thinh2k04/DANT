@@ -306,7 +306,16 @@ const ChiTietSanPhamAdmin = () => {
                 </div>
               </div>
             </div>
-            <ProductVariantsTable variants={filteredVariants} fetchData={fetchData} />
+            <ProductVariantsTable 
+              variants={filteredVariants} 
+              fetchData={fetchData}
+              rams={rams}
+              cpus={cpus}
+              gpus={gpus}
+              storages={storages}
+              displays={displays}
+              colors={colors}
+            />
           </div>
         </div>
 

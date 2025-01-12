@@ -16,6 +16,23 @@ const TrackOrderPage = () => {
     setOrderHistory(savedOrders);
   }, []);
 
+  // Thêm hàm để lấy chi tiết hóa đơn theo ID
+  const getOrderById = async (orderId) => {
+    setLoading(true);
+    try {
+      const response = await fetch(`http://localhost:8080/rest/hoa_don/getById/${orderId}`);
+      if (!response.ok) throw new Error('Không tìm thấy đơn hàng');
+      
+      const orderData = await response.json();
+      setCurrentOrder(orderData);
+    } catch (error) {
+      console.error('Error fetching order details:', error);
+      toast.error('Không thể lấy thông tin đơn hàng!');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Hàm tra cứu đơn hàng
   const handleTrackOrder = async () => {
     if (!orderCode && !phoneNumber) {
@@ -27,32 +44,29 @@ const TrackOrderPage = () => {
     try {
       let response;
       if (orderCode) {
-        response = await fetch(`http://localhost:8080/rest/hoa_don/traCuu?maHoaDon=${orderCode}`);
+        // Nếu có mã đơn hàng, gọi trực tiếp API getById
+        await getOrderById(orderCode);
       } else {
+        // Nếu tìm theo số điện thoại, giữ nguyên logic cũ
         response = await fetch(`http://localhost:8080/rest/hoa_don/traCuu?soDienThoai=${phoneNumber}`);
+        if (!response.ok) throw new Error('Không tìm thấy đơn hàng');
+        
+        const orderData = await response.json();
+        const orders = Array.isArray(orderData) ? orderData : [orderData];
+        
+        // Cập nhật lịch sử và hiển thị đơn hàng đầu tiên
+        const newHistory = [...orders, ...orderHistory.filter(order => 
+          !orders.some(newOrder => newOrder.id === order.id)
+        )].slice(0, 5);
+        
+        localStorage.setItem('orderHistory', JSON.stringify(newHistory));
+        setOrderHistory(newHistory);
+        setCurrentOrder(orders[0]);
       }
-
-      if (!response.ok) throw new Error('Không tìm thấy đơn hàng');
-      
-      const orderData = await response.json();
-      
-      // Nếu tìm theo số điện thoại, orderData có thể là một mảng các đơn hàng
-      const orders = Array.isArray(orderData) ? orderData : [orderData];
-      
-      // Cập nhật lịch sử đơn hàng
-      const newHistory = [...orders, ...orderHistory.filter(order => 
-        !orders.some(newOrder => newOrder.id === order.id)
-      )].slice(0, 5);
-      
-      localStorage.setItem('orderHistory', JSON.stringify(newHistory));
-      setOrderHistory(newHistory);
-      
-      // Hiển thị đơn hàng mới nhất hoặc đơn hàng duy nhất
-      setCurrentOrder(orders[0]);
-      setLoading(false);
     } catch (error) {
       console.error('Error tracking order:', error);
       toast.error('Không tìm thấy đơn hàng!');
+    } finally {
       setLoading(false);
     }
   };
@@ -66,6 +80,71 @@ const TrackOrderPage = () => {
       case 3: return { text: 'Đã giao hàng', color: 'text-green-500', icon: FaCheckCircle };
       default: return { text: 'Không xác định', color: 'text-gray-500', icon: FaBox };
     }
+  };
+
+  // Sửa lại phần hiển thị chi tiết đơn hàng
+  const renderOrderDetails = () => {
+    if (!currentOrder) return null;
+
+    return (
+      <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+        <h2 className="text-xl font-semibold mb-4">Thông tin đơn hàng</h2>
+        <div className="space-y-4">
+          {/* Thông tin cơ bản */}
+          <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
+            <div>
+              <p className="font-medium">Mã đơn hàng: {currentOrder.id}</p>
+              <p className="text-gray-600">Ngày đặt: {new Date(currentOrder.thoiGianLapHoaDon).toLocaleDateString('vi-VN')}</p>
+              <p className="text-gray-600">Khách hàng: {currentOrder.khachHang?.hoTen || 'N/A'}</p>
+              <p className="text-gray-600">SĐT: {currentOrder.khachHang?.soDienThoai || 'N/A'}</p>
+            </div>
+            <div className={`flex items-center gap-2 ${getOrderStatus(currentOrder.trangThaiThanhToan).color}`}>
+              {React.createElement(getOrderStatus(currentOrder.trangThaiThanhToan).icon)}
+              <span>{getOrderStatus(currentOrder.trangThaiThanhToan).text}</span>
+            </div>
+          </div>
+
+          {/* Chi tiết sản phẩm */}
+          <div className="border-t pt-4">
+            <h3 className="font-medium mb-2">Chi tiết đơn hàng</h3>
+            {currentOrder.hoaDonChiTiets?.map((item, index) => (
+              <div key={index} className="flex justify-between items-center py-2 border-b">
+                <div className="flex-1">
+                  <p className="font-medium">{item.sanPhamChiTiet?.sanPham?.tenSanPham}</p>
+                  <p className="text-sm text-gray-600">
+                    {item.sanPhamChiTiet?.cpu?.ten} | 
+                    RAM {item.sanPhamChiTiet?.ram?.dungLuong}GB | 
+                    {item.sanPhamChiTiet?.oLuuTru?.dungLuong}GB
+                  </p>
+                  <p className="text-gray-600">Số lượng: {item.soLuong}</p>
+                </div>
+                <p className="font-medium">
+                  {parseFloat(item.gia).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          {/* Tổng tiền và thông tin thanh toán */}
+          <div className="border-t pt-4 space-y-2">
+            <div className="flex justify-between items-center">
+              <span>Tổng tiền hàng:</span>
+              <span>{parseFloat(currentOrder.tongTien).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span>Giảm giá:</span>
+              <span>-{parseFloat(currentOrder.giamGia || 0).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</span>
+            </div>
+            <div className="flex justify-between items-center font-bold text-lg">
+              <span>Tổng thanh toán:</span>
+              <span className="text-red-600">
+                {parseFloat(currentOrder.tongTien - (currentOrder.giamGia || 0)).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -113,48 +192,8 @@ const TrackOrderPage = () => {
             </button>
           </div>
 
-          {/* Hiển thị thông tin đơn hàng */}
-          {currentOrder && (
-            <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-              <h2 className="text-xl font-semibold mb-4">Thông tin đơn hàng</h2>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
-                  <div>
-                    <p className="font-medium">Mã đơn hàng: {currentOrder.id}</p>
-                    <p className="text-gray-600">Ngày đặt: {new Date(currentOrder.thoiGianLapHoaDon).toLocaleDateString('vi-VN')}</p>
-                  </div>
-                  <div className={`flex items-center gap-2 ${getOrderStatus(currentOrder.trangThaiThanhToan).color}`}>
-                    {React.createElement(getOrderStatus(currentOrder.trangThaiThanhToan).icon)}
-                    <span>{getOrderStatus(currentOrder.trangThaiThanhToan).text}</span>
-                  </div>
-                </div>
-                
-                <div className="border-t pt-4">
-                  <h3 className="font-medium mb-2">Chi tiết đơn hàng</h3>
-                  {currentOrder.hoaDonChiTiets?.map((item, index) => (
-                    <div key={index} className="flex justify-between items-center py-2">
-                      <div className="flex-1">
-                        <p className="font-medium">{item.sanPhamChiTiet.tenSanPhamChiTiet}</p>
-                        <p className="text-gray-600">Số lượng: {item.soLuong}</p>
-                      </div>
-                      <p className="font-medium">
-                        {parseFloat(item.gia).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="border-t pt-4">
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium">Tổng tiền:</span>
-                    <span className="text-xl font-bold text-red-600">
-                      {parseFloat(currentOrder.tongTien).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+          {/* Hiển thị chi tiết đơn hàng */}
+          {renderOrderDetails()}
 
           {/* Lịch sử tra cứu */}
           {orderHistory.length > 0 && (
@@ -165,7 +204,7 @@ const TrackOrderPage = () => {
                   <div
                     key={index}
                     className="flex justify-between items-center p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100"
-                    onClick={() => setCurrentOrder(order)}
+                    onClick={() => getOrderById(order.id)}
                   >
                     <div>
                       <p className="font-medium">Mã đơn hàng: {order.id}</p>

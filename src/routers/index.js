@@ -10,7 +10,7 @@ import ChiTietSanPham from '../pages/chitietsanpham[/id]/page';
 import CheckoutPage from '../pages/use/thanhtoan/page';
 import PaymentSuccess from '../components/GioHangComponenst/PaymentSuccess';
 import ChiTietSanPhamAdmin from '../pages/admin/sanphamchitietAdmin[/id]/page';
-import TrackOrder from '../pages/use/track order/page';
+import TrackOrder from '../pages/use/trackorder/page';
 import LoginPage from '../pages/use/loginuse/page';
 import RegisterPage from '../pages/use/register/page';
 import ProductAttributesPage from '../pages/admin/product-attributes/page';

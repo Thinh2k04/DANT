@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { FaUser, FaLock, FaEye, FaEyeSlash, FaSignInAlt } from 'react-icons/fa';
 import { motion } from 'framer-motion';
+import axios from 'axios';
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -108,6 +109,7 @@ const LoginPage = () => {
       const data = await response.json();
 
       if (response.ok) {
+        // Lưu thông tin đăng nhập nếu người dùng chọn "Remember me"
         if (formData.rememberMe) {
           localStorage.setItem('savedCredentials', JSON.stringify({
             username: formData.username,
@@ -117,21 +119,31 @@ const LoginPage = () => {
           localStorage.removeItem('savedCredentials');
         }
 
-        // Lưu token và thông tin user vào localStorage
+        // Lưu token vào localStorage
         localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data));
+        
+        // Lưu thông tin user và role
+        localStorage.setItem('userRole', data.role);
+        localStorage.setItem('userData', JSON.stringify({
+          username: formData.username,
+          role: data.role,
+          // Thêm các thông tin khác nếu cần
+        }));
+
+        // Set Authorization header cho các request tiếp theo
+        axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
         
         toast.success('🎉 Đăng nhập thành công! Chào mừng trở lại! 💖', {
           position: "top-center",
           autoClose: 1500,
         });
 
-        // Kiểm tra role và điều hướng
+        // Điều hướng dựa trên role
         setTimeout(() => {
           if (data.role === 'ADMIN') {
-            navigate('/admin'); // Điều hướng admin vào trang admin
+            navigate('/admin');
           } else if (data.role === 'USER') {
-            navigate('/home'); // Điều hướng user vào trang home
+            navigate('/home');
           }
         }, 1500);
       } else {
@@ -171,6 +183,7 @@ const LoginPage = () => {
               transition={{ duration: 0.5 }}
             >
               <motion.img
+                src="https://res.cloudinary.com/dmtek0eaq/image/upload/v1736695132/aahoalljunxjpdy65uqu.png"
                 alt="Premium Laptop Store"
                 className="w-full h-full object-contain"
                 initial={{ rotate: 0 }}

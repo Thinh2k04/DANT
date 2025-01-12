@@ -28,7 +28,7 @@ const useProductVariant = () => {
       };
 
       const response = await axios.post(
-        'http://localhost:8080/rest/spctDTO/Update',
+        'http://localhost:8080/rest/spctDTO/update',
         payload
       );
 

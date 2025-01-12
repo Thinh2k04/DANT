@@ -98,6 +98,11 @@ const RegisterPage = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-8 transform hover:scale-[1.02] transition-all duration-300">
         <div className="text-center mb-8">
+          <img 
+            src="https://res.cloudinary.com/dmtek0eaq/image/upload/v1736695132/aahoalljunxjpdy65uqu.png"
+            alt="Logo"
+            className="h-24 w-auto mx-auto mb-4"
+          />
           <h2 className="text-4xl font-bold text-gray-900 mb-4">Đăng ký tài khoản</h2>
           <div className="h-1 w-20 bg-blue-600 mx-auto rounded-full mb-4"></div>
           <p className="mt-2 text-sm text-gray-600">

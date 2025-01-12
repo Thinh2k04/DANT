@@ -172,10 +172,17 @@ const ChiTietSanPham = () => {
         'Ổ cứng': <FaHdd className="text-purple-600" />,
         'Màn hình': <FaDesktop className="text-red-600" />,
         'Card đồ họa': <FaGamepad className="text-yellow-600" />,
-        'Card đồ họa rời': <FaGamepad className="text-orange-600" />,
-        'Pin': <FaBatteryFull className="text-green-600" />,
+        'Độ phân giải': <FaDesktop className="text-orange-600" />,
+        'Tấm nền': <FaDesktop className="text-indigo-600" />,
+        'Tần số quét': <FaDesktop className="text-pink-600" />,
+        'Số nhân': <FaMicrochip className="text-cyan-600" />,
+        'Kiến trúc': <FaMicrochip className="text-teal-600" />,
         'Trọng lượng': <FaWeightHanging className="text-blue-600" />,
-        'Bảo hành': <FaTools className="text-gray-600" />
+        'Pin': <FaBatteryFull className="text-green-600" />,
+        'Bảo hành': <FaTools className="text-gray-600" />,
+        'Chất liệu': <FaTools className="text-brown-600" />,
+        'Thương hiệu': <FaLaptop className="text-blue-800" />,
+        'Mã sản phẩm': <FaInfoCircle className="text-gray-600" />
     };
 
     // Return JSX
@@ -191,8 +198,9 @@ const ChiTietSanPham = () => {
             {!isLoading && product && (
                 <div className="container mx-auto px-4 py-8">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        {/* Cột trái - Ảnh sản phẩm */}
-                        <div className="sticky top-20 h-fit">
+                        {/* Cột trái - Ảnh sản phẩm và giới thiệu */}
+                        <div className="sticky top-20 space-y-6">
+                            {/* Phần ảnh sản phẩm */}
                             <div className="bg-white rounded-2xl shadow-sm overflow-hidden p-4">
                                 <div className="relative h-80 mb-4">
                                     <img 
@@ -229,13 +237,25 @@ const ChiTietSanPham = () => {
                                     ))}
                                 </div>
                             </div>
+
+                            {/* Phần giới thiệu sản phẩm */}
+                            <div className="bg-white rounded-2xl shadow-sm p-6">
+                                <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                    <FaInfoCircle className="text-blue-600" />
+                                    Giới thiệu sản phẩm
+                                </h2>
+                                <p className="text-gray-600 text-base leading-relaxed">
+                                    {selectedConfig.gioiThieu}
+                                </p>
+                            </div>
                         </div>
 
                         {/* Cột phải - Thông tin sản phẩm */}
                         <div className="space-y-6">
                             <div className="bg-white rounded-2xl shadow-sm p-6">
-                                <h1 className="text-3xl font-bold text-gray-900 mb-3">{selectedConfig.tenSanPhamChiTiet}</h1>
-                                <p className="text-gray-600 text-base mb-4">{selectedConfig.gioiThieu}</p>
+                                <h1 className="text-3xl font-bold text-gray-900 mb-6">
+                                    {selectedConfig.tenSanPhamChiTiet}
+                                </h1>
                                 
                                 <div className="flex items-center gap-4 mb-6">
                                     <span className="text-3xl font-bold text-red-600">
@@ -268,21 +288,28 @@ const ChiTietSanPham = () => {
 
                                 <div className="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-xl mb-6">
                                     {[
+                                        ['Mã sản phẩm', selectedConfig.maSpct],
+                                        ['Thương hiệu', selectedConfig.thuongHieu],
                                         ['CPU', selectedConfig.tenCPU],
+                                        ['Số nhân', `${selectedConfig.soNhan} nhân`],
+                                        ['Kiến trúc', selectedConfig.kienTrucCongNghe],
                                         ['RAM', `${selectedConfig.dungLuongRam} GB`],
                                         ['Ổ cứng', `${selectedConfig.dungLuong} GB`],
                                         ['Màn hình', `${selectedConfig.kichThuocLaptop} inch`],
+                                        ['Độ phân giải', selectedConfig.doPhanGiai],
+                                        ['Tấm nền', selectedConfig.tamNen],
+                                        ['Tần số quét', `${selectedConfig.tanSoQuet} Hz`],
                                         ['Card đồ họa', selectedConfig.gpu],
-                                        ['Card đồ họa rời', selectedConfig.cardDoHoaRoi || 'Không có'],
                                         ['Pin', `${selectedConfig.pin} Wh`],
                                         ['Trọng lượng', `${selectedConfig.trongLuong} kg`],
-                                        ['Bảo hành', selectedConfig.baoHanh]
+                                        ['Chất liệu', selectedConfig.chatLieu],
+                                        ['Bảo hành', `${selectedConfig.thoiHanBaoHanh} tháng`]
                                     ].map(([label, value]) => (
-                                        <div key={label} className="flex items-center gap-2">
+                                        <div key={label} className="flex items-center gap-2 p-3 bg-white rounded-lg shadow-sm">
                                             {specIcons[label]}
                                             <div>
                                                 <p className="text-sm text-gray-600">{label}</p>
-                                                <p className="font-medium text-gray-900">{value}</p>
+                                                <p className="font-medium text-gray-900">{value || 'Không có'}</p>
                                             </div>
                                         </div>
                                     ))}

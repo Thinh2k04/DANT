@@ -63,14 +63,25 @@ function CartPage() {
   // Thêm hàm kiểm tra số lượng
   const checkQuantity = async (id, quantity) => {
     try {
-      const response = await axios.post('http://localhost:8080/rest/ghct/check', {
-        id: id,
-        soLuong: quantity
-      });
-      return response.data;
+      const response = await axios.post('http://localhost:8080/rest/ghct/check', [
+        {
+          id: id,
+          soLuong: quantity
+        }
+      ]);
+      
+      // Kiểm tra response.data.success
+      return {
+        success: response.data.success,
+        message: response.data.success ? 'Số lượng hợp lệ' : 'Số lượng sản phẩm không đủ'
+      };
+      
     } catch (error) {
       console.error('Lỗi khi kiểm tra số lượng:', error);
-      return { success: false, message: 'Số lượng sản phẩm không đủ' };
+      return {
+        success: false,
+        message: 'Có lỗi xảy ra khi kiểm tra số lượng sản phẩm'
+      };
     }
   };
 
@@ -94,7 +105,7 @@ function CartPage() {
       const checkResult = await checkQuantity(id, newQuantity);
       
       if (!checkResult.success) {
-        toast.error(checkResult.message || 'Số lượng sản phẩm không đủ', {
+        toast.error('Số lượng sản phẩm không đủ', {
           position: "top-right",
           autoClose: 3000,
           hideProgressBar: false,
@@ -107,6 +118,7 @@ function CartPage() {
         return;
       }
 
+      // Nếu kiểm tra thành công, cập nhật số lượng
       const result = await updateCartItemQuantity(id, newQuantity);
       if (result.success) {
         setQuantities(prev => ({

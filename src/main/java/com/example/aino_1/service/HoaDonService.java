@@ -6,6 +6,7 @@ import com.example.aino_1.entity.*;
 import com.example.aino_1.repository.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -36,6 +37,7 @@ public class HoaDonService {
     @Autowired
     ImeiInterface imeiRepository;
 
+    @Lazy
     @Autowired
     ImeiService imeiService;
 

@@ -24,8 +24,7 @@ public class ImeiService {
     @Autowired
     HDCTInterFace hdctInterFace;
 
-    @Autowired
-    ImeiService imeiService;
+
 
     public Map<String, Object> addOrUpdateImei(Integer idSPCT, List<Imei> listImei) {
         // Tìm sản phẩm chi tiết dựa trên ID
@@ -84,7 +83,7 @@ public class ImeiService {
             imif.save(im);
         }
 
-        List<Imei> limspcttrue = imeiService.imif.findAllBySpctIdAndTrangThai(spct.getId(), 0);
+        List<Imei> limspcttrue = imif.findAllBySpctIdAndTrangThai(spct.getId(),0);
         if(limspcttrue.size()> 0){
             spct.setTrangThai(1);
             spctInterface.save(spct);

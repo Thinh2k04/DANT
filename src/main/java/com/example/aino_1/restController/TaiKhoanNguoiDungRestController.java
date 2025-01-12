@@ -25,12 +25,12 @@ import java.util.Map;
 @RestController
 @RequestMapping("/rest/tai_khoan")
 public class TaiKhoanNguoiDungRestController {
-    @Autowired
-    TaiKhoanService tksv;
+
     @Autowired
     private TaiKhoanNguoiDungInterface taiKhoanInterface; // Thống nhất tên interface
     @Autowired
     TaiKhoanService tkndsv;
+
     private final BCryptPasswordEncoder passwordEncoder;
 
 
@@ -45,8 +45,6 @@ public class TaiKhoanNguoiDungRestController {
         List<Map<String, String>> danhSachThongTin = tkndsv.getTaiKhoan();
         return ResponseEntity.ok(danhSachThongTin);
     }
-
-
 
 
     @PostMapping("/register")
@@ -105,6 +103,26 @@ public class TaiKhoanNguoiDungRestController {
     @GetMapping("/getByID/{id}")
     public TaiKhoanNguoiDung getAll(@PathVariable Integer id) {
         return taiKhoanInterface.findById(id).get();
+    }
+
+
+    @PostMapping("/forgatePass")
+    public ResponseEntity<String> handleForgotPassword(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+
+        String username = request.get("username");
+
+        if (email == null || email.isEmpty()) {
+            return ResponseEntity.badRequest().body("Email không được để trống.");
+        }
+
+        boolean isSuccess = tkndsv.handleForgotPassword(email,username);
+
+        if (isSuccess) {
+            return ResponseEntity.ok("Đã gửi mật khẩu tạm thời qua email. Vui lòng kiểm tra hộp thư.");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Email không tồn tại trong hệ thống.");
+        }
     }
 
 

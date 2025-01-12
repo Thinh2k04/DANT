@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -27,7 +29,7 @@ public class SanPhamChiTiet {
     private Integer trangThai;
 
     @Column(name = "don_gia", nullable = false)
-    private Float donGia;
+    private BigDecimal donGia;
 
     @Column(name = "ma_spct", nullable = false, length = 20)
     private String maSpct;

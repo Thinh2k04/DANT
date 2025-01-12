@@ -1,5 +1,8 @@
 // Import các thư viện và components cần thiết
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import Navbar from '../../../components/Layout/DefaultLayout/Navbar';
 import { 
   getCartItems, // Hàm lấy danh sách sản phẩm trong giỏ hàng
@@ -44,18 +47,95 @@ function CartPage() {
         delete updatedSelectedItems[id];
         return updatedSelectedItems;
       });
+      toast.success('Đã xóa sản phẩm khỏi giỏ hàng', {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
     }
   };
 
-  // Hàm xử lý thay đổi số lượng sản phẩm
+  // Thêm hàm kiểm tra số lượng
+  const checkQuantity = async (id, quantity) => {
+    try {
+      const response = await axios.post('http://localhost:8080/rest/ghct/check', {
+        id: id,
+        soLuong: quantity
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Lỗi khi kiểm tra số lượng:', error);
+      return { success: false, message: 'Số lượng sản phẩm không đủ' };
+    }
+  };
+
+  // Sửa lại hàm handleQuantityChange
   const handleQuantityChange = async (id, newQuantity) => {
-    console.log('hàm + được gọi')
-    const result = await updateCartItemQuantity(id, newQuantity);
-    if (result.success) {
-      setQuantities(prev => ({
-        ...prev,
-        [id]: newQuantity
-      }));
+    if (newQuantity < 1) {
+      toast.warning('Số lượng không thể nhỏ hơn 1', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
+      return;
+    }
+
+    try {
+      const checkResult = await checkQuantity(id, newQuantity);
+      
+      if (!checkResult.success) {
+        toast.error(checkResult.message || 'Số lượng sản phẩm không đủ', {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+        return;
+      }
+
+      const result = await updateCartItemQuantity(id, newQuantity);
+      if (result.success) {
+        setQuantities(prev => ({
+          ...prev,
+          [id]: newQuantity
+        }));
+        toast.success('Cập nhật số lượng thành công', {
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+      }
+    } catch (error) {
+      console.error('Lỗi khi cập nhật số lượng:', error);
+      toast.error('Có lỗi xảy ra khi cập nhật số lượng', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
     }
   };
 
@@ -106,6 +186,18 @@ function CartPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
       <Navbar />
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
       <div className="container mx-auto py-8 px-4">
         {/* Phần header của giỏ hàng */}
         <div className="flex items-center mb-6">

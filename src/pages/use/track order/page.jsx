@@ -18,24 +18,37 @@ const TrackOrderPage = () => {
 
   // Hàm tra cứu đơn hàng
   const handleTrackOrder = async () => {
-    if (!orderCode || !phoneNumber) {
-      toast.error('Vui lòng nhập đầy đủ thông tin!');
+    if (!orderCode && !phoneNumber) {
+      toast.error('Vui lòng nhập mã đơn hàng hoặc số điện thoại!');
       return;
     }
 
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:8080/rest/hoa_don/track?maHoaDon=${orderCode}&soDienThoai=${phoneNumber}`);
+      let response;
+      if (orderCode) {
+        response = await fetch(`http://localhost:8080/rest/hoa_don/traCuu?maHoaDon=${orderCode}`);
+      } else {
+        response = await fetch(`http://localhost:8080/rest/hoa_don/traCuu?soDienThoai=${phoneNumber}`);
+      }
+
       if (!response.ok) throw new Error('Không tìm thấy đơn hàng');
       
       const orderData = await response.json();
       
-      // Thêm đơn hàng vào lịch sử
-      const newHistory = [orderData, ...orderHistory.filter(order => order.id !== orderData.id)].slice(0, 5);
+      // Nếu tìm theo số điện thoại, orderData có thể là một mảng các đơn hàng
+      const orders = Array.isArray(orderData) ? orderData : [orderData];
+      
+      // Cập nhật lịch sử đơn hàng
+      const newHistory = [...orders, ...orderHistory.filter(order => 
+        !orders.some(newOrder => newOrder.id === order.id)
+      )].slice(0, 5);
+      
       localStorage.setItem('orderHistory', JSON.stringify(newHistory));
       setOrderHistory(newHistory);
       
-      setCurrentOrder(orderData);
+      // Hiển thị đơn hàng mới nhất hoặc đơn hàng duy nhất
+      setCurrentOrder(orders[0]);
       setLoading(false);
     } catch (error) {
       console.error('Error tracking order:', error);

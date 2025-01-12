@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
 import java.util.Date;
 
 @Data
@@ -31,13 +30,13 @@ public class Voucher {
     private Date thoiGianHenKet;  // Thời gian hết hạn của voucher
 
     @Column(name = "so_tien_toi_da")
-    private BigDecimal soTienToiDa;  // Số tiền tối đa có thể áp dụng cho 1 đơn hàng
+    private Float soTienToiDa;  // Số tiền tối đa có thể áp dụng cho 1 đơn hàng
 
     @Column(name = "dieu_kien_ap_dung", nullable = false)
-    private BigDecimal dieuKienApDung;  // Điều kiện áp dụng (giá trị tối thiểu của hóa đơn)
+    private Float dieuKienApDung;  // Điều kiện áp dụng (giá trị tối thiểu của hóa đơn)
 
     @Column(name = "so_tien_ap_dung")
-    private BigDecimal soTienApDung;  // Số tiền giảm (có thể NULL nếu giảm theo %)
+    private Float soTienApDung;  // Số tiền giảm (có thể NULL nếu giảm theo %)
 
     @Column(name = "phan_tram_ap_dung")
     private Float phanTramApDung;  // Phần trăm giảm giá (có thể NULL nếu giảm theo số tiền)

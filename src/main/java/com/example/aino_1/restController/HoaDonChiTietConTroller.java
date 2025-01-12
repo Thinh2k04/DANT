@@ -26,6 +26,8 @@ public class HoaDonChiTietConTroller {
         return hdctsi.findById(id).get();
     }
 
+
+
     @GetMapping("/Byidhd/{id}")
     public List<HoaDonChiTiet> getHDCT(@PathVariable Integer id){
         return  hdctsi.findHoaDonWithDetailsById(id);

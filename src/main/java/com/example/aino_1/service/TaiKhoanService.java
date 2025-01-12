@@ -5,18 +5,16 @@ import com.example.aino_1.repository.GioHangChiTietInterface;
 import com.example.aino_1.repository.TaiKhoanNguoiDungInterface;
 import com.example.aino_1.repository.ThongTinTaiKhoaninterface;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
 public class TaiKhoanService {
-
-    @Autowired
-    EmailService emailService;
 
     @Autowired
     TaiKhoanNguoiDungInterface taiKhoanNguoiDungInterface;
@@ -27,9 +25,6 @@ public class TaiKhoanService {
 
     @Autowired
     GioHangChiTietInterface gioHangChiTietInterface;
-
-    @Autowired
-    private BCryptPasswordEncoder passwordEncoder; // Đảm bảo được tự động khởi tạo
 
     public Boolean addTaiKhoan(TaiKhoanNguoiDung tknd) {
         try {
@@ -78,61 +73,5 @@ public class TaiKhoanService {
                 .collect(Collectors.toList());
     }
 
-
-    public boolean changePassword(String username, String oldPassword, String newPassword) {
-        // Tìm tài khoản theo username
-        Optional<TaiKhoanNguoiDung> optionalTaiKhoan = taiKhoanNguoiDungInterface.findByUsername(username);
-
-        if (optionalTaiKhoan.isEmpty()) {
-            return false; // Không tìm thấy tài khoản
-        }
-
-        TaiKhoanNguoiDung taiKhoan = optionalTaiKhoan.get();
-
-        // Kiểm tra mật khẩu cũ
-        if (!passwordEncoder.matches(oldPassword, taiKhoan.getPassword())) {
-            return false; // Mật khẩu cũ không đúng
-        }
-
-        // Cập nhật mật khẩu mới
-        taiKhoan.setPassword(passwordEncoder.encode(newPassword));
-        taiKhoanNguoiDungInterface.save(taiKhoan);
-
-        return true;
-    }
-
-    public boolean handleForgotPassword(String email, String username) {
-        // Tìm tài khoản theo email
-        Optional<TaiKhoanNguoiDung> optionalTaiKhoan = taiKhoanNguoiDungInterface.findByEmailAndUsername(email,username);
-
-        if (optionalTaiKhoan.isEmpty()) {
-            return false; // Không tìm thấy tài khoản
-        }
-
-        TaiKhoanNguoiDung taiKhoan = optionalTaiKhoan.get();
-
-        // Tạo mật khẩu tạm thời
-        String temporaryPassword = UUID.randomUUID().toString().substring(0, 8);
-        taiKhoan.setPassword(passwordEncoder.encode(temporaryPassword));
-
-        // Cập nhật mật khẩu mới trong cơ sở dữ liệu
-        taiKhoanNguoiDungInterface.save(taiKhoan);
-
-        // Tạo nội dung email
-        String subject = "Khôi phục mật khẩu";
-        String messageContent = "Xin chào,\n\n" +
-                "Mật khẩu tạm thời của bạn là: " + temporaryPassword + "\n\n" +
-                "Vui lòng đổi mật khẩu ngay sau khi đăng nhập.\n\n" +
-                "Trân trọng,\nĐội ngũ hỗ trợ.";
-
-        // Gửi email
-        try {
-            emailService.sendEmailWithAttachment(email, subject, messageContent, null, null); // Không có file đính kèm
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
 
 }

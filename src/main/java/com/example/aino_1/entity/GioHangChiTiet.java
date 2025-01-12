@@ -5,8 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -30,7 +28,7 @@ public class    GioHangChiTiet {
     private Integer soLuong;  // Số lượng của sản phẩm chi tiết trong giỏ hàng
 
     @Column(name = "don_gia")
-    private BigDecimal donGia;  // Đơn giá của sản phẩm chi tiết trong giỏ hàng
+    private Float donGia;  // Đơn giá của sản phẩm chi tiết trong giỏ hàng
 
     @Column(name = "trang_thai")
     private Integer trangThai;  // Trạng thái của sản phẩm trong giỏ hàng

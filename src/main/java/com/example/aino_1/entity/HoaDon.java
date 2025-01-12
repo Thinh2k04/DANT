@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
 import java.util.Date;
 
 @Data
@@ -27,7 +26,13 @@ public class  HoaDon {
     private Date thoiGianLapHoaDon;  // Thời gian lập hóa đơn
 
     @Column(name = "tong_tien", nullable = false)
-    private BigDecimal tongTien;  // Tổng tiền của hóa đơn
+    private Float tongTien;  // Tổng tiền của hóa đơn
+
+
+    @Column(name = "phi_van_chuyen", nullable = false)
+    private Float phiVanChuyen;  // Tổng tiền của hóa đơn
+
+
 
     @ManyToOne
     @JoinColumn(name = "id_hinh_thuc_thanh_toan", nullable = true)
@@ -52,10 +57,4 @@ public class  HoaDon {
 
     @Column(name = "trang_thai", nullable = false)
     private Integer trangThai;  // Trạng thái thanh toán, mặc định là 0
-
-
-    @Column(name = "phi_giao_hang", nullable = false)
-    private BigDecimal phiGiaoHang;  // Trạng thái thanh toán, mặc định là 0
-
-
 }

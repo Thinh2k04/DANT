@@ -5,8 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,7 +16,7 @@ public class KichThuocLapTop {
     private Integer id;
 
     @Column(name = "kich_thuoc", nullable = false)
-    private BigDecimal kichThuoc;
+    private Float kichThuoc;
 
     @Column(name = "trang_thai")
     private Integer trangThai;  // Cột trạng thái, mặc định là 1

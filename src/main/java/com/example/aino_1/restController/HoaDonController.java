@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 @CrossOrigin("*") //cho phép tất cả các miền khác truy cập tài nguyên server (end point api)
 @RestController
@@ -138,17 +139,13 @@ public class HoaDonController {
                 return ResponseEntity.badRequest().body("Vui lòng cung cấp ít nhất một thông tin: số điện thoại hoặc mã hóa đơn.");
             }
 
-            // Gọi service để tìm kiếm hóa đơn
-            List<HoaDon> listHoaDon = hdsv.findListHoaDon(soDienThoai, maHoaDon);
-
-            // Xử lý nếu không tìm thấy dữ liệu
-            if (listHoaDon.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("Không tìm thấy hóa đơn với thông tin đã cung cấp.");
+            // Gọi service để xử lý logic
+            try {
+                Object result = hdsv.traCuuDonHang(soDienThoai, maHoaDon);
+                return ResponseEntity.ok(result);
+            } catch (NoSuchElementException ex) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
             }
-
-            // Trả về kết quả
-            return ResponseEntity.ok(listHoaDon);
         }
 
 }

@@ -139,5 +139,11 @@ public class ImeiService {
         return "Cập nhật trạng thái thành công cho " + soLuong + " IMEI.";
     }
 
+    public boolean checkTinhTrang(Integer idSPCT) {
+        List<Imei> listImei = imif.findAllBySpctIdAndTrangThai(idSPCT, 0);
+        return listImei == null || listImei.isEmpty();
+    }
+
+
 
 }

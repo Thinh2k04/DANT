@@ -19,6 +19,7 @@ public interface HoaDonInterface extends JpaRepository<HoaDon,Integer> {
     List<HoaDon> findBySoDienThoaiAndMaVoucher(@Param("soDienThoai") String soDienThoai,
                                                @Param("maVoucher") String maVoucher);
 
+    HoaDon findHoaDonByMaHoaDon(String maHoaDon);
 
-    public HoaDon findHoaDonByMaHoaDon(String mahoaDon);
+    public List<HoaDon> findHoaDonByThongTinTaiKhoan_SoDienThoaiOrMaHoaDon(String soDienThoai, String mahoaDon);
 }

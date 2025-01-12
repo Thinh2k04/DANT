@@ -28,6 +28,12 @@ public class  HoaDon {
     @Column(name = "tong_tien", nullable = false)
     private Float tongTien;  // Tổng tiền của hóa đơn
 
+
+    @Column(name = "phi_van_chuyen", nullable = false)
+    private Float phiVanChuyen;  // Tổng tiền của hóa đơn
+
+
+
     @ManyToOne
     @JoinColumn(name = "id_hinh_thuc_thanh_toan", nullable = true)
     private HinhThucThanhToan hinhThucThanhToan;  // Liên kết với bảng hinh_thuc_thanh_toan
@@ -36,7 +42,7 @@ public class  HoaDon {
     private String diaChiNhanHang;  // Địa chỉ nhận hàng
 
     @Column(name = "ma_hoa_don", nullable = true, length = 255)
-    private String maHoaDon;  // Mã hóa đơn của đơn hàng
+    private String maHoaDon;  // Mã hóa đơn của đơn han
 
     @ManyToOne
     @JoinColumn(name = "id_cua_hang", nullable = false)

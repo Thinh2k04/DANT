@@ -95,13 +95,13 @@ public class DiscountService {
 
             SanPhamChiTiet product = productDiscount.getProduct();
 
-            Integer sIMEISPCT = imeiService.getListImeibySPCT(product.getId()).size();
-            // Kiểm tra số lượng tồn kho của sản phẩm
-            if(sIMEISPCT== 0) {
-                // Nếu sản phẩm hết hàng, set active = 0
-                productDiscount.setActive(0);
-                continue; // Bỏ qua các bước kiểm tra khác
-            }
+//            Integer sIMEISPCT = imeiService.getListImeibySPCT(product.getId()).size();
+//            // Kiểm tra số lượng tồn kho của sản phẩm
+//            if(sIMEISPCT== 0) {
+//                // Nếu sản phẩm hết hàng, set active = 0
+//                productDiscount.setActive(0);
+//                continue; // Bỏ qua các bước kiểm tra khác
+//            }
 
             // Kiểm tra thời gian bắt đầu và kết thúc của chiến dịch giảm giá
             if (discountCampaign.getStartDate().isBefore(now) && discountCampaign.getEndDate().isAfter(now)) {
@@ -219,25 +219,30 @@ public class DiscountService {
             for (Integer productId : productIds) {
                 // Tìm sản phẩm theo ID
                 SanPhamChiTiet product = sanPhamChiTietInterface.findById(productId)
-                        .orElseThrow(() -> new RuntimeException("Product not found with ID: " + productId));
+                        .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại. Tên sản phẩm: " + sanPhamChiTietInterface.getSanPhamChiTietById(productId).getTenSanPhamChiTiet()));
+
+                SanPhamChiTietDto sanPhamChiTietDto = sanPhamChiTietInterface.getSanPhamChiTietById(productId);
 
                 // Kiểm tra nếu sản phẩm đã thuộc một chiến dịch đang hoạt động
-                Optional<ProductDiscount> existingDiscount = productDiscountInterface.findByProductAndActive(product, 1);
+                Optional<ProductDiscount> existingDiscountOpt = productDiscountInterface.findByProductAndActive(product, 1);
 
-                if (existingDiscount.isPresent()) {
-                    DiscountCampaign currentCampaign = existingDiscount.get().getDiscountCampaign();
+                if (existingDiscountOpt.isPresent()) {
+                    ProductDiscount existingDiscount = existingDiscountOpt.get();
+                    DiscountCampaign existingCampaign = existingDiscount.getDiscountCampaign();
+
                     LocalDateTime now = LocalDateTime.now();
 
-                    // Nếu chiến dịch hiện tại không còn hiệu lực
-                    if (currentCampaign.getEndDate().isBefore(now) || currentCampaign.getActive() == 0) {
-                        existingDiscount.get().setActive(0); // Vô hiệu hóa chiến dịch hiện tại
-                        productDiscountInterface.save(existingDiscount.get());
+                    // Nếu đợt khuyến mại cũ không hoạt động
+                    if (existingCampaign.getEndDate().isBefore(now) || existingCampaign.getActive() == 0) {
+                        existingDiscount.setActive(0); // Vô hiệu hóa đợt khuyến mại cũ
+                        productDiscountInterface.save(existingDiscount);
                     } else {
-                        // Nếu chiến dịch hiện tại đang hoạt động, bỏ qua sản phẩm này
-                        result.put("Lỗi", "Sản phẩm đã có trong một chiến dịch đang hoạt động.");
+                        // Nếu đợt khuyến mại cũ đang hoạt động, bỏ qua sản phẩm
+                        result.put("Lỗi", "Sản phẩm "+ sanPhamChiTietInterface.getSanPhamChiTietById(existingDiscountOpt.get().getId()).getTenSanPhamChiTiet() +"đã có trong một chiến dịch đang hoạt động: " + existingCampaign.getName());
                         continue;
                     }
                 }
+
 
                 // Thêm sản phẩm vào chiến dịch mới
                 ProductDiscount newProductDiscount = new ProductDiscount();

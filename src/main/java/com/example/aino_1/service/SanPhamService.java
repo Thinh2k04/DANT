@@ -54,6 +54,7 @@ public class SanPhamService {
             if (sp == null) {
                 throw new IllegalArgumentException("Thông tin sản phẩm không được để trống.");
             }
+            sp.setTrangThai(0);
             SanPham savedSanPham = spsi.save(sp);
 
             // Bước 2: Liên kết sản phẩm với sản phẩm chi tiết và lưu
@@ -74,19 +75,6 @@ public class SanPhamService {
                     }
                 }
             }
-
-//            // Bước 4:
-//            if (listImei != null && !listImei.isEmpty()) {
-//                for (String url : listImei) {
-//                    if (url != null && !url.isEmpty()) {
-//                        Imei imei = new Imei();
-//                        imei.setImei(url);
-//                        imei.setSpct(savedSanPhamCT);
-//                        imei.setTrangThai(1);
-//                        imsi.save(imei);
-//                    }
-//                }
-//            }
 
             return true; // Thành công
         } catch (Exception e) {

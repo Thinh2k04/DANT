@@ -74,7 +74,7 @@ public class ZaloPayService {
             put("bank_code", "");
             put("item", itemJSONArray.toString()); // Chuyển đổi itemList thành JSON string
             put("embed_data", new JSONObject(embed_data).toString());
-            put("callback_url", "http://localhost:8080/api/payment/callback"); // URL callback
+            put("callback_url", " https://1e98-2405-4803-fe6b-f550-6d75-2953-2f33-a695.ngrok-free.app/api/payment/callback"); // URL callback
         }};
 
         // Tạo dữ liệu cho chữ ký HMAC
@@ -147,37 +147,37 @@ public class ZaloPayService {
         return new JSONObject(resultJsonStr.toString());
     }
 
-//    private static final String KEY2 = "trMrHtvjo6myautxDUiAcYsVtaeQ8nhf"; // Key2 của bạn
-//
-//    // Hàm để tạo chữ ký HMAC từ dữ liệu
-//    private String generateHMAC(String data) throws Exception {
-//        Mac hmacSHA256 = Mac.getInstance("HmacSHA256");
-//        hmacSHA256.init(new SecretKeySpec(KEY2.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
-//        byte[] hashBytes = hmacSHA256.doFinal(data.getBytes(StandardCharsets.UTF_8));
-//        return Hex.encodeHexString(hashBytes).toLowerCase(); // Sử dụng Hex để mã hóa byte thành chuỗi hex
-//    }
-//
-//    public boolean verifyCallback(Map<String, Object> payload) {
-//        try {
-//            String dataStr = (String) payload.get("data");
-//            String reqMac = (String) payload.get("mac");
-//
-//            // Tính toán chữ ký từ dữ liệu nhận được
-//            String computedMac = generateHMAC(dataStr);
-//
-//            // So sánh chữ ký đã nhận với chữ ký tính toán
-//            return reqMac.equals(computedMac);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return false;
-//        }
-//    }
-//
-//    public void processCallback(Map<String, Object> payload) throws JSONException {
-//        // Xử lý cập nhật đơn hàng trong database
-//        JSONObject data = new JSONObject((String) payload.get("data"));
-//        String orderId = data.getString("app_trans_id");
-//        System.out.println("Đơn hàng đã thanh toán thành công: " + orderId);
-//        // Thêm logic cập nhật trạng thái đơn hàng trong cơ sở dữ liệu nếu cần
-//    }
+    private static final String KEY2 = "trMrHtvjo6myautxDUiAcYsVtaeQ8nhf"; // Key2 của bạn
+
+    // Hàm để tạo chữ ký HMAC từ dữ liệu
+    private String generateHMAC(String data) throws Exception {
+        Mac hmacSHA256 = Mac.getInstance("HmacSHA256");
+        hmacSHA256.init(new SecretKeySpec(KEY2.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
+        byte[] hashBytes = hmacSHA256.doFinal(data.getBytes(StandardCharsets.UTF_8));
+        return Hex.encodeHexString(hashBytes).toLowerCase(); // Sử dụng Hex để mã hóa byte thành chuỗi hex
+    }
+
+    public boolean verifyCallback(Map<String, Object> payload) {
+        try {
+            String dataStr = (String) payload.get("data");
+            String reqMac = (String) payload.get("mac");
+
+            // Tính toán chữ ký từ dữ liệu nhận được
+            String computedMac = generateHMAC(dataStr);
+
+            // So sánh chữ ký đã nhận với chữ ký tính toán
+            return reqMac.equals(computedMac);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public void processCallback(Map<String, Object> payload) throws JSONException {
+        // Xử lý cập nhật đơn hàng trong database
+        JSONObject data = new JSONObject((String) payload.get("data"));
+        String orderId = data.getString("app_trans_id");
+        System.out.println("Đơn hàng đã thanh toán thành công: " + orderId);
+        // Thêm logic cập nhật trạng thái đơn hàng trong cơ sở dữ liệu nếu cần
+    }
 }

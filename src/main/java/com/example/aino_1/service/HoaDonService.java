@@ -93,12 +93,16 @@ public class HoaDonService {
 
             for (HoaDonChiTiet hdct : lhdct) {
                 Integer idSanPhamChiTiet = hdct.getSanPhamChiTiet().getId();
+                String tenSPCT  = sanPhamChiTietService.getSanPhamChiTietById(idSanPhamChiTiet).getTenSanPhamChiTiet();
                 Integer soLuong = hdct.getSoLuong();
 
                 // Lấy danh sách IMEI khả dụng
                 List<Imei> listImei = imeiRepository.findAllBySpctIdAndTrangThai(idSanPhamChiTiet, 0);
                 if (soLuong > listImei.size()) {
-                    throw new RuntimeException("Số lượng IMEI cho sản phẩm ID: " + idSanPhamChiTiet + " không đủ, hiện còn: " + listImei.size());
+                    return Map.of(
+                            "success", false,
+                            "message", "Chúng tôi chân thành xin lỗi, số lượng sản phẩm " + tenSPCT + "bạn yêu cầu không đủ. Hiện chỉ còn " + listImei.size() + " sản phẩm khả dụng."
+                    );
                 }
 
                 hdct.setHoaDon(savedHoaDon);
@@ -123,7 +127,7 @@ public class HoaDonService {
                     imeiRepository.save(imei); // Lưu trạng thái mới và liên kết
                 }
 
-                // Kiểm tra nếu số lượng IMEI khả dụng bằng 0 sau khi bán
+                // Hàm chuyển trang_thái = 0 nếu như hết hàng
                 if (imeiService.checkTinhTrang(idSanPhamChiTiet)) {
                     System.out.println("chạy hàm kiểm tra hết hàng");
                     // Cập nhật trạng thái sản phẩm chi tiết thành 0 (hết hàng)
@@ -147,7 +151,7 @@ public class HoaDonService {
             return Map.of(
                     "success", true,
                     "hoaDon", savedHoaDon,
-                    "listHDCT",listspctFeetback
+                    "listHDCT", listspctFeetback
             );
 
         } catch (Exception e) {
@@ -168,15 +172,6 @@ public class HoaDonService {
                 throw new NoSuchElementException("Không tìm thấy hóa đơn với mã: " + maHoaDon);
             }
             return hoaDon;
-        }
-
-        // Trường hợp tìm kiếm chỉ theo số điện thoại
-        if (soDienThoai != null && !soDienThoai.isBlank() && (maHoaDon == null || maHoaDon.isBlank())) {
-            List<HoaDon> listHoaDon = hdsi.findHoaDonByThongTinTaiKhoan_SoDienThoai(soDienThoai);
-            if (listHoaDon.isEmpty()) {
-                throw new NoSuchElementException("Không tìm thấy hóa đơn với số điện thoại: " + soDienThoai);
-            }
-            return listHoaDon;
         }
 
         // Trường hợp tìm kiếm theo cả số điện thoại và mã hóa đơn

@@ -136,7 +136,7 @@ public class HoaDonController {
 
             // Xác thực tham số đầu vào
             if ((soDienThoai == null || soDienThoai.isBlank()) && (maHoaDon == null || maHoaDon.isBlank())) {
-                return ResponseEntity.badRequest().body("Vui lòng cung cấp ít nhất một thông tin: số điện thoại hoặc mã hóa đơn.");
+                return ResponseEntity.badRequest().body("Vui lòng cung cấp mã Đơn hàng.");
             }
 
             // Gọi service để xử lý logic

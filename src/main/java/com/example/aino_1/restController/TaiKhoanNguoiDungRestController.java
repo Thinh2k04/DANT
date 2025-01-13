@@ -96,6 +96,7 @@ public class TaiKhoanNguoiDungRestController {
         // Đưa token vào phản hồi
         response.put("role",role);
         response.put("message", "Đăng nhập thành công");
+        response.put("username", existingUser.getUsername());
         response.put("token", token);
 
         // Trả về phản hồi

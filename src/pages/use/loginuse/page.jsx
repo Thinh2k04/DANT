@@ -1,25 +1,28 @@
+// Import các thư viện cần thiết
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import { FaUser, FaLock, FaEye, FaEyeSlash, FaSignInAlt } from 'react-icons/fa';
-import { motion } from 'framer-motion';
-import axios from 'axios';
+import { useNavigate } from "react-router-dom"; // Hook điều hướng trang
+import { toast } from 'react-toastify'; // Thông báo toast
+import 'react-toastify/dist/ReactToastify.css'; // Style cho toast
+import { FaUser, FaLock, FaEye, FaEyeSlash, FaSignInAlt } from 'react-icons/fa'; // Icons
+import { motion } from 'framer-motion'; // Animation
+import axios from 'axios'; // HTTP client
 
 const LoginPage = () => {
-  const [showPassword, setShowPassword] = useState(false);
+  // Các state quản lý form
+  const [showPassword, setShowPassword] = useState(false); // Hiển thị/ẩn mật khẩu
   const [formData, setFormData] = useState({
     username: "",
     password: "",
     rememberMe: false
-  });
-  const [errors, setErrors] = useState({});
-  const [isLoading, setIsLoading] = useState(false);
-  const [loginAttempts, setLoginAttempts] = useState(0);
-  const [funnyMessage, setFunnyMessage] = useState('');
+  }); // Dữ liệu form
+  const [errors, setErrors] = useState({}); // Lỗi validation
+  const [isLoading, setIsLoading] = useState(false); // Trạng thái loading
+  const [loginAttempts, setLoginAttempts] = useState(0); // Số lần đăng nhập thất bại
+  const [funnyMessage, setFunnyMessage] = useState(''); // Thông điệp vui nhộn
 
   const navigate = useNavigate();
 
+  // Mảng thông điệp vui nhộn
   const funnyMessages = [
     "Chào mừng bạn đến với thế giới công nghệ cao cấp 💻",
     "Khám phá những chiếc laptop đẳng cấp cùng chúng tôi ✨",
@@ -28,7 +31,10 @@ const LoginPage = () => {
     "Công nghệ hiện đại, giá trị đích thực 💎"
   ];
 
+
+  // Effect xử lý khi component mount
   useEffect(() => {
+    // Kiểm tra thông tin đăng nhập đã lưu
     const savedCredentials = localStorage.getItem('savedCredentials');
     if (savedCredentials) {
       const { username, rememberMe } = JSON.parse(savedCredentials);
@@ -39,7 +45,7 @@ const LoginPage = () => {
       }));
     }
 
-    // Easter egg animation
+    // Easter egg - Xử lý chuỗi phím đặc biệt
     const easterEggSequence = "↑↑↓↓←→←→BA";
     let keys = '';
     const handleKeydown = (e) => {
@@ -58,6 +64,7 @@ const LoginPage = () => {
     return () => window.removeEventListener('keydown', handleKeydown);
   }, []);
 
+  // Xử lý thay đổi input
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData(prev => ({
@@ -69,6 +76,7 @@ const LoginPage = () => {
     }
   };
 
+  // Kiểm tra form hợp lệ
   const validateForm = () => {
     const newErrors = {};
     if (!formData.username.trim()) {
@@ -83,6 +91,7 @@ const LoginPage = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Xử lý submit form
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (!validateForm()) {
@@ -95,6 +104,7 @@ const LoginPage = () => {
 
     setIsLoading(true);
     try {
+      // Gọi API đăng nhập
       const response = await fetch('http://localhost:8080/rest/tai_khoan/login', {
         method: 'POST',
         headers: {
@@ -108,8 +118,10 @@ const LoginPage = () => {
 
       const data = await response.json();
 
+      console.log('Tên đăng nhập: ' + data.username)
+
       if (response.ok) {
-        // Lưu thông tin đăng nhập nếu người dùng chọn "Remember me"
+        // Lưu thông tin đăng nhập nếu chọn "Remember me"
         if (formData.rememberMe) {
           localStorage.setItem('savedCredentials', JSON.stringify({
             username: formData.username,
@@ -119,26 +131,25 @@ const LoginPage = () => {
           localStorage.removeItem('savedCredentials');
         }
 
-        // Lưu token vào localStorage
-        localStorage.setItem('token', data.token);
-        
-        // Lưu thông tin user và role
+        // Lưu token và thông tin người dùng
+        localStorage.setItem('Authorization', data.token);
         localStorage.setItem('userRole', data.role);
+        localStorage.setItem('username', data.username);
         localStorage.setItem('userData', JSON.stringify({
           username: formData.username,
           role: data.role,
-          // Thêm các thông tin khác nếu cần
         }));
 
-        // Set Authorization header cho các request tiếp theo
+        // Cấu hình axios header
         axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
         
+        // Thông báo thành công
         toast.success('🎉 Đăng nhập thành công! Chào mừng trở lại! 💖', {
           position: "top-center",
           autoClose: 1500,
         });
 
-        // Điều hướng dựa trên role
+        // Chuyển hướng theo role
         setTimeout(() => {
           if (data.role === 'ADMIN') {
             navigate('/admin');
@@ -162,6 +173,11 @@ const LoginPage = () => {
     }
   };
 
+
+
+
+
+  // Render giao diện
   return (
     <motion.div 
       initial={{ opacity: 0 }}
@@ -176,6 +192,7 @@ const LoginPage = () => {
           transition={{ type: "spring", stiffness: 300 }}
           className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl p-8 space-y-6"
         >
+          {/* Phần logo và tiêu đề */}
           <div className="text-center space-y-2">
             <motion.div
               className="relative w-40 h-40 mx-auto"
@@ -230,7 +247,9 @@ const LoginPage = () => {
             )}
           </div>
 
+          {/* Form đăng nhập */}
           <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Input username */}
             <motion.div 
               whileHover={{ scale: 1.02 }}
               className="space-y-2"
@@ -258,6 +277,7 @@ const LoginPage = () => {
               )}
             </motion.div>
 
+            {/* Input password */}
             <motion.div 
               whileHover={{ scale: 1.02 }}
               className="space-y-2"
@@ -294,6 +314,7 @@ const LoginPage = () => {
               )}
             </motion.div>
 
+            {/* Remember me và Quên mật khẩu */}
             <div className="flex items-center justify-between">
               <label className="flex items-center space-x-2">
                 <input
@@ -310,6 +331,7 @@ const LoginPage = () => {
               </a>
             </div>
 
+            {/* Nút đăng nhập */}
             <motion.button
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.98 }}
@@ -340,6 +362,7 @@ const LoginPage = () => {
             </motion.button>
           </form>
 
+          {/* Link đăng ký */}
           <div className="text-center">
             <p className="text-sm text-gray-600">
               Chưa có tài khoản? {' '}

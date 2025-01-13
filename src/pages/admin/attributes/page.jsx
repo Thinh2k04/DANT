@@ -26,7 +26,12 @@ const BanHangTaiQuay = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get('http://localhost:8080/rest/spctDTO/getAll');
+        const token = localStorage.getItem('Authorization'); // Lấy token từ localStorage
+        const response = await axios.get('http://localhost:8080/rest/spctDTO/getAll', {
+          headers: {
+            Authorization: `${token}` // Thêm header Authorization
+          }
+        });
         setProducts(response.data);
       } catch (error) {
         console.error('Error fetching products:', error);
@@ -35,7 +40,7 @@ const BanHangTaiQuay = () => {
     };
     fetchProducts();
   }, []);
-
+  
   // Thêm vào giỏ hàng
   const addToCart = (product) => {
     const existingItem = cart.find(item => item.id === product.id);

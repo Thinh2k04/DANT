@@ -91,4 +91,9 @@ public class VoucherRestController {
     public void getThungRac(){
         vsi.findAllByTrangThai(0);
     }
+
+    @GetMapping("/getVoucher/{voucher}")
+    public Voucher getVoucher(@PathVariable String voucher){
+       return voucherService.findVoucher(voucher);
+    }
 }

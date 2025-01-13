@@ -31,7 +31,7 @@ export const useEmail = () => {
         
         Chi tiết đơn hàng:
         ${cartItems.map(item => `
-          - ${item.sanPhamChiTiet?.tenSanPham}: ${item.soLuong} x ${item.donGia.toLocaleString('vi-VN')}đ
+          ${item.sanPhamChiTiet.hinhAnhMinhHoa}- ${item.sanPhamChiTiet.tenSanPhamChiTiet}: ${item.soLuong} x ${item.donGia.toLocaleString('vi-VN')}đ
         `).join('\n')}
         
         Tổng tiền hàng: ${totalAmount.toLocaleString('vi-VN')}đ

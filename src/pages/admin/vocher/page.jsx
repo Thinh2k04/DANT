@@ -15,6 +15,7 @@ import VoucherFormDialog from './VoucherFormDialog';
 import VoucherUpdate from './VoucherUpdate';
 
 const VoucherPage = () => {
+  const token = localStorage.getItem('Authorization'); // Lấy token từ localStorage
   const [vouchers, setVouchers] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [openSnackbar, setOpenSnackbar] = useState(false);
@@ -40,7 +41,11 @@ const VoucherPage = () => {
 
   const fetchVouchers = async () => {
     try {
-      const response = await axios.get('http://localhost:8080/rest/voucher/getAll');
+      const response = await axios.get('http://localhost:8080/rest/voucher/getAll', {
+        headers: {
+          Authorization: `${token}`
+        }
+      });
       setVouchers(response.data);
     } catch (error) {
       showMessage('Lỗi khi tải danh sách voucher', 'error');
@@ -140,10 +145,18 @@ const VoucherPage = () => {
 
       if (selectedVoucher) {
         voucherData.id = selectedVoucher.id;
-        await axios.put(`http://localhost:8080/rest/voucher/update`, voucherData);
+        await axios.put(`http://localhost:8080/rest/voucher/update`, voucherData, {
+          headers: {
+            Authorization: `${token}`
+          }
+        });
         showMessage('Cập nhật voucher thành công');
       } else {
-        await axios.post('http://localhost:8080/rest/voucher/create', voucherData);
+        await axios.post('http://localhost:8080/rest/voucher/create', voucherData, {
+          headers: {
+            Authorization: `${token}`
+          }
+        });
         showMessage('Thêm voucher mới thành công');
       }
       handleCloseDialog();
@@ -156,7 +169,11 @@ const VoucherPage = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Bạn có chắc chắn muốn xóa voucher này?')) {
       try {
-        await axios.delete(`http://localhost:8080/rest/voucher/delete/${id}`);
+        await axios.delete(`http://localhost:8080/rest/voucher/delete/${id}`, {
+          headers: {
+            Authorization: `${token}`
+          }
+        });
         showMessage('Xóa voucher thành công');
         fetchVouchers();
       } catch (error) {

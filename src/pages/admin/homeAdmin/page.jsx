@@ -82,38 +82,48 @@ const AdminDashboard = () => {
     }
   };
 
-  // Fetch thống kê theo tháng
-  const fetchMonthlyStats = async (year, month) => {
-    try {
-      const formattedMonth = month.toString().padStart(2, '0');
-      const response = await axios.get(`http://localhost:8080/rest/thong_ke/thang/${year}-${formattedMonth}`);
-      
-      if (response.data) {
-        const newData = [...revenueChartData.datasets[0].data];
-        newData[month - 1] = response.data.tongTien;
-        
-        setRevenueChartData(prev => ({
-          ...prev,
-          datasets: [{
-            ...prev.datasets[0],
-            data: newData
-          }]
-        }));
-
-        setMonthlyStats(response.data);
-      } else {
-        setMonthlyStats(null);
+ // Fetch thống kê theo tháng
+const fetchMonthlyStats = async (year, month) => {
+  try {
+    const formattedMonth = month.toString().padStart(2, '0');
+    const token = localStorage.getItem('Authorization'); // Lấy token từ localStorage
+    const response = await axios.get(`http://localhost:8080/rest/thong_ke/thang/${year}-${formattedMonth}`, {
+      headers: {
+        Authorization: `${token}` // Thêm header Authorization
       }
-    } catch (error) {
-      console.error('Error fetching monthly statistics:', error);
+    });
+
+    if (response.data) {
+      const newData = [...revenueChartData.datasets[0].data];
+      newData[month - 1] = response.data.tongTien;
+
+      setRevenueChartData(prev => ({
+        ...prev,
+        datasets: [{
+          ...prev.datasets[0],
+          data: newData
+        }]
+      }));
+
+      setMonthlyStats(response.data);
+    } else {
       setMonthlyStats(null);
     }
-  };
+  } catch (error) {
+    console.error('Error fetching monthly statistics:', error);
+    setMonthlyStats(null);
+  }
+};
 
   // Fetch thống kê theo năm
   const fetchYearlyStats = async (year) => {
     try {
-      const response = await axios.get(`http://localhost:8080/rest/thong_ke/nam/${year}`);
+      const token = localStorage.getItem('Authorization');
+      const response = await axios.get(`http://localhost:8080/rest/thong_ke/nam/${year}`, {
+        headers: {
+          Authorization: `${token}`
+        }
+      });
       setYearlyStats(response.data);
     } catch (error) {
       console.error('Error fetching yearly statistics:', error);
@@ -123,7 +133,12 @@ const AdminDashboard = () => {
   // Thêm hàm fetch thống kê theo ngày
   const fetchDailyStats = async (date) => {
     try {
-      const response = await axios.get(`http://localhost:8080/rest/thong_ke/getToday/${date}`);
+      const token = localStorage.getItem('Authorization');
+      const response = await axios.get(`http://localhost:8080/rest/thong_ke/getToday/${date}`, {
+        headers: {
+          Authorization: `${token}`
+        }
+      });
       // Kiểm tra nếu response.data là mảng rỗng hoặc không có dữ liệu
       if (response.data && response.data.length > 0) {
         setDailyStats(response.data[0]);
@@ -140,7 +155,12 @@ const AdminDashboard = () => {
   // Thêm hàm fetch tổng doanh thu
   const fetchTotalRevenue = async () => {
     try {
-      const response = await axios.get('http://localhost:8080/rest/thong_ke/tongDoanhThu');
+      const token = localStorage.getItem('Authorization');
+      const response = await axios.get('http://localhost:8080/rest/thong_ke/tongDoanhThu', {
+        headers: {
+          Authorization: `${token}`
+        }
+      });
       setTotalRevenue(response.data);
     } catch (error) {
       console.error('Error fetching total revenue:', error);
@@ -152,12 +172,17 @@ const AdminDashboard = () => {
     try {
       const labels = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'];
       const data = Array(12).fill(0);
+      const token = localStorage.getItem('Authorization');
 
       // Lấy dữ liệu cho từng tháng trong năm
       for (let month = 1; month <= 12; month++) {
         const formattedMonth = month.toString().padStart(2, '0');
         try {
-          const response = await axios.get(`http://localhost:8080/rest/thong_ke/thang/${year}-${formattedMonth}`);
+          const response = await axios.get(`http://localhost:8080/rest/thong_ke/thang/${year}-${formattedMonth}`, {
+            headers: {
+              Authorization: `${token}`
+            }
+          });
           if (response.data && response.data.tongTien) {
             data[month - 1] = response.data.tongTien;
           }
@@ -193,9 +218,14 @@ const AdminDashboard = () => {
       );
       
       const data = [];
+      const token = localStorage.getItem('Authorization');
       for (const year of years) {
         try {
-          const response = await axios.get(`http://localhost:8080/rest/thong_ke/nam/${year}`);
+          const response = await axios.get(`http://localhost:8080/rest/thong_ke/nam/${year}`, {
+            headers: {
+              Authorization: `${token}`
+            }
+          });
           data.push(response.data?.tongTien || 0);
         } catch (err) {
           data.push(0);

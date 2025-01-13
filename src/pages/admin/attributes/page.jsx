@@ -35,7 +35,11 @@ const BanHangTaiQuay = () => {
         setProducts(response.data);
       } catch (error) {
         console.error('Error fetching products:', error);
-        toast.error('Lỗi khi tải danh sách sản phẩm');
+        if (error.response && error.response.status === 400) {
+          toast.error(error.response.data.message);
+        } else {
+          toast.error('Lỗi khi tải danh sách sản phẩm');
+        }
       }
     };
     fetchProducts();
@@ -114,6 +118,8 @@ const BanHangTaiQuay = () => {
       const thoiGianLapHoaDon = vietnamTime.toISOString();
       console.log(thoiGianLapHoaDon);
 
+      const token = localStorage.getItem('Authorization');
+
       const orderData = {
         tttk: {
           id: "",
@@ -163,8 +169,11 @@ const BanHangTaiQuay = () => {
         }))
       };
 
-      const response = await axios.post('http://localhost:8080/rest/hoa_don/addHD', orderData);
-      
+      const response = await axios.post('http://localhost:8080/rest/hoa_don/addHD', orderData, {
+        headers: {
+          Authorization: `${token}`
+        }
+      });
       if (response.data.success) {
         toast.success('Thanh toán thành công!');
         // Reset form
@@ -181,7 +190,11 @@ const BanHangTaiQuay = () => {
       }
     } catch (error) {
       console.error('Error during checkout:', error);
-      toast.error(error.message || 'Có lỗi xảy ra khi thanh toán');
+      if (error.response && error.response.status === 400) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error(error.message || 'Có lỗi xảy ra khi thanh toán');
+      }
     } finally {
       setLoading(false);
     }
@@ -191,7 +204,12 @@ const BanHangTaiQuay = () => {
   const checkCustomerInfo = async (phoneNumber) => {
     try {
       if (phoneNumber.length === 10) {
-        const response = await axios.get(`http://localhost:8080/rest/tttk/timSDT/${phoneNumber}`);
+        const token = localStorage.getItem('Authorization');
+        const response = await axios.get(`http://localhost:8080/rest/tttk/timSDT/${phoneNumber}`, {
+          headers: {
+            Authorization: `${token}`
+          }
+        });
         if (response.data) {
           // Cập nhật tất cả thông tin khách hàng bao gồm họ tên
           setCustomerInfo({
@@ -210,6 +228,9 @@ const BanHangTaiQuay = () => {
       }
     } catch (error) {
       console.error('Error checking customer:', error);
+      if (error.response && error.response.status === 400) {
+        toast.error(error.response.data.message);
+      }
     }
   };
 
@@ -217,32 +238,65 @@ const BanHangTaiQuay = () => {
   useEffect(() => {
     const fetchStores = async () => {
       try {
-        const response = await axios.get('http://localhost:8080/rest/cuaHang/getAll');
+        const token = localStorage.getItem('Authorization'); // Lấy token từ localStorage
+        const response = await axios.get('http://localhost:8080/rest/cuaHang/getAll', {
+          headers: {
+            Authorization: `${token}` // Thêm header Authorization
+          }
+        });
+        
         setStores(response.data);
         if (response.data.length > 0) {
           setSelectedStore(response.data[0]); // Mặc định chọn cửa hàng đầu tiên
         }
       } catch (error) {
         console.error('Error fetching stores:', error);
-        toast.error('Lỗi khi tải danh sách cửa hàng');
+        if (error.response && error.response.status === 400) {
+          toast.error(error.response.data.message);
+        } else {
+          toast.error('Lỗi khi tải danh sách cửa hàng');
+        }
       }
     };
+    
     fetchStores();
   }, []);
+  
 
-  // Thêm hàm check voucher
-  const checkVoucher = async (code) => {
-    try {
-      const response = await axios.get(`http://localhost:8080/rest/voucher/${code}`);
-      if (response.data) {
-        setVoucherInfo(response.data);
-        toast.success('Áp dụng voucher thành công!');
-      }
-    } catch (error) {
-      toast.error('Voucher không hợp lệ hoặc đã hết hạn');
-      setVoucherInfo(null);
+ // Thêm hàm check voucher
+const checkVoucher = async (code) => {
+  try {
+    const token = localStorage.getItem('Authorization'); // Lấy token từ localStorage
+
+    if (!token) {
+      toast.error('Bạn chưa đăng nhập. Vui lòng đăng nhập để sử dụng voucher.');
+      return;
     }
-  };
+
+    const response = await axios.get(`http://localhost:8080/rest/voucher/${code}`, {
+      headers: {
+        Authorization: `${token}` // Thêm header Authorization
+      }
+    });
+
+    if (response.data) {
+      setVoucherInfo(response.data);
+      toast.success('Áp dụng voucher thành công!');
+    } else {
+      setVoucherInfo(null);
+      toast.error('Voucher không hợp lệ hoặc đã hết hạn');
+    }
+  } catch (error) {
+    console.error('Error checking voucher:', error);
+    if (error.response && error.response.status === 400) {
+      toast.error(error.response.data.message);
+    } else {
+      toast.error('Voucher không hợp lệ hoặc đã hết hạn');
+    }
+    setVoucherInfo(null);
+  }
+};
+
 
   return (
     <div className="flex h-screen bg-[#f0f2f5] overflow-hidden">

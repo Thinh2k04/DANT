@@ -4,6 +4,7 @@ import axios from 'axios'
 import NavbarAdmin from '../Navbar/NavbarAdmin'
 
 export default function EmployeePage() {
+  const token = localStorage.getItem('Authorization'); // Lấy token từ localStorage
   const [employees, setEmployees] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -13,7 +14,11 @@ export default function EmployeePage() {
     const fetchEmployees = async () => {
       try {
         setIsLoading(true)
-        const response = await axios.get('http://localhost:8080/rest/tai_khoan/getAllNhanVien')
+        const response = await axios.get('http://localhost:8080/rest/tai_khoan/getAllNhanVien', {
+          headers: {
+            Authorization: `${token}` // Thêm header Authorization
+          }
+        })
         setEmployees(response.data)
         setError(null)
       } catch (error) {

@@ -79,6 +79,6 @@ public class JwtUtils {
         if (tokenDetails == null) {
             return false; // Token không hợp lệ
         }
-        return "ADMIN".equalsIgnoreCase((String) tokenDetails.get("role"));
+        return "ROLE_ADMIN".equalsIgnoreCase((String) tokenDetails.get("role"));
     }
 }

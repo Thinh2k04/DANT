@@ -51,29 +51,35 @@ public class DiscountService {
         List<DiscountCampaign> campaigns = discountCampaignInterface
                 .findByActiveTrueAndStartDateBeforeAndEndDateAfter(now, now);
 
-        List<SanPhamChiTietDto> list = new ArrayList<>();
+        // Sử dụng Map để lưu sản phẩm với `id` làm key, tránh trùng lặp
+        Map<Integer, SanPhamChiTietDto> productMap = new HashMap<>();
 
-        for (DiscountCampaign discountCampaign : campaigns){
-            list = getSanPhamWithDiscounts(discountCampaign.getId());
+        // Lấy sản phẩm từ các chiến dịch giảm giá đang hoạt động
+        for (DiscountCampaign discountCampaign : campaigns) {
+            List<SanPhamChiTietDto> discountedProducts = getSanPhamWithDiscounts(discountCampaign.getId());
+            for (SanPhamChiTietDto product : discountedProducts) {
+                // Nếu sản phẩm đã tồn tại, có thể thực hiện logic ưu tiên
+                productMap.put(product.getId(), product);
+            }
         }
 
-        if (campaigns == null || campaigns.isEmpty()) {
-            // Không có chiến dịch giảm giá đang hoạt động, lấy danh sách sản phẩm
+        // Nếu không có chiến dịch khuyến mãi đang hoạt động
+        if (productMap.isEmpty()) {
             List<SanPhamChiTietDto> products = sanPhamChiTietService.getListForHome();
 
-            // Xóa thông tin giảm giá trên sản phẩm
             for (SanPhamChiTietDto product : products) {
                 product.setDiscountedPrice(product.getDonGia()); // Giá giảm = Giá gốc
                 product.setDiscountPercentage(0); // Không có giảm giá
+                productMap.put(product.getId(), product);
             }
 
             System.out.println("No active campaigns found. Returning all products.");
-            return new ArrayList<>(products);
         }
 
-        // Trả về danh sách chiến dịch giảm giá đang hoạt động
-        return list;
+        // Trả về danh sách sản phẩm duy nhất
+        return new ArrayList<>(productMap.values());
     }
+
 
 
     // Cron Job cho ProductDiscount

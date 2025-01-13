@@ -54,13 +54,13 @@ public class SanPhamService {
             if (sp == null) {
                 throw new IllegalArgumentException("Thông tin sản phẩm không được để trống.");
             }
-            sp.setTrangThai(0);
             SanPham savedSanPham = spsi.save(sp);
 
             // Bước 2: Liên kết sản phẩm với sản phẩm chi tiết và lưu
             if (spct == null) {
                 throw new IllegalArgumentException("Thông tin sản phẩm chi tiết không được để trống.");
             }
+            spct.setTrangThai(0);
             spct.setSanPham(savedSanPham);
             SanPhamChiTiet savedSanPhamCT = spctsi.save(spct);
 

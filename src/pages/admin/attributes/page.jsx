@@ -87,28 +87,76 @@ const BanHangTaiQuay = () => {
   // Xử lý thanh toán
   const handleCheckout = async () => {
     try {
+      if (!selectedStore) {
+        toast.error('Vui lòng chọn cửa hàng');
+        return;
+      }
+
+      if (!customerInfo.soDienThoai || !customerInfo.hoten) {
+        toast.error('Vui lòng nhập thông tin khách hàng');
+        return;
+      }
+
       setLoading(true);
+
+      // Tính tổng tiền sau khi áp dụng voucher
+      const subtotal = calculateTotal();
+      const discount = voucherInfo 
+        ? (voucherInfo.phanTramApDung 
+          ? (subtotal * voucherInfo.phanTramApDung / 100) 
+          : voucherInfo.soTienApDung)
+        : 0;
+      const finalTotal = subtotal - discount;
+
+      // Lấy thời gian hiện tại theo múi giờ Việt Nam
+      const now = new Date();
+      const vietnamTime = new Date(now.getTime() + (7 * 60 * 60 * 1000)); // UTC+7
+      const thoiGianLapHoaDon = vietnamTime.toISOString();
+      console.log(thoiGianLapHoaDon);
+
       const orderData = {
         tttk: {
-          hoten: customerInfo.hoten || "",
-          soDienThoai: customerInfo.soDienThoai || "",
+          id: "",
+          hoTen: customerInfo.hoten,
+          diaChi: `${selectedStore.soNha}, ${selectedStore.phuong}, ${selectedStore.huyen}, ${selectedStore.tinh}`,
+          soDienThoai: customerInfo.soDienThoai,
           email: customerInfo.email || "",
-          trangThai: 1
+          taiKhoanNguoiDung: null,
+          trangThai: null
         },
         hd: {
-          thoiGianLapHoaDon: new Date().toISOString(),
-          tongTien: calculateTotal(),
+          thoiGianLapHoaDon: thoiGianLapHoaDon, // Sử dụng thời gian Việt Nam
+          tongTien: finalTotal,
+          phiVanChuyen: 0,
           hinhThucThanhToan: {
-            id: 1
+            id: 1 // 1: Thanh toán tại quầy
           },
-          cuaHang: selectedStore,
-          voucher: voucherInfo,
-          trangThaiThanhToan: 1,
-          trangThai: 1
+          diaChiNhanHang: `${selectedStore.soNha}, ${selectedStore.phuong}, ${selectedStore.huyen}, ${selectedStore.tinh}`,
+          cuaHang: {
+            id: selectedStore.id,
+            tinh: selectedStore.tinh,
+            huyen: selectedStore.huyen,
+            phuong: selectedStore.phuong,
+            soNha: selectedStore.soNha,
+            thoiGianMoCua: selectedStore.thoiGianMoCua,
+            thoiGianDongCua: selectedStore.thoiGianDongCua,
+            trangThai: 1
+          },
+          voucher: voucherInfo ? {
+            id: voucherInfo.id,
+            maVoucher: voucherInfo.maVoucher,
+            giaTriGiam: voucherInfo.giaTriGiam,
+            loaiGiam: voucherInfo.loaiGiam
+          } : null,
+          trangThaiThanhToan: 1, // Đã thanh toán
+          trangThai: 1 // Đã xác nhận
         },
         lhdct: cart.map(item => ({
+          hoaDon: {
+            id: ""
+          },
           sanPhamChiTiet: {
-            id: item.id
+            id: item.id.toString()
           },
           soLuong: item.quantity,
           gia: item.donGia
@@ -117,18 +165,23 @@ const BanHangTaiQuay = () => {
 
       const response = await axios.post('http://localhost:8080/rest/hoa_don/addHD', orderData);
       
-      if (response.status === 200) {
+      if (response.data.success) {
         toast.success('Thanh toán thành công!');
-        setCart([]); // Clear cart
-        setCustomerInfo({ // Reset customer info
+        // Reset form
+        setCart([]);
+        setCustomerInfo({
           hoten: '',
           soDienThoai: '',
           email: ''
         });
+        setVoucherCode('');
+        setVoucherInfo(null);
+      } else {
+        throw new Error(response.data.message || 'Thanh toán thất bại');
       }
     } catch (error) {
       console.error('Error during checkout:', error);
-      toast.error('Có lỗi xảy ra khi thanh toán');
+      toast.error(error.message || 'Có lỗi xảy ra khi thanh toán');
     } finally {
       setLoading(false);
     }

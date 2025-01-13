@@ -60,7 +60,7 @@ public class SanPhamService {
             if (spct == null) {
                 throw new IllegalArgumentException("Thông tin sản phẩm chi tiết không được để trống.");
             }
-            spct.setTrangThai(0);
+            spct.setTrangThai(2);
             spct.setSanPham(savedSanPham);
             SanPhamChiTiet savedSanPhamCT = spctsi.save(spct);
 

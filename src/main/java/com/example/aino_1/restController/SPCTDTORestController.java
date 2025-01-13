@@ -37,6 +37,11 @@ public class    SPCTDTORestController {
         return spctsv.getListThungRac();
     }
 
+    @GetMapping("/getSpctNullImei")
+    public List<SanPhamChiTietDto> getAllSanPhamChiTietNullImei() {
+        return spctsv.getListDelay();
+    }
+
     @GetMapping("/getById/{id}")
     public SanPhamChiTietDto getByIDSPCT(@PathVariable Integer id){
         return spctsi.getSanPhamChiTietById(id);

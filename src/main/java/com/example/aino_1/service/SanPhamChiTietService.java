@@ -51,7 +51,7 @@ public class SanPhamChiTietService {
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm với ID: " + idSanPham));
 
             // Gán sản phẩm vào sản phẩm chi tiết và lưu
-            spct.setTrangThai(0);
+            spct.setTrangThai(2);
             spct.setSanPham(sanPham);
             SanPhamChiTiet savedSpct = sanPhamChiTietInterface.save(spct);
 
@@ -67,18 +67,6 @@ public class SanPhamChiTietService {
                         });
             }
 
-//            // Lưu hình ảnh nếu danh sách URL hợp lệ
-//            if (listImei != null && !listImei.isEmpty()) {
-//                listImei.stream()
-//                        .filter(url -> url != null && !url.isEmpty()) // Loại bỏ URL null hoặc rỗng
-//                        .forEach(url -> {
-//                            Imei imei = new Imei();
-//                            imei.setImei(url);
-//                            imei.setSpct(savedSpct);
-//                            imsi.save(imei);
-//                        });
-//            }
-
             return true;
         } catch (Exception e) {
             // Log lỗi
@@ -90,43 +78,7 @@ public class SanPhamChiTietService {
 }
     @Transactional
     public void updateSanPhamChiTietWithImage(SanPhamChiTiet sp, List<String> urlImg) {
-//        SanPham existingSanPham = sanPhamInterface.findById(sp.getId()).orElse(null);
 
-//        if (existingSanPham != null) {
-//            // Nếu sản phẩm tồn tại, cập nhật thông tin
-//            existingSanPham.setTenSanPham(sp.getTenSanPham());
-//            existingSanPham.setNamSanXuat(sp.getNamSanXuat());
-//            existingSanPham.setTrongLuong(sp.getTrongLuong());
-//            existingSanPham.setGioiThieu(sp.getGioiThieu());
-//            existingSanPham.setThoiHanBaoHanh(sp.getThoiHanBaoHanh());
-//            existingSanPham.setPin(sp.getPin());
-//
-//            // Cập nhật loại sản phẩm nếu có thay đổi
-//            if (sp.getLoaiSanPham() != null) {
-//                LoaiSanPham loaiSanPham = loaiSanPhamInterface.findById(sp.getLoaiSanPham().getId()).get();
-//                existingSanPham.setLoaiSanPham(loaiSanPham);
-//            }
-//
-//            // Cập nhật nguồn nhập nếu có thay đổi
-//            if (sp.getNguonNhap() != null) {
-//                NguonNhap nguonNhap = nguonNhapInterface.findById(sp.getNguonNhap().getId()).get();
-//                existingSanPham.setNguonNhap(nguonNhap);
-//            }
-//
-//            // Cập nhật chất liệu nếu có thay đổi
-//            if (sp.getChatLieu() != null) {
-//                ChatLieu chatLieu = chatLieuInterface.findById(sp.getChatLieu().getId()).get();
-//                existingSanPham.setChatLieu(chatLieu);
-//            }
-//
-//            // Cập nhật kích thước laptop nếu có thay đổi
-//            if (sp.getKichThuocLaptop() != null) {
-//                KichThuocLapTop kichThuocLapTop = kichThuocLaptopInterface.findById(sp.getKichThuocLaptop().getId()).get();
-//                existingSanPham.setKichThuocLaptop(kichThuocLapTop);
-//            }
-
-        // Lưu thông tin sản phẩm đã cập nhật vào cơ sở dữ liệu
-//            SanPham updatedSanPham = sanPhamInterface.save(existingSanPham);
 
         sanPhamChiTietInterface.save(sp);
 
@@ -153,6 +105,18 @@ public class SanPhamChiTietService {
         ) {
             System.out.println("Trạng Thái của SPCT DTO: " + spctdto.getTrangThai());
             if(spctdto.getTrangThai() == 1){
+                listHome.add(spctdto);
+            }
+        }
+        return listHome;
+    }
+
+    public List<SanPhamChiTietDto> getListDelay(){
+        List<SanPhamChiTietDto> listSPCTDTO = sanPhamChiTietInterface.getAllDTO();
+        List<SanPhamChiTietDto> listHome = new ArrayList<>()    ;
+        for (SanPhamChiTietDto spctdto : listSPCTDTO
+        ) {
+            if(spctdto.getTrangThai() == 2){
                 listHome.add(spctdto);
             }
         }

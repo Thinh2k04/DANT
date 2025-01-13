@@ -61,6 +61,8 @@ public class ImeiService {
             }
         }
 
+
+
         // Nếu có IMEI không hợp lệ hoặc đã tồn tại, trả về thông báo lỗi
         if (!invalidImeiList.isEmpty()) {
             Map<String, Object> response = new HashMap<>();
@@ -83,12 +85,11 @@ public class ImeiService {
             imif.save(im);
         }
 
-        List<Imei> limspcttrue = imif.findAllBySpctIdAndTrangThai(spct.getId(),0);
-        if(limspcttrue.size()> 0){
+        // Sét lại trạng thái cho sản phẩm chi tiết sau khi đự thêm imei nếu spct.Trạng thái = 2
+        if(spct.getTrangThai() == 2){
             spct.setTrangThai(1);
-            spctInterface.save(spct);
+            spctif.save(spct);
         }
-
 
         // Trả về thông báo thành công
         Map<String, Object> response = new HashMap<>();
@@ -103,6 +104,8 @@ public class ImeiService {
          return listispct;
     }
 
+
+    // Hàm trả v cho backend biết số lượng imei còn thiếu
     public Integer checkImeiIDSPCT(Integer idSPCT) {
         // Kiểm tra sản phẩm chi tiết (SPCT) có tồn tại hay không
         Optional<SanPhamChiTiet> optionalSPCT = spctInterface.findById(idSPCT);

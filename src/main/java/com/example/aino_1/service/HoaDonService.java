@@ -6,12 +6,14 @@ import com.example.aino_1.entity.*;
 import com.example.aino_1.repository.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 @Service
 public class HoaDonService {
@@ -35,6 +37,7 @@ public class HoaDonService {
     @Autowired
     ImeiInterface imeiRepository;
 
+    @Lazy
     @Autowired
     ImeiService imeiService;
 
@@ -157,9 +160,42 @@ public class HoaDonService {
         }
     }
 
-    public List<HoaDon> findListHoaDon(String soDienThoai, String maHoaDon) {
-        // Tìm kiếm hóa đơn theo thông tin
-        return hdsi.findHoaDonByThongTinTaiKhoan_SoDienThoaiOrMaHoaDon(soDienThoai, maHoaDon);
+    public Object traCuuDonHang(String soDienThoai, String maHoaDon) {
+        // Trường hợp tìm kiếm chỉ theo mã hóa đơn
+        if (maHoaDon != null && !maHoaDon.isBlank() && (soDienThoai == null || soDienThoai.isBlank())) {
+            HoaDon hoaDon = hdsi.findHoaDonByMaHoaDon(maHoaDon);
+            if (hoaDon == null) {
+                throw new NoSuchElementException("Không tìm thấy hóa đơn với mã: " + maHoaDon);
+            }
+            return hoaDon;
+        }
+
+        // Trường hợp tìm kiếm chỉ theo số điện thoại
+        if (soDienThoai != null && !soDienThoai.isBlank() && (maHoaDon == null || maHoaDon.isBlank())) {
+            List<HoaDon> listHoaDon = hdsi.findHoaDonByThongTinTaiKhoan_SoDienThoai(soDienThoai);
+            if (listHoaDon.isEmpty()) {
+                throw new NoSuchElementException("Không tìm thấy hóa đơn với số điện thoại: " + soDienThoai);
+            }
+            return listHoaDon;
+        }
+
+        // Trường hợp tìm kiếm theo cả số điện thoại và mã hóa đơn
+        if (soDienThoai != null && !soDienThoai.isBlank() && maHoaDon != null && !maHoaDon.isBlank()) {
+            List<HoaDon> listHoaDon = hdsi.findHoaDonByThongTinTaiKhoan_SoDienThoai(soDienThoai);
+            if (listHoaDon.isEmpty()) {
+                throw new NoSuchElementException("Không tìm thấy hóa đơn với số điện thoại: " + soDienThoai);
+            }
+
+            // Lọc kết quả theo mã hóa đơn
+            return listHoaDon.stream()
+                    .filter(hoaDon -> hoaDon.getMaHoaDon().equals(maHoaDon))
+                    .findFirst()
+                    .orElseThrow(() -> new NoSuchElementException(
+                            "Không tìm thấy hóa đơn với mã: " + maHoaDon + " trong danh sách hóa đơn của số điện thoại: " + soDienThoai));
+        }
+
+        // Trường hợp không hợp lệ (không xảy ra nhưng để an toàn)
+        throw new IllegalArgumentException("Dữ liệu đầu vào không hợp lệ.");
     }
 
 

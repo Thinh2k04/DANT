@@ -51,6 +51,7 @@ public class SanPhamChiTietService {
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm với ID: " + idSanPham));
 
             // Gán sản phẩm vào sản phẩm chi tiết và lưu
+            spct.setTrangThai(0);
             spct.setSanPham(sanPham);
             SanPhamChiTiet savedSpct = sanPhamChiTietInterface.save(spct);
 

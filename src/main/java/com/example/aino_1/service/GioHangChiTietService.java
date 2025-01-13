@@ -111,8 +111,6 @@ public class GioHangChiTietService {
     }
 
 
-
-
     @Transactional
     public Map<String, Object> updateProductQuantityInCart(String token, Integer productId, Integer quantityChange) {
         String username = null;

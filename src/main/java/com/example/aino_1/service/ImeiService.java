@@ -24,6 +24,8 @@ public class ImeiService {
     @Autowired
     HDCTInterFace hdctInterFace;
 
+
+
     public Map<String, Object> addOrUpdateImei(Integer idSPCT, List<Imei> listImei) {
         // Tìm sản phẩm chi tiết dựa trên ID
         SanPhamChiTiet spct = spctif.findById(idSPCT)
@@ -80,6 +82,13 @@ public class ImeiService {
             im.setSpct(spct);
             imif.save(im);
         }
+
+        List<Imei> limspcttrue = imif.findAllBySpctIdAndTrangThai(spct.getId(),0);
+        if(limspcttrue.size()> 0){
+            spct.setTrangThai(1);
+            spctInterface.save(spct);
+        }
+
 
         // Trả về thông báo thành công
         Map<String, Object> response = new HashMap<>();

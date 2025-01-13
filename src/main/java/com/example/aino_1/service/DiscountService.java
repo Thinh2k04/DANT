@@ -13,6 +13,7 @@ import com.example.aino_1.repository.SanPhamChiTietInterface;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -23,17 +24,22 @@ import java.util.stream.Collectors;
 
 @Service
 public class DiscountService {
+    @Lazy
     @Autowired
     private DiscountCampaignInterface discountCampaignInterface;
+
 
     @Autowired
     private SanPhamChiTietInterface sanPhamChiTietInterface;
 
+
     @Autowired
     private ProductDiscountInterface productDiscountInterface;
 
+    @Lazy
     @Autowired
     private ImeiService imeiService;
+
 
     @Autowired
     private SanPhamChiTietService sanPhamChiTietService;

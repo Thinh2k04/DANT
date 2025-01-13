@@ -17,8 +17,46 @@ const AddCpuModal = ({ showModal, setShowModal, onSuccess }) => {
 
   const handleSubmit = async () => {
     try {
-      if (!newCpu.ten || !newCpu.hangSanXuat || !newCpu.kienTrucCongNghe) {
-        toast.error('Vui lòng nhập đầy đủ thông tin');
+      // Validate các trường bắt buộc
+      if (!newCpu.ten.trim()) {
+        toast.error('Vui lòng nhập tên CPU');
+        return;
+      }
+
+      if (!newCpu.hangSanXuat.trim()) {
+        toast.error('Vui lòng nhập hãng sản xuất');
+        return;
+      }
+
+      if (!newCpu.kienTrucCongNghe.trim()) {
+        toast.error('Vui lòng nhập kiến trúc công nghệ');
+        return;
+      }
+
+      // Validate giá trị số
+      if (newCpu.tocDoToiThieu <= 0 || newCpu.tocDoToiDa <= 0) {
+        toast.error('Tốc độ CPU phải lớn hơn 0');
+        return;
+      }
+
+      if (parseFloat(newCpu.tocDoToiThieu) >= parseFloat(newCpu.tocDoToiDa)) {
+        toast.error('Tốc độ tối thiểu phải nhỏ hơn tốc độ tối đa');
+        return;
+      }
+
+      if (parseInt(newCpu.soNhan) <= 0 || parseInt(newCpu.soLuong) <= 0) {
+        toast.error('Số nhân và số luồng phải lớn hơn 0');
+        return;
+      }
+
+      if (parseInt(newCpu.boNhoDem) <= 0) {
+        toast.error('Bộ nhớ đệm phải lớn hơn 0');
+        return;
+      }
+
+      // Validate độ dài
+      if (newCpu.ten.length > 100) {
+        toast.error('Tên CPU không được vượt quá 100 ký tự');
         return;
       }
 

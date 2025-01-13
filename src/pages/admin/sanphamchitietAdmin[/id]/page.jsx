@@ -176,14 +176,12 @@ const ChiTietSanPhamAdmin = () => {
   // Lọc danh sách biến thể theo từ khóa tìm kiếm và trạng thái
   const filteredVariants = productVariants
     .filter(variant => {
-      // Chỉ hiện sản phẩm có trạng thái 1
-      const isActive = variant.trangThai === 1;
       // Kiểm tra từ khóa tìm kiếm
       const matchesSearch = searchTerm === '' || 
         (variant.maSpct?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
         (variant.sanPham?.tenSanPham?.toLowerCase() || '').includes(searchTerm.toLowerCase());
       
-      return isActive && matchesSearch;
+      return matchesSearch;
     });
 
   // Hiển thị loading khi đang tải dữ liệu

@@ -10,8 +10,28 @@ const AddColorModal = ({ showModal, setShowModal, onSuccess }) => {
 
   const handleSubmit = async () => {
     try {
-      if (!newColor.tenMau || !newColor.maHex) {
-        toast.error('Vui lòng nhập đầy đủ thông tin');
+      // Validate tên màu
+      if (!newColor.tenMau.trim()) {
+        toast.error('Vui lòng nhập tên màu');
+        return;
+      }
+
+      // Validate mã màu
+      if (!newColor.maHex.trim()) {
+        toast.error('Vui lòng chọn mã màu');
+        return;
+      }
+
+      // Validate định dạng mã màu hex
+      const hexColorRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
+      if (!hexColorRegex.test(newColor.maHex)) {
+        toast.error('Mã màu không hợp lệ (ví dụ: #FF0000)');
+        return;
+      }
+
+      // Validate độ dài tên
+      if (newColor.tenMau.length > 50) {
+        toast.error('Tên màu không được vượt quá 50 ký tự');
         return;
       }
 

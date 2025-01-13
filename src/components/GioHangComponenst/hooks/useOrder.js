@@ -26,7 +26,8 @@ export const useOrder = () => {
     quantities,
     totalAmount,
     shippingFee,
-    paymentMethod
+    paymentMethod,
+    appliedVoucher
   }) => {
     const now = new Date();
     const selectedProvinceName = provinces.find(
@@ -47,12 +48,14 @@ export const useOrder = () => {
       deliveryAddress = `${specificAddress || ''}, ${selectedWard || ''}, ${selectedDistrictName}, ${selectedProvinceName}`;
     }
 
+    // Tính phí vận chuyển dựa trên phương thức giao hàng
+    const calculatedShippingFee = deliveryMethod === "pickup" ? 0 : (shippingFee || 0);
+
     return {
       tttk: {
         id: "",
         hoTen: customerName || '',
         diaChi: specificAddress || '',
-        soCCCD: "",
         soDienThoai: phoneNumber || '',
         email: email || '',
         taiKhoanNguoiDung: null,
@@ -60,7 +63,8 @@ export const useOrder = () => {
       },
       hd: {
         thoiGianLapHoaDon: now.toISOString(),
-        tongTien: totalAmount + (shippingFee || 0),
+        tongTien: totalAmount + calculatedShippingFee,
+        phiVanChuyen: calculatedShippingFee,
         hinhThucThanhToan: {
           id: parseInt(paymentMethod) || 1
         },
@@ -69,8 +73,13 @@ export const useOrder = () => {
           id: deliveryMethod === "pickup" ? parseInt(selectedStore) : 1,
           trangThai: 1
         },
-        voucher: null,
-        trangThaiThanhToan: 2,
+        voucher: appliedVoucher ? {
+          id: appliedVoucher.id,
+          maVoucher: appliedVoucher.maVoucher,
+          giaTriGiam: appliedVoucher.giaTriGiam,
+          loaiGiam: appliedVoucher.loaiGiam
+        } : null,
+        trangThaiThanhToan: 0,
         trangThai: 0
       },
       lhdct: cartItems.map(item => ({
@@ -86,12 +95,28 @@ export const useOrder = () => {
     };
   };
 
-  const clearCart = () => {
+  const clearCart = async (purchasedItems) => {
     try {
-      localStorage.removeItem('cartItems');
+      // Lấy danh sách sản phẩm hiện tại trong giỏ hàng
+      const currentCartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+      
+      // Lọc ra các sản phẩm không nằm trong đơn hàng
+      const remainingItems = currentCartItems.filter(cartItem => 
+        !purchasedItems.some(purchasedItem => purchasedItem.id === cartItem.id)
+      );
+
+      // Cập nhật lại localStorage với các sản phẩm còn lại
+      if (remainingItems.length > 0) {
+        localStorage.setItem('cartItems', JSON.stringify(remainingItems));
+      } else {
+        localStorage.removeItem('cartItems');
+      }
+
+      // Trigger event để cập nhật số lượng trong navbar
       window.dispatchEvent(new Event('cartUpdated'));
     } catch (error) {
       console.error('Error clearing cart:', error);
+      throw error;
     }
   };
 
@@ -99,7 +124,7 @@ export const useOrder = () => {
     orderData, 
     email, 
     customerName, 
-    cartItems, 
+    cartItems, // Danh sách sản phẩm được mua
     quantities, 
     totalAmount, 
     shippingFee, 
@@ -119,65 +144,91 @@ export const useOrder = () => {
         body: JSON.stringify(orderData)
       });
 
-      if (!orderResponse.ok) {
-        throw new Error('Failed to create order');
-      }
-
       const orderResponseData = await orderResponse.json();
 
-      // 2. Xóa giỏ hàng
-      await clearCart();
+      // Kiểm tra response có thành công không
+      if (!orderResponse.ok || !orderResponseData.success) {
+        throw new Error(orderResponseData.message || 'Failed to create order');
+      }
 
-      // 3. Chuyển hướng đến trang thành công
+      // Xóa chỉ những sản phẩm đã mua khỏi giỏ hàng
+      await clearCart(cartItems);
+
+      // Hiển thị thông báo thành công
+      toast.success('Đặt hàng thành công!');
+
+      // Chuyển hướng với dữ liệu từ API response
       navigate('/payment-success', {
         state: {
           orderInfo: {
-            id: orderResponseData?.id || '',
-            tongTienHang: totalAmount,
-            phiVanChuyen: shippingFee || 0,
+            id: orderResponseData.hoaDon.id,
+            maHoaDon: orderResponseData.hoaDon.maHoaDon,
+            tongTienHang: orderResponseData.hoaDon.tongTien - orderResponseData.hoaDon.phiVanChuyen,
+            phiVanChuyen: orderResponseData.hoaDon.phiVanChuyen,
             tttk: {
-              hoTen: customerName,
-              soDienThoai: phoneNumber,
-              email: email,
-              diaChi: specificAddress
+              hoTen: orderResponseData.hoaDon.thongTinTaiKhoan.hoTen,
+              soDienThoai: orderResponseData.hoaDon.thongTinTaiKhoan.soDienThoai,
+              email: orderResponseData.hoaDon.thongTinTaiKhoan.email,
+              diaChi: orderResponseData.hoaDon.thongTinTaiKhoan.diaChi
             },
-            diaChiNhanHang: orderResponseData?.diaChiNhanHang,
+            diaChiNhanHang: orderResponseData.hoaDon.diaChiNhanHang,
             hinhThucThanhToan: {
-              id: paymentMethod,
-              tenHinhThuc: paymentMethod === "1" ? "Thanh toán khi nhận hàng" : "Thanh toán qua ZaloPay"
+              id: orderResponseData.hoaDon.hinhThucThanhToan.id,
+              tenHinhThuc: orderResponseData.hoaDon.hinhThucThanhToan.tenHinhThuc
             },
-            trangThaiDonHang: "Chờ xác nhận",
-            thoiGianLapHoaDon: new Date().toISOString(),
-            cartItems: cartItems.map(item => ({
-              ...item,
-              soLuong: quantities[item.id] || 1
-            }))
+            trangThaiDonHang: orderResponseData.hoaDon.trangThai === 0 ? "Chờ xác nhận" : "Đã xác nhận",
+            thoiGianLapHoaDon: new Date(orderResponseData.hoaDon.thoiGianLapHoaDon).toISOString(),
+            cartItems: orderResponseData.listHDCT.map(item => ({
+              id: item.id,
+              tenSanPhamChiTiet: item.tenSanPhamChiTiet,
+              donGia: item.donGia,
+              soLuong: item.soLuong,
+              hinhAnhMinhHoa: item.hinhAnhMinhHoa,
+              sanPhamChiTiet: {
+                id: item.idSanPham,
+                tenSanPham: item.tenSanPham,
+                thuongHieu: item.thuongHieu,
+                // Thêm các thông tin chi tiết khác nếu cần
+                chatLieu: item.chatLieu,
+                dungLuongRam: item.dungLuongRam,
+                dungLuong: item.dungLuong,
+                doPhanGiai: item.doPhanGiai,
+                kichThuocLaptop: item.kichThuocLaptop,
+                tamNen: item.tamNen,
+                tanSoQuet: item.tanSoQuet,
+                cpu: item.tenCPU,
+                gpu: item.gpu,
+                trongLuong: item.trongLuong,
+                pin: item.pin,
+                thoiHanBaoHanh: item.thoiHanBaoHanh
+              }
+            })),
+            voucher: orderResponseData.hoaDon.voucher,
+            cuaHang: orderResponseData.hoaDon.cuaHang,
+            trangThaiThanhToan: orderResponseData.hoaDon.trangThaiThanhToan
           }
         },
         replace: true
       });
 
-      toast.success('Đặt hàng thành công!');
-
-      // 4. Gửi email sau khi đã chuyển trang
+      // Gửi email xác nhận
       if (email) {
         try {
           const emailData = {
             email,
-            customerName,
-            cartItems,
-            quantities,
-            totalAmount,
-            shippingFee,
+            customerName: orderResponseData.hoaDon.thongTinTaiKhoan.hoTen,
+            cartItems: orderResponseData.listHDCT,
+            totalAmount: orderResponseData.hoaDon.tongTien - orderResponseData.hoaDon.phiVanChuyen,
+            shippingFee: orderResponseData.hoaDon.phiVanChuyen,
             orderData: {
-              id: orderResponseData.id,
-              diaChiNhanHang: orderResponseData.diaChiNhanHang,
-              tongTien: orderResponseData.tongTien
+              id: orderResponseData.hoaDon.id,
+              maHoaDon: orderResponseData.hoaDon.maHoaDon,
+              diaChiNhanHang: orderResponseData.hoaDon.diaChiNhanHang,
+              tongTien: orderResponseData.hoaDon.tongTien
             },
-            paymentMethod
+            paymentMethod: orderResponseData.hoaDon.hinhThucThanhToan.id
           };
 
-          // Sử dụng setTimeout để đảm bảo email được gửi sau khi đã chuyển trang
           setTimeout(async () => {
             try {
               const emailResult = await sendOrderEmail(emailData);
@@ -188,7 +239,7 @@ export const useOrder = () => {
               console.error('Email error:', emailError);
               toast.warning('Không thể gửi email xác nhận. Đơn hàng vẫn được tạo thành công');
             }
-          }, 1000); // Delay 1 giây để đảm bảo trang đã chuyển xong
+          }, 1000);
         } catch (emailError) {
           console.error('Email error:', emailError);
           toast.warning('Không thể gửi email xác nhận. Đơn hàng vẫn được tạo thành công');
@@ -197,7 +248,7 @@ export const useOrder = () => {
 
     } catch (error) {
       console.error('Order error:', error);
-      toast.error('Có lỗi xảy ra khi xử lý đơn hàng');
+      toast.error(error.message || 'Có lỗi xảy ra khi xử lý đơn hàng');
     } finally {
       setIsProcessing(false);
       setIsButtonDisabled(false);

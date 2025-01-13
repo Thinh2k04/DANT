@@ -80,14 +80,20 @@ const PaymentSuccess = () => {
         <div className="p-8">
           {/* Order ID and Date */}
           <div className="mb-8 text-center bg-gray-50 p-4 rounded-xl">
-            <p className="text-gray-700 text-lg">Mã đơn hàng: <span className="font-bold text-green-600">#{orderInfo.id || Math.random().toString(36).substr(2, 9).toUpperCase()}</span></p>
-            <p className="text-gray-600">Thời gian đặt: {new Date().toLocaleString('vi-VN', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit'
-            })}</p>
+            <p className="text-gray-700 text-lg">
+              Mã đơn hàng: <span className="font-bold text-green-600">
+                {orderInfo.maHoaDon || 'N/A'}
+              </span>
+            </p>
+            <p className="text-gray-600">
+              Thời gian đặt: {new Date(orderInfo.thoiGianLapHoaDon).toLocaleString('vi-VN', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              })}
+            </p>
           </div>
 
           {/* Customer Info */}
@@ -143,8 +149,8 @@ const PaymentSuccess = () => {
               {orderInfo.cartItems && orderInfo.cartItems.map((item, index) => (
                 <div key={index} className="flex items-start space-x-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
                   <img
-                    src={item.sanPhamChiTiet?.hinhAnhSanPhams?.[0]?.duongDan || '/placeholder-image.jpg'}
-                    alt={item.sanPhamChiTiet?.tenSanPham}
+                    src={item.hinhAnhMinhHoa}
+                    alt={item.tenSanPhamChiTiet}
                     className="w-24 h-24 object-cover rounded-lg shadow-sm"
                   />
                   <div className="flex-1">

@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import uploadImageUtil from '../../../../utils/imageUpload';
 
 const EditProductModal = ({ 
@@ -76,9 +77,40 @@ const EditProductModal = ({
     e.preventDefault();
     
     try {
-      // Validate required fields
-      if (!formData.tenSanPham || !formData.thuongHieu?.id || !formData.loaiSanPham?.id) {
-        toast.error('Vui lòng điền đầy đủ thông tin cơ bản');
+      if (!formData.tenSanPham?.trim()) {
+        toast.error('Vui lòng nhập tên sản phẩm', {
+          toastId: 'edit-error1'
+        });
+        return;
+      }
+
+      if (!formData.thuongHieu?.id) {
+        toast.error('Vui lòng chọn thương hiệu');
+        return;
+      }
+
+      if (!formData.loaiSanPham?.id) {
+        toast.error('Vui lòng chọn loại sản phẩm');
+        return;
+      }
+
+      if (!formData.namSanXuat || formData.namSanXuat < 2000 || formData.namSanXuat > new Date().getFullYear()) {
+        toast.error('Năm sản xuất không hợp lệ');
+        return;
+      }
+
+      if (!formData.trongLuong || formData.trongLuong <= 0) {
+        toast.error('Trọng lượng phải lớn hơn 0');
+        return;
+      }
+
+      if (!formData.thoiHanBaoHanh || formData.thoiHanBaoHanh <= 0) {
+        toast.error('Thời hạn bảo hành phải lớn hơn 0');
+        return;
+      }
+
+      if (!formData.pin || formData.pin <= 0) {
+        toast.error('Dung lượng pin phải lớn hơn 0');
         return;
       }
 
@@ -101,7 +133,9 @@ const EditProductModal = ({
       
     } catch (error) {
       console.error('Error submitting form:', error);
-      toast.error('Có lỗi xảy ra khi cập nhật sản phẩm');
+      toast.error('Có lỗi xảy ra khi cập nhật sản phẩm', {
+        toastId: 'edit-error-submit'
+      });
     }
   };
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import uploadImageUtil from '../../../../utils/imageUpload';
 
 const AddProductModal = ({ 
@@ -45,11 +46,25 @@ const AddProductModal = ({
           ...prev,
           hinhAnhMinhHoa: result.url
         }));
-        toast.success('Tải ảnh minh họa thành công');
+        toast.success('Tải ảnh minh họa thành công', {
+          autoClose: 1000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: false,
+          theme: 'colored'
+        });
       }
     } catch (error) {
       console.error('Error uploading main image:', error);
-      toast.error('Lỗi khi tải ảnh minh họa');
+      toast.error('Lỗi khi tải ảnh minh họa', {
+        autoClose: 1500,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: false,
+        theme: 'colored'
+      });
     }
   };
 
@@ -59,10 +74,24 @@ const AddProductModal = ({
       const uploadPromises = files.map(uploadImageUtil);
       const results = await Promise.all(uploadPromises);
       setImageUrls(prevUrls => [...prevUrls, ...results.map(result => result.url)]);
-      toast.success('Tải ảnh sản phẩm thành công');
+      toast.success('Tải ảnh sản phẩm thành công', {
+        autoClose: 1000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: false,
+        theme: 'colored'
+      });
     } catch (error) {
       console.error('Error uploading images:', error);
-      toast.error('Lỗi khi tải ảnh sản phẩm');
+      toast.error('Lỗi khi tải ảnh sản phẩm', {
+        autoClose: 1500,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: false,
+        theme: 'colored'
+      });
     }
   };
 
@@ -70,14 +99,134 @@ const AddProductModal = ({
     e.preventDefault();
     
     try {
-      // Validate required fields
-      if (!formData.tenSanPham || !formData.thuongHieu?.id || !formData.loaiSanPham?.id) {
-        toast.error('Vui lòng điền đầy đủ thông tin cơ bản');
+      if (!formData.tenSanPham?.trim()) {
+        toast.error('Vui lòng nhập tên sản phẩm', {
+          toastId: 'error1',
+          autoClose: 1500,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: false,
+          theme: 'colored'
+        });
         return;
       }
 
-      if (!spctData.maSpct || !spctData.soLuong || !spctData.donGia) {
-        toast.error('Vui lòng điền đầy đủ thông tin chi tiết');
+      if (!formData.thuongHieu?.id) {
+        toast.error('Vui lòng chọn thương hiệu');
+        return;
+      }
+
+      if (!formData.loaiSanPham?.id) {
+        toast.error('Vui lòng chọn loại sản phẩm');
+        return;
+      }
+
+      if (!formData.namSanXuat || formData.namSanXuat < 2000 || formData.namSanXuat > new Date().getFullYear()) {
+        toast.error('Năm sản xuất không hợp lệ');
+        return;
+      }
+
+      if (!formData.trongLuong || formData.trongLuong <= 0) {
+        toast.error('Trọng lượng phải lớn hơn 0');
+        return;
+      }
+
+      if (!formData.thoiHanBaoHanh || formData.thoiHanBaoHanh <= 0) {
+        toast.error('Thời hạn bảo hành phải lớn hơn 0');
+        return;
+      }
+      if (!formData.thoiHanBaoHanh || formData.thoiHanBaoHanh >= 36){
+        toast.error('Thời hạn bảo hành không được lớn hơn 36 tháng');
+        return;
+      }
+      
+      if (!formData.pin || formData.pin <= 0) {
+        toast.error('Dung lượng pin phải lớn hơn 0');
+        return;
+      }
+
+      if (!formData.pin || formData.pin >= 100000) {
+        toast.error('Dung lượng pin phải bé hơn 100000');
+        return;
+      }
+
+      if (!spctData.maSpct?.trim()) {
+        toast.error('Vui lòng nhập mã sản phẩm chi tiết');
+        return;
+      }
+
+      if (!spctData.soLuong || spctData.soLuong < 0) {
+        toast.error('Số lượng không hợp lệ');
+        return;
+      }
+      if (!spctData.soLuong || spctData.soLuong >= 1000) {
+        toast.error('Số lượng không hợp lệ');
+        return;
+      }
+
+      if (!spctData.donGia || spctData.donGia <= 0) {
+        toast.error('Đơn giá phải lớn hơn 0');
+        return;
+      }
+
+      if (!spctData.donGia || spctData.donGia >= 1000000000) {
+        toast.error('Đơn giá phải bé hơn 1000000000');
+        return;
+      }
+
+      if (!spctData.gioiThieu?.trim() || spctData.gioiThieu.length < 10) {
+        toast.error('Giới thiệu sản phẩm phải có ít nhất 10 ký tự');
+        return;
+      }
+
+      if (!spctData.gioiThieu?.trim() || spctData.gioiThieu.length >= 4000) {
+        toast.error('Giới thiệu sản phẩm không được lớn hơn 4000 ký tự');
+        return;
+      }
+
+      if (!spctData.ram?.id) {
+        toast.error('Vui lòng chọn RAM');
+        return;
+      }
+
+      if (!spctData.cpu?.id) {
+        toast.error('Vui lòng chọn CPU');
+        return;
+      }
+
+      if (!spctData.gpu?.id) {
+        toast.error('Vui lòng chọn GPU');
+        return;
+      }
+
+      if (!spctData.oLuuTru?.id) {
+        toast.error('Vui lòng chọn ổ lưu trữ');
+        return;
+      }
+
+      if (!spctData.manHinh?.id) {
+        toast.error('Vui lòng chọn màn hình');
+        return;
+      }
+
+      if (!spctData.mauSac?.id) {
+        toast.error('Vui lòng chọn màu sắc');
+        return;
+      }
+
+      if (!spctData.cardDoHoa?.id) {
+        toast.error('Vui lòng chọn card đồ họa');
+        return;
+      }
+
+      if (!spctData.hinhAnhMinhHoa) {
+        toast.error('Vui lòng tải lên ảnh minh họa');
+        return;
+      }
+
+      if (imageUrls.length === 0) {
+        toast.error('Vui lòng tải lên ít nhất một ảnh sản phẩm');
         return;
       }
 
@@ -152,7 +301,15 @@ const AddProductModal = ({
       
     } catch (error) {
       console.error('Error submitting form:', error);
-      toast.error('Có lỗi xảy ra khi thêm sản phẩm');
+      toast.error('Có lỗi xảy ra khi thêm sản phẩm', {
+        toastId: 'error-submit',
+        autoClose: 1500,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: false,
+        theme: 'colored'
+      });
     }
   };
 

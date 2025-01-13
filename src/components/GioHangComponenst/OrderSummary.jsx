@@ -11,6 +11,7 @@ import { useOrder } from './hooks/useOrder';
 import { useValidation } from './hooks/useValidation';
 import { useShipping } from './hooks/useShipping';
 import { useEmail } from './hooks/useEmail';
+import VoucherInput from './VoucherInput';
 
 // Component OrderSummary để hiển thị và xử lý thông tin đơn hàng
 function OrderSummary({ 
@@ -62,6 +63,20 @@ function OrderSummary({
   const { validateFields } = useValidation(setErrors);
   const { calculateShippingFee } = useShipping(setShippingFee);
   const { sendOrderEmail } = useEmail();
+
+  const [appliedVoucher, setAppliedVoucher] = useState(null);
+  const [discountAmount, setDiscountAmount] = useState(0);
+
+  const handleApplyVoucher = (voucher) => {
+    if (voucher) {
+      const discount = voucher.loaiGiam === 'PERCENTAGE' 
+        ? (totalAmount * voucher.giaTriGiam) / 100
+        : voucher.giaTriGiam;
+      setDiscountAmount(discount);
+    } else {
+      setDiscountAmount(0);
+    }
+  };
 
   const generatePDF = () => {
     const doc = new jsPDF();
@@ -223,187 +238,203 @@ function OrderSummary({
     );
   };
 
+  // Tính toán phí vận chuyển hiển thị
+  const displayShippingFee = deliveryMethod === "pickup" ? 0 : shippingFee;
+  
+  // Tính tổng tiền cuối cùng
+  const finalTotal = totalAmount - discountAmount + (deliveryMethod === "pickup" ? 0 : shippingFee);
+
   // Render component
   return (
-    <>
-      {/* Container chính */}
-      <div className="bg-white rounded-xl shadow-lg p-8 mb-8 border border-gray-100">
-        {/* Tiêu đề */}
-        <h2 className="text-2xl font-bold mb-6 text-gray-800 flex items-center">
-          <svg className="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-          </svg>
-          Thông tin đơn hàng
-        </h2>
+    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+      {/* Tiêu đề */}
+      <h2 className="text-2xl font-bold mb-6 text-gray-800 flex items-center">
+        <svg className="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        </svg>
+        Thông tin đơn hàng
+      </h2>
 
-        {/* Hiển thị lỗi giỏ hàng nếu có */}
-        {errors.cart && (
-          <div className="bg-red-50 text-red-600 p-4 rounded-lg mb-6">
-            {errors.cart}
-          </div>
-        )}
+      {/* Hiển thị lỗi giỏ hàng nếu có */}
+      {errors.cart && (
+        <div className="bg-red-50 text-red-600 p-4 rounded-lg mb-6">
+          {errors.cart}
+        </div>
+      )}
 
-        {/* Danh sách sản phẩm trong giỏ hàng */}
-        <div className="space-y-6">
-          {cartItems.map((item) => (
-            <div key={item?.id || Math.random()} className="flex items-start space-x-6 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
-              <div className="w-32 h-32 flex-shrink-0">
-                <img
-                  src={item?.hinhAnhMinhHoa || '/placeholder-image.jpg'}
-                  alt={item?.tenSanPhamChiTiet || 'Sản phẩm'}
-                  className="w-full h-full object-cover rounded-lg shadow-sm"
-                  onError={(e) => {
-                    e.target.onerror = null; 
-                    e.target.src = '/placeholder-image.jpg';
-                  }}
-                />
-              </div>
+      {/* Danh sách sản phẩm trong giỏ hàng */}
+      <div className="space-y-6">
+        {cartItems.map((item) => (
+          <div key={item?.id || Math.random()} className="flex items-start space-x-6 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+            <div className="w-32 h-32 flex-shrink-0">
+              <img
+                src={item?.hinhAnhMinhHoa || '/placeholder-image.jpg'}
+                alt={item?.tenSanPhamChiTiet || 'Sản phẩm'}
+                className="w-full h-full object-cover rounded-lg shadow-sm"
+                onError={(e) => {
+                  e.target.onerror = null; 
+                  e.target.src = '/placeholder-image.jpg';
+                }}
+              />
+            </div>
 
-              <div className="flex-1">
-                <h3 className="font-bold text-xl text-gray-800 mb-2 line-clamp-2">
-                  {item?.tenSanPhamChiTiet || 'Đang tải...'}
-                </h3>
-                
-                <div className="grid grid-cols-2 gap-4 text-gray-600">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-gray-500">Đơn giá:</span>
-                    <span className="font-semibold text-red-600">
-                      {(parseFloat(item?.donGia || 0)).toLocaleString("vi-VN")}₫
-                    </span>
-                  </div>
+            <div className="flex-1">
+              <h3 className="font-bold text-xl text-gray-800 mb-2 line-clamp-2">
+                {item?.tenSanPhamChiTiet || 'Đang tải...'}
+              </h3>
+              
+              <div className="grid grid-cols-2 gap-4 text-gray-600">
+                <div className="flex items-center space-x-2">
+                  <span className="text-gray-500">Đơn giá:</span>
+                  <span className="font-semibold text-red-600">
+                    {(parseFloat(item?.donGia || 0)).toLocaleString("vi-VN")}₫
+                  </span>
+                </div>
 
-                  <div className="flex items-center space-x-2">
-                    <span className="text-gray-500">Số lượng:</span>
-                    <span className="font-semibold">
-                      {quantities[item?.id] || item?.soLuong || 1}
-                    </span>
-                  </div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-gray-500">Số lượng:</span>
+                  <span className="font-semibold">
+                    {quantities[item?.id] || item?.soLuong || 1}
+                  </span>
+                </div>
 
-                  <div className="flex items-center space-x-2 col-span-2">
-                    <span className="text-gray-500">Thành tiền:</span>
-                    <span className="font-bold text-red-600">
-                      {((quantities[item?.id] || item?.soLuong || 1) * parseFloat(item?.donGia || 0)).toLocaleString("vi-VN")}₫
-                    </span>
-                  </div>
+                <div className="flex items-center space-x-2 col-span-2">
+                  <span className="text-gray-500">Thành tiền:</span>
+                  <span className="font-bold text-red-600">
+                    {((quantities[item?.id] || item?.soLuong || 1) * parseFloat(item?.donGia || 0)).toLocaleString("vi-VN")}₫
+                  </span>
                 </div>
               </div>
             </div>
-          ))}
+          </div>
+        ))}
+      </div>
+
+      <VoucherInput
+        onApplyVoucher={handleApplyVoucher}
+        appliedVoucher={appliedVoucher}
+        setAppliedVoucher={setAppliedVoucher}
+      />
+
+      <div className="mt-8 space-y-4 border-t pt-6">
+        <div className="flex justify-between items-center text-lg">
+          <span className="text-gray-600">Tạm tính:</span>
+          <span className="font-bold text-gray-800">
+            {totalAmount.toLocaleString("vi-VN")}₫
+          </span>
         </div>
 
-        <div className="mt-8 space-y-4 border-t pt-6">
-          <div className="flex justify-between items-center text-lg">
-            <span className="text-gray-600">Tạm tính:</span>
-            <span className="font-bold text-gray-800">
-              {totalAmount.toLocaleString("vi-VN")}₫
+        {appliedVoucher && (
+          <div className="flex justify-between items-center text-lg text-green-600">
+            <span>Giảm giá:</span>
+            <span className="font-bold">
+              -{discountAmount.toLocaleString("vi-VN")}₫
             </span>
           </div>
+        )}
 
-          <div className="flex justify-between items-center text-lg">
-            <span className="text-gray-600">Phí vận chuyển:</span>
-            <span className="font-bold text-gray-800">
-              {deliveryMethod === "pickup" ? 
-                'Miễn phí' : 
-                (shippingFee ? `${Number(shippingFee).toLocaleString("vi-VN")}₫` : 'Miễn phí')
-              }
-            </span>
-          </div>
-
-          <div className="flex justify-between items-center text-xl pt-4 border-t">
-            <span className="font-bold text-gray-800">Tổng cộng:</span>
-            <span className="font-bold text-2xl text-red-600">
-              {(totalAmount + (deliveryMethod === "pickup" ? 0 : (shippingFee || 0)))
-                .toLocaleString("vi-VN")}₫
-            </span>
-          </div>
+        <div className="flex justify-between items-center text-lg">
+          <span className="text-gray-600">Phí vận chuyển:</span>
+          <span className="font-bold text-gray-800">
+            {deliveryMethod === "pickup" 
+              ? "Miễn phí" 
+              : `${displayShippingFee.toLocaleString("vi-VN")}₫`}
+          </span>
         </div>
 
-        <div className="mt-8">
-          {errors.submit && (
-            <div className="bg-red-50 text-red-600 p-4 rounded-lg mb-4">
-              {errors.submit}
-            </div>
-          )}
-          
-          {errors.name && (
-            <div className="text-red-500 text-sm mb-4">
-              {errors.name}
-            </div>
-          )}
-
-          {errors.phone && (
-            <div className="text-red-500 text-sm mb-4">
-              {errors.phone} 
-            </div>
-          )}
-
-          {errors.province && (
-            <div className="text-red-500 text-sm mb-4">
-              {errors.province}
-            </div>
-          )}
-
-          {errors.district && (
-            <div className="text-red-500 text-sm mb-4">
-              {errors.district}
-            </div>
-          )}
-
-          {errors.ward && (
-            <div className="text-red-500 text-sm mb-4">
-              {errors.ward}
-            </div>
-          )}
-
-          {errors.address && (
-            <div className="text-red-500 text-sm mb-4">
-              {errors.address}
-            </div>
-          )}
-
-          {errors.paymentMethod && (
-            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-4 flex items-center">
-              <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-              </svg>
-              {errors.paymentMethod}
-            </div>
-          )}
-
-          <button
-            onClick={() => {
-              if (validateFields({
-                customerName,
-                phoneNumber,
-                email,
-                deliveryMethod,
-                selectedStore,
-                pickupDate,
-                selectedProvince,
-                selectedDistrict,
-                selectedWard,
-                specificAddress,
-                cartItems,
-                paymentMethod
-              })) {
-                handleOrder();
-              }
-            }}
-            disabled={loading || isButtonDisabled || isProcessing || !paymentMethod}
-            className={`w-full py-4 bg-gradient-to-r from-green-500 to-green-600 text-white text-lg font-bold rounded-xl
-              hover:from-green-600 hover:to-green-700 transform hover:-translate-y-0.5 transition-all
-              focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2
-              ${(loading || isButtonDisabled || isProcessing || !paymentMethod) ? "opacity-50 cursor-not-allowed" : ""}`}
-          >
-            {loading ? "Đang xử lý..." : 
-             isProcessing ? "Vui lòng đợi..." :
-             !paymentMethod ? "Vui lòng chọn phương thức thanh toán" :
-             isButtonDisabled ? "Vui lòng đợi" : 
-             "Xác nhận đơn hàng"}
-          </button>
+        <div className="flex justify-between items-center text-xl pt-4 border-t">
+          <span className="font-bold text-gray-800">Tổng cộng:</span>
+          <span className="font-bold text-2xl text-red-600">
+            {finalTotal.toLocaleString("vi-VN")}₫
+          </span>
         </div>
       </div>
-    </>
+
+      <div className="mt-8">
+        {errors.submit && (
+          <div className="bg-red-50 text-red-600 p-4 rounded-lg mb-4">
+            {errors.submit}
+          </div>
+        )}
+        
+        {errors.name && (
+          <div className="text-red-500 text-sm mb-4">
+            {errors.name}
+          </div>
+        )}
+
+        {errors.phone && (
+          <div className="text-red-500 text-sm mb-4">
+            {errors.phone} 
+          </div>
+        )}
+
+        {errors.province && (
+          <div className="text-red-500 text-sm mb-4">
+            {errors.province}
+          </div>
+        )}
+
+        {errors.district && (
+          <div className="text-red-500 text-sm mb-4">
+            {errors.district}
+          </div>
+        )}
+
+        {errors.ward && (
+          <div className="text-red-500 text-sm mb-4">
+            {errors.ward}
+          </div>
+        )}
+
+        {errors.address && (
+          <div className="text-red-500 text-sm mb-4">
+            {errors.address}
+          </div>
+        )}
+
+        {errors.paymentMethod && (
+          <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-4 flex items-center">
+            <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+            </svg>
+            {errors.paymentMethod}
+          </div>
+        )}
+
+        <button
+          onClick={() => {
+            if (validateFields({
+              customerName,
+              phoneNumber,
+              email,
+              deliveryMethod,
+              selectedStore,
+              pickupDate,
+              selectedProvince,
+              selectedDistrict,
+              selectedWard,
+              specificAddress,
+              cartItems,
+              paymentMethod
+            })) {
+              handleOrder();
+            }
+          }}
+          disabled={loading || isButtonDisabled || isProcessing || !paymentMethod}
+          className={`w-full py-4 bg-gradient-to-r from-green-500 to-green-600 text-white text-lg font-bold rounded-xl
+            hover:from-green-600 hover:to-green-700 transform hover:-translate-y-0.5 transition-all
+            focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2
+            ${(loading || isButtonDisabled || isProcessing || !paymentMethod) ? "opacity-50 cursor-not-allowed" : ""}`}
+        >
+          {loading ? "Đang xử lý..." : 
+           isProcessing ? "Vui lòng đợi..." :
+           !paymentMethod ? "Vui lòng chọn phương thức thanh toán" :
+           isButtonDisabled ? "Vui lòng đợi" : 
+           "Xác nhận đơn hàng"}
+        </button>
+      </div>
+    </div>
   );
 }
 

@@ -52,7 +52,7 @@ const ProductManagement = () => {
     <div className="min-h-screen flex bg-gray-100">
       <NavbarAdmin />
       <main className="flex-1 p-8 overflow-hidden">
-        <ToastContainer />
+        <ToastContainer limit={3} />
         
         <div className="max-w-7xl mx-auto">
           {/* Header Section */}

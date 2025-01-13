@@ -27,94 +27,26 @@ const ProductVariantsTable = ({
   };
 
   const handleDelete = async (variant) => {
-    try {
-      const response = await axios.post('http://localhost:8080/rest/san_pham_chi_tiet/del', {
-        id: variant.id,
-        hinhAnhMinhHoa: variant.hinhAnhMinhHoa,
-        soLuong: variant.soLuong,
-        trangThai: variant.trangThai,
-        donGia: variant.donGia,
-        maSpct: variant.maSpct,
-        sanPham: {
-          id: variant.sanPham.id,
-          loaiSanPham: variant.sanPham.loaiSanPham,
-          nguonNhap: variant.sanPham.nguonNhap,
-          chatLieu: variant.sanPham.chatLieu,
-          kichThuocLaptop: variant.sanPham.kichThuocLaptop,
-          tenSanPham: variant.sanPham.tenSanPham,
-          namSanXuat: variant.sanPham.namSanXuat,
-          trongLuong: variant.sanPham.trongLuong,
-          thuongHieu: variant.sanPham.thuongHieu,
-          thoiHanBaoHanh: variant.sanPham.thoiHanBaoHanh,
-          pin: variant.sanPham.pin,
-          trangThai: variant.sanPham.trangThai
-        },
-        ram: {
-          id: variant.ram.id,
-          dungLuong: variant.ram.dungLuong,
-          tocDo: variant.ram.tocDo,
-          trangThai: variant.ram.trangThai
-        },
-        manHinh: {
-          id: variant.manHinh.id,
-          doPhanGiai: variant.manHinh.doPhanGiai,
-          tanSoQuet: variant.manHinh.tanSoQuet,
-          doSang: variant.manHinh.doSang,
-          doPhuMau: variant.manHinh.doPhuMau,
-          tamNen: variant.manHinh.tamNen,
-          trangThai: variant.manHinh.trangThai
-        },
-        cpu: {
-          id: variant.cpu.id,
-          hangSanXuat: variant.cpu.hangSanXuat,
-          kienTrucCongNghe: variant.cpu.kienTrucCongNghe,
-          tocDoToiThieu: variant.cpu.tocDoToiThieu,
-          tocDoToiDa: variant.cpu.tocDoToiDa,
-          soNhan: variant.cpu.soNhan,
-          soLuong: variant.cpu.soLuong,
-          boNhoDem: variant.cpu.boNhoDem,
-          ten: variant.cpu.ten,
-          trangThai: variant.cpu.trangThai
-        },
-        gpu: {
-          id: variant.gpu.id,
-          hangSanXuat: variant.gpu.hangSanXuat,
-          xungNhipToiThieu: variant.gpu.xungNhipToiThieu,
-          xungNhipToiDa: variant.gpu.xungNhipToiDa,
-          vram: variant.gpu.vram,
-          dienAp: variant.gpu.dienAp,
-          kienTrucCongNghe: variant.gpu.kienTrucCongNghe,
-          ten: variant.gpu.ten,
-          trangThai: variant.gpu.trangThai
-        },
-        cuaHang: variant.cuaHang,
-        mauSac: {
-          id: variant.mauSac.id,
-          tenMau: variant.mauSac.tenMau,
-          maHex: variant.mauSac.maHex,
-          trangThai: variant.mauSac.trangThai
-        },
-        gioiThieu: variant.gioiThieu,
-        cardDoHoa: {
-          id: variant.cardDoHoa.id,
-          tenCard: variant.cardDoHoa.tenCard,
-          trangThai: variant.cardDoHoa.trangThai
-        },
-        oLuuTru: {
-          id: variant.oLuuTru.id,
-          dungLuong: variant.oLuuTru.dungLuong,
-          loaiOCung: variant.oLuuTru.loaiOCung,
-          trangThai: variant.oLuuTru.trangThai
-        }
-      });
+    const newStatus = variant.trangThai === 1 ? 0 : 1;
+    const confirmMessage = newStatus === 1 
+      ? 'Bạn có chắc chắn muốn hiện lại sản phẩm này?' 
+      : 'Bạn có chắc chắn muốn ẩn sản phẩm này?';
 
-      if (response.status === 200) {
-        toast.success('Cập nhật trạng thái thành công');
-        fetchData(); // Refresh the data after successful update
+    if (window.confirm(confirmMessage)) {
+      try {
+        const response = await axios.post('http://localhost:8080/rest/san_pham_chi_tiet/del', {
+          ...variant,
+          trangThai: newStatus
+        });
+
+        if (response.status === 200) {
+          toast.success(newStatus === 1 ? 'Đã hiện sản phẩm' : 'Đã ẩn sản phẩm');
+          fetchData(); // Refresh the data after successful update
+        }
+      } catch (error) {
+        console.error('Error updating status:', error);
+        toast.error('Có lỗi xảy ra khi cập nhật trạng thái');
       }
-    } catch (error) {
-      console.error('Error updating status:', error);
-      toast.error('Có lỗi xảy ra khi cập nhật trạng thái');
     }
   };
 
@@ -149,11 +81,20 @@ const ProductVariantsTable = ({
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {variants.map((variant, index) => (
-              <tr key={index} className="hover:bg-gray-50">
+              <tr key={index} 
+                className={`hover:bg-gray-50 ${variant.trangThai === 0 ? 'opacity-50' : ''}`}
+              >
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                    {variant.maSpct}
-                  </span>
+                  <div className="flex items-center">
+                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                      {variant.maSpct}
+                    </span>
+                    {variant.trangThai === 0 && (
+                      <span className="ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                        Đã ẩn
+                      </span>
+                    )}
+                  </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <img 
@@ -206,13 +147,9 @@ const ProductVariantsTable = ({
                       <FaEdit size={18} />
                     </button>
                     <button 
-                      className="text-red-600 hover:text-red-900"
-                      title="Xóa"
-                      onClick={() => {
-                        if (window.confirm('Bạn có chắc chắn muốn thay đổi trạng thái sản phẩm này?')) {
-                          handleDelete(variant);
-                        }
-                      }}
+                      className={`text-${variant.trangThai === 1 ? 'red' : 'green'}-600 hover:text-${variant.trangThai === 1 ? 'red' : 'green'}-900`}
+                      title={variant.trangThai === 1 ? 'Ẩn' : 'Hiện'}
+                      onClick={() => handleDelete(variant)}
                     >
                       <FaTrash size={18} />
                     </button>

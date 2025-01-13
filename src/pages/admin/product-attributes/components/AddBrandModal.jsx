@@ -10,8 +10,18 @@ const AddBrandModal = ({ showModal, setShowModal, onSuccess }) => {
 
   const handleSubmit = async () => {
     try {
-      if (!newBrand.ten) {
+      if (!newBrand.ten.trim()) {
         toast.error('Vui lòng nhập tên thương hiệu');
+        return;
+      }
+
+      if (newBrand.ten.length > 100) {
+        toast.error('Tên thương hiệu không được vượt quá 100 ký tự');
+        return;
+      }
+
+      if (newBrand.trangThai === null) {
+        toast.error('Vui lòng chọn trạng thái');
         return;
       }
 

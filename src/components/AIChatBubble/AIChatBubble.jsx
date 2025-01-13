@@ -8,6 +8,7 @@ const AIChatBubble = () => {
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [productData, setProductData] = useState([]);
+  const MAX_MESSAGES = 10; // Giới hạn số lượng tin nhắn
 
   // Fetch dữ liệu sản phẩm khi component mount
   useEffect(() => {
@@ -31,8 +32,13 @@ const AIChatBubble = () => {
 
     try {
       setIsLoading(true);
-      // Thêm tin nhắn người dùng
-      setMessages(prev => [...prev, { text: newMessage, sender: 'user' }]);
+      
+      // Thêm tin nhắn người dùng và giới hạn số lượng tin nhắn
+      setMessages(prev => {
+        const newMessages = [...prev, { text: newMessage, sender: 'user' }];
+        // Nếu vượt quá giới hạn, chỉ giữ lại MAX_MESSAGES tin nhắn gần nhất
+        return newMessages.slice(-MAX_MESSAGES);
+      });
       
       // Tạo context cho AI từ dữ liệu sản phẩm
       const productContext = JSON.stringify(productData);
@@ -55,15 +61,22 @@ const AIChatBubble = () => {
       const result = await model.generateContent(prompt);
       const response = result.response.text();
       
-      // Thêm phản hồi của AI
-      setMessages(prev => [...prev, { text: response, sender: 'ai' }]);
+      // Thêm phản hồi của AI và giới hạn số lượng tin nhắn
+      setMessages(prev => {
+        const newMessages = [...prev, { text: response, sender: 'ai' }];
+        return newMessages.slice(-MAX_MESSAGES);
+      });
+
       setNewMessage('');
     } catch (error) {
       console.error('Lỗi khi tạo phản hồi:', error);
-      setMessages(prev => [...prev, { 
-        text: 'Xin lỗi, đã có lỗi xảy ra. Vui lòng thử lại.', 
-        sender: 'ai' 
-      }]);
+      setMessages(prev => {
+        const newMessages = [...prev, { 
+          text: 'Xin lỗi, đã có lỗi xảy ra. Vui lòng thử lại.', 
+          sender: 'ai' 
+        }];
+        return newMessages.slice(-MAX_MESSAGES);
+      });
     } finally {
       setIsLoading(false);
     }
@@ -99,10 +112,15 @@ const AIChatBubble = () => {
         </div>
 
         {/* Phần tin nhắn */}
-        <div className="flex-1 p-4 overflow-y-auto">
+        <div className="flex-1 p-4 overflow-y-auto max-h-[400px]">
           {messages.length === 0 && (
             <div className="text-center text-gray-500 mt-4">
               Xin chào! Tôi có thể giúp gì cho bạn?
+            </div>
+          )}
+          {messages.length === MAX_MESSAGES && (
+            <div className="text-center text-gray-400 text-sm mb-2">
+              Đã đạt giới hạn tin nhắn. Tin nhắn cũ sẽ bị xóa.
             </div>
           )}
           {messages.map((message, index) => (

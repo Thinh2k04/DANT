@@ -1,13 +1,12 @@
 import { useState } from 'react';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
-import { useEmail } from './useEmail';
+import { sendOrderConfirmationEmail } from '../EmailOrder';
 
 export const useOrder = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
   const navigate = useNavigate();
-  const { sendOrderEmail } = useEmail();
 
   const prepareOrderData = ({
     customerName,
@@ -216,30 +215,19 @@ export const useOrder = () => {
         try {
           const emailData = {
             email,
-            customerName: orderResponseData.hoaDon.thongTinTaiKhoan.hoTen,
-            cartItems: orderResponseData.listHDCT,
-            totalAmount: orderResponseData.hoaDon.tongTien - orderResponseData.hoaDon.phiVanChuyen,
-            shippingFee: orderResponseData.hoaDon.phiVanChuyen,
-            orderData: {
-              id: orderResponseData.hoaDon.id,
-              maHoaDon: orderResponseData.hoaDon.maHoaDon,
-              diaChiNhanHang: orderResponseData.hoaDon.diaChiNhanHang,
-              tongTien: orderResponseData.hoaDon.tongTien
-            },
-            paymentMethod: orderResponseData.hoaDon.hinhThucThanhToan.id
+            customerName,
+            cartItems,
+            quantities,
+            totalAmount,
+            shippingFee,
+            orderData,
+            paymentMethod
           };
 
-          setTimeout(async () => {
-            try {
-              const emailResult = await sendOrderEmail(emailData);
-              if (emailResult) {
-                toast.success('Đã gửi email xác nhận đơn hàng');
-              }
-            } catch (emailError) {
-              console.error('Email error:', emailError);
-              toast.warning('Không thể gửi email xác nhận. Đơn hàng vẫn được tạo thành công');
-            }
-          }, 1000);
+          const emailResult = await sendOrderConfirmationEmail(emailData);
+          if (emailResult) {
+            toast.success('Đã gửi email xác nhận đơn hàng');
+          }
         } catch (emailError) {
           console.error('Email error:', emailError);
           toast.warning('Không thể gửi email xác nhận. Đơn hàng vẫn được tạo thành công');

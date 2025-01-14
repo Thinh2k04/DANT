@@ -12,6 +12,7 @@ const CustomerChatBubble = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [userId, setUserId] = useState(null);
   const messagesEndRef = useRef(null);
+  const MAX_MESSAGES = 10; // Giới hạn số lượng tin nhắn
 
   useEffect(() => {
     const storedUserId = localStorage.getItem('chatUserId');
@@ -67,7 +68,10 @@ const CustomerChatBubble = () => {
       WebSocketService.connect(() => {
         WebSocketService.subscribe(`/topic/chat/${session.id}`, (message) => {
           const parsedMessage = JSON.parse(message.body);
-          setMessages(prev => [...prev, parsedMessage]);
+          setMessages(prev => {
+            const newMessages = [...prev, parsedMessage];
+            return newMessages.slice(-MAX_MESSAGES);
+          });
         });
       });
 
@@ -77,7 +81,7 @@ const CustomerChatBubble = () => {
       );
       if (historyResponse.ok) {
         const history = await historyResponse.json();
-        setMessages(history);
+        setMessages(history.slice(-MAX_MESSAGES));
       }
     } catch (error) {
       console.error('Error initializing chat:', error);
@@ -93,13 +97,23 @@ const CustomerChatBubble = () => {
       
       const messageData = {
         idPhienChat: chatSession.id,
-        idNguoiGui: userId, // Đã là số nguyên
+        idNguoiGui: userId,
         noiDung: newMessage,
         thoiGianGui: new Date().toISOString()
       };
 
       WebSocketService.sendMessage('/app/chat/send', JSON.stringify(messageData));
       setNewMessage('');
+
+      // Giới hạn số lượng tin nhắn
+      setMessages(prev => {
+        const newMessages = [...prev];
+        if (newMessages.length >= MAX_MESSAGES) {
+          newMessages.shift(); // Xóa tin nhắn cũ nhất
+        }
+        return newMessages;
+      });
+
     } catch (error) {
       console.error('Error sending message:', error);
       toast.error('Không thể gửi tin nhắn');
@@ -153,6 +167,11 @@ const CustomerChatBubble = () => {
             <div className="text-center text-gray-500 mt-4">
               <div className="mb-2">👋 Xin chào!</div>
               <div>Chúng tôi có thể giúp gì cho bạn?</div>
+            </div>
+          )}
+          {messages.length === MAX_MESSAGES && (
+            <div className="text-center text-gray-400 text-sm mb-2">
+              Đã đạt giới hạn tin nhắn. Tin nhắn cũ sẽ bị xóa.
             </div>
           )}
           {messages.map((message, index) => (

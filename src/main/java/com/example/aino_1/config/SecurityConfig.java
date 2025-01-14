@@ -37,7 +37,7 @@ public class SecurityConfig {
         return http
                 .csrf(csrf -> csrf.disable())  // Tắt CSRF nếu cần
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/admin1/**").hasAuthority("ROLE_ADMIN")  // Kiểm tra quyền "ROLE_ADMIN" cho các đường dẫn /admin/**
+                        .requestMatchers("/NoTOken/**").hasAuthority("ROLE_ADMIN")  // Kiểm tra quyền "ROLE_ADMIN" cho các đường dẫn /admin/**
                         .anyRequest().permitAll()  // Các đường dẫn khác cho phép tất cả mọi người truy cập
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))  // Không lưu trạng thái session

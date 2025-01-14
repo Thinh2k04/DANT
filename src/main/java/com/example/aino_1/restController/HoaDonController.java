@@ -54,30 +54,19 @@ public class HoaDonController {
     }
 
     @PostMapping("addHD")
-    public ResponseEntity<?> addHoaDon(@RequestHeader(value = "Authorization", required = false) String token,
+    public ResponseEntity<?> addHoaDon(
                                        @RequestBody Map<String, Object> requestData) {
         try {
             System.out.println("HOADONCONTROLLER: chạy vào phần try");
             ObjectMapper objectMapper = new ObjectMapper();
-            String username = null;
 
-            // Lấy thông tin tài khoản từ token nếu có
-            if (token != null && !token.isEmpty()) {
-                Map<String, Object> decodedToken = jwtUtils.validateToken(token.replace("Bearer ", ""));
-                if (decodedToken == null || !decodedToken.containsKey("username")) {
-                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(
-                            "success", false,
-                            "message", "Token không hợp lệ."
-                    ));
-                }
-                username = decodedToken.get("username").toString();
-            }
-
+            String username = objectMapper.convertValue(requestData.get("username"),String.class);
             // Ánh xạ dữ liệu từ requestData
             ThongTinTaiKhoan thongTinTaiKhoan = objectMapper.convertValue(requestData.get("tttk"), ThongTinTaiKhoan.class);
             HoaDon hd = objectMapper.convertValue(requestData.get("hd"), HoaDon.class);
             List<HoaDonChiTiet> lhdct = objectMapper.convertValue(requestData.get("lhdct"), new TypeReference<List<HoaDonChiTiet>>() {});
             Voucher voucher = objectMapper.convertValue(requestData.get("hd.voucher"), Voucher.class);
+            List<Imei> imeiList = objectMapper.convertValue(requestData.get("listImei"), new TypeReference<List<Imei>>() {});
 
             if (hd == null || lhdct == null || lhdct.isEmpty()) {
                 return ResponseEntity.badRequest().body(Map.of(
@@ -87,7 +76,7 @@ public class HoaDonController {
             }
 
             // Gọi service để xử lý hóa đơn
-            Map<String, Object> result = hdsv.hamXuLiHoaDon(username, thongTinTaiKhoan, hd, lhdct, voucher);
+            Map<String, Object> result = hdsv.hamXuLiHoaDon(username, thongTinTaiKhoan, hd, lhdct, voucher,imeiList);
 
             // Trả về kết quả dựa trên trạng thái
             if ((boolean) result.get("success")) {
@@ -110,6 +99,20 @@ public class HoaDonController {
         }
     }
 
+    @PostMapping("/xac-nhan/{maHoaDon}")
+    public ResponseEntity<?> xacNhanDonHang(
+            @PathVariable String maHoaDon, // Sử dụng PathVariable thay vì RequestParam
+            @RequestBody List<Imei> imeiList
+    ) {
+        try {
+            Map<String, Object> result = hdsv.xacNhanDonHang(maHoaDon, imeiList);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "error", e.getMessage()
+            ));
+        }
+    }
 
 
 

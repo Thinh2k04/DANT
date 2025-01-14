@@ -61,21 +61,17 @@ public class ImeiController {
         }
     }
 
-
-
-
     @GetMapping("/getById/{id}")
     public Imei getByidHD(@PathVariable Integer id){
         return ii.findById(id).get();
     }
 
+
     @GetMapping("/checkidSPCT/{id}")
     public ResponseEntity<?> checkSPCT(@PathVariable Integer id) {
         // Gọi phương thức để kiểm tra số lượng thiếu
         Integer soLuongThieu = imsv.checkImeiIDSPCT(id);
-
         System.out.println("check cho id: " + id + ", số lượng thiếu: " + soLuongThieu);
-
         if (soLuongThieu == -1) {
             // Trả về nếu sản phẩm chi tiết không tồn tại
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -84,7 +80,6 @@ public class ImeiController {
                             "message", "Sản phẩm chi tiết không tồn tại."
                     ));
         }
-
         if (soLuongThieu == 0) {
             // Trả về nếu đã nhập đủ số lượng IMEI
             return ResponseEntity.ok(Map.of(
@@ -110,32 +105,26 @@ public class ImeiController {
 
 
 
-    @DeleteMapping("/del/{maSo}")
-    public void delete(@PathVariable Integer maSo) {
-        ii.deleteById(maSo);
-    }
-
-
-    @GetMapping("/getTopImei")
-    public ResponseEntity<?> getTopImeiBySanPhamChiTietIdAndTrangThai(
-            @RequestParam("idSpct") Integer idSpct,
-            @RequestParam("idHDCT") Integer idHDCT,
-            @RequestParam("soLuong") Integer soLuong) {
-        try {
-            // Gọi service để xử lý logic
-            String result = imsv.updateTopImeiTrangThai(idSpct, soLuong, idHDCT);
-
-            // Kiểm tra kết quả trả về
-            if (result.startsWith("Số lượng không đủ")) {
-                return ResponseEntity.badRequest().body(result);
-            }
-
-            return ResponseEntity.ok(result);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Đã xảy ra lỗi: " + e.getMessage());
-        }
-    }
+//    @GetMapping("/getTopImei")
+//    public ResponseEntity<?> getTopImeiBySanPhamChiTietIdAndTrangThai(
+//            @RequestParam("idSpct") Integer idSpct,
+//            @RequestParam("idHDCT") Integer idHDCT,
+//            @RequestParam("soLuong") Integer soLuong) {
+//        try {
+//            // Gọi service để xử lý logic
+//            String result = imsv.updateTopImeiTrangThai(idSpct, soLuong, idHDCT);
+//
+//            // Kiểm tra kết quả trả về
+//            if (result.startsWith("Số lượng không đủ")) {
+//                return ResponseEntity.badRequest().body(result);
+//            }
+//
+//            return ResponseEntity.ok(result);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Đã xảy ra lỗi: " + e.getMessage());
+//        }
+//    }
 
     }
 

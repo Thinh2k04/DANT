@@ -51,7 +51,7 @@ public class CpuRestController {
         Optional<Cpu> optionalCpu = csi.findById(id);
 
         if (!optionalCpu.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ram with ID " + id + " not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cpu với ID " + id + " không tìm thấy");
         }
 
         Cpu cpu = optionalCpu.get();

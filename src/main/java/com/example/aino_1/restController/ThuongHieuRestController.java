@@ -44,7 +44,7 @@ public class ThuongHieuRestController {
         Optional<ThuongHieu> optionalThuongHieu = thsi.findById(id);
 
         if (!optionalThuongHieu.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ram with ID " + id + " not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Thương hiệu với ID " + id + " không tìm thấy");
         }
 
         ThuongHieu thuongHieu = optionalThuongHieu.get();

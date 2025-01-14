@@ -51,7 +51,7 @@ public class ManHinhRestController {
         Optional<ManHinh> manHinhOptional = mhsi.findById(id);
 
         if (!manHinhOptional.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ram with ID " + id + " not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Màn hình với ID " + id + " không tìm thấy");
         }
 
         ManHinh manHinh = manHinhOptional.get();

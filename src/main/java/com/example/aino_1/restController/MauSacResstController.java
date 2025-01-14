@@ -54,7 +54,7 @@ public class MauSacResstController {
         Optional<MauSac> optionalMauSac = mssi.findById(id);
 
         if (!optionalMauSac.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ram with ID " + id + " not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Màu sắc với ID " + id + " không tìm thấy");
         }
 
         MauSac mauSac = optionalMauSac.get();

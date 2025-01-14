@@ -49,7 +49,6 @@ public class DiscountRestController {
     }
 
 
-
     // Thêm đợt giảm giá
     @PostMapping("/addDiscount")
     public ResponseEntity<Map<String, Object>> addDiscountCampaign(

@@ -54,7 +54,7 @@ public class KichTHuocLTController {
         Optional<KichThuocLapTop> optionalKichThuocLapTop = ktltsi.findById(id);
 
         if (!optionalKichThuocLapTop.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ram with ID " + id + " not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Kích thước Laptop với ID " + id + " không tìm thấy");
         }
 
         KichThuocLapTop kichThuocLapTop = optionalKichThuocLapTop.get();

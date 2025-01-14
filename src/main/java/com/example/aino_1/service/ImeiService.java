@@ -149,6 +149,11 @@ public class ImeiService {
     }
 
 
+    public List<Imei> getListImeiBySanPhamChiTiet(Integer idSpct) {
+        List<Imei> listImei = imif.findAllBySpctIdAndTrangThai(idSpct, 0);
+        return listImei;
+    }
+
 
 
 }

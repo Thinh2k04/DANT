@@ -67,6 +67,12 @@ public class ImeiController {
     }
 
 
+    @GetMapping("/getImeiSPCT/{idSPCT}")
+    public List<Imei> getImeiSPCT(@PathVariable Integer idSPCT){
+        List<Imei> listImei = imsv.getListImeiBySanPhamChiTiet(idSPCT);
+        return  listImei;
+    }
+
     @GetMapping("/checkidSPCT/{id}")
     public ResponseEntity<?> checkSPCT(@PathVariable Integer id) {
         // Gọi phương thức để kiểm tra số lượng thiếu

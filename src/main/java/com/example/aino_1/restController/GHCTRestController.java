@@ -27,7 +27,6 @@ public class GHCTRestController {
         return gsi.findAll();
     }
 
-
     @GetMapping("/getByID/{id}")
     public GioHangChiTiet getAll(@PathVariable Integer id) {
         return gsi.findById(id).get();
@@ -49,7 +48,6 @@ public class GHCTRestController {
         gsi.save(ghct);
     }
 
-
     // hàm dành cho nút mua hàng, check giỏi hàng trước khi đẩy qua màn xác nhận đơn hàng
     @PostMapping("/check")
     public ResponseEntity<?> checkGioHang(
@@ -69,7 +67,6 @@ public class GHCTRestController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Đã xảy ra lỗi: " + e.getMessage());
         }
     }
-
 
     @PostMapping("/changQuantity")
     public ResponseEntity<?> updateProductQuantityInCart(
@@ -104,9 +101,5 @@ public class GHCTRestController {
             ));
         }
     }
-
-
-
-
 }
 

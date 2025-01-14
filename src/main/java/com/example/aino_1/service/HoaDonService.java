@@ -242,6 +242,4 @@ public class HoaDonService {
         // Trường hợp không hợp lệ (không xảy ra nhưng để an toàn)
         throw new IllegalArgumentException("Dữ liệu đầu vào không hợp lệ.");
     }
-
-
 }

@@ -29,7 +29,7 @@ public class ThuongHieuRestController {
         return thsi.findById(id).get();
     }
 
-    @PostMapping("/update/{id}")
+    @PostMapping("/update")
     public ThuongHieu update(@RequestBody ThuongHieu tk) {
         return thsi.save(tk);
     }

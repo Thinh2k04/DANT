@@ -86,10 +86,9 @@ const AdminDashboard = () => {
 const fetchMonthlyStats = async (year, month) => {
   try {
     const formattedMonth = month.toString().padStart(2, '0');
-    const token = localStorage.getItem('Authorization'); // Lấy token từ localStorage
     const response = await axios.get(`http://localhost:8080/rest/thong_ke/thang/${year}-${formattedMonth}`, {
       headers: {
-        Authorization: `${token}` // Thêm header Authorization
+        Authorization: `${localStorage.getItem('Authorization')}` // Thêm header Authorization
       }
     });
 
@@ -118,10 +117,9 @@ const fetchMonthlyStats = async (year, month) => {
   // Fetch thống kê theo năm
   const fetchYearlyStats = async (year) => {
     try {
-      const token = localStorage.getItem('Authorization');
       const response = await axios.get(`http://localhost:8080/rest/thong_ke/nam/${year}`, {
         headers: {
-          Authorization: `${token}`
+          Authorization: `${localStorage.getItem('Authorization')}`
         }
       });
       setYearlyStats(response.data);
@@ -133,10 +131,9 @@ const fetchMonthlyStats = async (year, month) => {
   // Thêm hàm fetch thống kê theo ngày
   const fetchDailyStats = async (date) => {
     try {
-      const token = localStorage.getItem('Authorization');
       const response = await axios.get(`http://localhost:8080/rest/thong_ke/getToday/${date}`, {
         headers: {
-          Authorization: `${token}`
+          Authorization: `${localStorage.getItem('Authorization')}`
         }
       });
       // Kiểm tra nếu response.data là mảng rỗng hoặc không có dữ liệu
@@ -155,10 +152,9 @@ const fetchMonthlyStats = async (year, month) => {
   // Thêm hàm fetch tổng doanh thu
   const fetchTotalRevenue = async () => {
     try {
-      const token = localStorage.getItem('Authorization');
       const response = await axios.get('http://localhost:8080/rest/thong_ke/tongDoanhThu', {
         headers: {
-          Authorization: `${token}`
+          Authorization: `${localStorage.getItem('Authorization')}`
         }
       });
       setTotalRevenue(response.data);
@@ -172,7 +168,6 @@ const fetchMonthlyStats = async (year, month) => {
     try {
       const labels = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'];
       const data = Array(12).fill(0);
-      const token = localStorage.getItem('Authorization');
 
       // Lấy dữ liệu cho từng tháng trong năm
       for (let month = 1; month <= 12; month++) {
@@ -180,7 +175,7 @@ const fetchMonthlyStats = async (year, month) => {
         try {
           const response = await axios.get(`http://localhost:8080/rest/thong_ke/thang/${year}-${formattedMonth}`, {
             headers: {
-              Authorization: `${token}`
+              Authorization: `${localStorage.getItem('Authorization')}`
             }
           });
           if (response.data && response.data.tongTien) {
@@ -218,12 +213,11 @@ const fetchMonthlyStats = async (year, month) => {
       );
       
       const data = [];
-      const token = localStorage.getItem('Authorization');
       for (const year of years) {
         try {
           const response = await axios.get(`http://localhost:8080/rest/thong_ke/nam/${year}`, {
             headers: {
-              Authorization: `${token}`
+              Authorization: `${localStorage.getItem('Authorization')}`
             }
           });
           data.push(response.data?.tongTien || 0);

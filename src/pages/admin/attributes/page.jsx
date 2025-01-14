@@ -22,16 +22,10 @@ const BanHangTaiQuay = () => {
   const [voucherCode, setVoucherCode] = useState('');
   const [voucherInfo, setVoucherInfo] = useState(null);
 
-  // Fetch sản phẩm từ API
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const token = localStorage.getItem('Authorization'); // Lấy token từ localStorage
-        const response = await axios.get('http://localhost:8080/rest/spctDTO/getAll', {
-          headers: {
-            Authorization: `${token}` // Thêm header Authorization
-          }
-        });
+        const response = await axios.get('http://localhost:8080/rest/spctDTO/getAll');
         setProducts(response.data);
       } catch (error) {
         console.error('Error fetching products:', error);
@@ -45,7 +39,6 @@ const BanHangTaiQuay = () => {
     fetchProducts();
   }, []);
   
-  // Thêm vào giỏ hàng
   const addToCart = (product) => {
     const existingItem = cart.find(item => item.id === product.id);
     if (existingItem) {
@@ -64,12 +57,10 @@ const BanHangTaiQuay = () => {
     toast.success('Đã thêm sản phẩm vào giỏ hàng!');
   };
 
-  // Xóa khỏi giỏ hàng
   const removeFromCart = (productId) => {
     setCart(cart.filter(item => item.id !== productId));
   };
 
-  // Cập nhật số lượng
   const updateQuantity = (productId, newQuantity) => {
     const product = products.find(p => p.id === productId);
     if (newQuantity > product.soLuong) {
@@ -83,12 +74,10 @@ const BanHangTaiQuay = () => {
     ));
   };
 
-  // Tính tổng tiền
   const calculateTotal = () => {
     return cart.reduce((total, item) => total + (item.donGia * item.quantity), 0);
   };
 
-  // Xử lý thanh toán
   const handleCheckout = async () => {
     try {
       if (!selectedStore) {
@@ -103,7 +92,6 @@ const BanHangTaiQuay = () => {
 
       setLoading(true);
 
-      // Tính tổng tiền sau khi áp dụng voucher
       const subtotal = calculateTotal();
       const discount = voucherInfo 
         ? (voucherInfo.phanTramApDung 
@@ -112,13 +100,10 @@ const BanHangTaiQuay = () => {
         : 0;
       const finalTotal = subtotal - discount;
 
-      // Lấy thời gian hiện tại theo múi giờ Việt Nam
       const now = new Date();
-      const vietnamTime = new Date(now.getTime() + (7 * 60 * 60 * 1000)); // UTC+7
+      const vietnamTime = new Date(now.getTime() + (7 * 60 * 60 * 1000));
       const thoiGianLapHoaDon = vietnamTime.toISOString();
       console.log(thoiGianLapHoaDon);
-
-      const token = localStorage.getItem('Authorization');
 
       const orderData = {
         tttk: {
@@ -131,11 +116,11 @@ const BanHangTaiQuay = () => {
           trangThai: null
         },
         hd: {
-          thoiGianLapHoaDon: thoiGianLapHoaDon, // Sử dụng thời gian Việt Nam
+          thoiGianLapHoaDon: thoiGianLapHoaDon,
           tongTien: finalTotal,
           phiVanChuyen: 0,
           hinhThucThanhToan: {
-            id: 1 // 1: Thanh toán tại quầy
+            id: 1
           },
           diaChiNhanHang: `${selectedStore.soNha}, ${selectedStore.phuong}, ${selectedStore.huyen}, ${selectedStore.tinh}`,
           cuaHang: {
@@ -154,8 +139,8 @@ const BanHangTaiQuay = () => {
             giaTriGiam: voucherInfo.giaTriGiam,
             loaiGiam: voucherInfo.loaiGiam
           } : null,
-          trangThaiThanhToan: 1, // Đã thanh toán
-          trangThai: 1 // Đã xác nhận
+          trangThaiThanhToan: 1,
+          trangThai: 1
         },
         lhdct: cart.map(item => ({
           hoaDon: {
@@ -169,14 +154,9 @@ const BanHangTaiQuay = () => {
         }))
       };
 
-      const response = await axios.post('http://localhost:8080/rest/hoa_don/addHD', orderData, {
-        headers: {
-          Authorization: `${token}`
-        }
-      });
+      const response = await axios.post('http://localhost:8080/rest/hoa_don/addHD', orderData);
       if (response.data.success) {
         toast.success('Thanh toán thành công!');
-        // Reset form
         setCart([]);
         setCustomerInfo({
           hoten: '',
@@ -200,25 +180,17 @@ const BanHangTaiQuay = () => {
     }
   };
 
-  // Thêm hàm kiểm tra thông tin khách hàng
   const checkCustomerInfo = async (phoneNumber) => {
     try {
       if (phoneNumber.length === 10) {
-        const token = localStorage.getItem('Authorization');
-        const response = await axios.get(`http://localhost:8080/rest/tttk/timSDT/${phoneNumber}`, {
-          headers: {
-            Authorization: `${token}`
-          }
-        });
+        const response = await axios.get(`http://localhost:8080/rest/tttk/timSDT/${phoneNumber}`);
         if (response.data) {
-          // Cập nhật tất cả thông tin khách hàng bao gồm họ tên
           setCustomerInfo({
             hoten: response.data.hoten || '',
             soDienThoai: response.data.soDienThoai || phoneNumber,
             email: response.data.email || ''
           });
         } else {
-          // Reset form nếu không tìm thấy khách hàng
           setCustomerInfo({
             hoten: '',
             soDienThoai: phoneNumber,
@@ -234,20 +206,13 @@ const BanHangTaiQuay = () => {
     }
   };
 
-  // Thêm useEffect để fetch danh sách cửa hàng
   useEffect(() => {
     const fetchStores = async () => {
       try {
-        const token = localStorage.getItem('Authorization'); // Lấy token từ localStorage
-        const response = await axios.get('http://localhost:8080/rest/cuaHang/getAll', {
-          headers: {
-            Authorization: `${token}` // Thêm header Authorization
-          }
-        });
-        
+        const response = await axios.get('http://localhost:8080/rest/cuaHang/getAll');
         setStores(response.data);
         if (response.data.length > 0) {
-          setSelectedStore(response.data[0]); // Mặc định chọn cửa hàng đầu tiên
+          setSelectedStore(response.data[0]);
         }
       } catch (error) {
         console.error('Error fetching stores:', error);
@@ -261,23 +226,10 @@ const BanHangTaiQuay = () => {
     
     fetchStores();
   }, []);
-  
 
- // Thêm hàm check voucher
 const checkVoucher = async (code) => {
   try {
-    const token = localStorage.getItem('Authorization'); // Lấy token từ localStorage
-
-    if (!token) {
-      toast.error('Bạn chưa đăng nhập. Vui lòng đăng nhập để sử dụng voucher.');
-      return;
-    }
-
-    const response = await axios.get(`http://localhost:8080/rest/voucher/${code}`, {
-      headers: {
-        Authorization: `${token}` // Thêm header Authorization
-      }
-    });
+    const response = await axios.get(`http://localhost:8080/rest/voucher/${code}`);
 
     if (response.data) {
       setVoucherInfo(response.data);
@@ -297,15 +249,12 @@ const checkVoucher = async (code) => {
   }
 };
 
-
   return (
     <div className="flex h-screen bg-[#f0f2f5] overflow-hidden">
       <NavbarAdmin />
       <ToastContainer />
       
-      {/* Main Content */}
       <main className="flex-1 overflow-hidden">
-        {/* Header */}
         <div className="p-6 border-b bg-white">
           <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
             <BiLaptop className="text-blue-600" />
@@ -314,9 +263,7 @@ const checkVoucher = async (code) => {
           <p className="text-gray-500 mt-1">Quản lý bán laptop trực tiếp tại cửa hàng</p>
         </div>
 
-        {/* Content Area */}
         <div className="flex h-[calc(100vh-116px)]">
-          {/* Product Section */}
           <div className="flex-1 overflow-y-auto p-6">
             <SearchBar 
               searchTerm={searchTerm} 
@@ -331,7 +278,6 @@ const checkVoucher = async (code) => {
             </div>
           </div>
 
-          {/* Cart Section - Fixed width */}
           <div className="w-[380px] border-l bg-white overflow-y-auto">
             <ShoppingCart 
               cart={cart}

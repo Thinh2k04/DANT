@@ -141,7 +141,7 @@ const LoginPage = () => {
         }));
 
         // Cấu hình axios header
-        axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
+        axios.defaults.headers.common['Authorization'] = `${data.token}`;
         
         // Thông báo thành công
         toast.success('🎉 Đăng nhập thành công! Chào mừng trở lại! 💖', {

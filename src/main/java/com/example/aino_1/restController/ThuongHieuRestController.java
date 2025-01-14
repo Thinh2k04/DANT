@@ -5,9 +5,12 @@ import com.example.aino_1.entity.ThuongHieu;
 import com.example.aino_1.repository.ThongTinTaiKhoaninterface;
 import com.example.aino_1.repository.ThuongHieuInterface;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @CrossOrigin("*")
@@ -36,9 +39,19 @@ public class ThuongHieuRestController {
         return thsi.save(tk);
     }
 
-    @PostMapping("/del")
-    public void deleteThuongHieu(@RequestBody ThuongHieu thuonghieu){
-        thuonghieu.setTrangThai(0);
-        thsi.save(thuonghieu);
+    @PostMapping("/del/{id}")
+    public ResponseEntity<?> delete(@PathVariable Integer id) {
+        Optional<ThuongHieu> optionalThuongHieu = thsi.findById(id);
+
+        if (!optionalThuongHieu.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ram with ID " + id + " not found");
+        }
+
+        ThuongHieu thuongHieu = optionalThuongHieu.get();
+        thuongHieu.setTrangThai(0);
+        ThuongHieu saved = thsi.save(thuongHieu);
+
+        return ResponseEntity.ok(saved);
     }
+
 }

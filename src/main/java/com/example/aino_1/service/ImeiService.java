@@ -24,8 +24,6 @@ public class ImeiService {
     @Autowired
     HDCTInterFace hdctInterFace;
 
-
-
     public Map<String, Object> addOrUpdateImei(Integer idSPCT, List<Imei> listImei) {
         // Tìm sản phẩm chi tiết dựa trên ID
         SanPhamChiTiet spct = spctif.findById(idSPCT)
@@ -60,8 +58,6 @@ public class ImeiService {
                 validImeis.add(im);
             }
         }
-
-
 
         // Nếu có IMEI không hợp lệ hoặc đã tồn tại, trả về thông báo lỗi
         if (!invalidImeiList.isEmpty()) {
@@ -98,12 +94,10 @@ public class ImeiService {
         return response;
     }
 
-
     public List<Imei> getListImeibySPCT(Integer idSPCT){
          List<Imei> listispct = imif.findAllBySpctIdAndTrangThai(idSPCT,0);
          return listispct;
     }
-
 
     // Hàm trả v cho backend biết số lượng imei còn thiếu
     public Integer checkImeiIDSPCT(Integer idSPCT) {
@@ -126,8 +120,6 @@ public class ImeiService {
         // Trả về số lượng sản phẩm còn thiếu IMEI
         return soLuongSPCT - (int) soLuongImeiSPCT;
     }
-
-
 
     public String updateTopImeiTrangThai(Integer idSpct, Integer soLuong, Integer idHoaDonChiTiet) {
         // Lấy danh sách IMEI từ cơ sở dữ liệu
@@ -155,6 +147,7 @@ public class ImeiService {
         List<Imei> listImei = imif.findAllBySpctIdAndTrangThai(idSPCT, 0);
         return listImei == null || listImei.isEmpty();
     }
+
 
 
 

@@ -30,9 +30,6 @@ public class ImeiController {
         return ii.findAll();
     }
 
-
-
-
     @PostMapping("/createOrUpdate")
     public ResponseEntity<Map<String, Object>> createOrUpdate(@RequestBody Map<String, Object> requestData) {
         try {

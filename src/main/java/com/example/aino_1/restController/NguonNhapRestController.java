@@ -4,6 +4,8 @@ import com.example.aino_1.entity.ChatLieu;
 import com.example.aino_1.entity.NguonNhap;
 import com.example.aino_1.repository.NguonNhapInterface;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Optional;
 
 @CrossOrigin("*") //cho phép tất cả các miền khác truy cập tài nguyên server (end point api)
 @RestController
@@ -43,11 +46,21 @@ public class NguonNhapRestController {
         return nnsi.save(nguonNhap);
     }
 
-    @PostMapping("/del")
-    public void delete(@RequestBody NguonNhap nguonNhap) {
+    @PostMapping("/del/{id}")
+    public ResponseEntity<?> delete(@PathVariable Integer id) {
+        Optional<NguonNhap> optionalNguonNhap = nnsi.findById(id);
+
+        if (!optionalNguonNhap.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ram with ID " + id + " not found");
+        }
+
+        NguonNhap nguonNhap = optionalNguonNhap.get();
         nguonNhap.setTrangThai(0);
-        nnsi.save(nguonNhap);
+        NguonNhap saved = nnsi.save(nguonNhap);
+
+        return ResponseEntity.ok(saved);
     }
+
     @GetMapping("/getThungRac")
     public void getThungRac(){
         nnsi.findAllByTrangThai(0);

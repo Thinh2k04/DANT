@@ -51,7 +51,7 @@ public class LoaiSanPhamRestController {
         Optional<LoaiSanPham> optionalLoaiSanPham = lspsi.findById(id);
 
         if (!optionalLoaiSanPham.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ram with ID " + id + " not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Loại sản phẩm với ID " + id + " không tìm thấy");
         }
 
         LoaiSanPham loaiSanPham = optionalLoaiSanPham.get();

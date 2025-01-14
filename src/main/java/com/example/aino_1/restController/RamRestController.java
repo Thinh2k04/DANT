@@ -51,7 +51,7 @@ public class RamRestController {
         Optional<Ram> optionalRam = rsi.findById(id);
 
         if (!optionalRam.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ram with ID " + id + " not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ram với ID " + id + " không tìm thấy");
         }
 
         Ram ram = optionalRam.get();

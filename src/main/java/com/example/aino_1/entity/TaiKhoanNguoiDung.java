@@ -28,7 +28,7 @@ public class TaiKhoanNguoiDung {
     private String email;
 
     @Column(name = "chuc_vu", length = 50)
-    private String chucVu = "USER";
+    private String chucVu;
 
     @Column(name = "trang_thai")
     private Integer enabled;

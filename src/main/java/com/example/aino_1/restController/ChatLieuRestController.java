@@ -54,7 +54,7 @@ public class ChatLieuRestController {
         Optional<ChatLieu> optionalChatLieu = clsi.findById(id);
 
         if (!optionalChatLieu.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ram with ID " + id + " not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Chất liệu với ID " + id + " không tìm thấy");
         }
 
         ChatLieu chatLieu = optionalChatLieu.get();

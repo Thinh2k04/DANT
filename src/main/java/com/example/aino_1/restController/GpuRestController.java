@@ -52,7 +52,7 @@ public class GpuRestController {
         Optional<Gpu> optionalGpu = gsi.findById(id);
 
         if (!optionalGpu.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ram with ID " + id + " not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Gpu với ID " + id + " không tìm thấy");
         }
 
         Gpu gpu = optionalGpu.get();

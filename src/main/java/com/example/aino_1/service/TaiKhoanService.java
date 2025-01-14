@@ -1,5 +1,6 @@
 package com.example.aino_1.service;
 
+import com.example.aino_1.dto.StaffDTO;
 import com.example.aino_1.entity.*;
 import com.example.aino_1.repository.GioHangChiTietInterface;
 import com.example.aino_1.repository.TaiKhoanNguoiDungInterface;
@@ -7,6 +8,7 @@ import com.example.aino_1.repository.ThongTinTaiKhoaninterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,24 +28,71 @@ public class TaiKhoanService {
     @Autowired
     GioHangChiTietInterface gioHangChiTietInterface;
 
-    public Boolean addTaiKhoan(TaiKhoanNguoiDung tknd) {
+    public Boolean addTaiKhoanNguoiDungAsUser(TaiKhoanNguoiDung tknd) {
         try {
-            // Bước 1: Lưu sản phẩm
-            if (tknd == null) {
-                throw new IllegalArgumentException("Thông tin sản phẩm không được để trống.");
-            }
-            TaiKhoanNguoiDung saveTKNG = taiKhoanNguoiDungInterface.save(tknd);
+            // Gán các giá trị mặc định cho TaiKhoanNguoiDung
+            tknd.setChucVu("USER"); // Gán chức vụ mặc định là USER
+            tknd.setEnabled(1); // Mặc định tài khoản được kích hoạt
+            tknd.setCreatedAt(LocalDateTime.now()); // Gán thời gian tạo
+            tknd.setUpdatedAt(LocalDateTime.now()); // Gán thời gian cập nhật ban đầu
 
+            // Lưu thông tin tài khoản người dùng
+            TaiKhoanNguoiDung savedTKND = taiKhoanNguoiDungInterface.save(tknd);
+
+            // Tự động tạo thông tin chi tiết tài khoản
+            ThongTinTaiKhoan thongTin = new ThongTinTaiKhoan();
+            // Các thông tin không bắt buộc được để trống (không gán giá trị)
+            thongTin.setEmail(savedTKND.getEmail()); // Sử dụng email từ TaiKhoanNguoiDung
+            thongTin.setTaiKhoanNguoiDung(savedTKND); // Liên kết với tài khoản người dùng
+            thongTin.setTrangThai(1); // Mặc định trạng thái là kích hoạt
+
+            // Lưu thông tin chi tiết tài khoản vào cơ sở dữ liệu
+            thongTinTaiKhoaninterface.save(thongTin);
+
+            // Tự động tạo giỏ hàng chi tiết
             GioHangChiTiet ghct = new GioHangChiTiet();
-            ghct.setTaiKhoanNguoiDung(tknd);
-            GioHangChiTiet saveGioHangChiTiet = gioHangChiTietInterface.save(ghct);
-
+            ghct.setTaiKhoanNguoiDung(savedTKND); // Liên kết giỏ hàng với tài khoản người dùng
+            gioHangChiTietInterface.save(ghct); // Lưu giỏ hàng chi tiết
 
             return true; // Thành công
         } catch (Exception e) {
-            // Ghi log lỗi (nếu có hệ thống log)
-            System.err.println("Lỗi khi thêm TaiKhoan: " + e.getMessage());
+            // Ghi log lỗi
+            System.err.println("Lỗi khi thêm tài khoản người dùng: " + e.getMessage());
             return false; // Thất bại
+        }
+    }
+
+    public boolean addTaiKhoanNguoiDungAsStaff(StaffDTO staffDTO) {
+        try {
+            // Tạo và gán giá trị cho TaiKhoanNguoiDung
+            TaiKhoanNguoiDung tknd = new TaiKhoanNguoiDung();
+            tknd.setEmail(staffDTO.getEmail());
+            tknd.setPassword(staffDTO.getPassword());
+            tknd.setChucVu("STAFF");
+            tknd.setEnabled(1);
+            tknd.setCreatedAt(LocalDateTime.now());
+            tknd.setUpdatedAt(LocalDateTime.now());
+
+            // Lưu tài khoản người dùng
+            TaiKhoanNguoiDung savedTKND = taiKhoanNguoiDungInterface.save(tknd);
+
+            // Tạo và gán giá trị cho ThongTinTaiKhoan
+            ThongTinTaiKhoan thongTin = new ThongTinTaiKhoan();
+            thongTin.setHoTen(staffDTO.getHoTen());
+            thongTin.setDiaChi(staffDTO.getDiaChi());
+            thongTin.setSoCCCD(staffDTO.getSoCCCD());
+            thongTin.setSoDienThoai(staffDTO.getSoDienThoai());
+            thongTin.setEmail(savedTKND.getEmail());
+            thongTin.setTaiKhoanNguoiDung(savedTKND);
+            thongTin.setTrangThai(1);
+
+            // Lưu thông tin chi tiết tài khoản
+            thongTinTaiKhoaninterface.save(thongTin);
+
+            return true;
+        } catch (Exception e) {
+            System.err.println("Lỗi khi thêm tài khoản nhân viên: " + e.getMessage());
+            return false;
         }
     }
 
@@ -72,6 +121,4 @@ public class TaiKhoanService {
                 .filter(Objects::nonNull) // Loại bỏ các phần tử null
                 .collect(Collectors.toList());
     }
-
-
 }

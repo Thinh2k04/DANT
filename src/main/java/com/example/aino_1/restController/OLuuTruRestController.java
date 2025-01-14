@@ -52,7 +52,7 @@ public class OLuuTruRestController {
         Optional<OLuuTru> optionalOLuuTru = oltsi.findById(id);
 
         if (!optionalOLuuTru.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ram with ID " + id + " not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ổ lưu trữ với ID " + id + " không tìm thấy");
         }
 
         OLuuTru oLuuTru = optionalOLuuTru.get();

@@ -51,7 +51,7 @@ public class CardDoHoaController {
         Optional<CardDoHoa> optionalCardDoHoa = cdhsi.findById(id);
 
         if (!optionalCardDoHoa.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ram with ID " + id + " not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Card với ID " + id + " không tìm thấy");
         }
 
         CardDoHoa cardDoHoa = optionalCardDoHoa.get();

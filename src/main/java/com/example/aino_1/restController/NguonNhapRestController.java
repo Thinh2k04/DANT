@@ -51,7 +51,7 @@ public class NguonNhapRestController {
         Optional<NguonNhap> optionalNguonNhap = nnsi.findById(id);
 
         if (!optionalNguonNhap.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ram with ID " + id + " not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Nguồn nhập với ID " + id + " không tìm thấy");
         }
 
         NguonNhap nguonNhap = optionalNguonNhap.get();

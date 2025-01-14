@@ -1,5 +1,6 @@
 package com.example.aino_1.restController;
 
+import com.example.aino_1.dto.StaffDTO;
 import com.example.aino_1.service.JwtUtils;
 import com.example.aino_1.entity.*;
 
@@ -33,8 +34,6 @@ public class TaiKhoanNguoiDungRestController {
     TaiKhoanService tkndsv;
     private final BCryptPasswordEncoder passwordEncoder;
 
-
-
     public TaiKhoanNguoiDungRestController(TaiKhoanNguoiDungInterface taiKhoanInterface) {
         this.taiKhoanInterface = taiKhoanInterface;
         this.passwordEncoder = new BCryptPasswordEncoder(12);
@@ -46,8 +45,20 @@ public class TaiKhoanNguoiDungRestController {
         return ResponseEntity.ok(danhSachThongTin);
     }
 
-
-
+    @PostMapping("/registerForStaff")
+    public ResponseEntity<?> addStaff(@RequestBody StaffDTO staffDTO) {
+        try {
+            staffDTO.setPassword(passwordEncoder.encode(staffDTO.getPassword()));
+            boolean isAdded = tkndsv.addTaiKhoanNguoiDungAsStaff(staffDTO);
+            if (isAdded) {
+                return ResponseEntity.ok("Thêm tài khoản nhân viên thành công.");
+            } else {
+                return ResponseEntity.status(500).body("Thêm tài khoản nhân viên thất bại.");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Lỗi: " + e.getMessage());
+        }
+    }
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody TaiKhoanNguoiDung taiKhoanNguoiDung) {
@@ -57,7 +68,7 @@ public class TaiKhoanNguoiDungRestController {
             taiKhoanNguoiDung.setPassword(passwordEncoder.encode(taiKhoanNguoiDung.getPassword()));
 
             // Gọi service để thêm tài khoản
-            boolean result = tkndsv.addTaiKhoan(taiKhoanNguoiDung);
+            boolean result = tkndsv.addTaiKhoanNguoiDungAsUser(taiKhoanNguoiDung);
 
             if (result) {
                 return ResponseEntity.ok("Thêm tài khoản thành công");

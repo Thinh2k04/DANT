@@ -11,8 +11,8 @@ const EditBrandModal = ({ editingBrand, setEditingBrand, onSuccess }) => {
         return;
       }
 
-      const response = await fetch(`http://localhost:8080/rest/thuong-hieu/update/${editingBrand.id}`, {
-        method: 'PUT',
+      const response = await fetch('http://localhost:8080/rest/thuong-hieu/update', {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -87,4 +87,4 @@ const EditBrandModal = ({ editingBrand, setEditingBrand, onSuccess }) => {
   );
 };
 
-export default EditBrandModal; 
+export default EditBrandModal;

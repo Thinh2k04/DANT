@@ -94,12 +94,21 @@ const BaseAttributeComponent = ({
 
   const handleEdit = async (id) => {
     try {
-      let payload = editingAttribute;
       let url = '';
+      let payload;
       let method = 'POST';
 
       // Xử lý đặc biệt cho từng loại thuộc tính
       switch(attributeType) {
+        case 'brand':
+          url = 'http://localhost:8080/rest/thuong-hieu/update';
+          payload = {
+            id: editingAttribute.id,
+            ten: editingAttribute.ten,
+            trangThai: editingAttribute.trangThai
+          };
+          break;
+
         case 'ram':
           url = 'http://localhost:8080/rest/ram/update';
           payload = {
@@ -118,11 +127,6 @@ const BaseAttributeComponent = ({
             loaiOCung: editingAttribute.loaiOCung,
             trangThai: editingAttribute.trangThai
           };
-          break;
-
-        case 'brand':
-          url = `http://localhost:8080/rest/thuong-hieu/update/${id}`;
-          method = 'PUT';
           break;
 
         case 'cpu':

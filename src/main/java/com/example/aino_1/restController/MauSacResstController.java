@@ -65,8 +65,8 @@ public class MauSacResstController {
     }
 
     @GetMapping("/getThungRac")
-    public void getThungRac(){
-        mssi.findAllByTrangThai(0);
+    public List<MauSac> getThungRac(){
+        return mssi.findAllByTrangThai(0);
     }
 
 }

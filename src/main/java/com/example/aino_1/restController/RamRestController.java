@@ -62,7 +62,7 @@ public class RamRestController {
     }
 
     @GetMapping("/getThungRac")
-    public void getThungRac(){
-        rsi.findAllByTrangThai(0);
+    public List<Ram> getThungRac(){
+        return rsi.findAllByTrangThai(0);
     }
 }

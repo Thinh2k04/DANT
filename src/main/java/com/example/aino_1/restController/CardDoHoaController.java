@@ -1,6 +1,7 @@
 package com.example.aino_1.restController;
 
 import com.example.aino_1.entity.CardDoHoa;
+import com.example.aino_1.entity.Cpu;
 import com.example.aino_1.repository.CardDoHoaInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -62,7 +63,7 @@ public class CardDoHoaController {
 
 
     @GetMapping("/getThungRac")
-    public void getThungRac(){
-        cdhsi.findAllByTrangThai(0);
+    public List<CardDoHoa> getThungRac(){
+        return cdhsi.findAllByTrangThai(0);
     }
 }

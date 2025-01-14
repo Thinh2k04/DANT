@@ -62,7 +62,7 @@ public class ManHinhRestController {
     }
 
     @GetMapping("/getThungRac")
-    public void getThungRac(){
-        mhsi.findAllByTrangThai(0);
+    public List<ManHinh> getThungRac(){
+        return mhsi.findAllByTrangThai(0);
     }
 }

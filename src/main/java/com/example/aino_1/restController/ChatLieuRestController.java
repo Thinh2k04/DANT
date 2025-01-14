@@ -3,6 +3,7 @@ package com.example.aino_1.restController;
 
 import com.example.aino_1.entity.CardDoHoa;
 import com.example.aino_1.entity.ChatLieu;
+import com.example.aino_1.entity.Cpu;
 import com.example.aino_1.repository.ChatLieuInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -65,7 +66,7 @@ public class ChatLieuRestController {
 
 
     @GetMapping("/getThungRac")
-    public void getThungRac(){
-        clsi.findAllByTrangThai(0);
+    public List<ChatLieu> getThungRac(){
+        return clsi.findAllByTrangThai(0);
     }
 }

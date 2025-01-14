@@ -62,7 +62,7 @@ public class NguonNhapRestController {
     }
 
     @GetMapping("/getThungRac")
-    public void getThungRac(){
-        nnsi.findAllByTrangThai(0);
+    public List<NguonNhap> getThungRac(){
+        return nnsi.findAllByTrangThai(0);
     }
 }

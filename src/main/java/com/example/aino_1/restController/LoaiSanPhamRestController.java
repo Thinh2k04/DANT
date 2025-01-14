@@ -62,7 +62,7 @@ public class LoaiSanPhamRestController {
     }
 
     @GetMapping("/getThungRac")
-    public void getThungRac(){
-        lspsi.findAllByTrangThai(0);
+    public List<LoaiSanPham> getThungRac(){
+        return lspsi.findAllByTrangThai(0);
     }
 }

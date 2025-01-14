@@ -54,4 +54,8 @@ public class ThuongHieuRestController {
         return ResponseEntity.ok(saved);
     }
 
+    @GetMapping("/getThungRac")
+    public List<ThuongHieu> getThungRac(){
+        return thsi.findAllByTrangThai(0);
+    }
 }

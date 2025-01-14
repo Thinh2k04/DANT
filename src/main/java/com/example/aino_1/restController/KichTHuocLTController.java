@@ -65,7 +65,7 @@ public class KichTHuocLTController {
     }
 
     @GetMapping("/getThungRac")
-    public void getThungRac(){
-        ktltsi.findAllByTrangThai(0);
+    public List<KichThuocLapTop> getThungRac(){
+        return ktltsi.findAllByTrangThai(0);
     }
 }

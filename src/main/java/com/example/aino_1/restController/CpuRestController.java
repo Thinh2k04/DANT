@@ -62,7 +62,7 @@ public class CpuRestController {
     }
 
     @GetMapping("/getThungRac")
-    public void getThungRac(){
-        csi.findAllByTrangThai(0);
+    public List<Cpu> getThungRac(){
+       return csi.findAllByTrangThai(0);
     }
 }

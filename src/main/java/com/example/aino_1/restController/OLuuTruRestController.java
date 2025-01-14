@@ -63,7 +63,7 @@ public class OLuuTruRestController {
     }
 
     @GetMapping("/getThungRac")
-    public void getThungRac(){
-        oltsi.findAllByTrangThai(0);
+    public List<OLuuTru> getThungRac(){
+        return oltsi.findAllByTrangThai(0);
     }
 }

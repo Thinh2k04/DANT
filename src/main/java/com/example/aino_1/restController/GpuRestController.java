@@ -63,7 +63,7 @@ public class GpuRestController {
     }
 
     @GetMapping("/getThungRac")
-    public void getThungRac(){
-        gsi.findAllByTrangThai(0);
+    public List<Gpu> getThungRac(){
+        return gsi.findAllByTrangThai(0);
     }
 }

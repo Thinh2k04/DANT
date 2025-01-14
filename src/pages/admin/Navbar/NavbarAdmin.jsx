@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
   FiHome, 
@@ -22,12 +22,44 @@ const NavbarAdmin = () => {
   const location = useLocation();
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const [activeSubmenu, setActiveSubmenu] = useState(null);
-  const username = localStorage.getItem("sub");
+  const [adminInfo, setAdminInfo] = useState({
+    username: '',
+    role: '',
+    token: ''
+  });
+
+  useEffect(() => {
+    const username = localStorage.getItem('username');
+    const role = localStorage.getItem('role');
+    const token = localStorage.getItem('token');
+
+    if (username && (role === 'ADMIN' || role === 'ROLE_ADMIN')) {
+      setAdminInfo({
+        username: username,
+        role: role,
+        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=6366f1&color=fff`,
+        token: token
+      });
+    } else {
+      console.log('Current role:', role);
+      console.log('Username:', username);
+      console.log('Token:', token);
+      navigate('/login', { replace: true });
+    }
+  }, [navigate]);
 
   const handleLogout = () => {
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("sub");
-    navigate("/login");
+    localStorage.removeItem('username');
+    localStorage.removeItem('role');
+    localStorage.removeItem('token');
+
+    setAdminInfo({
+      username: '',
+      role: '',
+      token: ''
+    });
+
+    navigate('/login', { replace: true });
   };
 
   const navItems = [
@@ -206,15 +238,17 @@ const NavbarAdmin = () => {
               <div className="flex items-center">
                 <div className="relative">
                   <img
-                    src="https://ui-avatars.com/api/?name=Admin&background=6366f1&color=fff"
-                    alt="Profile"
+                    src={adminInfo.avatar}
+                    alt={adminInfo.username}
                     className="h-10 w-10 rounded-full border-2 border-indigo-400"
                   />
                   <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-indigo-900"></div>
                 </div>
                 <div className="ml-3">
-                  <p className="text-sm font-medium text-white">{username}</p>
-                  <p className="text-xs text-indigo-300">Administrator</p>
+                  <p className="text-sm font-medium text-white">{adminInfo.username}</p>
+                  <p className="text-xs text-indigo-300">
+                    {(adminInfo.role === 'ADMIN' || adminInfo.role === 'ROLE_ADMIN') ? 'Quản trị viên' : ''}
+                  </p>
                 </div>
               </div>
             )}

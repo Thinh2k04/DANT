@@ -133,7 +133,7 @@ const LoginPage = () => {
 
         // Lưu token và thông tin người dùng
         localStorage.setItem('Authorization', data.token);
-        localStorage.setItem('userRole', data.role);
+        localStorage.setItem('role', data.role);
         localStorage.setItem('username', data.username);
         localStorage.setItem('userData', JSON.stringify({
           username: formData.username,

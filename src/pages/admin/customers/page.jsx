@@ -33,8 +33,15 @@ const CustomerManagement = () => {
           throw new Error('Network response was not ok');
         }
         const data = await response.json();
-        setCustomers(data.filter(customer => customer.trangThai === 1));
-        setDeletedCustomers(data.filter(customer => customer.trangThai === 0));
+        const validCustomers = data.filter(customer => 
+          customer.trangThai === 1 && customer.hoTen
+        );
+        const validDeletedCustomers = data.filter(customer => 
+          customer.trangThai === 0 && customer.hoTen
+        );
+        
+        setCustomers(validCustomers);
+        setDeletedCustomers(validDeletedCustomers);
       } catch (error) {
         console.error('There was a problem with the fetch operation:', error);
       }
@@ -312,7 +319,9 @@ const CustomerManagement = () => {
                         <div className="flex items-center">
                           <div className="h-10 w-10 flex-shrink-0">
                             <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                              <span className="text-indigo-600 font-medium">{customer.hoTen.charAt(0)}</span>
+                              <span className="text-indigo-600 font-medium">
+                                {customer.hoTen ? customer.hoTen.charAt(0) : '?'}
+                              </span>
                             </div>
                           </div>
                           <div className="ml-4">

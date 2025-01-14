@@ -1,8 +1,8 @@
 // Import các thư viện cần thiết
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { FiShoppingCart, FiUser, FiSearch, FiPackage } from 'react-icons/fi';
+import { FiShoppingCart, FiUser, FiSearch, FiPackage, FiLogOut, FiGrid } from 'react-icons/fi';
 import { HiOutlineFire } from 'react-icons/hi';
 
 const Navbar = () => {
@@ -11,14 +11,31 @@ const Navbar = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [scrollText, setScrollText] = useState('');
   const [cartItemCount, setCartItemCount] = useState(0);
-  const [user, setUser] = useState({name: ''});
+  const [user, setUser] = useState({
+    name: '',
+    email: '',
+    avatar: '',
+    role: ''
+  });
+  const [isAdmin, setIsAdmin] = useState(false);
+  const navigate = useNavigate();
 
   // Kiểm tra trạng thái đăng nhập khi component được mount
   useEffect(() => {
     const username = localStorage.getItem('username');
+    const userRole = localStorage.getItem('userRole');
+    const userEmail = localStorage.getItem('email');
+    const userAvatar = localStorage.getItem('avatar');
+    
     if (username) {
       setIsAuthenticated(true);
-      setUser({name: username});
+      setUser({
+        name: username,
+        email: userEmail || 'user@example.com', // Fallback nếu không có email
+        avatar: userAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=random`,
+        role: userRole || 'USER'
+      });
+      setIsAdmin(userRole === 'ADMIN');
     }
   }, []);
 
@@ -57,6 +74,39 @@ const Navbar = () => {
   // Hàm thay đổi ngôn ngữ
   const changeLanguage = (lng) => {
     i18n.changeLanguage(lng);
+  };
+
+  // Thêm hàm xử lý đăng xuất
+  const handleLogout = () => {
+    // Xóa tất cả dữ liệu đăng nhập từ localStorage
+    localStorage.removeItem('username');
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('userInfo');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('permissions');
+    localStorage.removeItem('lastLoginTime');
+    localStorage.removeItem('sub'); // Thêm xóa sub cho admin
+    localStorage.removeItem('authToken'); // Thêm xóa authToken cho admin
+    
+    // Reset các state về trạng thái ban đầu
+    setIsAuthenticated(false);
+    setUser({
+      name: '',
+      email: '',
+      avatar: '',
+      role: ''
+    });
+    setCartItemCount(0);
+    setIsAdmin(false);
+
+    // Xóa các cookie nếu có
+    document.cookie.split(";").forEach(function(c) { 
+      document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+    });
+
+    // Chuyển về trang home và thay thế history
+    navigate('/', { replace: true });
   };
 
   return (
@@ -124,19 +174,69 @@ const Navbar = () => {
               </Link>
 
               {/* Phần xác thực người dùng */}
-              {localStorage.getItem('username') ? (
-                <div className="flex items-center gap-2">
-                  {/* <img
-                    src="https://ui-avatars.com/api/?name=User"
-                    alt="User"
-                    className="w-8 h-8 rounded-full"
-                  /> */}
-                  <Link 
-                    to="/profile"
-                    className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors"
-                  >
-                    {localStorage.getItem('username')}
-                  </Link>
+              {isAuthenticated ? (
+                <div className="relative group">
+                  <div className="flex items-center gap-2 cursor-pointer py-2">
+                    <img
+                      src={user.avatar}
+                      alt={user.name}
+                      className="w-8 h-8 rounded-full"
+                    />
+                    <span className="text-sm font-medium text-gray-600">
+                      {user.name}
+                    </span>
+                  </div>
+                  
+                  {/* Dropdown menu khi hover */}
+                  <div className="absolute right-0 w-56 bg-white rounded-lg shadow-lg py-2 invisible opacity-0 translate-y-2 
+                    group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 
+                    transition-all duration-300 z-50">
+                    <div className="px-4 py-3 border-b border-gray-100">
+                      <p className="text-sm font-medium text-gray-900">{user.name}</p>
+                      <p className="text-sm text-gray-500 truncate">{user.email}</p>
+                      {user.role === 'ADMIN' && (
+                        <span className="inline-block px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded-full mt-1">
+                          {t('adminRole')}
+                        </span>
+                      )}
+                    </div>
+                    
+                    <div className="py-2">
+                      {isAdmin && (
+                        <Link
+                          to="/admin"
+                          className="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        >
+                          <FiGrid className="w-4 h-4 mr-3 text-gray-400" />
+                          {t('adminDashboard')}
+                        </Link>
+                      )}
+                      <Link
+                        to="/profile"
+                        className="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                      >
+                        <FiUser className="w-4 h-4 mr-3 text-gray-400" />
+                        {t('profile')}
+                      </Link>
+                      <Link
+                        to="/orders"
+                        className="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                      >
+                        <FiPackage className="w-4 h-4 mr-3 text-gray-400" />
+                        {t('myOrders')}
+                      </Link>
+                    </div>
+
+                    <div className="border-t border-gray-100">
+                      <button
+                        onClick={handleLogout}
+                        className="flex items-center w-full px-4 py-2.5 text-sm text-red-600 hover:bg-gray-50 transition-colors"
+                      >
+                        <FiLogOut className="w-4 h-4 mr-3" />
+                        {t('logout')}
+                      </button>
+                    </div>
+                  </div>
                 </div>
               ) : (
                 <Link 

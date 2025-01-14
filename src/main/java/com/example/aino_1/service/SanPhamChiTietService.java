@@ -51,7 +51,7 @@ public class SanPhamChiTietService {
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm với ID: " + idSanPham));
 
             // Gán sản phẩm vào sản phẩm chi tiết và lưu
-            spct.setTrangThai(2);
+            spct.setTrangThai(0);
             spct.setSanPham(sanPham);
             SanPhamChiTiet savedSpct = sanPhamChiTietInterface.save(spct);
 
@@ -111,17 +111,6 @@ public class SanPhamChiTietService {
         return listHome;
     }
 
-    public List<SanPhamChiTietDto> getListDelay(){
-        List<SanPhamChiTietDto> listSPCTDTO = sanPhamChiTietInterface.getAllDTO();
-        List<SanPhamChiTietDto> listHome = new ArrayList<>()    ;
-        for (SanPhamChiTietDto spctdto : listSPCTDTO
-        ) {
-            if(spctdto.getTrangThai() == 2){
-                listHome.add(spctdto);
-            }
-        }
-        return listHome;
-    }
 
     public List<SanPhamChiTietDto> getListThungRac(){
         List<SanPhamChiTietDto> listSPCTDTO = sanPhamChiTietInterface.getAllDTO();
@@ -129,6 +118,18 @@ public class SanPhamChiTietService {
         for (SanPhamChiTietDto spctdto : listSPCTDTO
         ) {
             if(spctdto.getTrangThai() == 0){
+                listHome.add(spctdto);
+            }
+        }
+        return listHome;
+    }
+
+    public List<SanPhamChiTietDto> getListDelay(){
+        List<SanPhamChiTietDto> listSPCTDTO = sanPhamChiTietInterface.getAllDTO();
+        List<SanPhamChiTietDto> listHome = new ArrayList<>()    ;
+        for (SanPhamChiTietDto spctdto : listSPCTDTO
+        ) {
+            if(spctdto.getTrangThai() == 2){
                 listHome.add(spctdto);
             }
         }

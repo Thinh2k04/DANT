@@ -30,7 +30,7 @@ public class HinhAnhRestController {
     HinhAnhService hasv;
 
     @GetMapping("/getAll")
-    public List<HinhAnh> getAll() {
+    public List<HinhAnh> getAllHinhAnh() {
         return hasi.findAll();
     }
 

@@ -88,7 +88,7 @@ public class GHCTRestController {
                 ));
             }
 
-           
+
             Map<String, Object> response = gioHangChiTietService.updateProductQuantityInCart(token, productId, quantityChange);
 
             if ((boolean) response.get("success")) {

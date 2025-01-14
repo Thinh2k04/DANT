@@ -17,8 +17,8 @@ public class SanPhamChiTiet {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-//    @Column(name = "hinh_anh_minh_hoa", nullable = false)
-//    private String hinhAnhMinhHoa;
+    @Column(name = "hinh_anh_minh_hoa", nullable = false)
+    private String hinhAnhMinhHoa;
 
     @Column(name = "so_luong", nullable = false)
     private Integer soLuong;

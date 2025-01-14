@@ -21,7 +21,7 @@ public class SanPhamChiTietDto {
     private String kienTrucCongNghe;
     private String tenCPU;
     private String maSpct;
-//    private String hinhAnhMinhHoa;
+    private String hinhAnhMinhHoa;
     private Float donGia;
     private Float discountedPrice;
     private Integer discountPercentage;

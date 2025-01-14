@@ -69,11 +69,11 @@ public class ImeiController {
 
 
     @GetMapping("/getById/{id}")
-    public ImeiDTO getByidHD(@PathVariable Integer id) {
-        Imei imei = ii.findById(id).orElseThrow(() -> new RuntimeException("IMEI not found"));
-
-        // Chuyển đổi từ Imei thành ImeiDTO
-        return new ImeiDTO(imei.getId(), imei.getImei(), imei.getSpct().getId());
+    public List<ImeiDTO> getByidHD(@PathVariable Integer id) {
+        // Tìm kiếm IMEI theo id
+        List<ImeiDTO> list = imsv.getListImeiBySanPhamChiTiet(id);
+        // Trả về danh sách chứa một phần tử (danh sách IMEI)
+        return list;
     }
 
     @GetMapping("/checkidSPCT/{id}")

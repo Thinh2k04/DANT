@@ -151,11 +151,10 @@ public class ImeiService {
     }
 
 
-    // Phương thức lấy danh sách IMEI theo id sản phẩm chi tiết
     public List<ImeiDTO> getListImeiBySanPhamChiTiet(Integer idSpct) {
         List<Imei> listImei = imif.findAllBySpctIdAndTrangThai(idSpct, 0);
+        System.out.println("Danh sách IMEI nhận được: " + listImei.size());  // Kiểm tra kích thước danh sách
 
-        // Chuyển đổi danh sách Imei thành danh sách ImeiDTO
         List<ImeiDTO> imeiDTOList = listImei.stream()
                 .map(imei -> new ImeiDTO(imei.getId(), imei.getImei(), imei.getSpct().getId()))
                 .collect(Collectors.toList());

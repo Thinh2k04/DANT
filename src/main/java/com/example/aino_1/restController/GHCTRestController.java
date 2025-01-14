@@ -70,6 +70,7 @@ public class GHCTRestController {
 
     @PostMapping("/changQuantity")
     public ResponseEntity<?> updateProductQuantityInCart(
+            @RequestHeader(value = "Authorization", required = false) String token,
             @RequestBody Map<String, Object> requestData) {
         try {
             Integer productId = (Integer) requestData.get("productId");
@@ -83,9 +84,9 @@ public class GHCTRestController {
                         "message", "Dữ liệu không hợp lệ: sản phẩm hoặc thay đổi số lượng không hợp lệ."
                 ));
             }
-            String username =  requestData.get("username").toString();
 
-            Map<String, Object> response = gioHangChiTietService.updateProductQuantityInCart(username, productId, quantityChange);
+           
+            Map<String, Object> response = gioHangChiTietService.updateProductQuantityInCart(token, productId, quantityChange);
 
             if ((boolean) response.get("success")) {
                 return ResponseEntity.ok(response);

@@ -41,7 +41,7 @@ export const useOrder = () => {
     if (deliveryMethod === "pickup") {
       const selectedStoreInfo = stores.find(store => store.id === parseInt(selectedStore));
       if (selectedStoreInfo) {
-        deliveryAddress = `${selectedStoreInfo.tenCuaHang}, ${selectedStoreInfo.phuong}, ${selectedStoreInfo.huyen}, ${selectedStoreInfo.tinh}`;
+        deliveryAddress = `${selectedStoreInfo.soNha}, ${selectedStoreInfo.phuong}, ${selectedStoreInfo.huyen}, ${selectedStoreInfo.tinh}`;
       }
     } else {
       deliveryAddress = `${specificAddress || ''}, ${selectedWard || ''}, ${selectedDistrictName}, ${selectedProvinceName}`;
@@ -55,6 +55,7 @@ export const useOrder = () => {
         id: "",
         hoTen: customerName || '',
         diaChi: specificAddress || '',
+        soCCCD: "",
         soDienThoai: phoneNumber || '',
         email: email || '',
         taiKhoanNguoiDung: null,
@@ -70,15 +71,27 @@ export const useOrder = () => {
         diaChiNhanHang: deliveryAddress,
         cuaHang: {
           id: deliveryMethod === "pickup" ? parseInt(selectedStore) : 1,
+          tinh: "Hà Nội",
+          huyen: "Hoàn Kiếm",
+          phuong: "Phường 1",
+          soNha: "Số 123, Đường ABC",
+          thoiGianMoCua: "08:00",
+          thoiGianDongCua: "18:00",
           trangThai: 1
         },
         voucher: appliedVoucher ? {
           id: appliedVoucher.id,
           maVoucher: appliedVoucher.maVoucher,
-          giaTriGiam: appliedVoucher.giaTriGiam,
-          loaiGiam: appliedVoucher.loaiGiam
+          soLuong: appliedVoucher.soLuong || 100,
+          thoiGianHenKet: appliedVoucher.thoiGianHenKet,
+          soTienToiDa: appliedVoucher.soTienToiDa || 500000.0,
+          dieuKienApDung: appliedVoucher.dieuKienApDung || 300000.0,
+          soTienApDung: appliedVoucher.soTienApDung || 100000.0,
+          phanTramApDung: appliedVoucher.phanTramApDung || null,
+          thoiGianApDung: now.toISOString(),
+          trangThai: null
         } : null,
-        trangThaiThanhToan: 0,
+        trangThaiThanhToan: 2,
         trangThai: 0
       },
       lhdct: cartItems.map(item => ({
@@ -88,7 +101,7 @@ export const useOrder = () => {
         sanPhamChiTiet: {
           id: item?.id?.toString() || ''
         },
-        soLuong: quantities[item?.id] || item?.soLuong || 1,
+        soLuong: quantities[item?.id] || 1,
         gia: parseFloat(item?.donGia || 0)
       }))
     };

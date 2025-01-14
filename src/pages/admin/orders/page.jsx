@@ -449,181 +449,176 @@ const OrderManagement = () => {
             </tbody>
           </table>
 
-          {showStatusModal && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-              <div className="bg-white p-8 rounded-lg w-96 shadow-2xl transform transition-all duration-300">
-                <h2 className="text-2xl font-bold mb-6 text-gray-800">Cập nhật trạng thái</h2>
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-3">
-                    <input
-                      type="radio"
-                      id="status-success"
-                      name="status"
-                      value={1}
-                      checked={selectedStatus === 1}
-                      onChange={(e) => setSelectedStatus(Number(e.target.value))}
-                      className="form-radio h-4 w-4 text-blue-600"
-                    />
-                    <label htmlFor="status-success" className="text-gray-700">Thành công</label>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <input
-                      type="radio"
-                      id="status-cancel"
-                      name="status"
-                      value={0}
-                      checked={selectedStatus === 0}
-                      onChange={(e) => setSelectedStatus(Number(e.target.value))}
-                      className="form-radio h-4 w-4 text-blue-600"
-                    />
-                    <label htmlFor="status-cancel" className="text-gray-700">Hủy đơn</label>
-                  </div>
-                </div>
-                <div className="mt-8 flex justify-end space-x-4">
-                  <button
-                    onClick={handleCloseModal}
-                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors"
-                  >
-                    Hủy
-                  </button>
-                  <button
-                    onClick={handleUpdateStatus}
-                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-                  >
-                    Cập nhật
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {selectedOrder && orderDetails.length > 0 && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-              <div className="bg-white p-8 rounded-lg w-4/5 max-h-[85vh] overflow-y-auto shadow-2xl">
-                <div className="flex justify-between items-center mb-8">
-                  <div className="flex items-center gap-4">
-                    <h2 className="text-3xl font-bold text-gray-800">Chi tiết đơn hàng #{selectedOrder.id}</h2>
-                    <button 
-                      onClick={() => generatePDF(selectedOrder, orderDetails)}
-                      className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-all duration-200 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 flex items-center gap-2"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 3a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+          {showStatusModal && selectedOrder && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-y-auto p-6">
+                <div className="space-y-6">
+                  {/* Header */}
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-4">
+                      <h2 className="text-3xl font-bold text-gray-800">
+                        Chi tiết đơn hàng #{selectedOrder.hoaDon?.maHoaDon}
+                      </h2>
+                    </div>
+                    <button onClick={() => setShowStatusModal(false)} className="text-gray-500 hover:text-gray-700">
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                       </svg>
-                      In hóa đơn
                     </button>
                   </div>
-                  <button 
-                    onClick={handleCloseModal}
-                    className="text-gray-500 hover:text-gray-700 transition-colors duration-200 p-2 hover:bg-gray-100 rounded-full"
-                  >
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
 
-                <div className="grid grid-cols-2 gap-8 mb-8">
-                  <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-                    <h3 className="text-xl font-bold mb-4 text-gray-800">Thông tin khách hàng</h3>
-                    <div className="space-y-3">
-                      <p className="text-gray-700"><span className="font-semibold">Họ tên:</span> {selectedOrder.thongTinTaiKhoan?.hoTen}</p>
-                      <p className="text-gray-700"><span className="font-semibold">Số điện thoại:</span> {selectedOrder.thongTinTaiKhoan?.soDienThoai}</p>
-                      <p className="text-gray-700"><span className="font-semibold">Email:</span> {selectedOrder.thongTinTaiKhoan?.email}</p>
-                      <p className="text-gray-700"><span className="font-semibold">CCCD:</span> {selectedOrder.thongTinTaiKhoan?.soCccd}</p>
-                      <p className="text-gray-700"><span className="font-semibold">Địa chỉ:</span> {selectedOrder.thongTinTaiKhoan?.diaChi}</p>
+                  {/* Thông tin khách hàng */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                      <h3 className="text-xl font-bold mb-4 text-gray-800">Thông tin khách hàng</h3>
+                      <div className="space-y-3">
+                        <p className="text-gray-700">
+                          <span className="font-semibold">Họ tên:</span> {selectedOrder.hoaDon?.thongTinTaiKhoan?.hoTen}
+                        </p>
+                        <p className="text-gray-700">
+                          <span className="font-semibold">Số điện thoại:</span> {selectedOrder.hoaDon?.thongTinTaiKhoan?.soDienThoai}
+                        </p>
+                        <p className="text-gray-700">
+                          <span className="font-semibold">Email:</span> {selectedOrder.hoaDon?.thongTinTaiKhoan?.email}
+                        </p>
+                        <p className="text-gray-700">
+                          <span className="font-semibold">CCCD:</span> {selectedOrder.hoaDon?.thongTinTaiKhoan?.soCCCD || 'Chưa cập nhật'}
+                        </p>
+                        <p className="text-gray-700">
+                          <span className="font-semibold">Địa chỉ:</span> {selectedOrder.hoaDon?.thongTinTaiKhoan?.diaChi || 'Chưa cập nhật'}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Thông tin đơn hàng */}
+                    <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                      <h3 className="text-xl font-bold mb-4 text-gray-800">Thông tin đơn hàng</h3>
+                      <div className="space-y-3">
+                        <p className="text-gray-700">
+                          <span className="font-semibold">Mã đơn hàng:</span> {selectedOrder.hoaDon?.maHoaDon}
+                        </p>
+                        <p className="text-gray-700">
+                          <span className="font-semibold">Thời gian đặt:</span> {
+                            new Date(selectedOrder.hoaDon?.thoiGianLapHoaDon).toLocaleString('vi-VN')
+                          }
+                        </p>
+                        <p className="text-gray-700">
+                          <span className="font-semibold">Địa chỉ nhận hàng:</span> {selectedOrder.hoaDon?.diaChiNhanHang}
+                        </p>
+                        <p className="text-gray-700">
+                          <span className="font-semibold">Hình thức thanh toán:</span> {selectedOrder.hoaDon?.hinhThucThanhToan?.tenHinhThuc}
+                        </p>
+                        <p className="text-gray-700">
+                          <span className="font-semibold">Trạng thái thanh toán:</span>
+                          <span className={`ml-2 px-3 py-1 rounded-full text-sm font-semibold
+                            ${selectedOrder.hoaDon?.trangThaiThanhToan === 0 ? 'bg-red-100 text-red-800' : 
+                              selectedOrder.hoaDon?.trangThaiThanhToan === 1 ? 'bg-green-100 text-green-800' : 
+                              'bg-yellow-100 text-yellow-800'}`}>
+                            {selectedOrder.hoaDon?.trangThaiThanhToan === 0 ? 'Đã hủy' :
+                             selectedOrder.hoaDon?.trangThaiThanhToan === 1 ? 'Đã thanh toán' :
+                             selectedOrder.hoaDon?.trangThaiThanhToan === 2 ? 'Chờ thanh toán' : 'Không xác định'}
+                          </span>
+                        </p>
+                      </div>
                     </div>
                   </div>
-                  <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-                    <h3 className="text-xl font-bold mb-4 text-gray-800">Thông tin đơn hàng</h3>
-                    <div className="space-y-3">
-                      <p className="text-gray-700"><span className="font-semibold">Ngày đặt:</span> {selectedOrder.thoiGianLapHoaDon}</p>
-                      <p className="text-gray-700"><span className="font-semibold">Trạng thái:</span> 
-                        <span className={`ml-2 px-3 py-1 rounded-full text-sm font-semibold
-                          ${selectedOrder.trangThaiThanhToan === 0 ? 'bg-red-100 text-red-800' : 
-                            selectedOrder.trangThaiThanhToan === 1 ? 'bg-green-100 text-green-800' : 
-                            'bg-yellow-100 text-yellow-800'}`}>
-                          {selectedOrder.trangThaiThanhToan === 0 ? 'Đã hủy' :
-                           selectedOrder.trangThaiThanhToan === 1 ? 'Thành công' :
-                           selectedOrder.trangThaiThanhToan === 2 ? 'Chờ thanh toán' : 'Không xác định'}
-                        </span>
-                      </p>
-                      <p className="text-gray-700"><span className="font-semibold">Địa chỉ nhận hàng:</span> {selectedOrder.diaChiNhanHang}</p>
-                      <p className="text-gray-700"><span className="font-semibold">Hình thức thanh toán:</span> {selectedOrder.hinhThucThanhToan?.tenHinhThuc}</p>
-                    </div>
-                  </div>
-                </div>
 
-                <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200 mb-8">
-                  <h3 className="text-xl font-bold mb-4 text-gray-800">Thông tin cửa hàng</h3>
-                  <div className="grid grid-cols-2 gap-6">
-                    <div>
-                      <p className="text-gray-700 mb-2"><span className="font-semibold">Tỉnh/Thành phố:</span> {selectedOrder.cuaHang?.tinh}</p>
-                      <p className="text-gray-700 mb-2"><span className="font-semibold">Quận/Huyện:</span> {selectedOrder.cuaHang?.huyen}</p>
-                      <p className="text-gray-700"><span className="font-semibold">Phường/Xã:</span> {selectedOrder.cuaHang?.phuong}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-700 mb-2"><span className="font-semibold">Địa chỉ:</span> {selectedOrder.cuaHang?.soNha}</p>
-                      <p className="text-gray-700"><span className="font-semibold">Thời gian hoạt động:</span> {selectedOrder.cuaHang?.thoiGianMoCua} - {selectedOrder.cuaHang?.thoiGianDongCua}</p>
-                    </div>
-                  </div>
-                </div>
-
-                {selectedOrder.voucher && (
+                  {/* Thông tin cửa hàng */}
                   <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200 mb-8">
-                    <h3 className="text-xl font-bold mb-4 text-gray-800">Thông tin voucher</h3>
+                    <h3 className="text-xl font-bold mb-4 text-gray-800">Thông tin cửa hàng</h3>
                     <div className="grid grid-cols-2 gap-6">
                       <div>
-                        <p className="text-gray-700 mb-2"><span className="font-semibold">Mã voucher:</span> {selectedOrder.voucher.maVoucher}</p>
-                        <p className="text-gray-700 mb-2"><span className="font-semibold">Số tiền giảm tối đa:</span> {selectedOrder.voucher.soTienToiDa?.toLocaleString()}₫</p>
-                        <p className="text-gray-700"><span className="font-semibold">Phần trăm giảm:</span> {(selectedOrder.voucher.phanTramApDung * 100)}%</p>
+                        <p className="text-gray-700 mb-2">
+                          <span className="font-semibold">Tên cửa hàng:</span> {selectedOrder.hoaDon?.cuaHang?.tenCuaHang}
+                        </p>
+                        <p className="text-gray-700 mb-2">
+                          <span className="font-semibold">Địa chỉ:</span> {selectedOrder.hoaDon?.cuaHang?.soNha}
+                        </p>
+                        <p className="text-gray-700">
+                          <span className="font-semibold">Phường/Xã:</span> {selectedOrder.hoaDon?.cuaHang?.phuong}
+                        </p>
                       </div>
                       <div>
-                        <p className="text-gray-700 mb-2"><span className="font-semibold">Điều kiện áp dụng:</span> Đơn hàng từ {selectedOrder.voucher.dieuKienApDung?.toLocaleString()}₫</p>
-                        <p className="text-gray-700"><span className="font-semibold">Thời gian hết hạn:</span> {selectedOrder.voucher.thoiGianHenKet}</p>
+                        <p className="text-gray-700 mb-2">
+                          <span className="font-semibold">Quận/Huyện:</span> {selectedOrder.hoaDon?.cuaHang?.huyen}
+                        </p>
+                        <p className="text-gray-700 mb-2">
+                          <span className="font-semibold">Tỉnh/Thành:</span> {selectedOrder.hoaDon?.cuaHang?.tinh}
+                        </p>
+                        <p className="text-gray-700">
+                          <span className="font-semibold">Thời gian hoạt động:</span> {selectedOrder.hoaDon?.cuaHang?.thoiGianMoCua} - {selectedOrder.hoaDon?.cuaHang?.thoiGianDongCua}
+                        </p>
                       </div>
                     </div>
                   </div>
-                )}
 
-                <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 uppercase tracking-wider">Sản phẩm</th>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 uppercase tracking-wider">Thông số</th>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 uppercase tracking-wider">Số lượng</th>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 uppercase tracking-wider">Đơn giá</th>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 uppercase tracking-wider">Thành tiền</th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {orderDetails.map((detail, index) => (
-                        <tr key={index} className="hover:bg-gray-50 transition-colors duration-150">
-                          <td className="px-6 py-4">
-                            <p className="font-bold text-gray-900 mb-1">{detail.sanPhamChiTiet?.sanPham?.tenSanPham}</p>
-                            <p className="text-sm text-gray-600">Mã SP: {detail.sanPhamChiTiet?.maSpct}</p>
-                            <p className="text-sm text-gray-600">Năm SX: {detail.sanPhamChiTiet?.sanPham?.namSanXuat}</p>
-                            <p className="text-sm text-gray-600">Bảo hành: {detail.sanPhamChiTiet?.sanPham?.thoiHanBaoHanh}</p>
-                          </td>
-                          <td className="px-6 py-4">
-                            <p className="text-sm mb-1"><span className="font-semibold">CPU:</span> {detail.sanPhamChiTiet?.cpu?.hangSanXuat} {detail.sanPhamChiTiet?.cpu?.ten}</p>
-                            <p className="text-sm mb-1"><span className="font-semibold">RAM:</span> {detail.sanPhamChiTiet?.ram?.dungLuong}GB</p>
-                            <p className="text-sm mb-1"><span className="font-semibold">Ổ cứng:</span> {detail.sanPhamChiTiet?.oluuTru?.dungLuong}GB</p>
-                            <p className="text-sm mb-1"><span className="font-semibold">GPU:</span> {detail.sanPhamChiTiet?.gpu?.hangSanXuat} {detail.sanPhamChiTiet?.gpu?.ten}</p>
-                            <p className="text-sm"><span className="font-semibold">Màn hình:</span> {detail.sanPhamChiTiet?.manHinh?.doPhanGiai}, {detail.sanPhamChiTiet?.manHinh?.tanSoQuet}Hz</p>
-                          </td>
-                          <td className="px-6 py-4 text-sm text-gray-900">{detail.soLuong}</td>
-                          <td className="px-6 py-4 text-sm text-gray-900">{detail.gia?.toLocaleString()}₫</td>
-                          <td className="px-6 py-4 text-sm text-gray-900">{(detail.soLuong * detail.gia)?.toLocaleString()}₫</td>
+                  {/* Chi tiết sản phẩm */}
+                  <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Sản phẩm</th>
+                          <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Thông số chi tiết</th>
+                          <th className="px-6 py-4 text-center text-sm font-semibold text-gray-600">Số lượng</th>
+                          <th className="px-6 py-4 text-right text-sm font-semibold text-gray-600">Đơn giá</th>
+                          <th className="px-6 py-4 text-right text-sm font-semibold text-gray-600">Thành tiền</th>
                         </tr>
-                      ))}
-                      <tr className="bg-gray-50">
-                        <td colSpan="4" className="px-6 py-4 text-right font-bold text-lg">Tổng cộng:</td>
-                        <td className="px-6 py-4 font-bold text-lg text-blue-600">{selectedOrder.tongTien?.toLocaleString()}₫</td>
-                      </tr>
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200">
+                        {orderDetails.map((detail, index) => (
+                          <tr key={index} className="hover:bg-gray-50">
+                            <td className="px-6 py-4">
+                              <div className="flex items-center space-x-4">
+                                <img 
+                                  src={detail.sanPhamChiTiet?.hinhAnhMinhHoa} 
+                                  alt={detail.sanPhamChiTiet?.sanPham?.tenSanPham}
+                                  className="w-20 h-20 object-cover rounded-lg"
+                                />
+                                <div>
+                                  <p className="font-bold text-gray-900">{detail.sanPhamChiTiet?.sanPham?.tenSanPham}</p>
+                                  <p className="text-sm text-gray-600">Mã SP: {detail.sanPhamChiTiet?.maSpct}</p>
+                                  <p className="text-sm text-gray-600">Thương hiệu: {detail.sanPhamChiTiet?.sanPham?.thuongHieu?.ten}</p>
+                                  <p className="text-sm text-gray-600">Loại: {detail.sanPhamChiTiet?.sanPham?.loaiSanPham?.tenLoai}</p>
+                                  <p className="text-sm text-gray-600">Năm SX: {detail.sanPhamChiTiet?.sanPham?.namSanXuat}</p>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="space-y-1 text-sm">
+                                <p><span className="font-semibold">CPU:</span> {detail.sanPhamChiTiet?.cpu?.hangSanXuat} {detail.sanPhamChiTiet?.cpu?.ten}</p>
+                                <p><span className="font-semibold">RAM:</span> {detail.sanPhamChiTiet?.ram?.dungLuong}GB {detail.sanPhamChiTiet?.ram?.tocDo}MHz</p>
+                                <p><span className="font-semibold">Ổ cứng:</span> {detail.sanPhamChiTiet?.oLuuTru?.loaiOCung} {detail.sanPhamChiTiet?.oLuuTru?.dungLuong}GB</p>
+                                <p><span className="font-semibold">GPU:</span> {detail.sanPhamChiTiet?.gpu?.hangSanXuat} {detail.sanPhamChiTiet?.gpu?.ten}</p>
+                                <p><span className="font-semibold">Màn hình:</span> {detail.sanPhamChiTiet?.manHinh?.doPhanGiai}, {detail.sanPhamChiTiet?.manHinh?.tanSoQuet}Hz</p>
+                                <p><span className="font-semibold">Pin:</span> {detail.sanPhamChiTiet?.sanPham?.pin}Wh</p>
+                                <p><span className="font-semibold">Trọng lượng:</span> {detail.sanPhamChiTiet?.sanPham?.trongLuong}kg</p>
+                                <p><span className="font-semibold">Bảo hành:</span> {detail.sanPhamChiTiet?.sanPham?.thoiHanBaoHanh} tháng</p>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 text-center">{detail.soLuong}</td>
+                            <td className="px-6 py-4 text-right">{detail.gia?.toLocaleString()}₫</td>
+                            <td className="px-6 py-4 text-right font-bold">{(detail.soLuong * detail.gia)?.toLocaleString()}₫</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                      <tfoot className="bg-gray-50">
+                        <tr>
+                          <td colSpan="4" className="px-6 py-4 text-right font-bold">Tổng tiền hàng:</td>
+                          <td className="px-6 py-4 text-right font-bold">{selectedOrder.hoaDon?.tongTien?.toLocaleString()}₫</td>
+                        </tr>
+                        <tr>
+                          <td colSpan="4" className="px-6 py-4 text-right font-bold">Phí vận chuyển:</td>
+                          <td className="px-6 py-4 text-right font-bold">{selectedOrder.hoaDon?.phiVanChuyen?.toLocaleString()}₫</td>
+                        </tr>
+                        <tr>
+                          <td colSpan="4" className="px-6 py-4 text-right font-bold text-lg">Tổng thanh toán:</td>
+                          <td className="px-6 py-4 text-right font-bold text-lg text-blue-600">
+                            {(selectedOrder.hoaDon?.tongTien + selectedOrder.hoaDon?.phiVanChuyen)?.toLocaleString()}₫
+                          </td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
                 </div>
               </div>
             </div>

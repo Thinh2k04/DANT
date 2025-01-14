@@ -1,5 +1,6 @@
 package com.example.aino_1.service;
 
+import com.example.aino_1.dto.ImeiDTO;
 import com.example.aino_1.entity.*;
 import com.example.aino_1.repository.HDCTInterFace;
 import com.example.aino_1.repository.ImeiInterface;
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ImeiService {
@@ -149,9 +151,16 @@ public class ImeiService {
     }
 
 
-    public List<Imei> getListImeiBySanPhamChiTiet(Integer idSpct) {
+    // Phương thức lấy danh sách IMEI theo id sản phẩm chi tiết
+    public List<ImeiDTO> getListImeiBySanPhamChiTiet(Integer idSpct) {
         List<Imei> listImei = imif.findAllBySpctIdAndTrangThai(idSpct, 0);
-        return listImei;
+
+        // Chuyển đổi danh sách Imei thành danh sách ImeiDTO
+        List<ImeiDTO> imeiDTOList = listImei.stream()
+                .map(imei -> new ImeiDTO(imei.getId(), imei.getImei(), imei.getSpct().getId()))
+                .collect(Collectors.toList());
+
+        return imeiDTOList;
     }
 
 

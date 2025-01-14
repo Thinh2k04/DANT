@@ -1,5 +1,6 @@
 package com.example.aino_1.restController;
 
+import com.example.aino_1.dto.ImeiDTO;
 import com.example.aino_1.entity.*;
 import com.example.aino_1.repository.ImeiInterface;
 import com.example.aino_1.service.ImeiService;
@@ -61,16 +62,18 @@ public class ImeiController {
         }
     }
 
+//    @GetMapping("/getById/{id}")
+//    public Imei getByidHD(@PathVariable Integer id){
+//        return ii.findById(id).get();
+//    }
+
+
     @GetMapping("/getById/{id}")
-    public Imei getByidHD(@PathVariable Integer id){
-        return ii.findById(id).get();
-    }
+    public ImeiDTO getByidHD(@PathVariable Integer id) {
+        Imei imei = ii.findById(id).orElseThrow(() -> new RuntimeException("IMEI not found"));
 
-
-    @GetMapping("/getImeiSPCT/{idSPCT}")
-    public List<Imei> getImeiSPCT(@PathVariable Integer idSPCT){
-        List<Imei> listImei = imsv.getListImeiBySanPhamChiTiet(idSPCT);
-        return  listImei;
+        // Chuyển đổi từ Imei thành ImeiDTO
+        return new ImeiDTO(imei.getId(), imei.getImei(), imei.getSpct().getId());
     }
 
     @GetMapping("/checkidSPCT/{id}")

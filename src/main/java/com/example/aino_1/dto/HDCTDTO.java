@@ -19,5 +19,4 @@ public class HDCTDTO {
     private float donGia;
     private String hinhAnhMinhHoa;
     private List<String> listImei ;
-
 }

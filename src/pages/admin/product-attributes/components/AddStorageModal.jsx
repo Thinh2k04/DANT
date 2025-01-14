@@ -6,7 +6,7 @@ const AddStorageModal = ({ showModal, setShowModal, onSuccess }) => {
     id: null,
     dungLuong: '',
     loaiOCung: 'SSD',
-    trangThai: null
+    trangThai: 1
   });
 
   const handleSubmit = async () => {
@@ -18,7 +18,8 @@ const AddStorageModal = ({ showModal, setShowModal, onSuccess }) => {
 
       const payload = {
         ...newStorage,
-        dungLuong: parseInt(newStorage.dungLuong)
+        dungLuong: parseInt(newStorage.dungLuong),
+        trangThai: 1
       };
 
       const response = await fetch('http://localhost:8080/rest/o_luu_tru/add', {
@@ -37,7 +38,7 @@ const AddStorageModal = ({ showModal, setShowModal, onSuccess }) => {
         id: null,
         dungLuong: '',
         loaiOCung: 'SSD',
-        trangThai: null
+        trangThai: 1
       });
       onSuccess();
     } catch (error) {

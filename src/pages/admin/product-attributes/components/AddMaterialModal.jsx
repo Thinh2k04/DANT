@@ -5,7 +5,7 @@ const AddMaterialModal = ({ showModal, setShowModal, onSuccess }) => {
   const [newMaterial, setNewMaterial] = React.useState({
     id: null,
     tenChatLieu: '',
-    trangThai: null
+    trangThai: 1
   });
 
   const handleSubmit = async () => {
@@ -30,7 +30,7 @@ const AddMaterialModal = ({ showModal, setShowModal, onSuccess }) => {
       setNewMaterial({
         id: null,
         tenChatLieu: '',
-        trangThai: null
+        trangThai: 1
       });
       onSuccess();
     } catch (error) {

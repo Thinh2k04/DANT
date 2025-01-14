@@ -5,7 +5,8 @@ const AddColorModal = ({ showModal, setShowModal, onSuccess }) => {
   const [newColor, setNewColor] = React.useState({
     id: null,
     tenMau: '',
-    maHex: '#000000'
+    maHex: '#000000',
+    trangThai: 1
   });
 
   const handleSubmit = async () => {
@@ -50,7 +51,9 @@ const AddColorModal = ({ showModal, setShowModal, onSuccess }) => {
       setNewColor({
         id: null,
         tenMau: '',
-        maHex: '#000000'
+        maHex: '#000000',
+        trangThai: 1
+      
       });
       onSuccess();
     } catch (error) {

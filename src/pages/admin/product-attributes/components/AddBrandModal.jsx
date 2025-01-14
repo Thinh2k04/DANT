@@ -1,5 +1,6 @@
 import React from 'react';
 import { toast } from 'react-toastify';
+import { successConfig, errorConfig } from '../../../../configs/toastConfig';
 
 const AddBrandModal = ({ showModal, setShowModal, onSuccess }) => {
   const [newBrand, setNewBrand] = React.useState({
@@ -11,17 +12,17 @@ const AddBrandModal = ({ showModal, setShowModal, onSuccess }) => {
   const handleSubmit = async () => {
     try {
       if (!newBrand.ten.trim()) {
-        toast.error('Vui lòng nhập tên thương hiệu');
+        toast.error('Vui lòng nhập tên thương hiệu', errorConfig);
         return;
       }
 
       if (newBrand.ten.length > 100) {
-        toast.error('Tên thương hiệu không được vượt quá 100 ký tự');
+        toast.error('Tên thương hiệu không được vượt quá 100 ký tự', errorConfig);
         return;
       }
 
       if (newBrand.trangThai === null) {
-        toast.error('Vui lòng chọn trạng thái');
+        toast.error('Vui lòng chọn trạng thái', errorConfig);
         return;
       }
 
@@ -35,7 +36,7 @@ const AddBrandModal = ({ showModal, setShowModal, onSuccess }) => {
 
       if (!response.ok) throw new Error('Failed to add brand');
       
-      toast.success('Thêm thương hiệu thành công');
+      toast.success('Thêm thương hiệu thành công', successConfig);
       setShowModal(false);
       setNewBrand({
         id: null,
@@ -44,7 +45,7 @@ const AddBrandModal = ({ showModal, setShowModal, onSuccess }) => {
       });
       onSuccess();
     } catch (error) {
-      toast.error('Lỗi khi thêm: ' + error.message);
+      toast.error('Lỗi khi thêm', errorConfig);
     }
   };
 

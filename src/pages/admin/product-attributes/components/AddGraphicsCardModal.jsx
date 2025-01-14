@@ -5,7 +5,7 @@ const AddGraphicsCardModal = ({ showModal, setShowModal, onSuccess }) => {
   const [newCard, setNewCard] = React.useState({
     id: null,
     tenCard: '',
-    trangThai: null
+    trangThai: 1
   });
 
   const handleSubmit = async () => {
@@ -30,7 +30,7 @@ const AddGraphicsCardModal = ({ showModal, setShowModal, onSuccess }) => {
       setNewCard({
         id: null,
         tenCard: '',
-        trangThai: null
+        trangThai: 1
       });
       onSuccess();
     } catch (error) {

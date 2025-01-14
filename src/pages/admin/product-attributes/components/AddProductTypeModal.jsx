@@ -5,7 +5,7 @@ const AddProductTypeModal = ({ showModal, setShowModal, onSuccess }) => {
   const [newProductType, setNewProductType] = React.useState({
     id: null,
     tenLoai: '',
-    trangThai: null
+    trangThai: 1
   });
 
   const handleSubmit = async () => {
@@ -30,7 +30,7 @@ const AddProductTypeModal = ({ showModal, setShowModal, onSuccess }) => {
       setNewProductType({
         id: null,
         tenLoai: '',
-        trangThai: null
+        trangThai: 1
       });
       onSuccess();
     } catch (error) {

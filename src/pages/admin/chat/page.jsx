@@ -47,7 +47,6 @@ const AdminChatPage = () => {
       WebSocketService.subscribe(`/topic/chat/${selectedChat.id}`, (message) => {
         try {
           const parsedMessage = JSON.parse(message.body);
-          console.log('Received message:', parsedMessage); // Debug log
           setMessages(prev => [...prev, parsedMessage]);
         } catch (error) {
           console.error('Error parsing message:', error);
@@ -111,9 +110,10 @@ const AdminChatPage = () => {
       
       const messageData = {
         idPhienChat: selectedChat.id,
-        idNguoiGui: 1, // ID của nhân viên
-        noiDung: newMessage,
-        thoiGianGui: new Date().toISOString()
+        sender: "Admin", // Tên người gửi
+        content: newMessage,
+        timestamp: new Date().toISOString(),
+        nguoiGuiDi: true // true vì admin là người gửi
       };
 
       WebSocketService.sendMessage('/app/chat/send', JSON.stringify(messageData));
@@ -126,15 +126,30 @@ const AdminChatPage = () => {
     }
   };
 
+  // Hiển thị tin nhắn
+  const renderMessage = (message) => (
+    <div
+      className={`mb-4 ${message.nguoiGuiDi ? 'text-right' : 'text-left'}`}
+    >
+      <div className="flex flex-col">
+        <div
+          className={`inline-block max-w-[80%] p-3 rounded-lg ${
+            message.nguoiGuiDi
+              ? 'bg-blue-600 text-white ml-auto'
+              : 'bg-white text-gray-800 shadow-sm mr-auto'
+          }`}
+        >
+          {message.content}
+        </div>
+        <span className="text-xs text-gray-500 mt-1">
+          {formatTime(message.timestamp)}
+        </span>
+      </div>
+    </div>
+  );
+
+  // Format thời gian
   const formatTime = (timestamp) => {
-    if (Array.isArray(timestamp)) {
-      const [year, month, day, hour, minute, second] = timestamp;
-      return new Date(year, month - 1, day, hour, minute, second)
-        .toLocaleTimeString('vi-VN', {
-          hour: '2-digit',
-          minute: '2-digit'
-        });
-    }
     return new Date(timestamp).toLocaleTimeString('vi-VN', {
       hour: '2-digit',
       minute: '2-digit'
@@ -193,24 +208,8 @@ const AdminChatPage = () => {
               {/* Messages area */}
               <div className="flex-1 p-4 overflow-y-auto bg-gray-50">
                 {messages.map((message, index) => (
-                  <div
-                    key={index}
-                    className={`mb-4 ${message.idNguoiGui === 1 ? 'text-right' : 'text-left'}`}
-                  >
-                    <div className="flex flex-col">
-                      <div
-                        className={`inline-block max-w-[80%] p-3 rounded-lg ${
-                          message.idNguoiGui === 1
-                            ? 'bg-blue-600 text-white ml-auto'
-                            : 'bg-white text-gray-800 shadow-sm mr-auto'
-                        }`}
-                      >
-                        {message.noiDung}
-                      </div>
-                      <span className="text-xs text-gray-500 mt-1">
-                        {formatTime(message.thoiGianGui)}
-                      </span>
-                    </div>
+                  <div key={index}>
+                    {renderMessage(message)}
                   </div>
                 ))}
                 <div ref={messagesEndRef} />

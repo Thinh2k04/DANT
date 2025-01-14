@@ -12,7 +12,7 @@ const AddCpuModal = ({ showModal, setShowModal, onSuccess }) => {
     soLuong: '',
     boNhoDem: '',
     ten: '',
-    trangThai: null
+    trangThai: 1
   });
 
   const handleSubmit = async () => {
@@ -66,7 +66,8 @@ const AddCpuModal = ({ showModal, setShowModal, onSuccess }) => {
         tocDoToiDa: parseFloat(newCpu.tocDoToiDa),
         soNhan: parseInt(newCpu.soNhan),
         soLuong: parseInt(newCpu.soLuong),
-        boNhoDem: parseInt(newCpu.boNhoDem)
+        boNhoDem: parseInt(newCpu.boNhoDem),
+        trangThai: 1
       };
 
       const response = await fetch('http://localhost:8080/rest/cpu/add', {
@@ -91,7 +92,7 @@ const AddCpuModal = ({ showModal, setShowModal, onSuccess }) => {
         soLuong: '',
         boNhoDem: '',
         ten: '',
-        trangThai: null
+        trangThai: 1
       });
       onSuccess();
     } catch (error) {

@@ -9,7 +9,7 @@ const AddScreenModal = ({ showModal, setShowModal, onSuccess }) => {
     doSang: '',
     doPhuMau: '',
     tamNen: 'IPS',
-    trangThai: null
+    trangThai: 1
   });
 
   const handleSubmit = async () => {
@@ -45,7 +45,7 @@ const AddScreenModal = ({ showModal, setShowModal, onSuccess }) => {
         doSang: '',
         doPhuMau: '',
         tamNen: 'IPS',
-        trangThai: null
+        trangThai: 1
       });
       onSuccess();
     } catch (error) {

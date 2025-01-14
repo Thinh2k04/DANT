@@ -11,7 +11,7 @@ const AddGpuModal = ({ showModal, setShowModal, onSuccess }) => {
     dienAp: '',
     kienTrucCongNghe: '',
     ten: '',
-    trangThai: null
+    trangThai: 1
   });
 
   const handleSubmit = async () => {
@@ -50,7 +50,7 @@ const AddGpuModal = ({ showModal, setShowModal, onSuccess }) => {
         dienAp: '',
         kienTrucCongNghe: '',
         ten: '',
-        trangThai: null
+        trangThai: 1
       });
       onSuccess();
     } catch (error) {

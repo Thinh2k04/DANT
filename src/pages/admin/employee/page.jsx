@@ -14,11 +14,7 @@ export default function EmployeePage() {
     const fetchEmployees = async () => {
       try {
         setIsLoading(true)
-        const response = await axios.get('http://localhost:8080/rest/tai_khoan/getAllNhanVien', {
-          headers: {
-            Authorization: `${token}` // Thêm header Authorization
-          }
-        })
+        const response = await axios.get('http://localhost:8080/rest/tai_khoan/getAllNhanVien')
         setEmployees(response.data)
         setError(null)
       } catch (error) {

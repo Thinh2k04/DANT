@@ -6,7 +6,7 @@ const AddRamModal = ({ showModal, setShowModal, onSuccess }) => {
     id: null,
     dungLuong: '',
     tocDo: '',
-    trangThai: null
+    trangThai: 1
   });
 
   const handleSubmit = async () => {
@@ -20,7 +20,7 @@ const AddRamModal = ({ showModal, setShowModal, onSuccess }) => {
         id: null,
         dungLuong: parseInt(newRam.dungLuong),
         tocDo: parseInt(newRam.tocDo),
-        trangThai: null
+        trangThai: 1
       };
 
       const response = await fetch('http://localhost:8080/rest/ram/add', {
@@ -39,7 +39,7 @@ const AddRamModal = ({ showModal, setShowModal, onSuccess }) => {
         id: null,
         dungLuong: '',
         tocDo: '',
-        trangThai: null
+        trangThai: 1
       });
       onSuccess();
     } catch (error) {

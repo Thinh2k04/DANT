@@ -1,5 +1,6 @@
 package com.example.aino_1.repository;
 
+import com.example.aino_1.entity.HoaDon;
 import com.example.aino_1.entity.HoaDonChiTiet;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -12,6 +13,9 @@ import java.util.List;
 public interface HDCTInterFace  extends JpaRepository<HoaDonChiTiet, Integer> {
     @Query("SELECT hdct FROM HoaDon hd JOIN HoaDonChiTiet hdct on hd.id = hdct.hoaDon.id WHERE hd.id = :id")
     List<HoaDonChiTiet> findHoaDonWithDetailsById(@Param("id") Integer id);
+
+
+    List<HoaDonChiTiet> findAllByHoaDon_MaHoaDon(String hoaDonMaHoaDon);
 
 
 }

@@ -1,6 +1,7 @@
 package com.example.aino_1.service;
 
 
+import com.example.aino_1.dto.HDCTDTO;
 import com.example.aino_1.dto.SanPhamChiTietDto;
 import com.example.aino_1.entity.*;
 import com.example.aino_1.repository.*;
@@ -60,19 +61,20 @@ public class HoaDonService {
     SanPhamChiTietService sanPhamChiTietService;
 
     @Transactional
-    public Map<String, Object> hamXuLiHoaDon(String username, ThongTinTaiKhoan tttk, HoaDon hd, List<HoaDonChiTiet> lhdct, Voucher voucher) {
+    public Map<String, Object> hamXuLiHoaDon(
+            String username, ThongTinTaiKhoan tttk, HoaDon hd, List<HoaDonChiTiet> lhdct, Voucher voucher, List<Imei> listImei) {
         try {
-            if (username == null) {
-                System.out.println("Người dùng không đăng nhập mua hàng.");
-            } else {
-                // Lấy tài khoản người dùng từ username
+            // Xử lý tài khoản người dùng
+            if (username != null) {
                 TaiKhoanNguoiDung tknd = tksi.findByUsername(username)
                         .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản với username: " + username));
-                // Gắn tài khoản người dùng vào thông tin tài khoản
                 tttk.setTaiKhoanNguoiDung(tknd);
                 System.out.println("Người dùng " + username + " đăng nhập mua hàng.");
+            } else {
+                System.out.println("Người dùng không đăng nhập mua hàng.");
             }
 
+            // Xử lý hình thức thanh toán
             HinhThucThanhToan httt = hinhThucThanhToanInterface.findByid(hd.getHinhThucThanhToan().getId());
             hd.setHinhThucThanhToan(httt);
 
@@ -80,65 +82,45 @@ public class HoaDonService {
             ThongTinTaiKhoan tttkSaveToDB = tttksi.save(tttk);
             hd.setThongTinTaiKhoan(tttkSaveToDB);
 
-            // Lưu voucher vào hóa đơn (nếu có)
+            // Lưu voucher (nếu có)
             hd.setVoucher(voucher);
 
+            // Tạo mã hóa đơn và lưu hóa đơn
             String maHoaDon = orderCodeGenerator.generateUniqueOrderCode();
             hd.setMaHoaDon(maHoaDon);
-
-            // Lưu hóa đơn
             HoaDon savedHoaDon = hdsi.save(hd);
 
-            List<SanPhamChiTietDto> listspctFeetback = new ArrayList<>();
+            List<HDCTDTO> listhdctDTO = new ArrayList<>();
 
+            // Xử lý từng chi tiết hóa đơn
             for (HoaDonChiTiet hdct : lhdct) {
                 Integer idSanPhamChiTiet = hdct.getSanPhamChiTiet().getId();
-                String tenSPCT  = sanPhamChiTietService.getSanPhamChiTietById(idSanPhamChiTiet).getTenSanPhamChiTiet();
-                Integer soLuong = hdct.getSoLuong();
-
-                // Lấy danh sách IMEI khả dụng
-                List<Imei> listImei = imeiRepository.findAllBySpctIdAndTrangThai(idSanPhamChiTiet, 0);
-                if (soLuong > listImei.size()) {
-                    return Map.of(
-                            "success", false,
-                            "message", "Chúng tôi chân thành xin lỗi, số lượng sản phẩm " + tenSPCT + "bạn yêu cầu không đủ. Hiện chỉ còn " + listImei.size() + " sản phẩm khả dụng."
-                    );
-                }
-
                 hdct.setHoaDon(savedHoaDon);
-                HoaDonChiTiet hdcts = hdctsi.save(hdct);
-                int idSPCT = hdcts.getSanPhamChiTiet().getId();
+                HoaDonChiTiet savedHdct = hdctsi.save(hdct);
 
-                SanPhamChiTietDto spctDTO = sanPhamChiTietService.getSanPhamChiTietById(idSPCT);
+                HDCTDTO hdctDTO = new HDCTDTO();
+                hdctDTO.setSoLuong(savedHdct.getSoLuong());
+                hdctDTO.setDonGia(savedHdct.getGia());
+                String tenSanPham = sanPhamChiTietInterface.getSanPhamChiTietById(idSanPhamChiTiet).getTenSanPhamChiTiet();
+                hdctDTO.setTenSanPham(tenSanPham);
 
-                if (spctDTO != null) {
-                    spctDTO.setSoLuong(hdcts.getSoLuong());
-                    listspctFeetback.add(spctDTO);
-                    System.out.println("Số lượng là: " + spctDTO.getSoLuong());
-                } else {
-                    System.err.println("Không tìm thấy sản phẩm có ID: " + idSPCT);
+                // Nếu có IMEI, xử lý danh sách IMEI liên kết
+                if (listImei != null && !listImei.isEmpty()) {
+                    List<String> imeiCodes = new ArrayList<>();
+                    for (Imei imei : listImei) {
+                        if (imei.getSpct().getId().equals(idSanPhamChiTiet)) {
+                            imei.setHdct(savedHdct); // Gán HoaDonChiTiet đã lưu vào IMEI
+                            imei.setTrangThai(1); // Đánh dấu IMEI đã được sử dụng
+                            imeiRepository.save(imei); // Lưu IMEI vào cơ sở dữ liệu
+                            imeiCodes.add(imei.getImei());
+                        }
+                    }
+                    hdctDTO.setListImei(imeiCodes);
                 }
 
-                // Gán IMEI cho chi tiết hóa đơn và cập nhật trạng thái
-                List<Imei> imeisToUpdate = listImei.subList(0, soLuong);
-                for (Imei imei : imeisToUpdate) {
-                    imei.setTrangThai(1); // Đã bán
-                    imei.setHdct(hdcts); // Gắn IMEI với hóa đơn chi tiết
-                    imeiRepository.save(imei); // Lưu trạng thái mới và liên kết
-                }
+                listhdctDTO.add(hdctDTO);
 
-                // Hàm chuyển trang_thái = 0 nếu như hết hàng
-                if (imeiService.checkTinhTrang(idSanPhamChiTiet)) {
-                    System.out.println("chạy hàm kiểm tra hết hàng");
-                    // Cập nhật trạng thái sản phẩm chi tiết thành 0 (hết hàng)
-                    SanPhamChiTiet spct = sanPhamChiTietInterface.findById(idSanPhamChiTiet)
-                            .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm chi tiết với ID: " + idSanPhamChiTiet));
-                    spct.setTrangThai(0); // Đặt trạng thái thành hết hàng
-                    sanPhamChiTietInterface.save(spct);
-                    System.out.println("Đã cập nhật trạng thái sản phẩm chi tiết ID: " + idSanPhamChiTiet + " thành hết hàng.");
-                }
-
-                // Nếu người dùng đăng nhập, xóa giỏ hàng chi tiết
+                // Nếu người dùng đăng nhập, xóa sản phẩm khỏi giỏ hàng
                 if (username != null) {
                     GioHangChiTiet ghctUser = gioHangChiTietInterface.findGioHangChiTietByTaiKhoanNguoiDungUsernameAndSanPhamChiTiet_Id(username, idSanPhamChiTiet);
                     if (ghctUser != null) {
@@ -147,23 +129,91 @@ public class HoaDonService {
                 }
             }
 
-            // Trả về trạng thái thành công và thông tin hóa đơn
+            // Cập nhật trạng thái hóa đơn nếu có IMEI
+            if (listImei != null && !listImei.isEmpty()) {
+                hd.setTrangThai(1); // Đánh dấu hóa đơn đã xác nhận
+                hdsi.save(hd);
+            }
+
+            // Trả về kết quả thành công
             return Map.of(
                     "success", true,
                     "hoaDon", savedHoaDon,
-                    "listHDCT", listspctFeetback
+                    "listHDCT", listhdctDTO
             );
 
         } catch (Exception e) {
             e.printStackTrace();
-            // Trả về trạng thái thất bại và thông báo lỗi
+            // Trả về lỗi
             return Map.of(
                     "success", false,
                     "message", e.getMessage()
             );
         }
     }
+    
 
+    public Map<String, Object> xacNhanDonHang(String maHoaDon, List<Imei> imeiList) {
+        // Tìm hóa đơn theo mã hóa đơn
+        System.out.println("================"+ maHoaDon);
+        HoaDon hd = hdsi.findHoaDonByMaHoaDon(maHoaDon);
+        if (hd == null) {
+            throw new NoSuchElementException("Không tìm thấy hóa đơn với mã: " + maHoaDon);
+        }
+        // Lấy danh sách hóa đơn chi tiết của hóa đơn
+        List<HoaDonChiTiet> listHoaDonChiTiet = hdctsi.findAllByHoaDon_MaHoaDon(maHoaDon);
+        // Tạo lhdctDTO trả về cho fe
+        List<HDCTDTO> lhdctdto = new ArrayList<>();
+        for (HoaDonChiTiet hdct : listHoaDonChiTiet) {
+            System.out.println("Chạy vào hàm for xử lí hóa đơn chi tiết");
+            int idspct = hdct.getSanPhamChiTiet().getId();
+            // Tạo đối tượng HDCTDTO để lưu thông tin chi tiết hóa đơn
+            HDCTDTO hdctDTO = new HDCTDTO();
+            hdctDTO.setTenSanPham(sanPhamChiTietInterface.getSanPhamChiTietById(idspct).getTenSanPhamChiTiet());
+            hdctDTO.setSoLuong(hdct.getSoLuong());
+            hdctDTO.setDonGia(hdct.getSanPhamChiTiet().getDonGia());
+
+            // Xử lý danh sách IMEI liên kết với hóa đơn chi tiết
+            List<String> listImeiToHDCTDTO = new ArrayList<>();
+            for (Imei imei : imeiList) {
+                System.out.println("Chạy hàm for xử lí List Imei");
+                if (imei.getSpct().getId() == idspct) {
+                    System.out.println("ID spct trong imei trùng với ID SPCT");
+                    imei.setHdct(hdct);
+                    imei.setTrangThai(1);
+                    System.out.println("IMEI được lấy ra là:" + imei.getImei());
+                    imeiRepository.save(imei);
+                    listImeiToHDCTDTO.add(imei.getImei());
+                }
+                System.out.println("ID spct trong imei Không trùng với ID SPCT");
+            }
+
+            hdctDTO.setListImei(listImeiToHDCTDTO);
+            lhdctdto.add(hdctDTO);
+
+
+            // Kiểm tra và cập nhật trạng thái sản phẩm chi tiết nếu hết hàng
+            if (imeiService.checkTinhTrang(idspct)) {
+                SanPhamChiTiet spct = sanPhamChiTietInterface.findById(idspct)
+                        .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm chi tiết với ID: " + idspct));
+                spct.setTrangThai(0); // Đặt trạng thái thành hết hàng
+                sanPhamChiTietInterface.save(spct);
+            }
+        }
+
+        // Cập nhật trạng thái hóa đơn là "Đã xác nhận"
+        hd.setTrangThai(1);
+        hdsi.save(hd);
+
+        // Trả về kết quả
+        return Map.of(
+                "hoaDon", hd,
+                "listHDCTDTO", lhdctdto
+        );
+    }
+
+
+    // Hàm tra cứu đơn hàng
     public Object traCuuDonHang(String soDienThoai, String maHoaDon) {
         // Trường hợp tìm kiếm chỉ theo mã hóa đơn
         if (maHoaDon != null && !maHoaDon.isBlank() && (soDienThoai == null || soDienThoai.isBlank())) {

@@ -26,6 +26,7 @@ public class ImeiService {
 
 
 
+    // Hàm cập nhật hoạc thêm Imei
     public Map<String, Object> addOrUpdateImei(Integer idSPCT, List<Imei> listImei) {
         // Tìm sản phẩm chi tiết dựa trên ID
         SanPhamChiTiet spct = spctif.findById(idSPCT)
@@ -60,9 +61,6 @@ public class ImeiService {
                 validImeis.add(im);
             }
         }
-
-
-
         // Nếu có IMEI không hợp lệ hoặc đã tồn tại, trả về thông báo lỗi
         if (!invalidImeiList.isEmpty()) {
             Map<String, Object> response = new HashMap<>();
@@ -78,13 +76,11 @@ public class ImeiService {
             response.put("message", "Không thể thêm quá số lượng IMEI giới hạn của sản phẩm chi tiết.");
             return response;
         }
-
         // Thêm IMEI mới vào cơ sở dữ liệu
         for (Imei im : validImeis) {
             im.setSpct(spct);
             imif.save(im);
         }
-
         // Sét lại trạng thái cho sản phẩm chi tiết sau khi đự thêm imei nếu spct.Trạng thái = 2
         if(spct.getTrangThai() == 2){
             spct.setTrangThai(1);
@@ -98,7 +94,7 @@ public class ImeiService {
         return response;
     }
 
-
+    // hàm láy ra danh sách imei đang bán của 1 sản phẩm
     public List<Imei> getListImeibySPCT(Integer idSPCT){
          List<Imei> listispct = imif.findAllBySpctIdAndTrangThai(idSPCT,0);
          return listispct;
@@ -129,33 +125,24 @@ public class ImeiService {
 
 
 
-    public String updateTopImeiTrangThai(Integer idSpct, Integer soLuong, Integer idHoaDonChiTiet) {
-        // Lấy danh sách IMEI từ cơ sở dữ liệu
-        List<Imei> imeiList = imif.findTopImeiBySanPhamChiTietIdAndTrangThaiNative(idSpct);
+    // hàm sét imei vào hóa đơn chi tiét
+    public String updateImeiToHDCT(List<Imei> imeiList, HoaDonChiTiet hoaDonChiTiet) {
 
-        // Kiểm tra số lượng trả về
-        if (imeiList.size() < soLuong) {
-            return "Số lượng không đủ. Yêu cầu: " + soLuong + ", hiện có: " + imeiList.size();
-        }
-
-        // Cập nhật trạng thái của các IMEI
-        for (int i = 0; i < soLuong; i++) {
-            imeiList.get(i).setTrangThai(1); // Ví dụ: 1 là đã sử dụng
-            HoaDonChiTiet hdct =  hdctInterFace.findById(idHoaDonChiTiet).get();
-            imeiList.get(i).setHdct(hdct);
+        // cập nhật lại trạng thái của imei
+        for (Imei imei : imeiList) {
+            imei.setHdct(hoaDonChiTiet);
+            imei.setTrangThai(1); // 1 là trạng thái đã sử dụng
         }
 
         // Lưu lại danh sách IMEI đã cập nhật
         imif.saveAll(imeiList);
 
-        return "Cập nhật trạng thái thành công cho " + soLuong + " IMEI.";
+        return "Cập nhật trạng thái thành công cho " + imeiList + " IMEI.";
     }
 
     public boolean checkTinhTrang(Integer idSPCT) {
         List<Imei> listImei = imif.findAllBySpctIdAndTrangThai(idSPCT, 0);
         return listImei == null || listImei.isEmpty();
     }
-
-
 
 }

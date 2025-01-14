@@ -1,8 +1,11 @@
 package com.example.aino_1.restController;
 
 import com.example.aino_1.entity.CardDoHoa;
+import com.example.aino_1.entity.Cpu;
 import com.example.aino_1.repository.CardDoHoaInterface;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Optional;
 
 @CrossOrigin("*") //cho phép tất cả các miền khác truy cập tài nguyên server (end point api)
 @RestController
@@ -42,14 +46,24 @@ public class CardDoHoaController {
         return cdhsi.save(CardDoHoa);
     }
 
-    @PostMapping("/del")
-    public void delete(@RequestBody CardDoHoa CardDoHoa) {
-        CardDoHoa.setTrangThai(0);
-        cdhsi.save(CardDoHoa);
+    @PostMapping("/del/{id}")
+    public ResponseEntity<?> delete(@PathVariable Integer id) {
+        Optional<CardDoHoa> optionalCardDoHoa = cdhsi.findById(id);
+
+        if (!optionalCardDoHoa.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ram with ID " + id + " not found");
+        }
+
+        CardDoHoa cardDoHoa = optionalCardDoHoa.get();
+        cardDoHoa.setTrangThai(0);
+        CardDoHoa saved = cdhsi.save(cardDoHoa);
+
+        return ResponseEntity.ok(saved);
     }
 
+
     @GetMapping("/getThungRac")
-    public void getThungRac(){
-        cdhsi.findAllByTrangThai(0);
+    public List<CardDoHoa> getThungRac(){
+        return cdhsi.findAllByTrangThai(0);
     }
 }

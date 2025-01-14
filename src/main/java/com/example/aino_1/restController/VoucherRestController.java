@@ -88,8 +88,8 @@ public class VoucherRestController {
         vsi.save(voucher);
     }
     @GetMapping("/getThungRac")
-    public void getThungRac(){
-        vsi.findAllByTrangThai(0);
+    public List<Voucher> getThungRac(){
+        return vsi.findAllByTrangThai(0);
     }
 
     @GetMapping("/getVoucher/{voucher}")

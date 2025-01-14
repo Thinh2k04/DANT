@@ -5,6 +5,8 @@ import com.example.aino_1.entity.Gpu;
 
 import com.example.aino_1.repository.GpuInterface;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Optional;
 
 @CrossOrigin("*") //cho phép tất cả các miền khác truy cập tài nguyên server (end point api)
 @RestController
@@ -44,13 +47,23 @@ public class GpuRestController {
         return gsi.save(gpu);
     }
 
-    @PostMapping("/del")
-    public void delete(@RequestBody Gpu gpu) {
+    @PostMapping("/del/{id}")
+    public ResponseEntity<?> delete(@PathVariable Integer id) {
+        Optional<Gpu> optionalGpu = gsi.findById(id);
+
+        if (!optionalGpu.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ram with ID " + id + " not found");
+        }
+
+        Gpu gpu = optionalGpu.get();
         gpu.setTrangThai(0);
-        gsi.save(gpu);
+        Gpu saved = gsi.save(gpu);
+
+        return ResponseEntity.ok(saved);
     }
+
     @GetMapping("/getThungRac")
-    public void getThungRac(){
-        gsi.findAllByTrangThai(0);
+    public List<Gpu> getThungRac(){
+        return gsi.findAllByTrangThai(0);
     }
 }

@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import AttributeTable from './AttributeTable';
-import { FaPlus } from 'react-icons/fa';
+import { FaPlus, FaTrash, FaArrowLeft } from 'react-icons/fa';
 
 const BaseAttributeComponent = ({ 
   endpoint,
-  showTrash = false,
   fetchUrl,
   updateUrl,
   deleteUrl,
@@ -17,18 +16,76 @@ const BaseAttributeComponent = ({
   const [loading, setLoading] = useState(false);
   const [editingAttribute, setEditingAttribute] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [isTrashView, setIsTrashView] = useState(false);
 
   useEffect(() => {
     fetchAttributes();
-  }, []);
+  }, [isTrashView]);
 
   const fetchAttributes = async () => {
     setLoading(true);
     try {
-      const response = await fetch(fetchUrl);
+      // Thay đổi URL dựa vào loại thuộc tính và view
+      let url;
+      if (isTrashView) {
+        switch(attributeType) {
+          case 'brand':
+            url = 'http://localhost:8080/rest/thuong-hieu/getThungRac';
+            break;
+          case 'ram':
+            url = 'http://localhost:8080/rest/ram/getThungRac';
+            break;
+          case 'storage':
+            url = 'http://localhost:8080/rest/o_luu_tru/getThungRac';
+            break;
+          case 'cpu':
+            url = 'http://localhost:8080/rest/cpu/getThungRac';
+            break;
+          case 'screen':
+            url = 'http://localhost:8080/rest/man_hinh/getThungRac';
+            break;
+          case 'gpu':
+            url = 'http://localhost:8080/rest/gpu/getThungRac';
+            break;
+          case 'graphicsCard':
+            url = 'http://localhost:8080/rest/card_do_hoa/getThungRac';
+            break;
+          case 'material':
+            url = 'http://localhost:8080/rest/chat_lieu/getThungRac';
+            break;
+          case 'size':
+            url = 'http://localhost:8080/rest/ktlt/getThungRac';
+            break;
+          case 'productType':
+            url = 'http://localhost:8080/rest/loai_san_pham/getThungRac';
+            break;
+          case 'color':
+            url = 'http://localhost:8080/rest/mau_sac/getThungRac';
+            break;
+          case 'supplier':
+            url = 'http://localhost:8080/rest/nguon_nhap/getThungRac';
+            break;
+          default:
+            url = fetchUrl;
+        }
+      } else {
+        url = fetchUrl;
+      }
+
+      const response = await fetch(url);
       if (!response.ok) throw new Error('Failed to fetch');
       const data = await response.json();
-      setAttributes(data);
+      
+      // Lọc dữ liệu dựa vào view và loại thuộc tính
+      if ((attributeType === 'brand' || attributeType === 'ram' || attributeType === 'storage' || 
+           attributeType === 'cpu' || attributeType === 'screen' || attributeType === 'gpu' || 
+           attributeType === 'graphicsCard' || attributeType === 'material' || attributeType === 'size' ||
+           attributeType === 'productType' || attributeType === 'color' || attributeType === 'supplier') && !isTrashView) {
+        // Chỉ hiển thị items có trạng thái = 1 trong view chính
+        setAttributes(data.filter(item => item.trangThai === 1));
+      } else {
+        setAttributes(data);
+      }
     } catch (error) {
       toast.error('Lỗi khi tải dữ liệu');
     }
@@ -228,34 +285,64 @@ const BaseAttributeComponent = ({
 
   const handleRestore = async (id) => {
     try {
-      let url = '';
-      let method = 'POST';
-      let payload = {};
+      // Lấy thông tin hiện tại của item
+      const currentItem = attributes.find(attr => attr.id === id);
+      if (!currentItem) {
+        toast.error('Không tìm thấy dữ liệu');
+        return;
+      }
 
-      // Xử lý đặc biệt cho từng loại thuộc tính
+      let url;
       switch(attributeType) {
         case 'brand':
-          url = `http://localhost:8080/rest/thuong-hieu/update/${id}`;
-          method = 'PUT';
-          payload = {
-            trangThai: 1
-          };
+          url = 'http://localhost:8080/rest/thuong-hieu/update';
+          break;
+        case 'ram':
+          url = 'http://localhost:8080/rest/ram/update';
+          break;
+        case 'storage':
+          url = 'http://localhost:8080/rest/o_luu_tru/update';
+          break;
+        case 'cpu':
+          url = 'http://localhost:8080/rest/cpu/update';
+          break;
+        case 'screen':
+          url = 'http://localhost:8080/rest/man_hinh/update';
+          break;
+        case 'gpu':
+          url = 'http://localhost:8080/rest/gpu/update';
+          break;
+        case 'graphicsCard':
+          url = 'http://localhost:8080/rest/card_do_hoa/update';
+          break;
+        case 'material':
+          url = 'http://localhost:8080/rest/chat_lieu/update';
+          break;
+        case 'size':
+          url = 'http://localhost:8080/rest/ktlt/update';
+          break;
+        case 'productType':
+          url = 'http://localhost:8080/rest/loai_san_pham/update';
+          break;
+        case 'color':
+          url = 'http://localhost:8080/rest/mau_sac/update';
+          break;
+        case 'supplier':
+          url = 'http://localhost:8080/rest/nguon_nhap/update';
           break;
         default:
-          url = `${updateUrl}/${id}`;
-          method = 'PUT';
-          payload = {
-            ...editingAttribute,
-            trangThai: 1
-          };
+          url = updateUrl;
       }
 
       const response = await fetch(url, {
-        method: method,
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          ...currentItem,
+          trangThai: 1
+        }),
       });
 
       if (!response.ok) throw new Error('Failed to restore');
@@ -267,88 +354,43 @@ const BaseAttributeComponent = ({
     }
   };
 
-  const handlePermanentDelete = async (id) => {
-    if (!window.confirm('Bạn có chắc muốn xóa vĩnh viễn?')) return;
-
-    try {
-      let url = '';
-      let method = 'DELETE';
-
-      // Xử lý đặc biệt cho từng loại thuộc tính
-      switch(attributeType) {
-        case 'brand':
-          url = `http://localhost:8080/rest/thuong-hieu/delete/permanent/${id}`;
-          method = 'POST';
-          break;
-        case 'ram':
-          url = `http://localhost:8080/rest/ram/delete/permanent/${id}`;
-          method = 'POST';
-          break;
-        case 'storage':
-          url = `http://localhost:8080/rest/o_luu_tru/delete/permanent/${id}`;
-          method = 'POST';
-          break;
-        case 'cpu':
-          url = `http://localhost:8080/rest/cpu/delete/permanent/${id}`;
-          method = 'POST';
-          break;
-        case 'screen':
-          url = `http://localhost:8080/rest/man_hinh/delete/permanent/${id}`;
-          method = 'POST';
-          break;
-        case 'gpu':
-          url = `http://localhost:8080/rest/gpu/delete/permanent/${id}`;
-          method = 'POST';
-          break;
-        case 'graphicsCard':
-          url = `http://localhost:8080/rest/card_do_hoa/delete/permanent/${id}`;
-          method = 'POST';
-          break;
-        case 'material':
-          url = `http://localhost:8080/rest/chat_lieu/delete/permanent/${id}`;
-          method = 'POST';
-          break;
-        case 'size':
-          url = `http://localhost:8080/rest/ktlt/delete/permanent/${id}`;
-          method = 'POST';
-          break;
-        case 'productType':
-          url = `http://localhost:8080/rest/loai_san_pham/delete/permanent/${id}`;
-          method = 'POST';
-          break;
-        case 'color':
-          url = `http://localhost:8080/rest/mau_sac/delete/permanent/${id}`;
-          method = 'POST';
-          break;
-        case 'supplier':
-          url = `http://localhost:8080/rest/nguon_nhap/delete/permanent/${id}`;
-          method = 'POST';
-          break;
-        default:
-          url = `${deleteUrl}/permanent/${id}`;
-      }
-
-      const response = await fetch(url, {
-        method: method
-      });
-
-      if (!response.ok) throw new Error('Failed to delete permanently');
-      
-      toast.success('Đã xóa vĩnh viễn');
-      fetchAttributes();
-    } catch (error) {
-      toast.error('Lỗi khi xóa vĩnh viễn');
-    }
+  const toggleTrashView = () => {
+    setIsTrashView(!isTrashView);
   };
 
   return (
     <div>
-      <button
-        onClick={() => setShowAddModal(true)}
-        className="mb-4 px-4 py-2 bg-green-600 text-white rounded-lg flex items-center gap-2 hover:bg-green-700"
-      >
-        <FaPlus /> Thêm mới
-      </button>
+      <div className="flex gap-2 mb-4">
+        {!isTrashView ? (
+          <>
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg flex items-center gap-2 hover:bg-green-700"
+            >
+              <FaPlus /> Thêm mới
+            </button>
+
+            {(attributeType === 'brand' || attributeType === 'ram' || attributeType === 'storage' || 
+              attributeType === 'cpu' || attributeType === 'screen' || attributeType === 'gpu' || 
+              attributeType === 'graphicsCard' || attributeType === 'material' || attributeType === 'size' ||
+              attributeType === 'productType' || attributeType === 'color' || attributeType === 'supplier') && (
+              <button
+                onClick={toggleTrashView}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg flex items-center gap-2 hover:bg-red-700"
+              >
+                <FaTrash /> Thùng rác
+              </button>
+            )}
+          </>
+        ) : (
+          <button
+            onClick={toggleTrashView}
+            className="px-4 py-2 bg-gray-600 text-white rounded-lg flex items-center gap-2 hover:bg-gray-700"
+          >
+            <FaArrowLeft /> Quay lại
+          </button>
+        )}
+      </div>
 
       <AttributeTable 
         attributes={attributes}
@@ -357,8 +399,7 @@ const BaseAttributeComponent = ({
         handleEdit={handleEdit}
         handleDelete={handleDelete}
         handleRestore={handleRestore}
-        handlePermanentDelete={handlePermanentDelete}
-        showTrash={showTrash}
+        showTrash={isTrashView}
         attributeType={attributeType}
       />
 

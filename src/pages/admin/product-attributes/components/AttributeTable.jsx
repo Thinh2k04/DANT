@@ -7,10 +7,9 @@ const AttributeTable = ({
   setEditingAttribute, 
   handleEdit, 
   handleDelete,
-  handleRestore,
-  handlePermanentDelete,
+  attributeType,
   showTrash,
-  attributeType 
+  handleRestore
 }) => {
 
   const renderTableHeaders = () => {
@@ -856,7 +855,10 @@ const AttributeTable = ({
   };
 
   const renderActions = (attr) => {
-    if (showTrash) {
+    if ((attributeType === 'brand' || attributeType === 'ram' || attributeType === 'storage' || 
+         attributeType === 'cpu' || attributeType === 'screen' || attributeType === 'gpu' || 
+         attributeType === 'graphicsCard' || attributeType === 'material' || attributeType === 'size' ||
+         attributeType === 'productType' || attributeType === 'color' || attributeType === 'supplier') && showTrash) {
       return (
         <div className="flex gap-2">
           <button
@@ -865,13 +867,6 @@ const AttributeTable = ({
             title="Khôi phục"
           >
             <FaUndo />
-          </button>
-          <button
-            onClick={() => handlePermanentDelete(attr.id)}
-            className="text-red-600 hover:text-red-900"
-            title="Xóa vĩnh viễn"
-          >
-            <FaTrash />
           </button>
         </div>
       );
@@ -947,7 +942,7 @@ const AttributeTable = ({
       
       {attributes.length === 0 && (
         <div className="text-center py-4 text-gray-500">
-          {showTrash ? 'Thùng rác trống' : 'Không có dữ liệu'}
+          Không có dữ liệu
         </div>
       )}
     </div>

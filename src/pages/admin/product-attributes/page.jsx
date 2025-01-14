@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import NavbarAdmin from '../Navbar/NavbarAdmin';
 import AttributeTab from './components/AttributeTab';
 import BrandAttribute from './components/BrandAttribute';
@@ -15,8 +16,15 @@ import ColorAttribute from './components/ColorAttribute';
 import SupplierAttribute from './components/SupplierAttribute';
 
 const ProductAttributesPage = () => {
+  const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState('thuongHieu');
-  const [showTrash, setShowTrash] = useState(false);
+
+  useEffect(() => {
+    const tabFromUrl = searchParams.get('tab');
+    if (tabFromUrl) {
+      setActiveTab(tabFromUrl);
+    }
+  }, [searchParams]);
 
   // Define tabs array
   const tabs = [
@@ -37,7 +45,7 @@ const ProductAttributesPage = () => {
   const renderAttributeComponent = () => {
     switch(activeTab) {
       case 'thuongHieu':
-        return <BrandAttribute showTrash={showTrash} />;
+        return <BrandAttribute />;
       case 'ram':
         return <RamAttribute />;
       case 'cpu':
@@ -73,15 +81,6 @@ const ProductAttributesPage = () => {
           <div className="bg-white rounded-xl shadow-sm p-6">
             <div className="flex justify-between items-center mb-6">
               <h1 className="text-2xl font-bold">Quản lý thuộc tính sản phẩm</h1>
-              
-              {activeTab === 'thuongHieu' && (
-                <button
-                  onClick={() => setShowTrash(!showTrash)}
-                  className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-                >
-                  {showTrash ? 'Quay lại' : 'Thùng rác'}
-                </button>
-              )}
             </div>
 
             <AttributeTab 

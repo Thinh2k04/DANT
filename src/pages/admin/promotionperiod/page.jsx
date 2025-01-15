@@ -5,6 +5,7 @@ import { format, isValid } from 'date-fns';
 import { toast } from 'react-toastify';
 import NavbarAdmin from '../Navbar/NavbarAdmin';
 import ConfirmDialog from './components/ConfirmDialog';
+import ProductSelectionModal from './components/ProductSelectionModal';
 
 // Add these toast configurations at the top of your component
 const toastConfig = {
@@ -123,6 +124,7 @@ const PromotionPeriodPage = () => {
     type: 'delete',
     onConfirm: () => {},
   });
+  const [showProductSelection, setShowProductSelection] = useState(false);
 
   useEffect(() => {
     fetchCampaigns();
@@ -171,22 +173,31 @@ const PromotionPeriodPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (selectedProducts.length === 0) {
+      warningToast('Vui lòng chọn ít nhất một sản phẩm để áp dụng khuyến mãi!');
+      return;
+    }
+
     try {
       const formattedData = {
-        name: formData.name,
-        discountPercentage: parseInt(formData.discountPercentage),
-        startDate: formData.startDate,
-        endDate: formData.endDate,
-        active: 1
+        campaigns: {
+          name: formData.name,
+          discountPercentage: parseInt(formData.discountPercentage),
+          startDate: formData.startDate,
+          endDate: formData.endDate,
+          active: 1
+        },
+        products: selectedProducts
       };
 
-      if (!formattedData.startDate || !formattedData.endDate) {
+      if (!formattedData.campaigns.startDate || !formattedData.campaigns.endDate) {
         warningToast('Ngày bắt đầu và ngày kết thúc không được để trống!');
         return;
       }
 
-      const startDate = new Date(formattedData.startDate);
-      const endDate = new Date(formattedData.endDate);
+      const startDate = new Date(formattedData.campaigns.startDate);
+      const endDate = new Date(formattedData.campaigns.endDate);
 
       if (endDate <= startDate) {
         warningToast('Ngày kết thúc phải sau ngày bắt đầu!');
@@ -211,6 +222,7 @@ const PromotionPeriodPage = () => {
         endDate: '',
         active: 1
       });
+      setSelectedProducts([]);
     } catch (error) {
       console.error('Error saving campaign:', error);
       errorToast(
@@ -491,6 +503,19 @@ const PromotionPeriodPage = () => {
                       onChange={(e) => setFormData({...formData, endDate: e.target.value})}
                     />
                   </div>
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700">Sản phẩm áp dụng</label>
+                    <button
+                      type="button"
+                      onClick={() => setShowProductSelection(true)}
+                      className="mt-1 w-full px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-md text-left flex justify-between items-center"
+                    >
+                      <span>{selectedProducts.length > 0 ? `${selectedProducts.length} sản phẩm được chọn` : 'Chọn sản phẩm'}</span>
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                  </div>
                   <div className="mt-4 flex justify-end">
                     <button
                       type="button"
@@ -528,6 +553,17 @@ const PromotionPeriodPage = () => {
           isOpen={showProductsModal}
           onClose={() => setShowProductsModal(false)}
           products={selectedProducts}
+        />
+
+        <ProductSelectionModal
+          isOpen={showProductSelection}
+          onClose={() => setShowProductSelection(false)}
+          onConfirm={(products) => {
+            setSelectedProducts(products);
+            setShowProductSelection(false);
+          }}
+          selectedProducts={selectedProducts}
+          setSelectedProducts={setSelectedProducts}
         />
       </div>
     </div>

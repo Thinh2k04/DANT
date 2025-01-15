@@ -4,26 +4,40 @@ import { toast } from 'react-toastify';
 export const addToCart = (item) => {
   try {
     const existingCart = JSON.parse(localStorage.getItem('cartItems')) || [];
-    const updatedCart = [...existingCart, item];
+    // Sử dụng giá đã giảm nếu có, nếu không thì dùng giá gốc
+    const priceToUse = item.discountedPrice || item.donGia;
+    const updatedCart = [...existingCart, {...item, donGia: priceToUse}];
     localStorage.setItem('cartItems', JSON.stringify(updatedCart));
     
-    // Trigger event để cập nhật số lượng trong navbar
     window.dispatchEvent(new Event('cartUpdated'));
     
-    // Hiển thị thông báo thành công
-    toast.success(`Đã thêm ${item.tenSanPhamChiTiet || item.tenSanPham} vào giỏ hàng!`, {
-      position: "top-right",
-      autoClose: 2000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-    });
+    toast.success(
+      <div>
+        <p>Đã thêm vào giỏ hàng:</p>
+        <p className="font-semibold">{item.tenSanPhamChiTiet || item.tenSanPham}</p>
+        <p className="text-red-600 font-semibold mt-1">
+          Giá: {parseFloat(priceToUse).toLocaleString('vi-VN')}₫
+          {item.discountedPrice && (
+            <span className="text-gray-500 text-sm line-through ml-2">
+              {parseFloat(item.donGia).toLocaleString('vi-VN')}₫
+            </span>
+          )}
+        </p>
+      </div>, 
+      {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      }
+    );
 
     return {
       success: true,
       productName: item.tenSanPhamChiTiet || item.tenSanPham,
-      price: parseFloat(item.donGia)
+      price: parseFloat(priceToUse)
     };
   } catch (error) {
     console.error('Error adding to cart:', error);
@@ -52,7 +66,6 @@ export const removeFromCart = (id) => {
 // Hàm cập nhật số lượng sản phẩm
 export const updateCartItemQuantity = async (id, newQuantity) => {
   try {
-    // Kiểm tra số lượng trong giỏ hàng qua API
     const response = await fetch('http://localhost:8080/rest/ghct/changQuantity', {
       method: 'POST',
       headers: {
@@ -67,8 +80,7 @@ export const updateCartItemQuantity = async (id, newQuantity) => {
     const result = await response.json();
     
     if (result.success) {
-      // Kiểm tra số lượng tồn kho
-      const stockResponse = await fetch(`http://localhost:8080/rest/san_pham_chi_tiet/getById/${id}`);
+      const stockResponse = await fetch(`http://localhost:8080/rest/spctDTO/getById/${id}`);
       const stockData = await stockResponse.json();
       
       if (newQuantity > stockData.soLuong) {
@@ -80,20 +92,24 @@ export const updateCartItemQuantity = async (id, newQuantity) => {
       const existingItemIndex = currentCart.findIndex(item => item.id === id);
 
       if (existingItemIndex !== -1) {
-        // Cập nhật số lượng cho sản phẩm đã tồn tại
+        // Cập nhật số lượng và giá (sử dụng giá đã giảm nếu có)
+        const priceToUse = stockData.discountedPrice || stockData.donGia;
         currentCart[existingItemIndex] = {
           ...currentCart[existingItemIndex],
-          quantity: newQuantity
+          quantity: newQuantity,
+          donGia: priceToUse
         };
       } else {
-        // Thêm sản phẩm mới với số lượng được chỉ định
-        const dbProduct = stockData;
-        currentCart.push({ ...dbProduct, quantity: newQuantity });
+        // Thêm sản phẩm mới với giá đã giảm nếu có
+        const priceToUse = stockData.discountedPrice || stockData.donGia;
+        currentCart.push({ 
+          ...stockData, 
+          quantity: newQuantity,
+          donGia: priceToUse
+        });
       }
       
       localStorage.setItem('cartItems', JSON.stringify(currentCart));
-      
-      // Trigger event để cập nhật số lượng trong navbar
       window.dispatchEvent(new Event('cartUpdated'));
       
       return { success: true };
@@ -143,7 +159,9 @@ export const calculateTotal = (cartItems, selectedItems, quantities) => {
   return cartItems.reduce((total, item) => {
     if (selectedItems[item.id]) {
       const quantity = quantities[item.id] || 1;
-      return total + (parseFloat(item.donGia) * quantity);
+      // Sử dụng giá đã giảm nếu có
+      const price = parseFloat(item.donGia); // donGia đã là giá được giảm từ khi thêm vào giỏ
+      return total + (price * quantity);
     }
     return total;
   }, 0);

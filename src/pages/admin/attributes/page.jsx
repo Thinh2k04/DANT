@@ -39,22 +39,31 @@ const BanHangTaiQuay = () => {
     fetchProducts();
   }, []);
   
-  const addToCart = (product) => {
+  const addToCart = (product, quantity, selectedIMEIs) => {
     const existingItem = cart.find(item => item.id === product.id);
     if (existingItem) {
-      if (existingItem.quantity >= product.soLuong) {
-        toast.warning('Số lượng đã đạt giới hạn trong kho!');
-        return;
-      }
-      setCart(cart.map(item =>
-        item.id === product.id 
-          ? {...item, quantity: item.quantity + 1}
-          : item
-      ));
-    } else {
-      setCart([...cart, {...product, quantity: 1}]);
+      toast.warning('Sản phẩm đã có trong giỏ hàng');
+      return;
     }
-    toast.success('Đã thêm sản phẩm vào giỏ hàng!');
+
+    if (quantity <= 0 || quantity > product.soLuong) {
+      toast.error('Số lượng không hợp lệ');
+      return;
+    }
+
+    if (!selectedIMEIs || selectedIMEIs.length !== quantity) {
+      toast.error('Số lượng IMEI không khớp với số lượng sản phẩm');
+      return;
+    }
+
+    setCart([...cart, {
+      ...product,
+      quantity,
+      selectedIMEIs,
+      thanhTien: product.donGia * quantity
+    }]);
+
+    toast.success('Đã thêm sản phẩm vào giỏ hàng');
   };
 
   const removeFromCart = (productId) => {
@@ -142,6 +151,15 @@ const BanHangTaiQuay = () => {
           trangThaiThanhToan: 1,
           trangThai: 1
         },
+        listImei: cart.flatMap(item => 
+          item.selectedIMEIs.map(imei => ({
+            id: imei.id,
+            spct: {
+              id: item.id
+            },
+            imei: imei.imei
+          }))
+        ),
         lhdct: cart.map(item => ({
           hoaDon: {
             id: ""

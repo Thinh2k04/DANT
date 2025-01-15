@@ -204,11 +204,25 @@ const PromotionPeriodPage = () => {
         return;
       }
 
+      const token = localStorage.getItem('Authorization');
+      console.log(token);
+      const headers = {
+        'Authorization': `${token}`
+      };
+
       if (editingCampaign) {
-        await axios.put(`http://localhost:8080/rest/discount/updateDiscount/${editingCampaign.id}`, formattedData);
+        await axios.put(
+          `http://localhost:8080/rest/discount/updateDiscount/${editingCampaign.id}`, 
+          formattedData,
+          { headers }
+        );
         successToast('Cập nhật chiến dịch khuyến mãi thành công! 🎉');
       } else {
-        await axios.post('http://localhost:8080/rest/discount/addDiscount', formattedData);
+        await axios.post(
+          'http://localhost:8080/rest/discount/addDiscount', 
+          formattedData,
+          { headers }
+        );
         successToast('Tạo chiến dịch khuyến mãi mới thành công! 🎉');
       }
 

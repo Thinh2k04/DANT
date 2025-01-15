@@ -5,7 +5,6 @@ import NavbarAdmin from '../Navbar/NavbarAdmin';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import ImeiSelectionModal from './components/ImeiSelectionModal';
 
 const OrderManagement = () => {
   const [orders, setOrders] = useState([]);
@@ -14,8 +13,6 @@ const OrderManagement = () => {
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState(null);
   const [isPolling, setIsPolling] = useState(true);
-  const [showImeiModal, setShowImeiModal] = useState(false);
-  const [selectedOrderForImei, setSelectedOrderForImei] = useState(null);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -371,94 +368,6 @@ const OrderManagement = () => {
     // Lưu file PDF
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     doc.save(`hoa_don_${order.id}_${timestamp}.pdf`);
-  };
-
-  const handleStatusUpdate = async (order) => {
-    try {
-      // Kiểm tra xem đơn hàng đã có IMEI chưa
-      const imeiResponse = await fetch(`http://localhost:8080/rest/hoa_don/check-imei/${order.hoaDon.maHoaDon}`);
-      const imeiData = await imeiResponse.json();
-      
-      if (!imeiData.hasImei) {
-        // Nếu chưa có IMEI, mở modal chọn IMEI
-        setSelectedOrderForImei(order);
-        setShowImeiModal(true);
-      } else {
-        // Nếu đã có IMEI, cập nhật trạng thái bình thường
-        await updateOrderStatus(order);
-      }
-    } catch (error) {
-      console.error('Error checking IMEI:', error);
-      toast.error('Có lỗi xảy ra khi kiểm tra IMEI');
-    }
-  };
-
-  const handleImeiConfirm = async (maDonHang, imeiData) => {
-    try {
-      // Gọi API thêm IMEI
-      const response = await fetch(`http://localhost:8080/rest/hoa_don/xac-nhan/${maDonHang}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(imeiData)
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update IMEI');
-      }
-
-      // Sau khi thêm IMEI thành công, cập nhật trạng thái đơn hàng
-      await updateOrderStatus(selectedOrderForImei);
-      
-      setShowImeiModal(false);
-      setSelectedOrderForImei(null);
-      toast.success('Cập nhật IMEI thành công');
-    } catch (error) {
-      console.error('Error updating IMEI:', error);
-      toast.error('Có lỗi xảy ra khi cập nhật IMEI');
-    }
-  };
-
-  const updateOrderStatus = async (order) => {
-    try {
-      const response = await fetch(`http://localhost:8080/rest/hoa_don/update/${order.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...order,
-          trangThaiThanhToan: selectedStatus
-        })
-      });
-
-      if (!response.ok) throw new Error('Failed to update status');
-
-      setOrders(orders.map(o => 
-        o.id === order.id 
-          ? {...o, trangThaiThanhToan: selectedStatus}
-          : o
-      ));
-      
-      setSelectedOrder({...order, trangThaiThanhToan: selectedStatus});
-      setShowStatusModal(false);
-      setSelectedStatus(null);
-      setOrderDetails([]);
-      setIsPolling(true);
-
-      toast.success('Cập nhật trạng thái đơn hàng thành công', {
-        position: "top-right",
-        autoClose: 2000
-      });
-
-    } catch (error) {
-      console.error('Error updating order status:', error);
-      toast.error('Cập nhật trạng thái đơn hàng thất bại', {
-        position: "top-right",
-        autoClose: 3000
-      });
-    }
   };
 
   return (

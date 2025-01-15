@@ -70,7 +70,6 @@ const ShoppingCart = ({
           </div>
           <CartItems 
             cart={cart}
-            updateQuantity={updateQuantity}
             removeFromCart={removeFromCart}
           />
         </section>
@@ -141,7 +140,7 @@ const CustomerInfo = ({ customerInfo, setCustomerInfo, checkCustomerInfo }) => {
   );
 };
 
-const CartItems = ({ cart, updateQuantity, removeFromCart }) => {
+const CartItems = ({ cart, removeFromCart }) => {
   if (cart.length === 0) {
     return (
       <div className="text-center py-6 text-gray-500">
@@ -154,32 +153,38 @@ const CartItems = ({ cart, updateQuantity, removeFromCart }) => {
   return (
     <div className="space-y-2 max-h-[250px] overflow-y-auto pr-2 -mr-2">
       {cart.map(item => (
-        <div key={item.id} 
-          className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg hover:bg-gray-100">
-          <img 
-            src={item.hinhAnhMinhHoa || '/placeholder.png'} 
-            alt={item.tenSanPhamChiTiet}
-            className="w-14 h-14 object-cover rounded-lg"
-          />
-          <div className="flex-1 min-w-0">
-            <h4 className="font-medium text-sm text-gray-800 truncate">{item.tenSanPhamChiTiet}</h4>
-            <p className="text-blue-600 font-semibold text-sm mt-0.5">{item.donGia.toLocaleString()}₫</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <input
-              type="number"
-              min="1"
-              max={item.soLuong}
-              value={item.quantity}
-              onChange={(e) => updateQuantity(item.id, e.target.value)}
-              className="w-14 px-2 py-1 text-sm border rounded text-center"
+        <div key={item.id} className="bg-gray-50 rounded-lg hover:bg-gray-100">
+          <div className="flex items-center gap-3 p-2">
+            <img 
+              src={item.hinhAnhMinhHoa || '/placeholder.png'} 
+              alt={item.tenSanPhamChiTiet}
+              className="w-14 h-14 object-cover rounded-lg"
             />
+            <div className="flex-1 min-w-0">
+              <h4 className="font-medium text-sm text-gray-800 truncate">
+                {item.tenSanPhamChiTiet}
+              </h4>
+              <p className="text-blue-600 font-semibold text-sm mt-0.5">
+                {item.donGia.toLocaleString()}₫ × {item.quantity}
+              </p>
+            </div>
             <button
               onClick={() => removeFromCart(item.id)}
               className="text-red-500 hover:text-red-700 p-1 hover:bg-red-50 rounded"
             >
               <FiTrash2 size={16} />
             </button>
+          </div>
+          
+          <div className="px-2 pb-2">
+            <div className="text-xs text-gray-500 space-y-1">
+              {item.selectedIMEIs.map((imei, index) => (
+                <div key={imei.id} className="flex items-center">
+                  <span className="w-5 text-center">{index + 1}.</span>
+                  <span className="font-mono">{imei.imei}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       ))}

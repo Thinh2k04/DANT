@@ -1,6 +1,7 @@
 package com.example.aino_1.restController;
 
 import com.example.aino_1.service.ZaloPayService;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 import java.util.Map;
+import java.util.logging.Logger;
 
 
 @RestController
@@ -20,6 +22,9 @@ public class ZaloPayController {
 
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
+
+    private final Logger logger = Logger.getLogger(ZaloPayController.class.getName());
+
 
 
     @PostMapping("/create")
@@ -33,8 +38,8 @@ public class ZaloPayController {
     }
 
 
-    @GetMapping(value = "/order-status", produces = "application/json")
-    public ResponseEntity<String> getOrderStatus(@RequestParam String appTransId) {
+    @GetMapping(value = "/order-status/{appTransId}", produces = "application/json")
+    public ResponseEntity<String> getOrderStatus(@PathVariable String appTransId) {
         try {
             JSONObject jsonResponse = zaloPayService.getOrderStatus(appTransId);
             return ResponseEntity.ok(jsonResponse.toString());
@@ -45,31 +50,15 @@ public class ZaloPayController {
     }
 
     @PostMapping("/callback")
-    public ResponseEntity<String> handleCallback(@RequestBody Map<String, Object> payload) {
-        try {
-            // Log payload callback nhận được từ ZaloPay
-            System.out.println("Callback payload received: " + payload);
+    public String handleCallback(@RequestBody String jsonStr) throws JSONException {
+        System.out.println("Nhận được dữ liệu callback từ zalo: xác nhạn đơn hàng thành công");
+        logger.info("Received callback: " + jsonStr);
 
-            // Xác minh callback từ ZaloPay
-            boolean isValid = zaloPayService.verifyCallback(payload);
-            if (!isValid) {
-                return ResponseEntity.badRequest().body("Invalid signature");
-            }
+        // Gọi service để xử lý logic callback
+        JSONObject response = zaloPayService.processCallback(jsonStr);
 
-            // Xử lý logic đơn hàng sau khi thanh toán
-            zaloPayService.processCallback(payload);
-
-            // Gửi thông báo qua WebSocket cho frontend
-            String orderId = (String) payload.get("app_trans_id");
-            messagingTemplate.convertAndSend("/topic/payment-status", Map.of(
-                    "orderId", orderId,
-                    "status", "SUCCESS"
-            ));
-
-            return ResponseEntity.ok("Callback processed successfully");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(500).body("An error occurred: " + e.getMessage());
-        }
+        // Trả về kết quả
+        System.out.println(response.toString());
+        return response.toString();
     }
 }

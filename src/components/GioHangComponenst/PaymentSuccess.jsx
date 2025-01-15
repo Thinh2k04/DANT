@@ -5,10 +5,46 @@ import { FaCheckCircle, FaBox, FaUser, FaMapMarkerAlt, FaTruck, FaMoneyBill, FaS
 const PaymentSuccess = () => {
   const location = useLocation();
   const orderInfo = location.state?.orderInfo;
+  const navigate = useNavigate();
 
   // Kiểm tra và hiển thị dữ liệu
   console.log('Order Info:', orderInfo); // Để debug
 
+  const handleBankPayment = async () => {
+    try {
+      const paymentData = {
+        userId: orderInfo.hoaDon?.maHoaDon || '',
+        totalAmount: orderInfo.hoaDon.tongTien ,
+        items: orderInfo.listHDCT.map(item => ({
+          product_id: item.tenSanPham,
+          quantity: item.soLuong,
+          price: item.donGia
+        }))
+      };
+
+      const response = await fetch('http://localhost:8080/api/payment/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(paymentData)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create payment');
+      }
+
+      const result = await response.json();
+      
+      if (result.order_url) {
+        window.open(result.order_url, '_blank');
+        navigate('/home');
+      }
+
+    } catch (error) {
+      console.error('Error creating payment:', error);
+    }
+  };
   if (!orderInfo) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -54,17 +90,17 @@ const PaymentSuccess = () => {
               </span>
             </p>
             <p className="text-gray-600">
-              Thời gian đặt: {new Date(orderInfo.hoaDon.thoiGianLapHoaDon[0], 
-                                     orderInfo.hoaDon.thoiGianLapHoaDon[1] - 1,
-                                     orderInfo.hoaDon.thoiGianLapHoaDon[2],
-                                     orderInfo.hoaDon.thoiGianLapHoaDon[3],
-                                     orderInfo.hoaDon.thoiGianLapHoaDon[4]).toLocaleString('vi-VN', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-              })}
+              Thời gian đặt: {new Date(orderInfo.hoaDon.thoiGianLapHoaDon[0],
+                orderInfo.hoaDon.thoiGianLapHoaDon[1] - 1,
+                orderInfo.hoaDon.thoiGianLapHoaDon[2],
+                orderInfo.hoaDon.thoiGianLapHoaDon[3],
+                orderInfo.hoaDon.thoiGianLapHoaDon[4]).toLocaleString('vi-VN', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
             </p>
           </div>
 
@@ -127,7 +163,6 @@ const PaymentSuccess = () => {
             </div>
           </div>
 
-          {/* Actions */}
           <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6 mt-8">
             <Link
               to="/"
@@ -135,6 +170,14 @@ const PaymentSuccess = () => {
             >
               Tiếp tục mua sắm
             </Link>
+            {orderInfo.hoaDon.hinhThucThanhToan === "Thanh toán qua ZALOPAY" && orderInfo.hoaDon.trangThaiThanhToan === 2 && (
+              <button
+                onClick={handleBankPayment}
+                className="px-8 py-4 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl hover:from-green-600 hover:to-green-700 transition-all transform hover:-translate-y-0.5 shadow-lg text-center font-semibold"
+              >
+                Thanh toán ngân hàng
+              </button>
+            )}
           </div>
         </div>
       </div>

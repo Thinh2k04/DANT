@@ -1,16 +1,18 @@
 package com.example.aino_1.service;
 
 
-import com.example.aino_1.dto.HDCTDTO;
-import com.example.aino_1.dto.SanPhamChiTietDto;
+import com.example.aino_1.dto.HoaDonChiTietDTO;
+import com.example.aino_1.dto.HoaDonDTO;
+import com.example.aino_1.dto.ThongTinTaiKhoanDTO;
+import com.example.aino_1.dto.TimelineHoaDonDTO;
 import com.example.aino_1.entity.*;
 import com.example.aino_1.repository.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -60,6 +62,9 @@ public class HoaDonService {
     @Autowired
     SanPhamChiTietService sanPhamChiTietService;
 
+    @Autowired
+    TimelineHoaDonInterface timelineHoaDonInterface;
+
     @Transactional
     public Map<String, Object> hamXuLiHoaDon(
             String username, ThongTinTaiKhoan tttk, HoaDon hd, List<HoaDonChiTiet> lhdct, Voucher voucher, List<Imei> listImei) {
@@ -90,7 +95,10 @@ public class HoaDonService {
             hd.setMaHoaDon(maHoaDon);
             HoaDon savedHoaDon = hdsi.save(hd);
 
-            List<HDCTDTO> listhdctDTO = new ArrayList<>();
+            // Chuyển đổi HoaDon sang DTO
+            HoaDonDTO hoaDonDTO = HoaDonDTO.fromEntity(savedHoaDon);
+
+            List<HoaDonChiTietDTO> listhdctDTO = new ArrayList<>();
 
             // Xử lý từng chi tiết hóa đơn
             for (HoaDonChiTiet hdct : lhdct) {
@@ -98,7 +106,7 @@ public class HoaDonService {
                 hdct.setHoaDon(savedHoaDon);
                 HoaDonChiTiet savedHdct = hdctsi.save(hdct);
 
-                HDCTDTO hdctDTO = new HDCTDTO();
+                HoaDonChiTietDTO hdctDTO = new HoaDonChiTietDTO();
                 hdctDTO.setSoLuong(savedHdct.getSoLuong());
                 hdctDTO.setDonGia(savedHdct.getGia());
                 String tenSanPham = sanPhamChiTietInterface.getSanPhamChiTietById(idSanPhamChiTiet).getTenSanPhamChiTiet();
@@ -129,17 +137,31 @@ public class HoaDonService {
                 }
             }
 
-            // Cập nhật trạng thái hóa đơn nếu có IMEI
+            // Tạo và lưu timeline
+            TimelineHoaDon timeline = new TimelineHoaDon();
+            timeline.setHoaDon(savedHoaDon);
+            timeline.setThoiGianCapNhat(new Timestamp(System.currentTimeMillis()));
+            timeline.setNguoiCapNhat(username);
+
             if (listImei != null && !listImei.isEmpty()) {
-                hd.setTrangThai(1); // Đánh dấu hóa đơn đã xác nhận
-                hdsi.save(hd);
+                timeline.setTrangThai(1); // Đã xác nhận
+                timeline.setLyDo("Đơn hàng đã được xác nhận vì có IMEI.");
+            } else {
+                timeline.setTrangThai(0); // Chờ xác nhận
+                timeline.setLyDo("Chờ xác nhận đơn hàng.");
             }
+
+            timelineHoaDonInterface.save(timeline);
+
+            // Chuyển đổi TimelineHoaDon sang DTO
+            TimelineHoaDonDTO timelineDTO = TimelineHoaDonDTO.fromEntity(timeline);
 
             // Trả về kết quả thành công
             return Map.of(
                     "success", true,
-                    "hoaDon", savedHoaDon,
-                    "listHDCT", listhdctDTO
+                    "hoaDon", hoaDonDTO, // Trả về hóa đơn dạng DTO
+                    "listHDCT", listhdctDTO,
+                    "timeline", timelineDTO
             );
 
         } catch (Exception e) {
@@ -153,6 +175,10 @@ public class HoaDonService {
     }
 
 
+
+
+
+
     public Map<String, Object> xacNhanDonHang(String maHoaDon, List<Imei> imeiList) {
         // Tìm hóa đơn theo mã hóa đơn
         System.out.println("================"+ maHoaDon);
@@ -163,12 +189,12 @@ public class HoaDonService {
         // Lấy danh sách hóa đơn chi tiết của hóa đơn
         List<HoaDonChiTiet> listHoaDonChiTiet = hdctsi.findAllByHoaDon_MaHoaDon(maHoaDon);
         // Tạo lhdctDTO trả về cho fe
-        List<HDCTDTO> lhdctdto = new ArrayList<>();
+        List<HoaDonChiTietDTO> lhdctdto = new ArrayList<>();
         for (HoaDonChiTiet hdct : listHoaDonChiTiet) {
             System.out.println("Chạy vào hàm for xử lí hóa đơn chi tiết");
             int idspct = hdct.getSanPhamChiTiet().getId();
             // Tạo đối tượng HDCTDTO để lưu thông tin chi tiết hóa đơn
-            HDCTDTO hdctDTO = new HDCTDTO();
+            HoaDonChiTietDTO hdctDTO = new HoaDonChiTietDTO();
             hdctDTO.setTenSanPham(sanPhamChiTietInterface.getSanPhamChiTietById(idspct).getTenSanPhamChiTiet());
             hdctDTO.setSoLuong(hdct.getSoLuong());
             hdctDTO.setDonGia(hdct.getSanPhamChiTiet().getDonGia());

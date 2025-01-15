@@ -5,6 +5,7 @@ import NavbarAdmin from '../Navbar/NavbarAdmin';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import { useNavigate } from 'react-router-dom';
 
 const OrderManagement = () => {
   const [orders, setOrders] = useState([]);
@@ -13,6 +14,11 @@ const OrderManagement = () => {
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState(null);
   const [isPolling, setIsPolling] = useState(true);
+  const [updateReason, setUpdateReason] = useState('');
+  const [showReasonInput, setShowReasonInput] = useState(false);
+  const [timelineData, setTimelineData] = useState([]);
+  const [userInfo, setUserInfo] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -55,18 +61,53 @@ const OrderManagement = () => {
     }
   }, [showStatusModal]);
 
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('userInfo'));
+    if (user) {
+      setUserInfo(user);
+    } else {
+      toast.error('Vui lòng đăng nhập để tiếp tục', {
+        position: "top-right",
+        autoClose: 3000
+      });
+      navigate('/login');
+    }
+  }, [navigate]);
+
+  const fetchTimeline = async (orderId) => {
+    try {
+      const response = await fetch(`http://localhost:8080/rest/timeline/getByHoaDonId/${orderId}`);
+      if (!response.ok) throw new Error('Failed to fetch timeline');
+      const data = await response.json();
+      setTimelineData(data);
+    } catch (error) {
+      console.error('Lỗi khi tải timeline:', error);
+    }
+  };
+
   const handleOrderClick = async (orderId) => {
     try {
-      const response = await fetch(`http://localhost:8080/rest/hdct/Byidhd/${orderId}`);
-      if (!response.ok) throw new Error('Failed to fetch order details');
-      const data = await response.json();
-      setOrderDetails(data);
+      const [orderDetailsResponse, timelineResponse] = await Promise.all([
+        fetch(`http://localhost:8080/rest/hdct/Byidhd/${orderId}`),
+        fetch(`http://localhost:8080/rest/timeline/getByHoaDonId/${orderId}`)
+      ]);
+
+      if (!orderDetailsResponse.ok) throw new Error('Failed to fetch order details');
+      if (!timelineResponse.ok) throw new Error('Failed to fetch timeline');
+
+      const [detailsData, timelineData] = await Promise.all([
+        orderDetailsResponse.json(),
+        timelineResponse.json()
+      ]);
+
+      setOrderDetails(detailsData);
+      setTimelineData(timelineData);
       const order = orders.find(o => o.id === orderId);
       setSelectedOrder(order);
       setShowStatusModal(true);
     } catch (error) {
-      console.error('Error fetching order details:', error);
-      toast.error('Không thể tải chi tiết đơn hàng', {
+      console.error('Lỗi khi tải dữ liệu:', error);
+      toast.error('Không thể tải thông tin đơn hàng', {
         position: "top-right",
         autoClose: 3000
       });
@@ -74,35 +115,68 @@ const OrderManagement = () => {
   };
 
   const handleUpdateStatus = async () => {
-    if (!selectedOrder || selectedStatus === null) {
-      toast.warning('Vui lòng chọn trạng thái mới', {
+    if (!selectedOrder || selectedStatus === null || !updateReason) {
+      toast.warning('Vui lòng điền đầy đủ thông tin', {
         position: "top-right",
         autoClose: 3000
       });
       return;
     }
 
-    if (selectedOrder.trangThaiThanhToan === 0) {
-      toast.error('Không thể cập nhật đơn hàng đã hủy', {
+    if (!userInfo) {
+      toast.error('Vui lòng đăng nhập lại', {
         position: "top-right",
         autoClose: 3000
       });
-      setShowStatusModal(false);
-      setSelectedStatus(null);
       return;
     }
 
-    if (selectedOrder.trangThaiThanhToan === 1) {
-      toast.error('Không thể cập nhật đơn hàng đã thành công', {
+    // Kiểm tra logic chuyển trạng thái
+    let isValidTransition = false;
+    switch (selectedOrder.trangThaiThanhToan) {
+      case 0: // Hủy đơn hàng
+      case 7: // Hoàn thành đơn hàng  
+      case 8: // Yêu cầu hoàn trả hàng
+        isValidTransition = false;
+        break;
+      case 1: // Chờ xác nhận
+        isValidTransition = selectedStatus === 2 || selectedStatus === 0;
+        break;
+      case 2: // Xác nhận đơn hàng
+        isValidTransition = selectedStatus === 3 || selectedStatus === 0;
+        break;
+      case 3: // Đơn vị vận chuyển đang giao
+        isValidTransition = selectedStatus === 4 || selectedStatus === 0;
+        break;
+      case 4: // Đang được giao tới bạn
+        isValidTransition = selectedStatus === 5;
+        break;
+      case 5: // Đơn hàng đã được giao thành công
+        isValidTransition = selectedStatus === 6;
+        break;
+      case 6: // Xác nhận giao hàng thành công
+        isValidTransition = selectedStatus === 7;
+        break;
+      default:
+        isValidTransition = false;
+    }
+
+    if (!isValidTransition) {
+      toast.error('Không thể chuyển sang trạng thái này', {
         position: "top-right",
         autoClose: 3000
       });
-      setShowStatusModal(false);
-      setSelectedStatus(null);
+      return;
+    }
+
+    // Nếu hủy đơn hàng, yêu cầu nhập lý do
+    if (selectedStatus === 0 && !updateReason) {
+      setShowReasonInput(true);
       return;
     }
 
     try {
+      // Update order status
       const response = await fetch(`http://localhost:8080/rest/hoa_don/update/${selectedOrder.id}`, {
         method: 'PUT',
         headers: {
@@ -116,6 +190,23 @@ const OrderManagement = () => {
 
       if (!response.ok) throw new Error('Failed to update status');
 
+      // Add timeline entry với thông tin người dùng
+      const timelineResponse = await fetch('http://localhost:8080/rest/timeline/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          hoaDonId: selectedOrder.id,
+          trangThai: selectedStatus.toString(),
+          nguoiCapNhat: localStorage.getItem('username'),
+          lyDo: updateReason,
+          role: userInfo.role === 'ADMIN' ? 'Admin' : 'User'
+        })
+      });
+
+      if (!timelineResponse.ok) throw new Error('Failed to add timeline entry');
+
       setOrders(orders.map(order => 
         order.id === selectedOrder.id 
           ? {...order, trangThaiThanhToan: selectedStatus}
@@ -126,6 +217,8 @@ const OrderManagement = () => {
       setShowStatusModal(false);
       setSelectedStatus(null);
       setOrderDetails([]);
+      setUpdateReason('');
+      setShowReasonInput(false);
       setIsPolling(true);
 
       toast.success('Cập nhật trạng thái đơn hàng thành công', {
@@ -134,11 +227,35 @@ const OrderManagement = () => {
       });
 
     } catch (error) {
-      console.error('Error updating order status:', error);
+      console.error('Lỗi cập nhật trạng thái:', error);
       toast.error('Cập nhật trạng thái đơn hàng thất bại', {
         position: "top-right",
         autoClose: 3000
       });
+    }
+  };
+
+  // Helper function to get default reason based on status
+  const getDefaultReason = (status) => {
+    switch (status) {
+      case 0:
+        return "Đơn hàng đã bị hủy bởi Admin";
+      case 2:
+        return "Admin đã xác nhận đơn hàng";
+      case 3:
+        return "Admin đã bàn giao đơn hàng cho đơn vị vận chuyển";
+      case 4:
+        return "Đơn vị vận chuyển đang giao hàng đến khách hàng";
+      case 5:
+        return "Đơn vị vận chuyển đã giao hàng thành công";
+      case 6:
+        return "Khách hàng đã xác nhận nhận được hàng";
+      case 7:
+        return "Đơn hàng đã hoàn thành";
+      case 8:
+        return "Khách hàng yêu cầu hoàn trả hàng";
+      default:
+        return "Admin đã cập nhật trạng thái đơn hàng";
     }
   };
 
@@ -159,9 +276,16 @@ const OrderManagement = () => {
       'Địa chỉ nhận hàng': order.diaChiNhanHang,
       'Tổng tiền': order.tongTien,
       'Thời gian đặt hàng': order.thoiGianLapHoaDon,
-      'Trạng thái': order.trangThaiThanhToan === 0 ? 'Đã hủy' :
-                    order.trangThaiThanhToan === 1 ? 'Thành công' :
-                    order.trangThaiThanhToan === 2 ? 'Chờ thanh toán' : 'Không xác định',
+      'Trạng thái': 
+                    order.trangThaiThanhToan === 0 ? 'Đã hủy' :
+                    order.trangThaiThanhToan === 1 ? 'Chờ xác nhận' :
+                    order.trangThaiThanhToan === 2 ? 'Xác nhận đơn hàng' :
+                    order.trangThaiThanhToan === 3 ? 'Đơn vị vận chuyển đang giao' :
+                    order.trangThaiThanhToan === 4 ? 'Đang được giao tới bạn' :
+                    order.trangThaiThanhToan === 5 ? 'Đơn hàng đã được giao thành công' :
+                    order.trangThaiThanhToan === 6 ? 'Xác nhận giao hàng thành công' :
+                    order.trangThaiThanhToan === 7 ? 'Hoàn thành đơn hàng' :
+                    order.trangThaiThanhToan === 8 ? 'Yêu cầu hoàn trả hàng' : 'Không xác định',
       'Hình thức thanh toán': order.hinhThucThanhToan?.tenHinhThuc,
       'Cửa hàng': `${order.cuaHang?.soNha}, ${order.cuaHang?.phuong}, ${order.cuaHang?.huyen}, ${order.cuaHang?.tinh}`
     }));
@@ -424,15 +548,29 @@ const OrderManagement = () => {
                   <td className="px-6 py-4 whitespace-nowrap cursor-pointer" onClick={() => handleOrderClick(order.id)}>
                     <span className={`px-3 py-1 inline-flex text-sm leading-5 font-medium rounded-full 
                       ${order.trangThaiThanhToan === 0 ? 'bg-red-100 text-red-800' : 
-                        order.trangThaiThanhToan === 1 ? 'bg-green-100 text-green-800' : 
-                        order.trangThaiThanhToan === 2 ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'}`}>
+                        order.trangThaiThanhToan === 1 ? 'bg-yellow-100 text-yellow-800' :
+                        order.trangThaiThanhToan === 2 ? 'bg-blue-100 text-blue-800' :
+                        order.trangThaiThanhToan === 3 ? 'bg-indigo-100 text-indigo-800' :
+                        order.trangThaiThanhToan === 4 ? 'bg-purple-100 text-purple-800' :
+                        order.trangThaiThanhToan === 5 ? 'bg-pink-100 text-pink-800' :
+                        order.trangThaiThanhToan === 6 ? 'bg-green-100 text-green-800' :
+                        order.trangThaiThanhToan === 7 ? 'bg-emerald-100 text-emerald-800' :
+                        order.trangThaiThanhToan === 8 ? 'bg-orange-100 text-orange-800' : 
+                        'bg-gray-100 text-gray-800'}`}>
                       {order.trangThaiThanhToan === 0 ? 'Đã hủy' :
-                       order.trangThaiThanhToan === 1 ? 'Thành công' :
-                       order.trangThaiThanhToan === 2 ? 'Chờ thanh toán' : 'Không xác định'}
+                       order.trangThaiThanhToan === 1 ? 'Chờ xác nhận' :
+                       order.trangThaiThanhToan === 2 ? 'Xác nhận đơn hàng' :
+                       order.trangThaiThanhToan === 3 ? 'Đơn vị vận chuyển đang giao' :
+                       order.trangThaiThanhToan === 4 ? 'Đang được giao tới bạn' :
+                       order.trangThaiThanhToan === 5 ? 'Đơn hàng đã được giao thành công' :
+                       order.trangThaiThanhToan === 6 ? 'Xác nhận giao hàng thành công' :
+                       order.trangThaiThanhToan === 7 ? 'Hoàn thành đơn hàng' :
+                       order.trangThaiThanhToan === 8 ? 'Yêu cầu hoàn trả hàng' : 
+                       'Không xác định'}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    {order.trangThaiThanhToan === 2 && (
+                    {![0, 7, 8].includes(order.trangThaiThanhToan) && (
                       <button 
                         onClick={() => {
                           setSelectedOrder(order);
@@ -452,45 +590,79 @@ const OrderManagement = () => {
           {showStatusModal && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
               <div className="bg-white p-8 rounded-lg w-96 shadow-2xl transform transition-all duration-300">
-                <h2 className="text-2xl font-bold mb-6 text-gray-800">Cập nhật trạng thái</h2>
+                <h2 className="text-2xl font-bold mb-6 text-gray-800">Cập nhật trạng thái đơn hàng</h2>
                 <div className="space-y-4">
-                  <div className="flex items-center space-x-3">
-                    <input
-                      type="radio"
-                      id="status-success"
-                      name="status"
-                      value={1}
-                      checked={selectedStatus === 1}
-                      onChange={(e) => setSelectedStatus(Number(e.target.value))}
-                      className="form-radio h-4 w-4 text-blue-600"
-                    />
-                    <label htmlFor="status-success" className="text-gray-700">Thành công</label>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <input
-                      type="radio"
-                      id="status-cancel"
-                      name="status"
-                      value={0}
-                      checked={selectedStatus === 0}
-                      onChange={(e) => setSelectedStatus(Number(e.target.value))}
-                      className="form-radio h-4 w-4 text-blue-600"
-                    />
-                    <label htmlFor="status-cancel" className="text-gray-700">Hủy đơn</label>
-                  </div>
+                  {selectedOrder && !showReasonInput && (
+                    <>
+                      <div className="flex items-center space-x-3">
+                        <input
+                          type="radio"
+                          id={`status-${selectedOrder.trangThaiThanhToan + 1}`}
+                          name="status"
+                          value={selectedOrder.trangThaiThanhToan + 1}
+                          checked={selectedStatus === selectedOrder.trangThaiThanhToan + 1}
+                          onChange={(e) => setSelectedStatus(Number(e.target.value))}
+                          className="form-radio h-4 w-4 text-blue-600"
+                        />
+                        <label htmlFor={`status-${selectedOrder.trangThaiThanhToan + 1}`} className="text-gray-700">
+                          {selectedOrder.trangThaiThanhToan === 1 && "Xác nhận đơn hàng"}
+                          {selectedOrder.trangThaiThanhToan === 2 && "Bàn giao cho đơn vị vận chuyển"}
+                          {selectedOrder.trangThaiThanhToan === 3 && "Đang giao tới khách hàng"}
+                          {selectedOrder.trangThaiThanhToan === 4 && "Đã giao hàng thành công"}
+                          {selectedOrder.trangThaiThanhToan === 5 && "Khách hàng xác nhận nhận hàng"}
+                          {selectedOrder.trangThaiThanhToan === 6 && "Hoàn thành đơn hàng"}
+                        </label>
+                      </div>
+
+                      {[1, 2, 3].includes(selectedOrder.trangThaiThanhToan) && (
+                        <div className="flex items-center space-x-3">
+                          <input
+                            type="radio"
+                            id="status-0"
+                            name="status"
+                            value={0}
+                            checked={selectedStatus === 0}
+                            onChange={(e) => setSelectedStatus(Number(e.target.value))}
+                            className="form-radio h-4 w-4 text-blue-600"
+                          />
+                          <label htmlFor="status-0" className="text-gray-700">Hủy đơn hàng</label>
+                        </div>
+                      )}
+
+                      <div className="space-y-2 mt-4">
+                        <label className="block text-sm font-medium text-gray-700">
+                          Lý do cập nhật
+                        </label>
+                        <textarea
+                          value={updateReason}
+                          onChange={(e) => setUpdateReason(e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                          rows="3"
+                          placeholder="Vui lòng nhập lý do cập nhật trạng thái..."
+                          required
+                        />
+                      </div>
+                    </>
+                  )}
                 </div>
                 <div className="mt-8 flex justify-end space-x-4">
                   <button
-                    onClick={handleCloseModal}
+                    onClick={() => {
+                      handleCloseModal();
+                      setShowReasonInput(false);
+                      setUpdateReason('');
+                    }}
                     className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors"
                   >
-                    Hủy
+                    Đóng
                   </button>
                   <button
                     onClick={handleUpdateStatus}
-                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                    disabled={!updateReason}
+                    className={`px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors
+                      ${!updateReason ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
-                    Cập nhật
+                    Xác nhận
                   </button>
                 </div>
               </div>
@@ -624,6 +796,60 @@ const OrderManagement = () => {
                       </tr>
                     </tbody>
                   </table>
+                </div>
+
+                <div className="mt-8 bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                  <h3 className="text-xl font-bold mb-6 text-gray-800">Lịch sử đơn hàng</h3>
+                  <div className="relative">
+                    {timelineData.map((item, index) => (
+                      <div key={index} className="mb-8 flex items-start">
+                        <div className="flex flex-col items-center mr-4">
+                          <div className={`rounded-full h-8 w-8 flex items-center justify-center
+                            ${item.trangThai === '0' ? 'bg-red-100 text-red-800' :
+                              item.trangThai === '1' ? 'bg-yellow-100 text-yellow-800' :
+                              item.trangThai === '2' ? 'bg-blue-100 text-blue-800' :
+                              item.trangThai === '3' ? 'bg-indigo-100 text-indigo-800' :
+                              item.trangThai === '4' ? 'bg-purple-100 text-purple-800' :
+                              item.trangThai === '5' ? 'bg-pink-100 text-pink-800' :
+                              item.trangThai === '6' ? 'bg-green-100 text-green-800' :
+                              item.trangThai === '7' ? 'bg-emerald-100 text-emerald-800' :
+                              item.trangThai === '8' ? 'bg-orange-100 text-orange-800' : 
+                              'bg-gray-100 text-gray-800'}`}
+                          >
+                            <span className="text-sm font-semibold">{parseInt(item.trangThai) + 1}</span>
+                          </div>
+                          {index < timelineData.length - 1 && (
+                            <div className="h-full w-0.5 bg-gray-200 my-2"></div>
+                          )}
+                        </div>
+                        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 flex-1">
+                          <div className="flex justify-between items-start mb-2">
+                            <div>
+                              <h4 className="font-semibold text-gray-800">
+                                {item.trangThai === '0' ? 'Đã hủy' :
+                                 item.trangThai === '1' ? 'Chờ xác nhận' :
+                                 item.trangThai === '2' ? 'Xác nhận đơn hàng' :
+                                 item.trangThai === '3' ? 'Đơn vị vận chuyển đang giao' :
+                                 item.trangThai === '4' ? 'Đang được giao tới bạn' :
+                                 item.trangThai === '5' ? 'Đơn hàng đã được giao thành công' :
+                                 item.trangThai === '6' ? 'Xác nhận giao hàng thành công' :
+                                 item.trangThai === '7' ? 'Hoàn thành đơn hàng' :
+                                 item.trangThai === '8' ? 'Yêu cầu hoàn trả hàng' : 
+                                 'Không xác định'}
+                              </h4>
+                              <p className="text-sm text-gray-500">
+                                Cập nhật bởi: {item.nguoiCapNhat} ({item.role})
+                              </p>
+                            </div>
+                            <span className="text-sm text-gray-500">
+                              {new Date(item.thoiGianCapNhat).toLocaleString('vi-VN')}
+                            </span>
+                          </div>
+                          <p className="text-gray-600 text-sm">{item.lyDo}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>

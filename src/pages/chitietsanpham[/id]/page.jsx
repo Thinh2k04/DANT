@@ -145,11 +145,6 @@ const ChiTietSanPham = () => {
         navigate(`/chitietsanpham/${relatedProduct.id}`);
     };
 
-    // Hàm xử lý khi click nút mua ngay
-    const handleBuyNow = () => {
-        navigate(`/xacnhandonhang/${selectedConfig.id}`);
-    };
-
     // Hàm xử lý khi click vào ảnh thumbnail
     const handleThumbnailClick = (imageUrl) => {
         setSelectedImage(imageUrl);
@@ -259,11 +254,13 @@ const ChiTietSanPham = () => {
                                 
                                 <div className="flex items-center gap-4 mb-6">
                                     <span className="text-3xl font-bold text-red-600">
-                                        {formatPrice(selectedConfig.discountedPrice)} VNĐ
+                                        {formatPrice(selectedConfig.discountedPrice || selectedConfig.donGia)} VNĐ
                                     </span>
-                                    <span className="text-sm text-gray-500 line-through">
-                                        {formatPrice(selectedConfig.donGia)} VNĐ
-                                    </span>
+                                    {selectedConfig.discountedPrice && (
+                                        <span className="text-sm text-gray-500 line-through">
+                                            {formatPrice(selectedConfig.donGia)} VNĐ
+                                        </span>
+                                    )}
                                     {selectedConfig.discountPercentage > 0 && (
                                         <span className="bg-red-100 text-red-600 px-2 py-1 rounded-full text-sm">
                                             -{selectedConfig.discountPercentage}%
@@ -317,18 +314,11 @@ const ChiTietSanPham = () => {
 
                                 <div className="flex gap-4">
                                     <button 
-                                        onClick={handleBuyNow}
-                                        className="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 px-6 rounded-xl font-semibold text-base flex items-center justify-center gap-2 transition-colors"
-                                    >
-                                        <FaShoppingCart />
-                                        Mua ngay
-                                    </button>
-                                    <button 
                                         onClick={() => handleAddToCart(selectedConfig)}
-                                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-xl font-semibold text-base flex items-center justify-center gap-2 transition-colors"
+                                        className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 px-6 rounded-xl font-semibold text-lg flex items-center justify-center gap-2 transition-colors"
                                     >
-                                        <FaShoppingCart />
-                                        Thêm vào giỏ
+                                        <FaShoppingCart className="text-xl" />
+                                        Thêm vào giỏ hàng
                                     </button>
                                 </div>
                             </div>
@@ -393,9 +383,9 @@ const ChiTietSanPham = () => {
                                         </h3>
                                         <div className="flex items-center gap-2 mb-3">
                                             <p className="text-red-600 font-bold text-lg">
-                                                {formatPrice(relatedProduct.discountedPrice)} VNĐ
+                                                {formatPrice(relatedProduct.discountedPrice || relatedProduct.donGia)} VNĐ
                                             </p>
-                                            {relatedProduct.discountPercentage > 0 && (
+                                            {relatedProduct.discountedPrice && relatedProduct.discountPercentage > 0 && (
                                                 <>
                                                     <p className="text-gray-500 text-sm line-through">
                                                         {formatPrice(relatedProduct.donGia)} VNĐ

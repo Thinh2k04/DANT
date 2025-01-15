@@ -135,9 +135,11 @@ const LoginPage = () => {
         localStorage.setItem('Authorization', data.token);
         localStorage.setItem('role', data.role);
         localStorage.setItem('username', data.username);
-        localStorage.setItem('userData', JSON.stringify({
-          username: formData.username,
-          role: data.role,
+        
+        // Lưu thông tin user với format phù hợp cho timeline
+        localStorage.setItem('userInfo', JSON.stringify({
+          username: data.username,
+          role: data.role === 'ADMIN' ? 'Admin' : 'User'  // Format role cho đúng với API timeline
         }));
 
         // Cấu hình axios header

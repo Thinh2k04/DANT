@@ -109,6 +109,7 @@ public class HoaDonService {
                 HoaDonChiTietDTO hdctDTO = new HoaDonChiTietDTO();
                 hdctDTO.setSoLuong(savedHdct.getSoLuong());
                 hdctDTO.setDonGia(savedHdct.getGia());
+                hdctDTO.setHinhAnhMinhHoa(hdct.getSanPhamChiTiet().getHinhAnhMinhHoa());
                 String tenSanPham = sanPhamChiTietInterface.getSanPhamChiTietById(idSanPhamChiTiet).getTenSanPhamChiTiet();
                 hdctDTO.setTenSanPham(tenSanPham);
 

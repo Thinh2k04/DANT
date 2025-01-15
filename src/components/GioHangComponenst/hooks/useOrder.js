@@ -164,43 +164,44 @@ export const useOrder = () => {
         // Hiển thị thông báo thành công
         toast.success('Đặt hàng thành công!');
 
+        const orderInfo = {
+          hoaDon: {
+            maHoaDon: responseData.hoaDon.maHoaDon,
+            tenCuaHang: responseData.hoaDon.tenCuaHang,
+            thoiGianLapHoaDon: responseData.hoaDon.thoiGianLapHoaDon,
+            tongTien: responseData.hoaDon.tongTien,
+            phiVanChuyen: responseData.hoaDon.phiVanChuyen,
+            hinhThucThanhToan: responseData.hoaDon.hinhThucThanhToan,
+            diaChiNhanHang: responseData.hoaDon.diaChiNhanHang,
+            cuaHang: responseData.hoaDon.cuaHang,
+            trangThaiThanhToan: responseData.hoaDon.trangThaiThanhToan,
+            trangThai: responseData.hoaDon.trangThai
+          },
+          listHDCT: responseData.listHDCT,
+          timeline: responseData.timeline
+        };
+
         // Chuyển hướng với dữ liệu đơn hàng
         navigate('/payment-success', {
-          state: {
-            orderInfo: {
-              hoaDon: {
-                id: responseData.id,
-                maHoaDon: responseData.maHoaDon,
-                tongTien: totalAmount + shippingFee,
-                phiVanChuyen: shippingFee,
-                diaChiNhanHang: orderData.hd.diaChiNhanHang,
-                hinhThucThanhToan: paymentMethod === "1" ? "Thanh toán khi nhận hàng" : "Thanh toán qua ZaloPay",
-                thoiGianLapHoaDon: new Date().toISOString(),
-                trangThaiThanhToan: 1
-              },
-              listHDCT: cartItems.map(item => ({
-                id: item.id,
-                tenSanPham: item.tenSanPhamChiTiet,
-                donGia: item.donGia,
-                soLuong: quantities[item.id] || 1
-              }))
-            }
-          },
+          state: { orderInfo },
           replace: true
         });
 
-        // Gửi email xác nhận
+        // Gửi email xác nhận với dữ liệu từ orderInfo
         if (email) {
           try {
             await sendOrderConfirmationEmail({
               email,
               customerName,
-              cartItems,
-              quantities,
-              totalAmount,
-              shippingFee,
-              orderData,
-              paymentMethod
+              orderDetails: {
+                products: orderInfo.listHDCT,
+                totalAmount: orderInfo.hoaDon.tongTien,
+                shippingFee: orderInfo.hoaDon.phiVanChuyen,
+                orderNumber: orderInfo.hoaDon.maHoaDon,
+                shippingAddress: orderInfo.hoaDon.diaChiNhanHang,
+                paymentMethod: orderInfo.hoaDon.hinhThucThanhToan,
+                orderTime: orderInfo.hoaDon.thoiGianLapHoaDon
+              }
             });
             toast.success('Đã gửi email xác nhận đơn hàng');
           } catch (emailError) {

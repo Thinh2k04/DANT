@@ -24,12 +24,18 @@ import javax.crypto.spec.SecretKeySpec;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 
 @Service
 public class ZaloPayService {
+
+    private ZaloPayUtil zaloPayUtil;
+
+    private final Mac HmacSHA256;
+
     private static final Map<String, String> config = new HashMap<String, String>() {{
         put("app_id", "2554");
         put("key1", "sdngKKJmqEMzvh5QQcdD2A9XBSKUNaYn");
@@ -37,6 +43,11 @@ public class ZaloPayService {
         put("endpoint", "https://sb-openapi.zalopay.vn/v2/create");
         put("endpoint2", "https://sb-openapi.zalopay.vn/v2/query");
     }};
+
+    public ZaloPayService() throws Exception {
+        HmacSHA256 = Mac.getInstance("HmacSHA256");
+        HmacSHA256.init(new SecretKeySpec(KEY2.getBytes(), "HmacSHA256"));
+    }
 
     // Định dạng thời gian hiện tại
     private String getCurrentTimeString(String format) {
@@ -73,7 +84,7 @@ public class ZaloPayService {
             put("bank_code", "");
             put("item", itemJSONArray.toString()); // Chuyển đổi itemList thành JSON string
             put("embed_data", new JSONObject(embed_data).toString());
-            put("callback_url", "https://f41f-2405-4802-1c99-b120-ddf4-2321-5b9a-6a84.ngrok-free.app/api/payment/callback"); // URL callback
+            put("callback_url", "https://05a7-123-16-242-129.ngrok-free.app/api/payment/callback"); // URL callback
         }};
 
         // Tạo dữ liệu cho chữ ký HMAC
@@ -147,7 +158,7 @@ public class ZaloPayService {
 
 
 
-    private static final String KEY2 = "trMrHtvjo6myautxDUiAcYsVtaeQ8nhf"; // Key2 của bạn
+    private final String KEY2 = "trMrHtvjo6myautxDUiAcYsVtaeQ8nhf"; // Key2 của bạn
 
     // Hàm để tạo chữ ký HMAC từ dữ liệu
     private String generateHMAC(String data) throws Exception {
@@ -157,27 +168,34 @@ public class ZaloPayService {
         return Hex.encodeHexString(hashBytes).toLowerCase(); // Sử dụng Hex để mã hóa byte thành chuỗi hex
     }
 
-    public boolean verifyCallback(Map<String, Object> payload) {
+    public JSONObject processCallback(String jsonStr) throws JSONException {
+        JSONObject result = new JSONObject();
         try {
-            String dataStr = (String) payload.get("data");
-            String reqMac = (String) payload.get("mac");
+            JSONObject cbdata = new JSONObject(jsonStr);
+            String dataStr = cbdata.getString("data");
+            String reqMac = cbdata.getString("mac");
 
-            // Tính toán chữ ký từ dữ liệu nhận được
-            String computedMac = generateHMAC(dataStr);
+            // Tạo MAC từ dữ liệu nhận được
 
-            // So sánh chữ ký đã nhận với chữ ký tính toán
-            return reqMac.equals(computedMac);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
+            String mac = generateHMAC(dataStr);
+
+            // Kiểm tra chữ ký MAC
+            if (!reqMac.equals(mac)) {
+                result.put("return_code", -1);
+                result.put("return_message", "mac not equal");
+            } else {
+                // Xử lý logic giao dịch
+                JSONObject data = new JSONObject(dataStr);
+                String appTransId = data.getString("app_trans_id");
+                // TODO: Gọi repository hoặc cập nhật trạng thái giao dịch tại đây
+                result.put("return_code", 1);
+                result.put("return_message", "success");
+            }
+        } catch (Exception ex) {
+            // Xử lý lỗi
+            result.put("return_code", 0); // ZaloPay sẽ callback lại nếu xảy ra lỗi
+            result.put("return_message", ex.getMessage());
         }
-    }
-
-    public void processCallback(Map<String, Object> payload) throws JSONException {
-        // Xử lý cập nhật đơn hàng trong database
-        JSONObject data = new JSONObject((String) payload.get("data"));
-        String orderId = data.getString("app_trans_id");
-        System.out.println("Đơn hàng đã thanh toán thành công: " + orderId);
-        // Thêm logic cập nhật trạng thái đơn hàng trong cơ sở dữ liệu nếu cần
+        return result;
     }
 }

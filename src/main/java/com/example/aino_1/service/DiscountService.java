@@ -255,7 +255,6 @@ public class DiscountService {
                     }
                 }
 
-
                 // Thêm sản phẩm vào chiến dịch mới
                 ProductDiscount newProductDiscount = new ProductDiscount();
                 newProductDiscount.setProduct(product);
@@ -274,15 +273,21 @@ public class DiscountService {
 
 
     public DiscountCampaign updateDiscountCampaign(Integer id, DiscountCampaign updatedCampaign) {
-        return discountCampaignInterface.findById(id).map(existingCampaign -> {
-            existingCampaign.setName(updatedCampaign.getName());
-            existingCampaign.setDiscountPercentage(updatedCampaign.getDiscountPercentage());
-            existingCampaign.setStartDate(updatedCampaign.getStartDate());
-            existingCampaign.setEndDate(updatedCampaign.getEndDate());
-            existingCampaign.setActive(updatedCampaign.getActive());
-            return discountCampaignInterface.save(existingCampaign);
-        }).orElseThrow(() -> new EntityNotFoundException("Discount campaign not found"));
+        // Tìm kiếm chiến dịch giảm giá theo ID
+        DiscountCampaign existingCampaign = discountCampaignInterface.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Discount campaign not found"));
+
+        // Cập nhật thông tin chiến dịch hiện có
+        existingCampaign.setName(updatedCampaign.getName());
+        existingCampaign.setDiscountPercentage(updatedCampaign.getDiscountPercentage());
+        existingCampaign.setStartDate(updatedCampaign.getStartDate());
+        existingCampaign.setEndDate(updatedCampaign.getEndDate());
+        existingCampaign.setActive(updatedCampaign.getActive());
+
+        // Lưu lại thay đổi và trả về kết quả
+        return discountCampaignInterface.save(existingCampaign);
     }
+
 
     public DiscountCampaign updateDiscountCampaignForRealTime(Integer id) {
         return discountCampaignInterface.findById(id).map(existingCampaign -> {

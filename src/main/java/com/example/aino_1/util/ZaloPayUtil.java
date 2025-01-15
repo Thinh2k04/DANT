@@ -2,6 +2,7 @@ package com.example.aino_1.util;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+
 public class ZaloPayUtil {
     public static String generateMac(String data, String key) throws Exception {
         Mac hmacSHA256 = Mac.getInstance("HmacSHA256");

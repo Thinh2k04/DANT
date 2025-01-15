@@ -48,7 +48,6 @@ public class DiscountRestController {
         return productDiscountInterface.findAll();
     }
 
-
     // Thêm đợt giảm giá
     @PostMapping("/addDiscount")
     public ResponseEntity<Map<String, Object>> addDiscountCampaign(

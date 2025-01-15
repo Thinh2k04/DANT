@@ -51,15 +51,15 @@ public class DiscountRestController {
     // Thêm đợt giảm giá
     @PostMapping("/addDiscount")
     public ResponseEntity<Map<String, Object>> addDiscountCampaign(
+            @RequestHeader("Authorization") String token,
             @RequestBody Map<String, Object> discountCampaignRequest
     ) {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule()); // Đăng ký xử lý LocalDateTime
-        String username = objectMapper.convertValue(discountCampaignRequest.get("username"), String.class);
         DiscountCampaign discountCampaign = objectMapper.convertValue(discountCampaignRequest.get("campaigns"), DiscountCampaign.class);
         List<Integer> productIds = objectMapper.convertValue(discountCampaignRequest.get("products"), new TypeReference<List<Integer>>() {});
 
-        Map<String, Object> result = discountService.addDiscountCampaign( username,discountCampaign, productIds);
+        Map<String, Object> result = discountService.addDiscountCampaign( token,discountCampaign, productIds);
 
         if (result.containsKey("Lỗi")) {
             return ResponseEntity.badRequest().body(result);

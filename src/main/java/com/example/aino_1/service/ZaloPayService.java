@@ -84,7 +84,7 @@ public class ZaloPayService {
             put("bank_code", "");
             put("item", itemJSONArray.toString()); // Chuyển đổi itemList thành JSON string
             put("embed_data", new JSONObject(embed_data).toString());
-            put("callback_url", "https://05a7-123-16-242-129.ngrok-free.app/api/payment/callback"); // URL callback
+            put("callback_url", "https://b2ee-1-54-214-145.ngrok-free.app/api/payment/callback"); // URL callback
         }};
 
         // Tạo dữ liệu cho chữ ký HMAC
@@ -155,8 +155,6 @@ public class ZaloPayService {
 
         return new JSONObject(resultJsonStr.toString());
     }
-
-
 
     private final String KEY2 = "trMrHtvjo6myautxDUiAcYsVtaeQ8nhf"; // Key2 của bạn
 

@@ -1,9 +1,11 @@
 package com.example.aino_1.restController;
 
+import com.example.aino_1.service.HoaDonService;
 import com.example.aino_1.service.ZaloPayService;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +22,8 @@ public class ZaloPayController {
     @Autowired
     private ZaloPayService zaloPayService;
 
+    @Autowired
+    private HoaDonService hoaDonService;
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 

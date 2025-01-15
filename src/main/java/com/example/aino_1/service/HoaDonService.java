@@ -110,6 +110,7 @@ public class HoaDonService {
                 hdctDTO.setSoLuong(savedHdct.getSoLuong());
                 hdctDTO.setDonGia(savedHdct.getGia());
                 hdctDTO.setHinhAnhMinhHoa(hdct.getSanPhamChiTiet().getHinhAnhMinhHoa());
+                System.out.println("=========Hình ảnh minh họa lấy ra là :" + hdct.getSanPhamChiTiet().getHinhAnhMinhHoa());
                 String tenSanPham = sanPhamChiTietInterface.getSanPhamChiTietById(idSanPhamChiTiet).getTenSanPhamChiTiet();
                 hdctDTO.setTenSanPham(tenSanPham);
 

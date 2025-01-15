@@ -54,8 +54,7 @@ public class HoaDonController {
     }
 
     @PostMapping("addHD")
-    public ResponseEntity<?> addHoaDon(
-                                       @RequestBody Map<String, Object> requestData) {
+    public ResponseEntity<?> addHoaDon(@RequestBody Map<String, Object> requestData) {
         try {
             System.out.println("HOADONCONTROLLER: chạy vào phần try");
             ObjectMapper objectMapper = new ObjectMapper();

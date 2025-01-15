@@ -11,6 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 public class HoaDonChiTietDTO {
     private String tenSanPham;
+    private String hinhAnhMinhHoa;
     private Integer soLuong;
     private Float donGia;
     private List<String> listImei;

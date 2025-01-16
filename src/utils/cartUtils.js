@@ -11,28 +11,40 @@ export const addToCart = (item) => {
     
     window.dispatchEvent(new Event('cartUpdated'));
     
-    toast.success(
-      <div>
-        <p>Đã thêm vào giỏ hàng:</p>
-        <p className="font-semibold">{item.tenSanPhamChiTiet || item.tenSanPham}</p>
-        <p className="text-red-600 font-semibold mt-1">
-          Giá: {parseFloat(priceToUse).toLocaleString('vi-VN')}₫
-          {item.discountedPrice && (
-            <span className="text-gray-500 text-sm line-through ml-2">
-              {parseFloat(item.donGia).toLocaleString('vi-VN')}₫
-            </span>
-          )}
-        </p>
-      </div>, 
-      {
-        position: "top-right",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      }
-    );
+    // Kiểm tra xem thông báo đã hiển thị chưa
+    const toastShown = localStorage.getItem('cartToastShown');
+    if (!toastShown) {
+      toast.success(
+        <div>
+          <p>Đã thêm vào giỏ hàng:</p>
+          <p className="font-semibold">{item.tenSanPhamChiTiet || item.tenSanPham}</p>
+          <p className="text-red-600 font-semibold mt-1">
+            Giá: {parseFloat(priceToUse).toLocaleString('vi-VN')}₫
+            {item.discountedPrice && (
+              <span className="text-gray-500 text-sm line-through ml-2">
+                {parseFloat(item.donGia).toLocaleString('vi-VN')}₫
+              </span>
+            )}
+          </p>
+        </div>, 
+        {
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          onClose: () => {
+            // Đánh dấu là thông báo đã hiển thị
+            localStorage.setItem('cartToastShown', 'true');
+            // Xóa đánh dấu sau 1 giây để cho phép hiển thị thông báo tiếp theo
+            setTimeout(() => {
+              localStorage.removeItem('cartToastShown');
+            }, 1000);
+          }
+        }
+      );
+    }
 
     return {
       success: true,

@@ -8,6 +8,7 @@ import 'jspdf-autotable';
 import { useNavigate } from 'react-router-dom';
 
 const OrderManagement = () => {
+  const [orderData, setOrderData] = useState(null);
   const [orders, setOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [orderDetails, setOrderDetails] = useState([]);
@@ -102,34 +103,38 @@ const OrderManagement = () => {
 
   const handleOrderClick = async (orderId) => {
     try {
-      const [orderDetailsResponse, timelineResponse] = await Promise.all([
-        fetch(`http://localhost:8080/rest/hdct/Byidhd/${orderId}`),
+      const [orderResponse, timelineResponse] = await Promise.all([
+        fetch(`http://localhost:8080/rest/hoa_don/getById/${orderId}`),
         fetch(`http://localhost:8080/rest/timeline/getByHoaDonId/${orderId}`)
       ]);
 
-      if (!orderDetailsResponse.ok) throw new Error('Failed to fetch order details');
+      if (!orderResponse.ok) throw new Error('Failed to fetch order details');
       if (!timelineResponse.ok) throw new Error('Failed to fetch timeline');
 
-      const [detailsData, timelineData] = await Promise.all([
-        orderDetailsResponse.json(),
+      const [orderData, timelineData] = await Promise.all([
+        orderResponse.json(),
         timelineResponse.json()
       ]);
 
-      setOrderDetails(detailsData);
+      setOrderData(orderData);
+      setOrderDetails(orderData.chiTietHoaDon);
       setTimelineData(timelineData);
-      const order = orders.find(o => o.id === orderId);
-      setSelectedOrder(order);
+      setSelectedOrder(orderData.hoaDon);
 
-      if (order.trangThai === 1) {
-        const imeiPromises = detailsData.map(detail => 
-          fetchImeis(detail.sanPhamChiTiet.id)
+      // Xử lý hiển thị modal IMEI nếu đơn hàng ở trạng thái chờ xác nhận
+      if (orderData.hoaDon.trangThai === 1) {
+        // Lấy danh sách IMEI cho từng sản phẩm
+        const imeiPromises = orderData.chiTietHoaDon.map(detail => 
+          fetchImeis(detail.id)
         );
         const imeiResults = await Promise.all(imeiPromises);
         
+        // Tạo map IMEI với key là id sản phẩm
         const imeiMap = {};
-        detailsData.forEach((detail, index) => {
-          imeiMap[detail.sanPhamChiTiet.id] = imeiResults[index];
+        orderData.chiTietHoaDon.forEach((detail, index) => {
+          imeiMap[detail.id] = imeiResults[index];
         });
+
         setAvailableImeis(imeiMap);
         setSelectedImeis({});
         setShowImeiModal(true);
@@ -138,10 +143,7 @@ const OrderManagement = () => {
       }
     } catch (error) {
       console.error('Lỗi khi tải dữ liệu:', error);
-      toast.error('Không thể tải thông tin đơn hàng', {
-        position: "top-right",
-        autoClose: 3000
-      });
+      toast.error('Không thể tải thông tin đơn hàng');
     }
   };
 
@@ -400,21 +402,13 @@ const OrderManagement = () => {
     // Chi tiết sản phẩm
     const productDetails = {
       startY: doc.lastAutoTable.finalY + 10,
-      head: [['STT', 'San pham', 'Cau hinh', 'SL', 'Don gia', 'Thanh tien']],
+      head: [['STT', 'Sản phẩm', 'Số lượng', 'Đơn giá', 'Thành tiền']],
       body: details.map((detail, index) => [
         index + 1,
-        detail.sanPhamChiTiet?.sanPham?.tenSanPham || 'N/A',
-        [
-          `CPU: ${detail.sanPhamChiTiet?.cpu?.hangSanXuat} ${detail.sanPhamChiTiet?.cpu?.ten || 'N/A'}`,
-          `RAM: ${detail.sanPhamChiTiet?.ram?.dungLuong || 'N/A'}GB ${detail.sanPhamChiTiet?.ram?.tocDo || 'N/A'}MHz`,
-          `O cung: ${detail.sanPhamChiTiet?.oLuuTru?.dungLuong || 'N/A'}GB ${detail.sanPhamChiTiet?.oLuuTru?.loaiOCung || 'N/A'}`,
-          `GPU: ${detail.sanPhamChiTiet?.gpu?.hangSanXuat} ${detail.sanPhamChiTiet?.gpu?.ten || 'N/A'}`,
-          `Man hinh: ${detail.sanPhamChiTiet?.manHinh?.doPhanGiai || 'N/A'} ${detail.sanPhamChiTiet?.manHinh?.tanSoQuet || 'N/A'}Hz`,
-          `Card do hoa: ${detail.sanPhamChiTiet?.cardDoHoa?.tenCard || 'N/A'}`
-        ].join('\n'),
+        detail.tenSanPham,
         detail.soLuong,
-        detail.gia?.toLocaleString('vi-VN'),
-        (detail.soLuong * detail.gia)?.toLocaleString('vi-VN')
+        detail.donGia?.toLocaleString('vi-VN'),
+        (detail.soLuong * detail.donGia)?.toLocaleString('vi-VN')
       ]),
       theme: 'grid',
       headStyles: {
@@ -449,8 +443,9 @@ const OrderManagement = () => {
     const summaryData = {
       startY: doc.lastAutoTable.finalY + 5,
       body: [
-        ['Tong tien hang:', order.tongTien?.toLocaleString('vi-VN') || '0'],
-        ['Phi van chuyen:', order.phiVanChuyen?.toLocaleString('vi-VN') || '0']
+        ['Tổng tiền hàng:', order.tongTien?.toLocaleString('vi-VN') || '0'],
+        ['Phí vận chuyển:', order.phiVanChuyen?.toLocaleString('vi-VN') || '0'],
+        ['Tổng thanh toán:', order.tongTien?.toLocaleString('vi-VN') || '0']
       ],
       theme: 'plain',
       styles: { 
@@ -514,9 +509,9 @@ const OrderManagement = () => {
     try {
       // Kiểm tra số lượng IMEI đã chọn cho mỗi sản phẩm
       for (const detail of orderDetails) {
-        const selectedImeiList = selectedImeis[detail.sanPhamChiTiet.id] || [];
+        const selectedImeiList = selectedImeis[detail.id] || [];
         if (selectedImeiList.length !== detail.soLuong) {
-          toast.error(`Vui lòng chọn đủ ${detail.soLuong} IMEI cho sản phẩm ${detail.sanPhamChiTiet.sanPham.tenSanPham}`, {
+          toast.error(`Vui lòng chọn đủ ${detail.soLuong} IMEI cho sản phẩm ${detail.tenSanPham}`, {
             position: "top-right",
             autoClose: 3000
           });
@@ -524,14 +519,14 @@ const OrderManagement = () => {
         }
       }
 
-      // Tạo danh sách IMEI theo format yêu cầu
-      const listImei = [];
+      // Tạo danh sách IMEI theo format mới
+      const imeiList = [];
       for (const spctId in selectedImeis) {
         const selectedImeiIds = selectedImeis[spctId];
         const imeis = availableImeis[spctId].filter(imei => selectedImeiIds.includes(imei.id));
         
         imeis.forEach(imei => {
-          listImei.push({
+          imeiList.push({
             id: imei.id,
             spct: {
               id: parseInt(spctId)
@@ -541,17 +536,12 @@ const OrderManagement = () => {
         });
       }
 
-      const requestBody = {
-        username: userInfo.username,
-        listImei: listImei
-      };
-
       const response = await fetch(`http://localhost:8080/rest/hoa_don/xac-nhan/${selectedOrder.maHoaDon}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(requestBody)
+        body: JSON.stringify(imeiList)
       });
 
       if (!response.ok) throw new Error('Failed to update order');
@@ -563,9 +553,10 @@ const OrderManagement = () => {
 
       setShowImeiModal(false);
       setSelectedImeis({});
+      
       // Refresh order list
       const updatedOrders = orders.map(order => 
-        order.id === selectedOrder.id 
+        order.maHoaDon === selectedOrder.maHoaDon 
           ? {...order, trangThai: 2}
           : order
       );
@@ -791,58 +782,31 @@ const OrderManagement = () => {
                   <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
                     <h3 className="text-xl font-bold mb-4 text-gray-800">Thông tin khách hàng</h3>
                     <div className="space-y-3">
-                      <p className="text-gray-700"><span className="font-semibold">Họ tên:</span> {selectedOrder.thongTinTaiKhoan?.hoTen}</p>
-                      <p className="text-gray-700"><span className="font-semibold">Số điện thoại:</span> {selectedOrder.thongTinTaiKhoan?.soDienThoai}</p>
-                      <p className="text-gray-700"><span className="font-semibold">Email:</span> {selectedOrder.thongTinTaiKhoan?.email}</p>
-                      <p className="text-gray-700"><span className="font-semibold">CCCD:</span> {selectedOrder.thongTinTaiKhoan?.soCccd}</p>
-                      <p className="text-gray-700"><span className="font-semibold">Địa chỉ:</span> {selectedOrder.thongTinTaiKhoan?.diaChi}</p>
+                      <p className="text-gray-700">
+                        <span className="font-semibold">Họ tên:</span> {orderData?.thongTinTaiKhoan?.hoTen}
+                      </p>
+                      <p className="text-gray-700">
+                        <span className="font-semibold">Số điện thoại:</span> {orderData?.thongTinTaiKhoan?.soDienThoai}
+                      </p>
+                      <p className="text-gray-700">
+                        <span className="font-semibold">Email:</span> {orderData?.thongTinTaiKhoan?.email}
+                      </p>
                     </div>
                   </div>
                   <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
                     <h3 className="text-xl font-bold mb-4 text-gray-800">Thông tin đơn hàng</h3>
                     <div className="space-y-3">
-                      <p className="text-gray-700"><span className="font-semibold">Ngày đặt:</span> {selectedOrder.thoiGianLapHoaDon}</p>
-                      <p className="text-gray-700"><span className="font-semibold">Trạng thái:</span> 
-                        <span className={`ml-2 px-3 py-1 rounded-full text-sm font-semibold
-                          ${selectedOrder.trangThai === 0 ? 'bg-red-100 text-red-800' : 
-                            selectedOrder.trangThai === 1 ? 'bg-yellow-100 text-yellow-800' :
-                            selectedOrder.trangThai === 2 ? 'bg-blue-100 text-blue-800' :
-                            selectedOrder.trangThai === 3 ? 'bg-indigo-100 text-indigo-800' :
-                            selectedOrder.trangThai === 4 ? 'bg-purple-100 text-purple-800' :
-                            selectedOrder.trangThai === 5 ? 'bg-pink-100 text-pink-800' :
-                            selectedOrder.trangThai === 6 ? 'bg-green-100 text-green-800' :
-                            selectedOrder.trangThai === 7 ? 'bg-emerald-100 text-emerald-800' :
-                            selectedOrder.trangThai === 8 ? 'bg-orange-100 text-orange-800' : 
-                            'bg-gray-100 text-gray-800'}`}>
-                          {selectedOrder.trangThai === 0 ? 'Đã hủy' :
-                           selectedOrder.trangThai === 1 ? 'Chờ xác nhận' :
-                           selectedOrder.trangThai === 2 ? 'Xác nhận đơn hàng' :
-                           selectedOrder.trangThai === 3 ? 'Đơn vị vận chuyển đang giao' :
-                           selectedOrder.trangThai === 4 ? 'Đang được giao tới bạn' :
-                           selectedOrder.trangThai === 5 ? 'Đơn hàng đã được giao thành công' :
-                           selectedOrder.trangThai === 6 ? 'Xác nhận giao hàng thành công' :
-                           selectedOrder.trangThai === 7 ? 'Hoàn thành đơn hàng' :
-                           selectedOrder.trangThai === 8 ? 'Yêu cầu hoàn trả hàng' : 
-                           'Không xác định'}
-                        </span>
-                      </p>
+                      <p className="text-gray-700"><span className="font-semibold">Mã đơn hàng:</span> {selectedOrder.maHoaDon}</p>
+                      <p className="text-gray-700"><span className="font-semibold">Thời gian đặt:</span> {
+                        new Date(...selectedOrder.thoiGianLapHoaDon).toLocaleString('vi-VN')
+                      }</p>
+                      <p className="text-gray-700"><span className="font-semibold">Cửa hàng:</span> {selectedOrder.tenCuaHang}</p>
                       <p className="text-gray-700"><span className="font-semibold">Địa chỉ nhận hàng:</span> {selectedOrder.diaChiNhanHang}</p>
-                      <p className="text-gray-700"><span className="font-semibold">Hình thức thanh toán:</span> {selectedOrder.hinhThucThanhToan?.tenHinhThuc}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200 mb-8">
-                  <h3 className="text-xl font-bold mb-4 text-gray-800">Thông tin cửa hàng</h3>
-                  <div className="grid grid-cols-2 gap-6">
-                    <div>
-                      <p className="text-gray-700 mb-2"><span className="font-semibold">Tỉnh/Thành phố:</span> {selectedOrder.cuaHang?.tinh}</p>
-                      <p className="text-gray-700 mb-2"><span className="font-semibold">Quận/Huyện:</span> {selectedOrder.cuaHang?.huyen}</p>
-                      <p className="text-gray-700"><span className="font-semibold">Phường/Xã:</span> {selectedOrder.cuaHang?.phuong}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-700 mb-2"><span className="font-semibold">Địa chỉ:</span> {selectedOrder.cuaHang?.soNha}</p>
-                      <p className="text-gray-700"><span className="font-semibold">Thời gian hoạt động:</span> {selectedOrder.cuaHang?.thoiGianMoCua} - {selectedOrder.cuaHang?.thoiGianDongCua}</p>
+                      <p className="text-gray-700"><span className="font-semibold">Hình thức thanh toán:</span> {selectedOrder.hinhThucThanhToan}</p>
+                      <p className="text-gray-700"><span className="font-semibold">Trạng thái thanh toán:</span> {
+                        selectedOrder.trangThaiThanhToan === 1 ? 'Chưa thanh toán' : 
+                        selectedOrder.trangThaiThanhToan === 2 ? 'Đã thanh toán' : 'N/A'
+                      }</p>
                     </div>
                   </div>
                 </div>
@@ -868,38 +832,55 @@ const OrderManagement = () => {
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 uppercase tracking-wider">Sản phẩm</th>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 uppercase tracking-wider">Thông số</th>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 uppercase tracking-wider">Số lượng</th>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 uppercase tracking-wider">Đơn giá</th>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 uppercase tracking-wider">Thành tiền</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Sản phẩm</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Số lượng</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">IMEI</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Đơn giá</th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Thành tiền</th>
                       </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody>
                       {orderDetails.map((detail, index) => (
-                        <tr key={index} className="hover:bg-gray-50 transition-colors duration-150">
+                        <tr key={index}>
                           <td className="px-6 py-4">
-                            <p className="font-bold text-gray-900 mb-1">{detail.sanPhamChiTiet?.sanPham?.tenSanPham}</p>
-                            <p className="text-sm text-gray-600">Mã SP: {detail.sanPhamChiTiet?.maSpct}</p>
-                            <p className="text-sm text-gray-600">Năm SX: {detail.sanPhamChiTiet?.sanPham?.namSanXuat}</p>
-                            <p className="text-sm text-gray-600">Bảo hành: {detail.sanPhamChiTiet?.sanPham?.thoiHanBaoHanh}</p>
+                            <div className="flex items-center space-x-4">
+                              <img 
+                                src={detail.hinhAnhMinhHoa || 'https://placehold.co/80x80'} 
+                                alt={detail.tenSanPham}
+                                className="w-20 h-20 object-contain rounded border border-gray-200"
+                                onError={(e) => {
+                                  e.target.onerror = null;
+                                  e.target.src = 'https://placehold.co/80x80';
+                                }}
+                              />
+                              <div>
+                                <p className="font-bold text-gray-900">{detail.tenSanPham}</p>
+                              </div>
+                            </div>
                           </td>
+                          <td className="px-6 py-4">{detail.soLuong}</td>
                           <td className="px-6 py-4">
-                            <p className="text-sm mb-1"><span className="font-semibold">CPU:</span> {detail.sanPhamChiTiet?.cpu?.hangSanXuat} {detail.sanPhamChiTiet?.cpu?.ten || 'N/A'}</p>
-                            <p className="text-sm mb-1"><span className="font-semibold">RAM:</span> {detail.sanPhamChiTiet?.ram?.dungLuong || 'N/A'}GB {detail.sanPhamChiTiet?.ram?.tocDo || 'N/A'}MHz</p>
-                            <p className="text-sm mb-1"><span className="font-semibold">Ổ cứng:</span> {detail.sanPhamChiTiet?.oLuuTru?.dungLuong || 'N/A'}GB {detail.sanPhamChiTiet?.oLuuTru?.loaiOCung || 'N/A'}</p>
-                            <p className="text-sm mb-1"><span className="font-semibold">GPU:</span> {detail.sanPhamChiTiet?.gpu?.hangSanXuat} {detail.sanPhamChiTiet?.gpu?.ten || 'N/A'}</p>
-                            <p className="text-sm"><span className="font-semibold">Màn hình:</span> {detail.sanPhamChiTiet?.manHinh?.doPhanGiai || 'N/A'} {detail.sanPhamChiTiet?.manHinh?.tanSoQuet || 'N/A'}Hz</p>
-                            <p className="text-sm"><span className="font-semibold">Card đồ họa:</span> {detail.sanPhamChiTiet?.cardDoHoa?.tenCard || 'N/A'}</p>
+                            {detail.listImei?.map((imei, idx) => (
+                              <div key={idx} className="text-sm text-gray-600">{imei}</div>
+                            ))}
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-900">{detail.soLuong}</td>
-                          <td className="px-6 py-4 text-sm text-gray-900">{detail.gia?.toLocaleString()}₫</td>
-                          <td className="px-6 py-4 text-sm text-gray-900">{(detail.soLuong * detail.gia)?.toLocaleString()}₫</td>
+                          <td className="px-6 py-4">{detail.donGia?.toLocaleString()}₫</td>
+                          <td className="px-6 py-4">{(detail.soLuong * detail.donGia)?.toLocaleString()}₫</td>
                         </tr>
                       ))}
                       <tr className="bg-gray-50">
-                        <td colSpan="4" className="px-6 py-4 text-right font-bold text-lg">Tổng cộng:</td>
-                        <td className="px-6 py-4 font-bold text-lg text-blue-600">{selectedOrder.tongTien?.toLocaleString()}₫</td>
+                        <td colSpan="4" className="px-6 py-4 text-right font-bold">Tổng tiền hàng:</td>
+                        <td className="px-6 py-4 font-bold">{selectedOrder.tongTien?.toLocaleString()}₫</td>
+                      </tr>
+                      <tr className="bg-gray-50">
+                        <td colSpan="4" className="px-6 py-4 text-right font-bold">Phí vận chuyển:</td>
+                        <td className="px-6 py-4 font-bold">{selectedOrder.phiVanChuyen?.toLocaleString()}₫</td>
+                      </tr>
+                      <tr className="bg-gray-50">
+                        <td colSpan="4" className="px-6 py-4 text-right font-bold text-lg">Tổng thanh toán:</td>
+                        <td className="px-6 py-4 font-bold text-lg text-blue-600">
+                          {(selectedOrder.tongTien + selectedOrder.phiVanChuyen)?.toLocaleString()}₫
+                        </td>
                       </tr>
                     </tbody>
                   </table>
@@ -912,18 +893,18 @@ const OrderManagement = () => {
                       <div key={index} className="mb-8 flex items-start">
                         <div className="flex flex-col items-center mr-4">
                           <div className={`rounded-full h-8 w-8 flex items-center justify-center
-                            ${item.trangThai === '0' ? 'bg-red-100 text-red-800' :
-                              item.trangThai === '1' ? 'bg-yellow-100 text-yellow-800' :
-                              item.trangThai === '2' ? 'bg-blue-100 text-blue-800' :
-                              item.trangThai === '3' ? 'bg-indigo-100 text-indigo-800' :
-                              item.trangThai === '4' ? 'bg-purple-100 text-purple-800' :
-                              item.trangThai === '5' ? 'bg-pink-100 text-pink-800' :
-                              item.trangThai === '6' ? 'bg-green-100 text-green-800' :
-                              item.trangThai === '7' ? 'bg-emerald-100 text-emerald-800' :
-                              item.trangThai === '8' ? 'bg-orange-100 text-orange-800' : 
+                            ${item.trangThai === 0 ? 'bg-red-100 text-red-800' :
+                              item.trangThai === 1 ? 'bg-yellow-100 text-yellow-800' :
+                              item.trangThai === 2 ? 'bg-blue-100 text-blue-800' :
+                              item.trangThai === 3 ? 'bg-indigo-100 text-indigo-800' :
+                              item.trangThai === 4 ? 'bg-purple-100 text-purple-800' :
+                              item.trangThai === 5 ? 'bg-pink-100 text-pink-800' :
+                              item.trangThai === 6 ? 'bg-green-100 text-green-800' :
+                              item.trangThai === 7 ? 'bg-emerald-100 text-emerald-800' :
+                              item.trangThai === 8 ? 'bg-orange-100 text-orange-800' : 
                               'bg-gray-100 text-gray-800'}`}
                           >
-                            <span className="text-sm font-semibold">{parseInt(item.trangThai) + 1}</span>
+                            <span className="text-sm font-semibold">{item.trangThai}</span>
                           </div>
                           {index < timelineData.length - 1 && (
                             <div className="h-full w-0.5 bg-gray-200 my-2"></div>
@@ -933,15 +914,15 @@ const OrderManagement = () => {
                           <div className="flex justify-between items-start mb-2">
                             <div>
                               <h4 className="font-semibold text-gray-800">
-                                {item.trangThai === '0' ? 'Đã hủy' :
-                                 item.trangThai === '1' ? 'Chờ xác nhận' :
-                                 item.trangThai === '2' ? 'Xác nhận đơn hàng' :
-                                 item.trangThai === '3' ? 'Đơn vị vận chuyển đang giao' :
-                                 item.trangThai === '4' ? 'Đang được giao tới bạn' :
-                                 item.trangThai === '5' ? 'Đơn hàng đã được giao thành công' :
-                                 item.trangThai === '6' ? 'Xác nhận giao hàng thành công' :
-                                 item.trangThai === '7' ? 'Hoàn thành đơn hàng' :
-                                 item.trangThai === '8' ? 'Yêu cầu hoàn trả hàng' : 
+                                {item.trangThai === 0 ? 'Đã hủy' :
+                                 item.trangThai === 1 ? 'Chờ xác nhận' :
+                                 item.trangThai === 2 ? 'Xác nhận đơn hàng' :
+                                 item.trangThai === 3 ? 'Đơn vị vận chuyển đang giao' :
+                                 item.trangThai === 4 ? 'Đang được giao tới bạn' :
+                                 item.trangThai === 5 ? 'Đơn hàng đã được giao thành công' :
+                                 item.trangThai === 6 ? 'Xác nhận giao hàng thành công' :
+                                 item.trangThai === 7 ? 'Hoàn thành đơn hàng' :
+                                 item.trangThai === 8 ? 'Yêu cầu hoàn trả hàng' : 
                                  'Không xác định'}
                               </h4>
                               <p className="text-sm text-gray-500">
@@ -966,7 +947,7 @@ const OrderManagement = () => {
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
               <div className="bg-white p-8 rounded-lg w-4/5 max-h-[85vh] overflow-y-auto shadow-2xl">
                 <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold text-gray-800">Thêm IMEI cho đơn hàng #{selectedOrder.id}</h2>
+                  <h2 className="text-2xl font-bold text-gray-800">Thêm IMEI cho đơn hàng #{selectedOrder.maHoaDon}</h2>
                   <button 
                     onClick={() => setShowImeiModal(false)}
                     className="text-gray-500 hover:text-gray-700 transition-colors duration-200"
@@ -978,33 +959,33 @@ const OrderManagement = () => {
                 </div>
 
                 {orderDetails.map((detail, index) => (
-                  <div key={index} className="mb-6 p-4 border rounded-lg">
+                  <div key={detail.id} className="mb-6 p-4 border rounded-lg">
                     <h3 className="text-lg font-semibold mb-3">
-                      {detail.sanPhamChiTiet.sanPham.tenSanPham}
+                      {detail.tenSanPham}
                       <span className="ml-2 text-sm text-gray-500">
                         (Cần chọn {detail.soLuong} IMEI)
                       </span>
                     </h3>
                     <div className="grid grid-cols-4 gap-4">
-                      {availableImeis[detail.sanPhamChiTiet.id]?.map((imei, imeiIndex) => (
+                      {availableImeis[detail.id]?.map((imei, imeiIndex) => (
                         <div key={imeiIndex} className="flex items-center">
                           <input
                             type="checkbox"
                             id={`imei-${imei.id}`}
-                            checked={(selectedImeis[detail.sanPhamChiTiet.id] || []).includes(imei.id)}
+                            checked={(selectedImeis[detail.id] || []).includes(imei.id)}
                             onChange={(e) => {
-                              const currentSelected = selectedImeis[detail.sanPhamChiTiet.id] || [];
+                              const currentSelected = selectedImeis[detail.id] || [];
                               if (e.target.checked) {
                                 if (currentSelected.length < detail.soLuong) {
                                   setSelectedImeis({
                                     ...selectedImeis,
-                                    [detail.sanPhamChiTiet.id]: [...currentSelected, imei.id]
+                                    [detail.id]: [...currentSelected, imei.id]
                                   });
                                 }
                               } else {
                                 setSelectedImeis({
                                   ...selectedImeis,
-                                  [detail.sanPhamChiTiet.id]: currentSelected.filter(id => id !== imei.id)
+                                  [detail.id]: currentSelected.filter(id => id !== imei.id)
                                 });
                               }
                             }}

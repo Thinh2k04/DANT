@@ -194,17 +194,24 @@ const HomePage = () => {
       const result = await updateCartItemQuantity(laptop.id, newQuantity);
       if (result.success) {
         setSelectedProduct(laptop);
-        setShowToast(true);
-
-        setTimeout(() => {
-          setShowToast(false);
-        }, 3000);
+        toast.success('Sản phẩm đã được thêm vào giỏ hàng!', {
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
       }
     } catch (error) {
       console.error('Error adding to cart:', error);
       toast.error('Có lỗi xảy ra khi thêm vào giỏ hàng!', {
         position: "top-right",
         autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
       });
     }
   };
@@ -214,11 +221,6 @@ const HomePage = () => {
     <div className="flex flex-col min-h-screen bg-gray-50">
       <Navbar />
       <ToastContainer />
-      <CartToast 
-        isVisible={showToast}
-        onClose={() => setShowToast(false)}
-        product={selectedProduct}
-      />
       
       {/* Container cho các nút chat - CustomerChat trên, AIChat dưới */}
       <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-4">

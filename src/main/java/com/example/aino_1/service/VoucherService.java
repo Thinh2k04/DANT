@@ -39,7 +39,7 @@ public class VoucherService {
         return null; // Không tìm thấy
     }
 
-    @Scheduled(fixedRate = 1000) // Cập nhật mỗi 60 giây
+    @Scheduled(fixedRate = 60000) // Cập nhật mỗi 60 giây
     public void updateActiveVoucher() {
         updateActiveVoucherMain();
 

@@ -91,7 +91,7 @@ public class ZaloPayController {
         }
 
         // Trả về kết quả
-        System.out.println(response.toString());
+        System.out.println(response);
         return response.toString();
     }
 }

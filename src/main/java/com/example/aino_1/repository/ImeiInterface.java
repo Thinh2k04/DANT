@@ -1,5 +1,6 @@
 package com.example.aino_1.repository;
 
+import com.example.aino_1.entity.HoaDonChiTiet;
 import com.example.aino_1.entity.Imei;
 import com.example.aino_1.entity.SanPhamChiTiet;
 import org.springframework.data.domain.Pageable;
@@ -25,7 +26,7 @@ public interface ImeiInterface extends JpaRepository<Imei, Integer> {
 
     List<Imei> findAllBySpctIdAndTrangThai(Integer spctId, Integer trangThai);
 
-    Imei findImeiByImei(String imei);
+    List<Imei> findAllByHdct(HoaDonChiTiet hdct);
 
 
     @Query("SELECT e FROM Imei e WHERE e.spct.id = :spctId AND e.trangThai IN :trangThai")

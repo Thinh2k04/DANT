@@ -15,4 +15,6 @@ public class HoaDonChiTietDTO {
     private Integer soLuong;
     private Float donGia;
     private List<String> listImei;
+
+
 }

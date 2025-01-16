@@ -44,10 +44,11 @@ public class HoaDonController {
         hdsi.save(HoaDon);
     }
 
-    @GetMapping("/getById/{id}")
-    public HoaDon getByidHD(@PathVariable Integer id){
-        return hdsi.findById(id).get();
+    @GetMapping("/getById/{maDonHang}")
+    public Map<String, Object> getByidHD(@PathVariable String maDonHang) {
+        return hdsv.getHoaDon(maDonHang);
     }
+
 
     @PutMapping("GiveHD")
     public void givehd(){

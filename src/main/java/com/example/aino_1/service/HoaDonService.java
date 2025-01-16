@@ -10,10 +10,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 @Service
 public class HoaDonService {
@@ -284,18 +281,45 @@ public class HoaDonService {
 
 
 
-//    public HoaDonDTO getHoaDon(String maHoaDon) {
-//        HoaDon hoaDon = hdsi.findHoaDonByMaHoaDon(maHoaDon);
-//        HoaDonDTO hoaDonDTO = HoaDonDTO.fromEntity(hoaDon);
-//        List<HoaDonChiTiet> listHDCT = hdctsi.findAllByHoaDon_MaHoaDon(maHoaDon);
-//        List<HoaDonChiTietDTO> listhdctDTO = new ArrayList<>();
-//        for (HoaDonChiTiet hd : listHDCT) {
-//            HoaDonChiTietDTO hdctdto = new HoaDonChiTietDTO();
-//            hdctdto.setTenSanPham(hd.getSanPhamChiTiet().);
-//            List<ImeiDTO>lisistImei =  imeiService.getListImeiBySanPhamChiTiet(hd.getSanPhamChiTiet().getId());
-//        }
-//
-//
-//
-//    }
+    public Map<String, Object> getHoaDon(String maHoaDon) {
+        // Lấy hóa đơn
+        HoaDon hoaDon = hdsi.findHoaDonByMaHoaDon(maHoaDon);
+
+        // Chuyển hóa đơn qua DTO
+        HoaDonDTO hoaDonDTO = HoaDonDTO.fromEntity(hoaDon);
+
+        // Lấy danh sách chi tiết hóa đơn
+        List<HoaDonChiTiet> listHDCT = hdctsi.findAllByHoaDon_MaHoaDon(maHoaDon);
+        List<HoaDonChiTietDTO> listhdctDTO = new ArrayList<>();
+
+        for (HoaDonChiTiet hd : listHDCT) {
+            HoaDonChiTietDTO hdctdto = new HoaDonChiTietDTO();
+            SanPhamChiTietDto spctdto = sanPhamChiTietService.getSanPhamChiTietById(hd.getSanPhamChiTiet().getId());
+
+            // Gắn thông tin sản phẩm chi tiết vào hóa đơn chi tiết
+            hdctdto.setTenSanPham(spctdto.getTenSanPham());
+            hdctdto.setHinhAnhMinhHoa(spctdto.getHinhAnhMinhHoa());
+            hdctdto.setSoLuong(hd.getSoLuong());
+            hdctdto.setDonGia(hd.getGia());
+
+            // Lấy danh sách IMEI liên quan
+            List<Imei> listImei = imeiRepository.findAllByHdct(hd);
+            List<String> list = new ArrayList<>();
+            for (Imei imei : listImei) {
+                list.add(imei.getImei());
+            }
+            hdctdto.setListImei(list);
+
+            // Thêm vào danh sách hóa đơn chi tiết DTO
+            listhdctDTO.add(hdctdto);
+        }
+
+        // Tạo map để trả về
+        Map<String, Object> response = new HashMap<>();
+        response.put("hoaDon", hoaDonDTO);
+        response.put("chiTietHoaDon", listhdctDTO);
+
+        return response;
+    }
+
 }

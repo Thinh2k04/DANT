@@ -372,9 +372,7 @@ public class DiscountService {
     }
 
     // Lấy danh sách ProductDiscount theo Product ID
-    public List<ProductDiscount> getProductDiscountsByProduct(Integer productId) {
-        return productDiscountInterface.findByProductId(productId);
-    }
+
 
 }
 

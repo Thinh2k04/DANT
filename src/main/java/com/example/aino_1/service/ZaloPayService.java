@@ -18,6 +18,7 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import vn.zalopay.crypto.HMACUtil;
 
@@ -36,6 +37,7 @@ public class ZaloPayService {
 
     private ZaloPayUtil zaloPayUtil;
 
+    @Autowired
     private HoaDonInterface hoaDonInterface;
 
     private final Mac HmacSHA256;
@@ -88,7 +90,7 @@ public class ZaloPayService {
             put("bank_code", "");
             put("item", itemJSONArray.toString()); // Chuyển đổi itemList thành JSON string
             put("embed_data", new JSONObject(embed_data).toString());
-            put("callback_url", "https://5e27-1-54-214-145.ngrok-free.app/api/payment/callback"); // URL callback
+            put("callback_url", "https://0753-2402-800-3d1c-b98f-f5ca-5667-6426-af1f.ngrok-free.app/api/payment/callback"); // URL callback
         }};
 
         // Tạo dữ liệu cho chữ ký HMAC
@@ -131,7 +133,6 @@ public class ZaloPayService {
         }
         return response;
     }
-
 
     public JSONObject getOrderStatus(String appTransId) throws Exception {
         String data = config.get("app_id") + "|" + appTransId + "|" + config.get("key1");

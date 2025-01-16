@@ -41,6 +41,4 @@ public class ReviewRestController {
     public List<Review> getReview(@PathVariable int id) {
        return reviewService.getReviewList(id);
     }
-
-
 }

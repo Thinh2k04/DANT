@@ -148,6 +148,7 @@ public class HoaDonService {
             timeline.setHoaDon(savedHoaDon);
             timeline.setThoiGianCapNhat(new Timestamp(System.currentTimeMillis()));
             timeline.setNguoiCapNhat(username);
+            timeline.setRole("Admin");
 
             if (listImei != null && !listImei.isEmpty()) {
                 timeline.setTrangThai(2); // Đã xác nhận
@@ -243,6 +244,8 @@ public class HoaDonService {
         // Cập nhật trạng thái hóa đơn là "Đã xác nhận"
         hd.setTrangThai(2);
         hdsi.save(hd);
+        timelineHoaDonInterface.save(timeline);
+
 
         // Trả về kết quả
         return Map.of(

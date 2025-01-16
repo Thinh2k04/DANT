@@ -166,19 +166,19 @@ public class ImeiService {
     }
 
     public List<ImeiDTO> getListImeiBySanPhamChiTietAdmin(int idSpct) {
-        // Danh sách các trạng thái cần kiểm tra
-        List<Integer> trangThaiList = Arrays.asList(0, 2);
+        // Lấy danh sách Imei từ cơ sở dữ liệu
+        List<Imei> listImei = imif.findBySpct_Id(idSpct);
 
-        // Lấy danh sách từ cơ sở dữ liệu
-        List<Imei> listImei = imif.GetBySpctIdAndTrangThaiIn(idSpct, trangThaiList);
-
-        // Chuyển đổi danh sách Imei sang danh sách ImeiDTO
+        // Lọc danh sách Imei có trạng thái khác 1 và chuyển đổi sang ImeiDTO
         List<ImeiDTO> listImeiDTO = listImei.stream()
-                .map(ImeiDTO::fromEntity) // Sử dụng phương thức fromEntity
+                .filter(imei -> imei.getTrangThai() != 1) // Lọc trạng thái khác 1
+                .map(ImeiDTO::fromEntity)                // Chuyển đổi sang DTO
                 .toList();
 
+        System.out.println("Danh sách IMEI là");
         // Trả về danh sách DTO
         return listImeiDTO;
     }
+
 
 }

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -30,29 +31,6 @@ public class AdminRestController {
     @Autowired
     ImeiService imeiService;
 
-    @GetMapping("/dashboard")
-    public ResponseEntity<String> getDashboard(@RequestHeader("Authorization") String token) {
-        System.out.println("AdminRestController: Received token for dashboard: " + token);
-
-//        // Loại bỏ "Bearer " nếu có trong token
-//        if (token.startsWith("Bearer ")) {
-//            token = token.substring(7); // Cắt "Bearer " ra khỏi token
-//        }
-
-        if (isValidToken(token)) {
-            return ResponseEntity.ok("Welcome to the Admin Dashboard");
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
-        }
-    }
-
-    private boolean isValidToken(String token) {
-        // Giải mã và kiểm tra tính hợp lệ của token
-        Map<String, Object> tokenDetails = jwtUtils.validateToken(token); // Lấy chi tiết token dưới dạng Map
-        boolean isValid = tokenDetails != null && tokenDetails.get("username") != null; // Kiểm tra token và username
-        System.out.println("Is token valid: " + isValid);
-        return isValid;
-    }
 
 
     @GetMapping("/adminSPCT")
@@ -60,12 +38,27 @@ public class AdminRestController {
         List<SanPhamChiTietDto> listDiCout = discountService.getActiveDiscountsOrProducts();
         int i = 0;
         for (SanPhamChiTietDto dto : listDiCout) {
-            List<ImeiDTO> dtoList =  imeiService.getListImeiBySanPhamChiTietAdmin(dto.getIdSanPham());
-            dto.setSoLuong(dtoList.size()) ;
+            // Lấy danh sách IMEI
+            List<ImeiDTO> ImeiList = imeiService.getListImeiBySanPhamChiTietAdmin(dto.getIdSanPham());
+            System.out.println("Số lượng imei của sản phẩm ID " + dto.getIdSanPham() + " là: " + ImeiList.size());
+
+            // Ghi lại số lượng
+            dto.setSoLuong(ImeiList.size());
+            System.out.println("Số lượng được set vào DTO: " + dto.getSoLuong());
+
+            // Cập nhật vào danh sách
             listDiCout.set(i, dto);
-            i ++;
+            i++;
         }
+
+        // In danh sách cuối cùng để kiểm tra
+        System.out.println("Danh sách trả về là:");
+        listDiCout.forEach(d ->
+                System.out.println("Sản phẩm ID: " + d.getIdSanPham() + ", Số lượng: " + d.getSoLuong())
+        );
+
         return listDiCout;
     }
+
 
 }

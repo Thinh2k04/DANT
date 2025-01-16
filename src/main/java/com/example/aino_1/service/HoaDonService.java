@@ -148,8 +148,8 @@ public class HoaDonService {
             timeline.setRole("Admin");
 
             if (listImei != null && !listImei.isEmpty()) {
-                timeline.setTrangThai(8); // Đã xác nhận
-                hd.setTrangThai(8);
+                timeline.setTrangThai(7); // Đã xác nhận
+                hd.setTrangThai(7);
                 timeline.setLyDo("Đơn hàng đã được xác nhận vì có IMEI.");
             } else {
                 timeline.setTrangThai(1); // Chờ xác nhận

@@ -122,4 +122,9 @@ public class TaiKhoanService {
                 .collect(Collectors.toList());
     }
 
+    public boolean isUsernameExists(String username) {
+        return taiKhoanNguoiDungInterface.existsByUsername(username);
+    }
+
+
 }

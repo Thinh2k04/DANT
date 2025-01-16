@@ -63,6 +63,10 @@ public class TaiKhoanNguoiDungRestController {
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody TaiKhoanNguoiDung taiKhoanNguoiDung) {
         try {
+            // Kiểm tra tên người dùng đã tồn tại
+            if (tkndsv.isUsernameExists(taiKhoanNguoiDung.getUsername())) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("Tên người dùng đã tồn tại");
+            }
 
             // Mã hóa mật khẩu
             taiKhoanNguoiDung.setPassword(passwordEncoder.encode(taiKhoanNguoiDung.getPassword()));
@@ -83,6 +87,7 @@ public class TaiKhoanNguoiDungRestController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Đã xảy ra lỗi: " + e.getMessage());
         }
     }
+
 
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> login(@RequestBody TaiKhoanNguoiDung user) {

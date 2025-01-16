@@ -29,7 +29,7 @@ public class  HoaDon {
     private Float tongTien;  // Tổng tiền của hóa đơn
 
     @Column(name = "app_trans_id")
-    private String appTransId;  // Tổng tiền của hóa đơn
+    private String appTransId;
 
     @Column(name = "phi_van_chuyen", nullable = false)
     private Float phiVanChuyen;  // Tổng tiền của hóa đơn
@@ -54,9 +54,6 @@ public class  HoaDon {
 
     @Column(name = "trang_thai_thanh_toan", nullable = false)
     private Integer trangThaiThanhToan;  // Trạng thái thanh toán, mặc định là 0
-
-    @Column(name = "app_trans_id", nullable = false)
-    private String app_trans_id;
 
     @Column(name = "trang_thai", nullable = false)
     private Integer trangThai;  // Trạng thái thanh toán, mặc định là 0

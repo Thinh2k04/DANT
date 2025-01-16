@@ -203,7 +203,7 @@ public class ZaloPayService {
 
     public void saveAppTransId(String appTransId,String maHoaDon){
         HoaDon hoaDon = hoaDonInterface.findHoaDonByMaHoaDon(maHoaDon);
-        hoaDon.setApp_trans_id(appTransId);
+        hoaDon.setAppTransId(appTransId);
         hoaDonInterface.save(hoaDon);
     }
 }

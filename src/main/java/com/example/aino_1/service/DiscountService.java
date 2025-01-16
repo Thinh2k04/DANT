@@ -15,6 +15,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -50,8 +51,8 @@ public class DiscountService {
     public List<SanPhamChiTietDto> getActiveDiscountsOrProducts() {
         LocalDateTime now = LocalDateTime.now();
 
-        updateActiveStatusesForProductDiscount();
         updateActiveDiscountCampaigns();
+        updateActiveStatusesForProductDiscount();
 
         // Lấy danh sách chiến dịch giảm giá đang hoạt động
         List<DiscountCampaign> campaigns = discountCampaignInterface
@@ -86,10 +87,8 @@ public class DiscountService {
         return new ArrayList<>(productMap.values());
     }
 
-
-
-    // Cron Job cho ProductDiscount
-//    @Scheduled(fixedRate =1000000000) // Chạy mỗi 60 giây
+//     Cron Job cho ProductDiscount
+    @Scheduled(fixedRate =1000) // Chạy mỗi 60 giây
     public void updateActiveStatusesForProductDiscount() {
         updateActiveBasedOnRealTimeForProductDiscount();
     }
@@ -107,13 +106,13 @@ public class DiscountService {
 
             SanPhamChiTiet product = productDiscount.getProduct();
 
-//            Integer sIMEISPCT = imeiService.getListImeibySPCT(product.getId()).size();
-//            // Kiểm tra số lượng tồn kho của sản phẩm
-//            if(sIMEISPCT== 0) {
-//                // Nếu sản phẩm hết hàng, set active = 0
-//                productDiscount.setActive(0);
-//                continue; // Bỏ qua các bước kiểm tra khác
-//            }
+            Integer sIMEISPCT = imeiService.getListImeibySPCT(product.getId()).size();
+            // Kiểm tra số lượng tồn kho của sản phẩm
+            if(sIMEISPCT== 0) {
+                // Nếu sản phẩm hết hàng, set active = 0
+                productDiscount.setActive(0);
+                continue; // Bỏ qua các bước kiểm tra khác
+            }
 
             // Kiểm tra thời gian bắt đầu và kết thúc của chiến dịch giảm giá
             if (discountCampaign.getStartDate().isBefore(now) && discountCampaign.getEndDate().isAfter(now)) {
@@ -130,7 +129,7 @@ public class DiscountService {
     }
 
 
-    @Scheduled(fixedRate = 100000000) // Cập nhật mỗi 60 giây
+    @Scheduled(fixedRate = 1000) // Cập nhật mỗi 60 giây
     public void updateActiveCampaigns() {
         updateActiveDiscountCampaigns();
 
@@ -236,7 +235,7 @@ public class DiscountService {
                 SanPhamChiTietDto sanPhamChiTietDto = sanPhamChiTietInterface.getSanPhamChiTietById(productId);
 
                 // Kiểm tra nếu sản phẩm đã thuộc một chiến dịch đang hoạt động
-                Optional<ProductDiscount> existingDiscountOpt = productDiscountInterface.findByProductAndActive(product, 1);
+                Optional<ProductDiscount> existingDiscountOpt = productDiscountInterface.findByProductIdAndActive(sanPhamChiTietDto.getId(), 1);
 
                 if (existingDiscountOpt.isPresent()) {
                     ProductDiscount existingDiscount = existingDiscountOpt.get();
@@ -272,7 +271,7 @@ public class DiscountService {
     }
 
 
-    public DiscountCampaign updateDiscountCampaign(Integer id, DiscountCampaign updatedCampaign) {
+    public DiscountCampaign updateDiscountCampaign(Integer id, DiscountCampaign updatedCampaign, List<Integer> productIds) {
         // Tìm kiếm chiến dịch giảm giá theo ID
         DiscountCampaign existingCampaign = discountCampaignInterface.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Discount campaign not found"));
@@ -283,6 +282,30 @@ public class DiscountService {
         existingCampaign.setStartDate(updatedCampaign.getStartDate());
         existingCampaign.setEndDate(updatedCampaign.getEndDate());
         existingCampaign.setActive(updatedCampaign.getActive());
+
+        // Lấy danh sách ProductDiscount liên quan đến chiến dịch
+        List<ProductDiscount> discounts = getProductDiscountsByCampaign(id);
+
+        // Xử lý cập nhật danh sách sản phẩm
+        for (ProductDiscount productDiscount : discounts) {
+            if (!productIds.contains(productDiscount.getProduct().getId())) {
+                // Xóa ProductDiscount nếu không còn trong danh sách productIds
+                productDiscountInterface.delete(productDiscount);
+            }
+        }
+
+        // Thêm mới các ProductDiscount từ productIds chưa tồn tại
+        for (Integer productId : productIds) {
+            boolean exists = discounts.stream()
+                    .anyMatch(productDiscount -> productDiscount.getProduct().getId().equals(productId));
+            if (!exists) {
+                ProductDiscount newDiscount = new ProductDiscount();
+                newDiscount.setDiscountCampaign(existingCampaign);
+                newDiscount.setProduct(sanPhamChiTietInterface.findById(productId).get());
+                newDiscount.setActive(1);
+                productDiscountInterface.save(newDiscount);
+            }
+        }
 
         // Lưu lại thay đổi và trả về kết quả
         return discountCampaignInterface.save(existingCampaign);
@@ -303,16 +326,6 @@ public class DiscountService {
         }).orElseThrow(() -> new EntityNotFoundException("Discount campaign not found"));
     }
 
-
-
-    public void deleteDiscountCampaign(Integer id) {
-        if (discountCampaignInterface.existsById(id)) {
-            discountCampaignInterface.deleteById(id);
-        } else {
-            throw new EntityNotFoundException("Discount campaign not found");
-        }
-    }
-
     public ProductDiscount createProductDiscount(Integer productId, Integer campaignId, ProductDiscount productDiscount) {
         // Tìm sản phẩm
         SanPhamChiTiet product = sanPhamChiTietInterface.findById(productId)
@@ -324,7 +337,7 @@ public class DiscountService {
 
         // Kiểm tra xem sản phẩm có đang thuộc đợt khuyến mãi nào khác không
         Optional<ProductDiscount> existingDiscount = productDiscountInterface
-                    .findByProductAndActive(product, 1); // Kiểm tra active = 1
+                    .findByProductIdAndActive(product.getId(), 1); // Kiểm tra active = 1
 
         if (existingDiscount.isPresent()) {
             ProductDiscount activeDiscount = existingDiscount.get();
@@ -372,7 +385,20 @@ public class DiscountService {
     }
 
     // Lấy danh sách ProductDiscount theo Product ID
+    public SanPhamChiTietDto getProductDiscountsByProduct(Integer productId) {
+        Optional<ProductDiscount> discountOpt = productDiscountInterface.findByProductIdAndActive(productId, 1);
 
+        if (discountOpt.isPresent()) {
+            // Nếu tồn tại giảm giá, lấy chi tiết sản phẩm theo ID của giảm giá
+            return sanPhamChiTietService.getSanPhamChiTietById(discountOpt.get().getId());
+        } else {
+            // Nếu không có giảm giá, lấy chi tiết sản phẩm theo productId và đặt mặc định giảm giá là 0
+            SanPhamChiTietDto sanPhamChiTietDto = sanPhamChiTietInterface.getSanPhamChiTietById(productId);
+            sanPhamChiTietDto.setDiscountedPrice(sanPhamChiTietDto.getDonGia());
+            sanPhamChiTietDto.setDiscountPercentage(0);
+            return sanPhamChiTietDto;
+        }
+    }
 
 }
 

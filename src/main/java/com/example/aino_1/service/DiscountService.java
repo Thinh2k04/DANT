@@ -79,12 +79,11 @@ public class DiscountService {
     }
 
 //     Cron Job cho ProductDiscount
-    @Scheduled(fixedRate =1000) // Chạy mỗi 60 giây
-    public void updateActiveStatusesForProductDiscount() {
-        updateActiveBasedOnRealTimeForProductDiscount();
-    }
+@Scheduled(fixedRate = 60000) // Chạy mỗi 60 giây
+public void updateActiveStatusesForProductDiscount() {
+    updateActiveBasedOnRealTimeForProductDiscount();
+}
 
-    // updateActive cho ProductDiscount
     @Transactional
     public void updateActiveBasedOnRealTimeForProductDiscount() {
         LocalDateTime now = LocalDateTime.now();
@@ -92,21 +91,16 @@ public class DiscountService {
         // Lấy danh sách tất cả ProductDiscount
         List<ProductDiscount> productDiscounts = productDiscountInterface.findAll();
 
+        List<ProductDiscount> productDiscountsToDelete = new ArrayList<>();
+
         for (ProductDiscount productDiscount : productDiscounts) {
             DiscountCampaign discountCampaign = productDiscount.getDiscountCampaign();
 
-            SanPhamChiTiet product = productDiscount.getProduct();
-
-//            Integer sIMEISPCT = imeiService.getListImeibySPCT(product.getId()).size();
-//            // Kiểm tra số lượng tồn kho của sản phẩm
-//            if(sIMEISPCT== 0) {
-//                // Nếu sản phẩm hết hàng, set active = 0
-//                productDiscount.setActive(0);
-//                continue; // Bỏ qua các bước kiểm tra khác
-//            }
-
             // Kiểm tra thời gian bắt đầu và kết thúc của chiến dịch giảm giá
-            if (discountCampaign.getStartDate().isBefore(now) && discountCampaign.getEndDate().isAfter(now)) {
+            if (discountCampaign.getEndDate().isBefore(now)) {
+                // Nếu chiến dịch hết hạn, thêm ProductDiscount vào danh sách xóa
+                productDiscountsToDelete.add(productDiscount);
+            } else if (discountCampaign.getStartDate().isBefore(now) && discountCampaign.getEndDate().isAfter(now)) {
                 // Nếu trong khoảng thời gian hoạt động, set active = 1
                 productDiscount.setActive(1);
             } else {
@@ -115,15 +109,18 @@ public class DiscountService {
             }
         }
 
-        // Lưu danh sách đã cập nhật
+        // Xóa các ProductDiscount hết hạn
+        if (!productDiscountsToDelete.isEmpty()) {
+            productDiscountInterface.deleteAll(productDiscountsToDelete);
+        }
+
+        // Lưu các ProductDiscount còn lại
         productDiscountInterface.saveAll(productDiscounts);
     }
 
-
-    @Scheduled(fixedRate = 1000) // Cập nhật mỗi 60 giây
+    @Scheduled(fixedRate = 60000) // Cập nhật mỗi 60 giây
     public void updateActiveCampaigns() {
         updateActiveDiscountCampaigns();
-
     }
 
     @Transactional
@@ -133,18 +130,39 @@ public class DiscountService {
         // Lấy danh sách tất cả các DiscountCampaign
         List<DiscountCampaign> campaigns = discountCampaignInterface.findAll();
 
+        List<DiscountCampaign> campaignsToDelete = new ArrayList<>();
+        List<DiscountCampaign> campaignsToUpdate = new ArrayList<>();
+
         for (DiscountCampaign campaign : campaigns) {
-            if (campaign.getStartDate().isBefore(now) && campaign.getEndDate().isAfter(now)) {
+            if (campaign.getEndDate().isBefore(now)) {
+                // Nếu chiến dịch hết hạn, thêm vào danh sách xóa
+                campaignsToDelete.add(campaign);
+
+                // Tìm và xóa tất cả ProductDiscount liên quan đến chiến dịch
+                List<ProductDiscount> relatedProductDiscounts = productDiscountInterface.findByDiscountCampaignId(campaign.getId());
+                if (!relatedProductDiscounts.isEmpty()) {
+                    productDiscountInterface.deleteAll(relatedProductDiscounts);
+                }
+            } else if (campaign.getStartDate().isBefore(now) && campaign.getEndDate().isAfter(now)) {
                 // Trong khoảng thời gian hoạt động, set active = true
                 campaign.setActive(1);
+                campaignsToUpdate.add(campaign);
             } else {
                 // Ngoài khoảng thời gian hoạt động, set active = false
                 campaign.setActive(0);
+                campaignsToUpdate.add(campaign);
             }
         }
 
-        // Lưu danh sách đã cập nhật
-        discountCampaignInterface.saveAll(campaigns);
+        // Xóa các chiến dịch đã hết thời gian
+        if (!campaignsToDelete.isEmpty()) {
+            discountCampaignInterface.deleteAll(campaignsToDelete);
+        }
+
+        // Cập nhật các chiến dịch còn lại
+        if (!campaignsToUpdate.isEmpty()) {
+            discountCampaignInterface.saveAll(campaignsToUpdate);
+        }
     }
 
 

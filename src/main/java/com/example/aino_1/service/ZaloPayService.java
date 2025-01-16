@@ -133,7 +133,7 @@ public class ZaloPayService {
         }
         return response;
     }
-    
+
     public JSONObject getOrderStatus(String appTransId) throws Exception {
         String data = config.get("app_id") + "|" + appTransId + "|" + config.get("key1");
         String mac = HMACUtil.HMacHexStringEncode(HMACUtil.HMACSHA256, config.get("key1"), data);

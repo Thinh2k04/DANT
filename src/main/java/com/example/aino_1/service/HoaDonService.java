@@ -292,6 +292,9 @@ public class HoaDonService {
         List<HoaDonChiTiet> listHDCT = hdctsi.findAllByHoaDon_Id(idHoaDon);
         List<HoaDonChiTietDTO> listhdctDTO = new ArrayList<>();
 
+        ThongTinTaiKhoan thongTinTaiKhoan = hoaDon.getThongTinTaiKhoan();
+        ThongTinTaiKhoanDTO tttkDTO = ThongTinTaiKhoanDTO.fromEntity(thongTinTaiKhoan);
+
         for (HoaDonChiTiet hd : listHDCT) {
             HoaDonChiTietDTO hdctdto = new HoaDonChiTietDTO();
             SanPhamChiTietDto spctdto = sanPhamChiTietService.getSanPhamChiTietById(hd.getSanPhamChiTiet().getId());
@@ -319,6 +322,8 @@ public class HoaDonService {
         Map<String, Object> response = new HashMap<>();
         response.put("hoaDon", hoaDonDTO);
         response.put("chiTietHoaDon", listhdctDTO);
+        response.put("thongTinTaiKhoan", tttkDTO);
+
 
         return response;
     }

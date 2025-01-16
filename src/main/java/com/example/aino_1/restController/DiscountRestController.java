@@ -76,11 +76,29 @@ public class DiscountRestController {
 
     // Sửa đợt giảm giá
     @PutMapping("/updateDiscount/{id}")
-    public DiscountCampaign updateDiscountCampaign(@PathVariable Integer id, @RequestBody DiscountCampaign updatedCampaign) {
-        return discountService.updateDiscountCampaign(id, updatedCampaign);
+    public ResponseEntity<DiscountCampaign> updateDiscountCampaign(
+            @PathVariable Integer id,
+            @RequestBody Map<String, Object> discountCampaignRequest) {
+
+        // Trích xuất thông tin từ request
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        DiscountCampaign discountCampaign = objectMapper.convertValue(discountCampaignRequest.get("campaigns"), DiscountCampaign.class);
+        List<Integer> productIds = objectMapper.convertValue(discountCampaignRequest.get("products"), new TypeReference<List<Integer>>() {});
+
+
+        // Gọi phương thức updateDiscountCampaign trong service
+        DiscountCampaign result = discountService.updateDiscountCampaign(
+                id,
+                discountCampaign,
+                productIds
+        );
+
+        // Trả về phản hồi HTTP
+        return ResponseEntity.ok(result);
     }
 
-    @PutMapping("/updateDiscountForRealTime/{id}")
+    @PutMapping("/deleteDiscount/{id}")
     public DiscountCampaign updateDiscountCampaignForRealTime(@PathVariable Integer id) {
         return discountService.updateDiscountCampaignForRealTime(id);
     }
@@ -114,8 +132,6 @@ public class DiscountRestController {
     // API lấy danh sách ProductDiscount theo Product ID
     @GetMapping("/getProductByProductId/{productId}")
     public SanPhamChiTietDto getProductDiscountsByProduct(@PathVariable Integer productId) {
-        ProductDiscount discount = productDiscountInterface.findByProductId(productId);
-        SanPhamChiTietDto sanPhamChiTietDto = sanPhamChiTietService.getSanPhamChiTietById(discount.getId());
-        return sanPhamChiTietDto;
+        return discountService.getProductDiscountsByProduct(productId);
     }
 }

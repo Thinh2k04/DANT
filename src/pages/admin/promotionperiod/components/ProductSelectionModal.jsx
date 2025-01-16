@@ -15,7 +15,7 @@ const ProductSelectionModal = ({ isOpen, onClose, onConfirm, selectedProducts, s
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const response = await axios.get('http://localhost:8080/rest/spctDTO/getAll');
+      const response = await axios.get('http://localhost:8080/rest/discount/active');
       console.log('API Response:', response.data);
       
       const validProducts = response.data.filter(product => 

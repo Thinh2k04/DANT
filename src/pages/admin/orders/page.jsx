@@ -18,6 +18,9 @@ const OrderManagement = () => {
   const [showReasonInput, setShowReasonInput] = useState(false);
   const [timelineData, setTimelineData] = useState([]);
   const [userInfo, setUserInfo] = useState(null);
+  const [showImeiModal, setShowImeiModal] = useState(false);
+  const [selectedImeis, setSelectedImeis] = useState({});
+  const [availableImeis, setAvailableImeis] = useState({});
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -85,6 +88,18 @@ const OrderManagement = () => {
     }
   };
 
+  const fetchImeis = async (spctId) => {
+    try {
+      const response = await fetch(`http://localhost:8080/rest/imei/getById/${spctId}`);
+      if (!response.ok) throw new Error('Failed to fetch IMEIs');
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error fetching IMEIs:', error);
+      return [];
+    }
+  };
+
   const handleOrderClick = async (orderId) => {
     try {
       const [orderDetailsResponse, timelineResponse] = await Promise.all([
@@ -104,7 +119,23 @@ const OrderManagement = () => {
       setTimelineData(timelineData);
       const order = orders.find(o => o.id === orderId);
       setSelectedOrder(order);
-      setShowStatusModal(true);
+
+      if (order.trangThai === 1) {
+        const imeiPromises = detailsData.map(detail => 
+          fetchImeis(detail.sanPhamChiTiet.id)
+        );
+        const imeiResults = await Promise.all(imeiPromises);
+        
+        const imeiMap = {};
+        detailsData.forEach((detail, index) => {
+          imeiMap[detail.sanPhamChiTiet.id] = imeiResults[index];
+        });
+        setAvailableImeis(imeiMap);
+        setSelectedImeis({});
+        setShowImeiModal(true);
+      } else {
+        setShowStatusModal(true);
+      }
     } catch (error) {
       console.error('Lỗi khi tải dữ liệu:', error);
       toast.error('Không thể tải thông tin đơn hàng', {
@@ -133,7 +164,7 @@ const OrderManagement = () => {
 
     // Kiểm tra logic chuyển trạng thái
     let isValidTransition = false;
-    switch (selectedOrder.trangThaiThanhToan) {
+    switch (selectedOrder.trangThai) {
       case 0: // Hủy đơn hàng
       case 7: // Hoàn thành đơn hàng  
       case 8: // Yêu cầu hoàn trả hàng
@@ -176,21 +207,7 @@ const OrderManagement = () => {
     }
 
     try {
-      // Update order status
-      const response = await fetch(`http://localhost:8080/rest/hoa_don/update/${selectedOrder.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...selectedOrder,
-          trangThaiThanhToan: selectedStatus
-        })
-      });
-
-      if (!response.ok) throw new Error('Failed to update status');
-
-      // Add timeline entry với thông tin người dùng
+      // Add timeline entry
       const timelineResponse = await fetch('http://localhost:8080/rest/timeline/add', {
         method: 'POST',
         headers: {
@@ -199,21 +216,22 @@ const OrderManagement = () => {
         body: JSON.stringify({
           hoaDonId: selectedOrder.id,
           trangThai: selectedStatus.toString(),
-          nguoiCapNhat: localStorage.getItem('username'),
+          nguoiCapNhat: userInfo.username,
           lyDo: updateReason,
-          role: userInfo.role === 'ADMIN' ? 'Admin' : 'User'
+          role: userInfo.role
         })
       });
 
       if (!timelineResponse.ok) throw new Error('Failed to add timeline entry');
 
+      // Update local state
       setOrders(orders.map(order => 
         order.id === selectedOrder.id 
-          ? {...order, trangThaiThanhToan: selectedStatus}
+          ? {...order, trangThai: selectedStatus}
           : order
       ));
       
-      setSelectedOrder({...selectedOrder, trangThaiThanhToan: selectedStatus});
+      setSelectedOrder({...selectedOrder, trangThai: selectedStatus});
       setShowStatusModal(false);
       setSelectedStatus(null);
       setOrderDetails([]);
@@ -235,30 +253,6 @@ const OrderManagement = () => {
     }
   };
 
-  // Helper function to get default reason based on status
-  const getDefaultReason = (status) => {
-    switch (status) {
-      case 0:
-        return "Đơn hàng đã bị hủy bởi Admin";
-      case 2:
-        return "Admin đã xác nhận đơn hàng";
-      case 3:
-        return "Admin đã bàn giao đơn hàng cho đơn vị vận chuyển";
-      case 4:
-        return "Đơn vị vận chuyển đang giao hàng đến khách hàng";
-      case 5:
-        return "Đơn vị vận chuyển đã giao hàng thành công";
-      case 6:
-        return "Khách hàng đã xác nhận nhận được hàng";
-      case 7:
-        return "Đơn hàng đã hoàn thành";
-      case 8:
-        return "Khách hàng yêu cầu hoàn trả hàng";
-      default:
-        return "Admin đã cập nhật trạng thái đơn hàng";
-    }
-  };
-
   const handleCloseModal = () => {
     setShowStatusModal(false);
     setSelectedStatus(null);
@@ -277,15 +271,15 @@ const OrderManagement = () => {
       'Tổng tiền': order.tongTien,
       'Thời gian đặt hàng': order.thoiGianLapHoaDon,
       'Trạng thái': 
-                    order.trangThaiThanhToan === 0 ? 'Đã hủy' :
-                    order.trangThaiThanhToan === 1 ? 'Chờ xác nhận' :
-                    order.trangThaiThanhToan === 2 ? 'Xác nhận đơn hàng' :
-                    order.trangThaiThanhToan === 3 ? 'Đơn vị vận chuyển đang giao' :
-                    order.trangThaiThanhToan === 4 ? 'Đang được giao tới bạn' :
-                    order.trangThaiThanhToan === 5 ? 'Đơn hàng đã được giao thành công' :
-                    order.trangThaiThanhToan === 6 ? 'Xác nhận giao hàng thành công' :
-                    order.trangThaiThanhToan === 7 ? 'Hoàn thành đơn hàng' :
-                    order.trangThaiThanhToan === 8 ? 'Yêu cầu hoàn trả hàng' : 'Không xác định',
+                    order.trangThai === 0 ? 'Đã hủy' :
+                    order.trangThai === 1 ? 'Chờ xác nhận' :
+                    order.trangThai === 2 ? 'Xác nhận đơn hàng' :
+                    order.trangThai === 3 ? 'Đơn vị vận chuyển đang giao' :
+                    order.trangThai === 4 ? 'Đang được giao tới bạn' :
+                    order.trangThai === 5 ? 'Đơn hàng đã được giao thành công' :
+                    order.trangThai === 6 ? 'Xác nhận giao hàng thành công' :
+                    order.trangThai === 7 ? 'Hoàn thành đơn hàng' :
+                    order.trangThai === 8 ? 'Yêu cầu hoàn trả hàng' : 'Không xác định',
       'Hình thức thanh toán': order.hinhThucThanhToan?.tenHinhThuc,
       'Cửa hàng': `${order.cuaHang?.soNha}, ${order.cuaHang?.phuong}, ${order.cuaHang?.huyen}, ${order.cuaHang?.tinh}`
     }));
@@ -366,9 +360,15 @@ const OrderManagement = () => {
         ['Dia diem giao hang:', order.diaChiNhanHang || 'LAPTOP SHOP'],
         ['Ngay xac nhan:', new Date(order.thoiGianLapHoaDon).toLocaleDateString('vi-VN')],
         ['Hinh thuc thanh toan:', 'Thanh toan khi nhan hang'],
-        ['Trang thai:', order.trangThaiThanhToan === 0 ? 'Da huy' :
-                       order.trangThaiThanhToan === 1 ? 'Da xac nhan' :
-                       order.trangThaiThanhToan === 2 ? 'Cho xac nhan' : 'N/A']
+        ['Trang thai:', order.trangThai === 0 ? 'Da huy' :
+                       order.trangThai === 1 ? 'Cho xac nhan' :
+                       order.trangThai === 2 ? 'Xac nhan don hang' :
+                       order.trangThai === 3 ? 'Don vi van chuyen dang giao' :
+                       order.trangThai === 4 ? 'Dang duoc giao toi ban' :
+                       order.trangThai === 5 ? 'Don hang da duoc giao thanh cong' :
+                       order.trangThai === 6 ? 'Xac nhan giao hang thanh cong' :
+                       order.trangThai === 7 ? 'Hoan thanh don hang' :
+                       order.trangThai === 8 ? 'Yeu cau hoan tra hang' : 'N/A']
       ],
       theme: 'plain',
       styles: { 
@@ -494,6 +494,76 @@ const OrderManagement = () => {
     doc.save(`hoa_don_${order.id}_${timestamp}.pdf`);
   };
 
+  const handleAddImeis = async () => {
+    try {
+      // Kiểm tra số lượng IMEI đã chọn cho mỗi sản phẩm
+      for (const detail of orderDetails) {
+        const selectedImeiList = selectedImeis[detail.sanPhamChiTiet.id] || [];
+        if (selectedImeiList.length !== detail.soLuong) {
+          toast.error(`Vui lòng chọn đủ ${detail.soLuong} IMEI cho sản phẩm ${detail.sanPhamChiTiet.sanPham.tenSanPham}`, {
+            position: "top-right",
+            autoClose: 3000
+          });
+          return;
+        }
+      }
+
+      // Tạo danh sách IMEI theo format yêu cầu
+      const listImei = [];
+      for (const spctId in selectedImeis) {
+        const selectedImeiIds = selectedImeis[spctId];
+        const imeis = availableImeis[spctId].filter(imei => selectedImeiIds.includes(imei.id));
+        
+        imeis.forEach(imei => {
+          listImei.push({
+            id: imei.id,
+            spct: {
+              id: parseInt(spctId)
+            },
+            imei: imei.imei
+          });
+        });
+      }
+
+      const requestBody = {
+        username: userInfo.username,
+        listImei: listImei
+      };
+
+      const response = await fetch(`http://localhost:8080/rest/hoa_don/xac-nhan/${selectedOrder.maHoaDon}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody)
+      });
+
+      if (!response.ok) throw new Error('Failed to update order');
+
+      toast.success('Cập nhật IMEI thành công', {
+        position: "top-right",
+        autoClose: 2000
+      });
+
+      setShowImeiModal(false);
+      setSelectedImeis({});
+      // Refresh order list
+      const updatedOrders = orders.map(order => 
+        order.id === selectedOrder.id 
+          ? {...order, trangThai: 2}
+          : order
+      );
+      setOrders(updatedOrders);
+
+    } catch (error) {
+      console.error('Error updating IMEIs:', error);
+      toast.error('Không thể cập nhật IMEI', {
+        position: "top-right",
+        autoClose: 3000
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen flex">
       <NavbarAdmin />
@@ -547,30 +617,37 @@ const OrderManagement = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 cursor-pointer hover:text-blue-600" onClick={() => handleOrderClick(order.id)}>{order.thoiGianLapHoaDon}</td>
                   <td className="px-6 py-4 whitespace-nowrap cursor-pointer" onClick={() => handleOrderClick(order.id)}>
                     <span className={`px-3 py-1 inline-flex text-sm leading-5 font-medium rounded-full 
-                      ${order.trangThaiThanhToan === 0 ? 'bg-red-100 text-red-800' : 
-                        order.trangThaiThanhToan === 1 ? 'bg-yellow-100 text-yellow-800' :
-                        order.trangThaiThanhToan === 2 ? 'bg-blue-100 text-blue-800' :
-                        order.trangThaiThanhToan === 3 ? 'bg-indigo-100 text-indigo-800' :
-                        order.trangThaiThanhToan === 4 ? 'bg-purple-100 text-purple-800' :
-                        order.trangThaiThanhToan === 5 ? 'bg-pink-100 text-pink-800' :
-                        order.trangThaiThanhToan === 6 ? 'bg-green-100 text-green-800' :
-                        order.trangThaiThanhToan === 7 ? 'bg-emerald-100 text-emerald-800' :
-                        order.trangThaiThanhToan === 8 ? 'bg-orange-100 text-orange-800' : 
+                      ${order.trangThai === 0 ? 'bg-red-100 text-red-800' : 
+                        order.trangThai === 1 ? 'bg-yellow-100 text-yellow-800' :
+                        order.trangThai === 2 ? 'bg-blue-100 text-blue-800' :
+                        order.trangThai === 3 ? 'bg-indigo-100 text-indigo-800' :
+                        order.trangThai === 4 ? 'bg-purple-100 text-purple-800' :
+                        order.trangThai === 5 ? 'bg-pink-100 text-pink-800' :
+                        order.trangThai === 6 ? 'bg-green-100 text-green-800' :
+                        order.trangThai === 7 ? 'bg-emerald-100 text-emerald-800' :
+                        order.trangThai === 8 ? 'bg-orange-100 text-orange-800' : 
                         'bg-gray-100 text-gray-800'}`}>
-                      {order.trangThaiThanhToan === 0 ? 'Đã hủy' :
-                       order.trangThaiThanhToan === 1 ? 'Chờ xác nhận' :
-                       order.trangThaiThanhToan === 2 ? 'Xác nhận đơn hàng' :
-                       order.trangThaiThanhToan === 3 ? 'Đơn vị vận chuyển đang giao' :
-                       order.trangThaiThanhToan === 4 ? 'Đang được giao tới bạn' :
-                       order.trangThaiThanhToan === 5 ? 'Đơn hàng đã được giao thành công' :
-                       order.trangThaiThanhToan === 6 ? 'Xác nhận giao hàng thành công' :
-                       order.trangThaiThanhToan === 7 ? 'Hoàn thành đơn hàng' :
-                       order.trangThaiThanhToan === 8 ? 'Yêu cầu hoàn trả hàng' : 
+                      {order.trangThai === 0 ? 'Đã hủy' :
+                       order.trangThai === 1 ? 'Chờ xác nhận' :
+                       order.trangThai === 2 ? 'Xác nhận đơn hàng' :
+                       order.trangThai === 3 ? 'Đơn vị vận chuyển đang giao' :
+                       order.trangThai === 4 ? 'Đang được giao tới bạn' :
+                       order.trangThai === 5 ? 'Đơn hàng đã được giao thành công' :
+                       order.trangThai === 6 ? 'Xác nhận giao hàng thành công' :
+                       order.trangThai === 7 ? 'Hoàn thành đơn hàng' :
+                       order.trangThai === 8 ? 'Yêu cầu hoàn trả hàng' : 
                        'Không xác định'}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    {![0, 7, 8].includes(order.trangThaiThanhToan) && (
+                    {order.trangThai === 1 ? (
+                      <span className="text-yellow-600 font-medium flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
+                        Cần thêm IMEI
+                      </span>
+                    ) : ![0, 7, 8].includes(order.trangThai) && (
                       <button 
                         onClick={() => {
                           setSelectedOrder(order);
@@ -597,24 +674,24 @@ const OrderManagement = () => {
                       <div className="flex items-center space-x-3">
                         <input
                           type="radio"
-                          id={`status-${selectedOrder.trangThaiThanhToan + 1}`}
+                          id={`status-${selectedOrder.trangThai + 1}`}
                           name="status"
-                          value={selectedOrder.trangThaiThanhToan + 1}
-                          checked={selectedStatus === selectedOrder.trangThaiThanhToan + 1}
+                          value={selectedOrder.trangThai + 1}
+                          checked={selectedStatus === selectedOrder.trangThai + 1}
                           onChange={(e) => setSelectedStatus(Number(e.target.value))}
                           className="form-radio h-4 w-4 text-blue-600"
                         />
-                        <label htmlFor={`status-${selectedOrder.trangThaiThanhToan + 1}`} className="text-gray-700">
-                          {selectedOrder.trangThaiThanhToan === 1 && "Xác nhận đơn hàng"}
-                          {selectedOrder.trangThaiThanhToan === 2 && "Bàn giao cho đơn vị vận chuyển"}
-                          {selectedOrder.trangThaiThanhToan === 3 && "Đang giao tới khách hàng"}
-                          {selectedOrder.trangThaiThanhToan === 4 && "Đã giao hàng thành công"}
-                          {selectedOrder.trangThaiThanhToan === 5 && "Khách hàng xác nhận nhận hàng"}
-                          {selectedOrder.trangThaiThanhToan === 6 && "Hoàn thành đơn hàng"}
+                        <label htmlFor={`status-${selectedOrder.trangThai + 1}`} className="text-gray-700">
+                          {selectedOrder.trangThai === 1 && "Xác nhận đơn hàng"}
+                          {selectedOrder.trangThai === 2 && "Bàn giao cho đơn vị vận chuyển"}
+                          {selectedOrder.trangThai === 3 && "Đang giao tới khách hàng"}
+                          {selectedOrder.trangThai === 4 && "Đã giao hàng thành công"}
+                          {selectedOrder.trangThai === 5 && "Khách hàng xác nhận nhận hàng"}
+                          {selectedOrder.trangThai === 6 && "Hoàn thành đơn hàng"}
                         </label>
                       </div>
 
-                      {[1, 2, 3].includes(selectedOrder.trangThaiThanhToan) && (
+                      {[1, 2, 3].includes(selectedOrder.trangThai) && (
                         <div className="flex items-center space-x-3">
                           <input
                             type="radio"
@@ -712,12 +789,26 @@ const OrderManagement = () => {
                       <p className="text-gray-700"><span className="font-semibold">Ngày đặt:</span> {selectedOrder.thoiGianLapHoaDon}</p>
                       <p className="text-gray-700"><span className="font-semibold">Trạng thái:</span> 
                         <span className={`ml-2 px-3 py-1 rounded-full text-sm font-semibold
-                          ${selectedOrder.trangThaiThanhToan === 0 ? 'bg-red-100 text-red-800' : 
-                            selectedOrder.trangThaiThanhToan === 1 ? 'bg-green-100 text-green-800' : 
-                            'bg-yellow-100 text-yellow-800'}`}>
-                          {selectedOrder.trangThaiThanhToan === 0 ? 'Đã hủy' :
-                           selectedOrder.trangThaiThanhToan === 1 ? 'Thành công' :
-                           selectedOrder.trangThaiThanhToan === 2 ? 'Chờ thanh toán' : 'Không xác định'}
+                          ${selectedOrder.trangThai === 0 ? 'bg-red-100 text-red-800' : 
+                            selectedOrder.trangThai === 1 ? 'bg-yellow-100 text-yellow-800' :
+                            selectedOrder.trangThai === 2 ? 'bg-blue-100 text-blue-800' :
+                            selectedOrder.trangThai === 3 ? 'bg-indigo-100 text-indigo-800' :
+                            selectedOrder.trangThai === 4 ? 'bg-purple-100 text-purple-800' :
+                            selectedOrder.trangThai === 5 ? 'bg-pink-100 text-pink-800' :
+                            selectedOrder.trangThai === 6 ? 'bg-green-100 text-green-800' :
+                            selectedOrder.trangThai === 7 ? 'bg-emerald-100 text-emerald-800' :
+                            selectedOrder.trangThai === 8 ? 'bg-orange-100 text-orange-800' : 
+                            'bg-gray-100 text-gray-800'}`}>
+                          {selectedOrder.trangThai === 0 ? 'Đã hủy' :
+                           selectedOrder.trangThai === 1 ? 'Chờ xác nhận' :
+                           selectedOrder.trangThai === 2 ? 'Xác nhận đơn hàng' :
+                           selectedOrder.trangThai === 3 ? 'Đơn vị vận chuyển đang giao' :
+                           selectedOrder.trangThai === 4 ? 'Đang được giao tới bạn' :
+                           selectedOrder.trangThai === 5 ? 'Đơn hàng đã được giao thành công' :
+                           selectedOrder.trangThai === 6 ? 'Xác nhận giao hàng thành công' :
+                           selectedOrder.trangThai === 7 ? 'Hoàn thành đơn hàng' :
+                           selectedOrder.trangThai === 8 ? 'Yêu cầu hoàn trả hàng' : 
+                           'Không xác định'}
                         </span>
                       </p>
                       <p className="text-gray-700"><span className="font-semibold">Địa chỉ nhận hàng:</span> {selectedOrder.diaChiNhanHang}</p>
@@ -850,6 +941,79 @@ const OrderManagement = () => {
                       </div>
                     ))}
                   </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {showImeiModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white p-8 rounded-lg w-4/5 max-h-[85vh] overflow-y-auto shadow-2xl">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-bold text-gray-800">Thêm IMEI cho đơn hàng #{selectedOrder.id}</h2>
+                  <button 
+                    onClick={() => setShowImeiModal(false)}
+                    className="text-gray-500 hover:text-gray-700 transition-colors duration-200"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+
+                {orderDetails.map((detail, index) => (
+                  <div key={index} className="mb-6 p-4 border rounded-lg">
+                    <h3 className="text-lg font-semibold mb-3">
+                      {detail.sanPhamChiTiet.sanPham.tenSanPham}
+                      <span className="ml-2 text-sm text-gray-500">
+                        (Cần chọn {detail.soLuong} IMEI)
+                      </span>
+                    </h3>
+                    <div className="grid grid-cols-4 gap-4">
+                      {availableImeis[detail.sanPhamChiTiet.id]?.map((imei, imeiIndex) => (
+                        <div key={imeiIndex} className="flex items-center">
+                          <input
+                            type="checkbox"
+                            id={`imei-${imei.id}`}
+                            checked={(selectedImeis[detail.sanPhamChiTiet.id] || []).includes(imei.id)}
+                            onChange={(e) => {
+                              const currentSelected = selectedImeis[detail.sanPhamChiTiet.id] || [];
+                              if (e.target.checked) {
+                                if (currentSelected.length < detail.soLuong) {
+                                  setSelectedImeis({
+                                    ...selectedImeis,
+                                    [detail.sanPhamChiTiet.id]: [...currentSelected, imei.id]
+                                  });
+                                }
+                              } else {
+                                setSelectedImeis({
+                                  ...selectedImeis,
+                                  [detail.sanPhamChiTiet.id]: currentSelected.filter(id => id !== imei.id)
+                                });
+                              }
+                            }}
+                            className="mr-2"
+                          />
+                          <label htmlFor={`imei-${imei.id}`}>{imei.imei}</label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+
+                <div className="flex justify-end space-x-4 mt-6">
+                  <button
+                    onClick={() => setShowImeiModal(false)}
+                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors"
+                  >
+                    Hủy
+                  </button>
+                  <button
+                    onClick={handleAddImeis}
+                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                  >
+                    Xác nhận
+                  </button>
                 </div>
               </div>
             </div>

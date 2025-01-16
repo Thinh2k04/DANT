@@ -108,7 +108,7 @@ const HomePage = () => {
         setLoading(true);
         let response;
         if (searchTerm.trim() === '') {
-          response = await fetch('http://localhost:8080/rest/spctDTO/getAll');
+          response = await fetch('http://localhost:8080/rest/discount/active');
         } else {
           response = await fetch(`http://localhost:8080/rest/san_pham_chi_tiet/tim_kiem/${searchTerm}`);
         }

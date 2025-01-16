@@ -80,7 +80,7 @@ export const updateCartItemQuantity = async (id, newQuantity) => {
     const result = await response.json();
     
     if (result.success) {
-      const stockResponse = await fetch(`http://localhost:8080/rest/spctDTO/getById/${id}`);
+      const stockResponse = await fetch(`http://localhost:8080/rest/discount/getProductByProductId/${id}`);
       const stockData = await stockResponse.json();
       
       if (newQuantity > stockData.soLuong) {

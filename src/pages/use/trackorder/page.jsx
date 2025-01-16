@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../../../components/Layout/DefaultLayout/Navbar';
 import { toast } from 'react-toastify';
-import { FaSearch, FaBox, FaTruck, FaCheckCircle } from 'react-icons/fa';
+import { FaSearch, FaBox, FaTruck, FaCheckCircle, FaTimesCircle, FaWarehouse } from 'react-icons/fa';
 
 const TrackOrderPage = () => {
   const [orderCode, setOrderCode] = useState('');
@@ -82,9 +82,36 @@ const TrackOrderPage = () => {
     }
   };
 
+  // Thêm hàm getOrderTimeline
+  const getOrderTimeline = (status) => {
+    const steps = [
+      { id: 1, title: 'Đặt hàng', icon: FaBox, description: 'Đơn hàng đã được đặt' },
+      { id: 2, title: 'Xác nhận', icon: FaWarehouse, description: 'Đơn hàng đã được xác nhận' },
+      { id: 3, title: 'Vận chuyển', icon: FaTruck, description: 'Đơn hàng đang được giao' },
+      { id: 4, title: 'Hoàn thành', icon: FaCheckCircle, description: 'Đơn hàng đã giao thành công' },
+    ];
+
+    if (status === 0) {
+      return [{
+        id: 0,
+        title: 'Đã hủy',
+        icon: FaTimesCircle,
+        description: 'Đơn hàng đã bị hủy'
+      }];
+    }
+
+    return steps.map((step, index) => ({
+      ...step,
+      active: index < status,
+      current: index === status - 1
+    }));
+  };
+
   // Sửa lại phần hiển thị chi tiết đơn hàng
   const renderOrderDetails = () => {
     if (!currentOrder) return null;
+
+    const timeline = getOrderTimeline(currentOrder.trangThaiThanhToan);
 
     return (
       <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
@@ -101,6 +128,36 @@ const TrackOrderPage = () => {
             <div className={`flex items-center gap-2 ${getOrderStatus(currentOrder.trangThaiThanhToan).color}`}>
               {React.createElement(getOrderStatus(currentOrder.trangThaiThanhToan).icon)}
               <span>{getOrderStatus(currentOrder.trangThaiThanhToan).text}</span>
+            </div>
+          </div>
+
+          {/* Thêm timeline */}
+          <div className="my-8">
+            <div className="relative">
+              <div className="absolute left-0 top-0 h-full w-1 bg-gray-200" />
+              <div className="space-y-8">
+                {timeline.map((step, index) => (
+                  <div key={step.id} className="relative">
+                    <div className="flex items-center">
+                      <div className={`
+                        flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center
+                        ${step.active || step.current ? 'bg-blue-500' : 'bg-gray-200'}
+                        ${currentOrder.trangThaiThanhToan === 0 ? 'bg-red-500' : ''}
+                      `}>
+                        {React.createElement(step.icon, {
+                          className: `w-4 h-4 ${step.active || step.current || currentOrder.trangThaiThanhToan === 0 ? 'text-white' : 'text-gray-500'}`
+                        })}
+                      </div>
+                      <div className="ml-4">
+                        <p className={`text-sm font-medium ${step.current ? 'text-blue-500' : 'text-gray-500'}`}>
+                          {step.title}
+                        </p>
+                        <p className="text-sm text-gray-500">{step.description}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 

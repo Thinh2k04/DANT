@@ -37,14 +37,14 @@ const ChiTietSanPham = () => {
             try {
                 setIsLoading(true);
                 // Gọi API lấy thông tin sản phẩm
-                const response = await fetch(`http://localhost:8080/rest/spctDTO/getById/${idSanPham}`);
+                const response = await fetch(`http://localhost:8080/rest/discount/getProductByProductId/${idSanPham}`);
                 if (!response.ok) throw new Error('Network response was not ok');
                 const data = await response.json();
                 setProduct(data);
                 setSelectedConfig(data);
 
                 // Gọi API lấy danh sách laptop
-                const laptopsResponse = await fetch('http://localhost:8080/rest/spctDTO/getAll');
+                const laptopsResponse = await fetch('http://localhost:8080/rest/discount/active');
                 if (!laptopsResponse.ok) throw new Error('Network response was not ok');
                 const laptopsData = await laptopsResponse.json();
                 setLaptops(laptopsData);
@@ -253,17 +253,21 @@ const ChiTietSanPham = () => {
                                 </h1>
                                 
                                 <div className="flex items-center gap-4 mb-6">
-                                    <span className="text-3xl font-bold text-red-600">
-                                        {formatPrice(selectedConfig.discountedPrice || selectedConfig.donGia)} VNĐ
-                                    </span>
-                                    {selectedConfig.discountedPrice && (
-                                        <span className="text-sm text-gray-500 line-through">
+                                    {selectedConfig.discountPercentage > 0 ? (
+                                        <>
+                                            <span className="text-3xl font-bold text-red-600">
+                                                {formatPrice(selectedConfig.discountedPrice)} VNĐ
+                                            </span>
+                                            <span className="text-sm text-gray-500 line-through">
+                                                {formatPrice(selectedConfig.donGia)} VNĐ
+                                            </span>
+                                            <span className="bg-red-100 text-red-600 px-2 py-1 rounded-full text-sm">
+                                                -{selectedConfig.discountPercentage}%
+                                            </span>
+                                        </>
+                                    ) : (
+                                        <span className="text-3xl font-bold text-red-600">
                                             {formatPrice(selectedConfig.donGia)} VNĐ
-                                        </span>
-                                    )}
-                                    {selectedConfig.discountPercentage > 0 && (
-                                        <span className="bg-red-100 text-red-600 px-2 py-1 rounded-full text-sm">
-                                            -{selectedConfig.discountPercentage}%
                                         </span>
                                     )}
                                 </div>
@@ -382,11 +386,11 @@ const ChiTietSanPham = () => {
                                             {relatedProduct.tenSanPhamChiTiet}
                                         </h3>
                                         <div className="flex items-center gap-2 mb-3">
-                                            <p className="text-red-600 font-bold text-lg">
-                                                {formatPrice(relatedProduct.discountedPrice || relatedProduct.donGia)} VNĐ
-                                            </p>
-                                            {relatedProduct.discountedPrice && relatedProduct.discountPercentage > 0 && (
+                                            {relatedProduct.discountPercentage > 0 ? (
                                                 <>
+                                                    <p className="text-red-600 font-bold text-lg">
+                                                        {formatPrice(relatedProduct.discountedPrice)} VNĐ
+                                                    </p>
                                                     <p className="text-gray-500 text-sm line-through">
                                                         {formatPrice(relatedProduct.donGia)} VNĐ
                                                     </p>
@@ -394,6 +398,10 @@ const ChiTietSanPham = () => {
                                                         -{relatedProduct.discountPercentage}%
                                                     </span>
                                                 </>
+                                            ) : (
+                                                <p className="text-red-600 font-bold text-lg">
+                                                    {formatPrice(relatedProduct.donGia)} VNĐ
+                                                </p>
                                             )}
                                         </div>
                                         <button 

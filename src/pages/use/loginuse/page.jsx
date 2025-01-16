@@ -116,9 +116,15 @@ const LoginPage = () => {
         })
       });
 
-      const data = await response.json();
+      if (response.status === 500) {
+        toast.error('Tài khoản chưa được đăng ký! Vui lòng đăng ký tài khoản 🔑', {
+          position: "top-center"
+        });
+        setIsLoading(false);
+        return;
+      }
 
-      console.log('Tên đăng nhập: ' + data.username)
+      const data = await response.json();
 
       if (response.ok) {
         // Lưu thông tin đăng nhập nếu chọn "Remember me"
@@ -161,7 +167,7 @@ const LoginPage = () => {
         }, 1500);
       } else {
         setLoginAttempts(prev => prev + 1);
-        toast.error('Sai mất rồi! Kiểm tra lại thông tin nha 🔍', {
+        toast.error('Sai mật khẩu! Kiểm tra lại thông tin nha 🔍', {
           position: "top-center"
         });
       }

@@ -2,12 +2,10 @@ package com.example.aino_1.service;
 
 import com.example.aino_1.dto.SanPhamChiTietDto;
 import com.example.aino_1.entity.HinhAnh;
+import com.example.aino_1.entity.ProductDiscount;
 import com.example.aino_1.entity.SanPham;
 import com.example.aino_1.entity.SanPhamChiTiet;
-import com.example.aino_1.repository.HinhAnhInterface;
-import com.example.aino_1.repository.ImeiInterface;
-import com.example.aino_1.repository.SanPhamChiTietInterface;
-import com.example.aino_1.repository.SanPhamInterface;
+import com.example.aino_1.repository.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,6 +25,9 @@ public class SanPhamChiTietService {
 
     @Autowired
     ImeiInterface imsi;
+
+    @Autowired
+    ProductDiscountInterface productDiscountInterface;
 
     @Autowired
     HinhAnhInterface hasi;
@@ -78,8 +79,6 @@ public class SanPhamChiTietService {
 }
     @Transactional
     public void updateSanPhamChiTietWithImage(SanPhamChiTiet sp, List<String> urlImg) {
-
-
         sanPhamChiTietInterface.save(sp);
 
         // Nếu có danh sách URL hình ảnh mới, cập nhật hình ảnh
@@ -98,18 +97,18 @@ public class SanPhamChiTietService {
 
     }
 
-    public List<SanPhamChiTietDto> getListForHome(){
+    public List<SanPhamChiTietDto> getListForHome() {
         List<SanPhamChiTietDto> listSPCTDTO = sanPhamChiTietInterface.getAllDTO();
-        List<SanPhamChiTietDto> listHome = new ArrayList<>()    ;
-        for (SanPhamChiTietDto spctdto : listSPCTDTO
-        ) {
+        List<SanPhamChiTietDto> listHome1 = new ArrayList<>();
+        for (SanPhamChiTietDto spctdto : listSPCTDTO) {
             System.out.println("Trạng Thái của SPCT DTO: " + spctdto.getTrangThai());
-            if(spctdto.getTrangThai() == 1){
-                listHome.add(spctdto);
+            if (spctdto.getTrangThai() == 1) {
+                listHome1.add(spctdto);
             }
         }
-        return listHome;
+        return listHome1;
     }
+
 
 
     public List<SanPhamChiTietDto> getListThungRac(){

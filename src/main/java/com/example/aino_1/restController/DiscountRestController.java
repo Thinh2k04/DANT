@@ -6,6 +6,7 @@ import com.example.aino_1.entity.*;
 import com.example.aino_1.repository.DiscountCampaignInterface;
 import com.example.aino_1.repository.ProductDiscountInterface;
 import com.example.aino_1.service.DiscountService;
+import com.example.aino_1.service.SanPhamChiTietService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -29,6 +30,9 @@ public class DiscountRestController {
 
     @Autowired
     private DiscountCampaignInterface discountCampaignInterface;
+
+    @Autowired
+    private SanPhamChiTietService sanPhamChiTietService;
 
     @Autowired
     private ProductDiscountInterface productDiscountInterface;
@@ -109,7 +113,9 @@ public class DiscountRestController {
 
     // API lấy danh sách ProductDiscount theo Product ID
     @GetMapping("/getProductByProductId/{productId}")
-    public ResponseEntity<List<ProductDiscount>> getProductDiscountsByProduct(@PathVariable Integer productId) {
-        return ResponseEntity.ok(discountService.getProductDiscountsByProduct(productId));
+    public SanPhamChiTietDto getProductDiscountsByProduct(@PathVariable Integer productId) {
+        ProductDiscount discount = productDiscountInterface.findByProductId(productId);
+        SanPhamChiTietDto sanPhamChiTietDto = sanPhamChiTietService.getSanPhamChiTietById(discount.getId());
+        return sanPhamChiTietDto;
     }
 }

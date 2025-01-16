@@ -1,9 +1,11 @@
 package com.example.aino_1.restController;
 
+import com.example.aino_1.service.HoaDonService;
 import com.example.aino_1.service.ZaloPayService;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +22,8 @@ public class ZaloPayController {
     @Autowired
     private ZaloPayService zaloPayService;
 
+    @Autowired
+    private HoaDonService hoaDonService;
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
@@ -49,16 +53,46 @@ public class ZaloPayController {
         }
     }
 
+//    @PostMapping("/callback")
+//    public String handleCallback(@RequestBody String jsonStr) throws JSONException {
+//        System.out.println("Nhận được dữ liệu callback từ zalo: xác nhạn đơn hàng thành công");
+//        logger.info("Received callback: " + jsonStr);
+//
+//        // Gọi service để xử lý logic callback
+//        JSONObject response = zaloPayService.processCallback(jsonStr);
+//
+//        // Trả về kết quả
+//        System.out.println(response.toString());
+//        return response.toString();
+//    }
+
     @PostMapping("/callback")
     public String handleCallback(@RequestBody String jsonStr) throws JSONException {
-        System.out.println("Nhận được dữ liệu callback từ zalo: xác nhạn đơn hàng thành công");
+        System.out.println("Nhận được dữ liệu callback từ Zalo: xác nhận đơn hàng thành công");
         logger.info("Received callback: " + jsonStr);
 
         // Gọi service để xử lý logic callback
         JSONObject response = zaloPayService.processCallback(jsonStr);
 
+
+        // Lấy appTransId từ JSON callback
+        String appTransId = response.optString("appTransId", null);
+        String maHoaDon = response.optString("appUser", null);
+        if (appTransId == null) {
+            return "{\"error\":\"appTransId không tồn tại\"}";
+        }
+
+        // Lưu appTransId vào database
+        try {
+            zaloPayService.saveAppTransId(appTransId,maHoaDon); // Gọi hàm lưu trong repository/service
+            logger.info("appTransId đã được lưu vào database: " + appTransId);
+        } catch (Exception e) {
+            return "{\"error\":\"Lỗi lưu appTransId\"}";
+        }
+
         // Trả về kết quả
         System.out.println(response.toString());
         return response.toString();
     }
+
 }

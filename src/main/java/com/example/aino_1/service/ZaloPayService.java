@@ -1,5 +1,7 @@
 package com.example.aino_1.service;
 
+import com.example.aino_1.entity.HoaDon;
+import com.example.aino_1.repository.HoaDonInterface;
 import com.example.aino_1.util.ZaloPayUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.codec.binary.Hex;
@@ -33,6 +35,8 @@ import java.util.*;
 public class ZaloPayService {
 
     private ZaloPayUtil zaloPayUtil;
+
+    private HoaDonInterface hoaDonInterface;
 
     private final Mac HmacSHA256;
 
@@ -84,7 +88,7 @@ public class ZaloPayService {
             put("bank_code", "");
             put("item", itemJSONArray.toString()); // Chuyển đổi itemList thành JSON string
             put("embed_data", new JSONObject(embed_data).toString());
-            put("callback_url", "https://05a7-123-16-242-129.ngrok-free.app/api/payment/callback"); // URL callback
+            put("callback_url", "https://5e27-1-54-214-145.ngrok-free.app/api/payment/callback"); // URL callback
         }};
 
         // Tạo dữ liệu cho chữ ký HMAC
@@ -156,8 +160,6 @@ public class ZaloPayService {
         return new JSONObject(resultJsonStr.toString());
     }
 
-
-
     private final String KEY2 = "trMrHtvjo6myautxDUiAcYsVtaeQ8nhf"; // Key2 của bạn
 
     // Hàm để tạo chữ ký HMAC từ dữ liệu
@@ -197,5 +199,11 @@ public class ZaloPayService {
             result.put("return_message", ex.getMessage());
         }
         return result;
+    }
+
+    public void saveAppTransId(String appTransId,String maHoaDon){
+        HoaDon hoaDon = hoaDonInterface.findHoaDonByMaHoaDon(maHoaDon);
+        hoaDon.setApp_trans_id(appTransId);
+        hoaDonInterface.save(hoaDon);
     }
 }

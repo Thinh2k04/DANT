@@ -49,7 +49,7 @@ public class DiscountRestController {
 
     @GetMapping("/getAllProductDiscount")
     public List<ProductDiscount> getAllProductDiscount(){
-        return productDiscountInterface.findAll();
+        return productDiscountInterface.findAllByActive(1);
     }
 
     // Thêm đợt giảm giá

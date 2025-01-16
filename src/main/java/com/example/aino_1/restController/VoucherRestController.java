@@ -33,6 +33,7 @@ public class VoucherRestController {
 
     @GetMapping("/getAll")
     public List<Voucher> getAll() {
+        voucherService.updateActiveVoucher();
         return vsi.findAllByTrangThai(1);
     }
 

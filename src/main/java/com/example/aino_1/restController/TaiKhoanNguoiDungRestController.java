@@ -118,7 +118,5 @@ public class TaiKhoanNguoiDungRestController {
     public TaiKhoanNguoiDung getAll(@PathVariable Integer id) {
         return taiKhoanInterface.findById(id).get();
     }
-
-
 }
 

@@ -28,23 +28,14 @@ public class DiscountService {
     @Lazy
     @Autowired
     private DiscountCampaignInterface discountCampaignInterface;
-
-
     @Autowired
     private SanPhamChiTietInterface sanPhamChiTietInterface;
-
-
     @Autowired
     private ProductDiscountInterface productDiscountInterface;
-
-    @Lazy
     @Autowired
     private ImeiService imeiService;
-
-
     @Autowired
     private SanPhamChiTietService sanPhamChiTietService;
-
     @Autowired
     private JwtUtils jwtUtils;
 
@@ -106,13 +97,13 @@ public class DiscountService {
 
             SanPhamChiTiet product = productDiscount.getProduct();
 
-            Integer sIMEISPCT = imeiService.getListImeibySPCT(product.getId()).size();
-            // Kiểm tra số lượng tồn kho của sản phẩm
-            if(sIMEISPCT== 0) {
-                // Nếu sản phẩm hết hàng, set active = 0
-                productDiscount.setActive(0);
-                continue; // Bỏ qua các bước kiểm tra khác
-            }
+//            Integer sIMEISPCT = imeiService.getListImeibySPCT(product.getId()).size();
+//            // Kiểm tra số lượng tồn kho của sản phẩm
+//            if(sIMEISPCT== 0) {
+//                // Nếu sản phẩm hết hàng, set active = 0
+//                productDiscount.setActive(0);
+//                continue; // Bỏ qua các bước kiểm tra khác
+//            }
 
             // Kiểm tra thời gian bắt đầu và kết thúc của chiến dịch giảm giá
             if (discountCampaign.getStartDate().isBefore(now) && discountCampaign.getEndDate().isAfter(now)) {

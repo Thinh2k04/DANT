@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface ThongTinTaiKhoaninterface extends JpaRepository<ThongTinTaiKhoan,Integer> {
 
@@ -19,5 +21,5 @@ public interface ThongTinTaiKhoaninterface extends JpaRepository<ThongTinTaiKhoa
     TTTKDTO timTTTKBySDT(@Param("SDT") String SDT);
 
     // tìm kiếm thông tin tài khoản người dùng bằng username
-    ThongTinTaiKhoan findThongTinTaiKhoanByTaiKhoanNguoiDungUsername(String username);
+    Optional<ThongTinTaiKhoan> findThongTinTaiKhoanByTaiKhoanNguoiDungUsername(String username);
 }

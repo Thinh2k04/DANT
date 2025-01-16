@@ -12,4 +12,5 @@ import java.util.Optional;
 public interface ProductDiscountInterface extends JpaRepository<ProductDiscount,Integer> {
     List<ProductDiscount> findByDiscountCampaignId(Integer discountCampaignId);
     Optional<ProductDiscount> findByProductIdAndActive(Integer productID,Integer active);
+    List<ProductDiscount> findAllByActive(Integer active);
 }

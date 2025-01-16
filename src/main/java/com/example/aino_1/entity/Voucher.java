@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Data
@@ -27,7 +28,7 @@ public class Voucher {
 
     @Column(name = "thoi_gian_hen_ket", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
-    private Date thoiGianHenKet;  // Thời gian hết hạn của voucher
+    private LocalDateTime thoiGianHenKet;  // Thời gian hết hạn của voucher
 
     @Column(name = "so_tien_toi_da")
     private Float soTienToiDa;  // Số tiền tối đa có thể áp dụng cho 1 đơn hàng
@@ -43,7 +44,7 @@ public class Voucher {
 
     @Column(name = "thoi_gian_ap_dung", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
-    private Date thoiGianApDung;  // Thời gian voucher được áp dụng
+    private LocalDateTime thoiGianApDung;  // Thời gian voucher được áp dụng
 
     @Column(name = "trang_thai")
     private Integer trangThai;  // Trạng thái của voucher

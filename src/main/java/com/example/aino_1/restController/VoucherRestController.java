@@ -77,7 +77,6 @@ public class VoucherRestController {
         }
     }
 
-
     @PutMapping("/update/{id}")
     public Voucher update(@RequestBody Voucher voucher) {
         return vsi.save(voucher);

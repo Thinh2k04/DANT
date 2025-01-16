@@ -29,8 +29,6 @@ public class ZaloPayController {
 
     private final Logger logger = Logger.getLogger(ZaloPayController.class.getName());
 
-
-
     @PostMapping("/create")
     public Map<String, Object> createOrder(@RequestBody Map<String, Object> request) {
         try {
@@ -53,45 +51,17 @@ public class ZaloPayController {
         }
     }
 
-//    @PostMapping("/callback")
-//    public String handleCallback(@RequestBody String jsonStr) throws JSONException {
-//        System.out.println("Nhận được dữ liệu callback từ zalo: xác nhạn đơn hàng thành công");
-//        logger.info("Received callback: " + jsonStr);
-//
-//        // Gọi service để xử lý logic callback
-//        JSONObject response = zaloPayService.processCallback(jsonStr);
-//
-//        // Trả về kết quả
-//        System.out.println(response.toString());
-//        return response.toString();
-//    }
-
     @PostMapping("/callback")
     public String handleCallback(@RequestBody String jsonStr) throws JSONException {
-        System.out.println("Nhận được dữ liệu callback từ Zalo: xác nhận đơn hàng thành công");
+        System.out.println("Nhận được dữ liệu callback từ zalo: xác nhạn đơn hàng thành công");
         logger.info("Received callback: " + jsonStr);
 
         // Gọi service để xử lý logic callback
         JSONObject response = zaloPayService.processCallback(jsonStr);
 
-
-        // Lấy appTransId từ JSON callback
-        String appTransId = response.optString("appTransId", null);
-        String maHoaDon = response.optString("appUser", null);
-        if (appTransId == null) {
-            return "{\"error\":\"appTransId không tồn tại\"}";
-        }
-
-        // Lưu appTransId vào database
-        try {
-            zaloPayService.saveAppTransId(appTransId,maHoaDon); // Gọi hàm lưu trong repository/service
-            logger.info("appTransId đã được lưu vào database: " + appTransId);
-        } catch (Exception e) {
-            return "{\"error\":\"Lỗi lưu appTransId\"}";
-        }
-
         // Trả về kết quả
-        System.out.println(response);
+        System.out.println(response.toString());
+
         return response.toString();
     }
 }

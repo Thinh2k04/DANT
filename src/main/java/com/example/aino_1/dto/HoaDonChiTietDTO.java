@@ -10,6 +10,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class HoaDonChiTietDTO {
+    private Integer id;
     private String tenSanPham;
     private String hinhAnhMinhHoa;
     private Integer soLuong;

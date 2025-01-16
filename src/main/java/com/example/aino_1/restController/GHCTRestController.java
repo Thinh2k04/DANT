@@ -102,5 +102,12 @@ public class GHCTRestController {
             ));
         }
     }
+
+//    @GetMapping("/getAllGioHAng/")
+//    public List<GioHangChiTiet> getAllGioHAng(
+//            @RequestHeader
+//    ) {
+//
+//    }
 }
 

@@ -297,6 +297,7 @@ public class HoaDonService {
             SanPhamChiTietDto spctdto = sanPhamChiTietService.getSanPhamChiTietById(hd.getSanPhamChiTiet().getId());
 
             // Gắn thông tin sản phẩm chi tiết vào hóa đơn chi tiết
+            hdctdto.setId(spctdto.getId());
             hdctdto.setTenSanPham(spctdto.getTenSanPham());
             hdctdto.setHinhAnhMinhHoa(spctdto.getHinhAnhMinhHoa());
             hdctdto.setSoLuong(hd.getSoLuong());

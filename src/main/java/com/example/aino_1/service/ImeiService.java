@@ -152,7 +152,10 @@ public class ImeiService {
 
 
     public List<ImeiDTO> getListImeiBySanPhamChiTiet(Integer idSpct) {
-        List<Imei> listImei = imif.findAllBySpctIdAndTrangThai(idSpct, 0);
+        List<Integer> trangThaiList = Arrays.asList(0, 2);
+        // Lấy danh sách từ cơ sở dữ liệu
+        List<Imei> listImei = imif.GetBySpctIdAndTrangThaiIn(idSpct, trangThaiList);
+
         System.out.println("Danh sách IMEI nhận được: " + listImei.size());  // Kiểm tra kích thước danh sách
 
         List<ImeiDTO> imeiDTOList = listImei.stream()

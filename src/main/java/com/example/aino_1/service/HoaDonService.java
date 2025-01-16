@@ -238,6 +238,7 @@ public class HoaDonService {
         // Tạo và lưu timeline
         timeline.setThoiGianCapNhat(new Timestamp(System.currentTimeMillis()));
         timeline.setNguoiCapNhat(user);
+        timeline.setRole("Admin");
         timeline.setTrangThai(2);
         // Cập nhật trạng thái hóa đơn là "Đã xác nhận"
         hd.setTrangThai(2);

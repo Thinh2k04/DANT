@@ -1,8 +1,10 @@
 package com.example.aino_1.restController;
 
+import com.example.aino_1.dto.GHCTDTO;
 import com.example.aino_1.entity.GioHangChiTiet;
 import com.example.aino_1.entity.SanPhamChiTiet;
 import com.example.aino_1.repository.GioHangChiTietInterface;
+import com.example.aino_1.service.GHCTService;
 import com.example.aino_1.service.GioHangChiTietService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,6 +23,9 @@ public class GHCTRestController {
 
     @Autowired
     GioHangChiTietService gioHangChiTietService;
+
+    @Autowired
+    GHCTService ghct;
 
     @GetMapping("/getAll")
     public List<GioHangChiTiet> getAll() {
@@ -103,11 +108,13 @@ public class GHCTRestController {
         }
     }
 
-//    @GetMapping("/getAllGioHAng/")
-//    public List<GioHangChiTiet> getAllGioHAng(
-//            @RequestHeader
-//    ) {
-//
-//    }
+    @GetMapping("/getAllGioHang/")
+    public List<GHCTDTO> getAllGioHAng(
+            @RequestParam String username
+    ) {
+        List<GHCTDTO> list = ghct.getGioHangChiTiet(username);
+
+        return list;
+    }
 }
 

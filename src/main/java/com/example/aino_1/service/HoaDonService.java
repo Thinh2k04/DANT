@@ -281,15 +281,15 @@ public class HoaDonService {
 
 
 
-    public Map<String, Object> getHoaDon(String maHoaDon) {
+    public Map<String, Object> getHoaDon(Integer idHoaDon) {
         // Lấy hóa đơn
-        HoaDon hoaDon = hdsi.findHoaDonByMaHoaDon(maHoaDon);
+        HoaDon hoaDon = hdsi.findHoaDonById(idHoaDon);
 
         // Chuyển hóa đơn qua DTO
         HoaDonDTO hoaDonDTO = HoaDonDTO.fromEntity(hoaDon);
 
         // Lấy danh sách chi tiết hóa đơn
-        List<HoaDonChiTiet> listHDCT = hdctsi.findAllByHoaDon_MaHoaDon(maHoaDon);
+        List<HoaDonChiTiet> listHDCT = hdctsi.findAllByHoaDon_Id(idHoaDon);
         List<HoaDonChiTietDTO> listhdctDTO = new ArrayList<>();
 
         for (HoaDonChiTiet hd : listHDCT) {
@@ -321,5 +321,32 @@ public class HoaDonService {
 
         return response;
     }
+
+
+
+
+    @Transactional
+    public void huyHoaDon(Integer hoaDonId) {
+        // Lấy danh sách chi tiết hóa đơn
+        List<HoaDonChiTiet> hoaDonChiTietList = hdctsi.findAllByHoaDon_Id(hoaDonId);
+        if (hoaDonChiTietList.isEmpty()) {
+            throw new IllegalStateException("Không tìm thấy chi tiết cho hóa đơn: " + hoaDonId);
+        }
+
+        // Gộp danh sách tất cả IMEI cần cập nhật
+        List<Imei> imeiList = new ArrayList<>();
+        for (HoaDonChiTiet hd : hoaDonChiTietList) {
+            imeiList.addAll(imeiRepository.findAllByHdct(hd));
+        }
+
+        // Cập nhật trạng thái IMEI
+        for (Imei imei : imeiList) {
+            imei.setTrangThai(0); // Trạng thái về 0
+        }
+
+        // Lưu lại thay đổi vào cơ sở dữ liệu
+        imeiRepository.saveAll(imeiList);
+    }
+
 
 }

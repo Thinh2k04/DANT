@@ -8,22 +8,23 @@ import com.example.aino_1.repository.TimelineHoaDonInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.sql.Timestamp;
 import java.util.List;
-
 import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class TimelineHoaDonService {
-
 
     @Autowired
     private TimelineHoaDonInterface timelineRepository;
 
     @Autowired
     private HoaDonInterface hoaDonRepository;
+
+    @Autowired
+    private HoaDonService hoaDonService; // Inject thêm HoaDonService
 
     // Danh sách trạng thái hợp lệ
     private static final List<Integer> VALID_STATES = List.of(0, 1, 2, 3, 4, 5, 6, 7, 8);
@@ -35,45 +36,61 @@ public class TimelineHoaDonService {
 
     // Thêm timeline mới
     public ResponseEntity<?> addTimeline(TimelineHoaDonDTO timelineDTO) {
-        // Kiểm tra trạng thái có hợp lệ không
+        // Kiểm tra trạng thái hợp lệ
         if (!VALID_STATES.contains(timelineDTO.getTrangThai())) {
-            return new ResponseEntity<>("Trạng thái không hợp lệ: " + timelineDTO.getTrangThai(), HttpStatus.OK);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Trạng thái không hợp lệ: " + timelineDTO.getTrangThai());
         }
 
-        // Kiểm tra trạng thái hiện tại để đảm bảo tính hợp lệ khi chuyển trạng thái
+        // Lấy trạng thái hiện tại của hóa đơn
         TimelineHoaDon lastTimeline = timelineRepository.findTopByHoaDon_IdOrderByThoiGianCapNhatDesc(timelineDTO.getHoaDonId());
         Integer currentStatus = (lastTimeline != null) ? lastTimeline.getTrangThai() : null;
 
+        // Kiểm tra trạng thái hiện tại và trạng thái mới
         if (currentStatus != null && currentStatus.equals(timelineDTO.getTrangThai())) {
-            return new ResponseEntity<>("Không thể chuyển từ trạng thái " + currentStatus + " sang " + timelineDTO.getTrangThai(), HttpStatus.OK);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Không thể chuyển từ trạng thái " + currentStatus + " sang " + timelineDTO.getTrangThai());
         }
 
         if (!isValidTransition(currentStatus, timelineDTO.getTrangThai())) {
-            return new ResponseEntity<>("Không thể chuyển từ trạng thái " + currentStatus + " sang " + timelineDTO.getTrangThai(), HttpStatus.OK);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Không thể chuyển từ trạng thái " + currentStatus + " sang " + timelineDTO.getTrangThai());
         }
 
-        // Tạo đối tượng HoaDon từ ID trong DTO
-//        HoaDon hoaDon = new HoaDon();
-//        hoaDon.setId(timelineDTO.getHoaDonId());
-
-
+        // Lấy thông tin hóa đơn
         HoaDon hoaDon = hoaDonRepository.findHoaDonById(timelineDTO.getHoaDonId());
+        if (hoaDon == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Không tìm thấy hóa đơn với ID: " + timelineDTO.getHoaDonId());
+        }
 
-        // Tạo đối tượng TimelineHoaDon và gán các giá trị từ DTO
+        // Nếu trạng thái mới là 0 (hủy đơn hàng)
+        if (timelineDTO.getTrangThai() == 0) {
+            // Nếu trạng thái hiện tại là 3 (đơn vị vận chuyển đang giao), không cho phép hủy
+            if (currentStatus != null && currentStatus == 3) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Không thể hủy hóa đơn khi đơn vị vận chuyển đang giao.");
+            }
+
+            // Gọi hàm huyHoaDon
+            hoaDonService.huyHoaDon(timelineDTO.getHoaDonId());
+        }
+
+        // Tạo đối tượng TimelineHoaDon và gán giá trị từ DTO
         TimelineHoaDon timeline = new TimelineHoaDon();
         timeline.setHoaDon(hoaDon);
         timeline.setTrangThai(timelineDTO.getTrangThai());
-        timeline.setThoiGianCapNhat(new Timestamp(System.currentTimeMillis())); // Ghi thời gian hiện tại
+        timeline.setThoiGianCapNhat(new Timestamp(System.currentTimeMillis())); // Thời gian hiện tại
         timeline.setNguoiCapNhat(timelineDTO.getNguoiCapNhat());
         timeline.setLyDo(timelineDTO.getLyDo());
-        timeline.setRole(timelineDTO.getRole()); // Gán giá trị role từ DTO
+        timeline.setRole(timelineDTO.getRole());
 
+        // Cập nhật trạng thái hóa đơn và lưu dữ liệu
         hoaDon.setTrangThai(timelineDTO.getTrangThai());
         hoaDonRepository.save(hoaDon);
-        // Lưu vào cơ sở dữ liệu
         timelineRepository.save(timeline);
 
-        return new ResponseEntity<>(timeline, HttpStatus.OK); // Trả về đối tượng đã lưu với trạng thái OK
+        return new ResponseEntity<>(timeline, HttpStatus.OK); // Trả về đối tượng timeline
     }
 
     // Kiểm tra tính hợp lệ khi chuyển trạng thái
@@ -92,7 +109,7 @@ public class TimelineHoaDonService {
             case 2: // Xác nhận đơn hàng
                 return newStatus == 3 || newStatus == 0;
             case 3: // Đơn vị vận chuyển đang giao
-                return newStatus == 4 || newStatus == 0;
+                return newStatus == 4; // Không cho phép hủy, chỉ được chuyển sang trạng thái 4
             case 4: // Đang được giao tới bạn
                 return newStatus == 5;
             case 5: // Đơn hàng đã được giao thành công

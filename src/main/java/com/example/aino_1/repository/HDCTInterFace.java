@@ -17,5 +17,7 @@ public interface HDCTInterFace  extends JpaRepository<HoaDonChiTiet, Integer> {
 
     List<HoaDonChiTiet> findAllByHoaDon_MaHoaDon(String hoaDonMaHoaDon);
 
+    List<HoaDonChiTiet> findAllByHoaDon_Id(Integer hoaDonId);
+
 
 }

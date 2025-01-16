@@ -36,7 +36,7 @@ public class AdminRestController {
     @GetMapping("/adminSPCT")
     public List<SanPhamChiTietDto> getSanPhamChiTietADMIN() {
         List<SanPhamChiTietDto> listDiCout = discountService.getActiveDiscountsOrProducts();
-        int i = 0;
+        List<SanPhamChiTietDto> listDiCout2 = new ArrayList<>();
         for (SanPhamChiTietDto dto : listDiCout) {
             // Lấy danh sách IMEI
             List<ImeiDTO> ImeiList = imeiService.getListImeiBySanPhamChiTietAdmin(dto.getIdSanPham());
@@ -45,10 +45,7 @@ public class AdminRestController {
             // Ghi lại số lượng
             dto.setSoLuong(ImeiList.size());
             System.out.println("Số lượng được set vào DTO: " + dto.getSoLuong());
-
-            // Cập nhật vào danh sách
-            listDiCout.set(i, dto);
-            i++;
+            listDiCout2.add(dto);
         }
 
         // In danh sách cuối cùng để kiểm tra
@@ -57,7 +54,7 @@ public class AdminRestController {
                 System.out.println("Sản phẩm ID: " + d.getIdSanPham() + ", Số lượng: " + d.getSoLuong())
         );
 
-        return listDiCout;
+        return listDiCout2;
     }
-    
+
 }

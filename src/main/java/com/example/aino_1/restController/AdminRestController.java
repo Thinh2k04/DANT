@@ -1,5 +1,9 @@
 package com.example.aino_1.restController;
 
+import com.example.aino_1.dto.ImeiDTO;
+import com.example.aino_1.dto.SanPhamChiTietDto;
+import com.example.aino_1.service.DiscountService;
+import com.example.aino_1.service.ImeiService;
 import com.example.aino_1.service.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -9,14 +13,22 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/admin")
+@RequestMapping("/rest")
 public class AdminRestController {
 
     @Autowired
     JwtUtils jwtUtils;
+
+    @Autowired
+    DiscountService discountService;
+
+    @Autowired
+    ImeiService imeiService;
 
     @GetMapping("/dashboard")
     public ResponseEntity<String> getDashboard(@RequestHeader("Authorization") String token) {
@@ -42,5 +54,18 @@ public class AdminRestController {
         return isValid;
     }
 
+
+    @GetMapping("/adminSPCT")
+    public List<SanPhamChiTietDto> getSanPhamChiTietADMIN() {
+        List<SanPhamChiTietDto> listDiCout = discountService.getActiveDiscountsOrProducts();
+        int i = 0;
+        for (SanPhamChiTietDto dto : listDiCout) {
+            List<ImeiDTO> dtoList =  imeiService.getListImeiBySanPhamChiTietAdmin(dto.getIdSanPham());
+            dto.setSoLuong(dtoList.size()) ;
+            listDiCout.set(i, dto);
+            i ++;
+        }
+        return listDiCout;
+    }
 
 }

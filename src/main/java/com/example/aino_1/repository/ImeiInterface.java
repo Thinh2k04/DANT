@@ -25,4 +25,9 @@ public interface ImeiInterface extends JpaRepository<Imei, Integer> {
     List<Imei> findAllBySpctIdAndTrangThai(Integer spctId, Integer trangThai);
 
     Imei findImeiByImei(String imei);
+
+
+    @Query("SELECT e FROM Imei e WHERE e.spct.id = :spctId AND e.trangThai IN :trangThai")
+    List<Imei> GetBySpctIdAndTrangThaiIn(@Param("spctId") Integer spctId, @Param("trangThai") List<Integer> trangThai);
+
 }

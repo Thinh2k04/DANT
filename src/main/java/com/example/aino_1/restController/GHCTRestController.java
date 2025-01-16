@@ -48,7 +48,7 @@ public class GHCTRestController {
         gsi.save(ghct);
     }
 
-    // hàm dành cho nút mua hàng, check giỏi hàng trước khi đẩy qua màn xác nhận đơn hàng
+    // hàm dành cho nút mua hàng, check giỏ hàng trước khi đẩy qua màn xác nhận đơn hàng
     @PostMapping("/check")
     public ResponseEntity<?> checkGioHang(
             @RequestHeader(value = "Authorization", required = false) String token,

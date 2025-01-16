@@ -123,7 +123,9 @@ public class ImeiService {
         return soLuongSPCT - (int) soLuongImeiSPCT;
     }
 
-    public String updateTopImeiTrangThai(Integer idSpct, Integer soLuong, Integer idHoaDonChiTiet) {
+
+    // hàm cập nhật số lương cho sản phẩm được đặt online
+        public String updateTopImeiTrangThai(Integer idSpct, Integer soLuong) {
         // Lấy danh sách IMEI từ cơ sở dữ liệu
         List<Imei> imeiList = imif.findTopImeiBySanPhamChiTietIdAndTrangThaiNative(idSpct);
 
@@ -134,9 +136,7 @@ public class ImeiService {
 
         // Cập nhật trạng thái của các IMEI
         for (int i = 0; i < soLuong; i++) {
-            imeiList.get(i).setTrangThai(1); // Ví dụ: 1 là đã sử dụng
-            HoaDonChiTiet hdct =  hdctInterFace.findById(idHoaDonChiTiet).get();
-            imeiList.get(i).setHdct(hdct);
+            imeiList.get(i).setTrangThai(2); // Ví dụ: 2 là cập nhật số lượng chờ tạm
         }
 
         // Lưu lại danh sách IMEI đã cập nhật
@@ -162,6 +162,20 @@ public class ImeiService {
         return imeiDTOList;
     }
 
+    public List<ImeiDTO> getListImeiBySanPhamChiTietAdmin(int idSpct) {
+        // Danh sách các trạng thái cần kiểm tra
+        List<Integer> trangThaiList = Arrays.asList(0, 2);
 
+        // Lấy danh sách từ cơ sở dữ liệu
+        List<Imei> listImei = imif.GetBySpctIdAndTrangThaiIn(idSpct, trangThaiList);
+
+        // Chuyển đổi danh sách Imei sang danh sách ImeiDTO
+        List<ImeiDTO> listImeiDTO = listImei.stream()
+                .map(ImeiDTO::fromEntity) // Sử dụng phương thức fromEntity
+                .toList();
+
+        // Trả về danh sách DTO
+        return listImeiDTO;
+    }
 
 }

@@ -28,11 +28,11 @@ public class  HoaDon {
     @Column(name = "tong_tien", nullable = false)
     private Float tongTien;  // Tổng tiền của hóa đơn
 
+    @Column(name = "app_trans_id")
+    private String appTransId;  // Tổng tiền của hóa đơn
 
     @Column(name = "phi_van_chuyen", nullable = false)
     private Float phiVanChuyen;  // Tổng tiền của hóa đơn
-
-
 
     @ManyToOne
     @JoinColumn(name = "id_hinh_thuc_thanh_toan", nullable = true)

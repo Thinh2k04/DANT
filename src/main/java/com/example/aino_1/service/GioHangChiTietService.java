@@ -28,6 +28,10 @@ public class GioHangChiTietService {
 
     @Autowired
     SanPhamChiTietInterface sanPhamChiTietInterface;
+
+    @Autowired
+    ImeiService imeiService;
+
     @Autowired
     private TaiKhoanNguoiDungInterface taiKhoanNguoiDungInterface;
 
@@ -62,8 +66,9 @@ public class GioHangChiTietService {
             for (GioHangChiTiet gioHangChiTiet : gioHangChiTietList) {
                 SanPhamChiTiet spct = gioHangChiTiet.getSanPhamChiTiet();
                 Integer soLuongSanPham = gioHangChiTiet.getSoLuong();
-                Integer soLuongImei = imeiInterface.findBySpct(spct).size();
+                Integer soLuongImei = imeiService.getListImeiBySanPhamChiTiet(spct.getId()).size();
 
+                // lấy số lượng yêu cầu với sô lượng imei còn lại của khách hàng
                 if (soLuongSanPham > soLuongImei) {
                     return Map.of(
                             "success", false,
@@ -90,7 +95,7 @@ public class GioHangChiTietService {
 
             for (SanPhamChiTiet spct : listSPCT) {
                 Integer soLuongSanPham = spct.getSoLuong(); // Lấy số lượng từ đối tượng sản phẩm
-                Integer soLuongImei = imeiInterface.findBySpct(spct).size();
+                Integer soLuongImei = imeiService.getListImeiBySanPhamChiTiet(spct.getId()).size();
 
                 if (soLuongSanPham > soLuongImei) {
                     return Map.of(
@@ -213,30 +218,30 @@ public class GioHangChiTietService {
 
 
 
-    public List<Map<String, Object>> checkSPSoLuong(List<SanPhamChiTiet> listSPCT) {
-        List<Map<String, Object>> resultList = new ArrayList<>();
-
-        for (SanPhamChiTiet spct : listSPCT) {
-            // Lấy danh sách các IMEI có trạng thái = 0
-            long soLuongImei = imeiInterface.findBySpct(spct).stream()
-                    .filter(imei -> imei.getTrangThai() == 0) // Lọc các IMEI có trang_thai = 0
-                    .count(); // Đếm số lượng
-
-            Integer soLuongSP = spct.getSoLuong(); // Số lượng sản phẩm hiện có
-            boolean isSufficient = soLuongSP <= soLuongImei; // Kiểm tra số lượng có đủ hay không
-
-            // Tạo một bản ghi thông tin
-            Map<String, Object> record = new HashMap<>();
-            record.put("idSpct", spct.getId());
-            record.put("soLuong", soLuongImei);
-            record.put("message", isSufficient);
-
-            // Thêm vào danh sách kết quả
-            resultList.add(record);
-        }
-
-        return resultList; // Trả về danh sách thông tin
-    }
+//    public List<Map<String, Object>> checkSPSoLuong(List<SanPhamChiTiet> listSPCT) {
+//        List<Map<String, Object>> resultList = new ArrayList<>();
+//
+//        for (SanPhamChiTiet spct : listSPCT) {
+//            // Lấy danh sách các IMEI có trạng thái = 0
+//            long soLuongImei = imeiInterface.findBySpct(spct).stream()
+//                    .filter(imei -> imei.getTrangThai() == 0) // Lọc các IMEI có trang_thai = 0
+//                    .count(); // Đếm số lượng
+//
+//            Integer soLuongSP = spct.getSoLuong(); // Số lượng sản phẩm hiện có
+//            boolean isSufficient = soLuongSP <= soLuongImei; // Kiểm tra số lượng có đủ hay không
+//
+//            // Tạo một bản ghi thông tin
+//            Map<String, Object> record = new HashMap<>();
+//            record.put("idSpct", spct.getId());
+//            record.put("soLuong", soLuongImei);
+//            record.put("message", isSufficient);
+//
+//            // Thêm vào danh sách kết quả
+//            resultList.add(record);
+//        }
+//
+//        return resultList; // Trả về danh sách thông tin
+//    }
 
 
 

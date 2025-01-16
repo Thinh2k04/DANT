@@ -113,6 +113,8 @@ public class HoaDonService {
                 System.out.println("=========Hình ảnh minh họa lấy ra là :" + hdct.getSanPhamChiTiet().getHinhAnhMinhHoa());
                 String tenSanPham = sanPhamChiTietInterface.getSanPhamChiTietById(idSanPhamChiTiet).getTenSanPhamChiTiet();
                 hdctDTO.setTenSanPham(tenSanPham);
+                // hàm cập nhật số lượng sản phẩm chờ cho danh sách imei
+                imeiService.updateTopImeiTrangThai(hdct.getSanPhamChiTiet().getId(),hdct.getSoLuong());
 
                 // Nếu có IMEI, xử lý danh sách IMEI liên kết
                 if (listImei != null && !listImei.isEmpty()) {
@@ -175,11 +177,6 @@ public class HoaDonService {
             );
         }
     }
-
-
-
-
-
 
     public Map<String, Object> xacNhanDonHang(String maHoaDon, List<Imei> imeiList) {
         // Tìm hóa đơn theo mã hóa đơn

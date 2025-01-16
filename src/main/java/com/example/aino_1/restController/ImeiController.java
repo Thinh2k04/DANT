@@ -71,7 +71,7 @@ public class ImeiController {
     @GetMapping("/getById/{id}")
     public List<ImeiDTO> getByidHD(@PathVariable Integer id) {
         // Tìm kiếm IMEI theo id
-        List<ImeiDTO> list = imsv.getListImeiBySanPhamChiTiet(id);
+        List<ImeiDTO> list = imsv.getListImeiBySanPhamChiTietAdmin(id);
         // Trả về danh sách chứa một phần tử (danh sách IMEI)
         return list;
     }

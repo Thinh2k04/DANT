@@ -60,6 +60,7 @@ public class TimelineHoaDonService {
         timeline.setNguoiCapNhat(timelineDTO.getNguoiCapNhat());
         timeline.setLyDo(timelineDTO.getLyDo());
         timeline.setRole(timelineDTO.getRole()); // Gán giá trị role từ DTO
+        hoaDon.setTrangThai(timelineDTO.getTrangThai());
 
         // Lưu vào cơ sở dữ liệu
         timelineRepository.save(timeline);

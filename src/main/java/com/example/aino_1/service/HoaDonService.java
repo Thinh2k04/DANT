@@ -149,9 +149,11 @@ public class HoaDonService {
 
             if (listImei != null && !listImei.isEmpty()) {
                 timeline.setTrangThai(1); // Đã xác nhận
+                hd.setTrangThai(1);
                 timeline.setLyDo("Đơn hàng đã được xác nhận vì có IMEI.");
             } else {
                 timeline.setTrangThai(0); // Chờ xác nhận
+                hd.setTrangThai(0);
                 timeline.setLyDo("Chờ xác nhận đơn hàng.");
             }
 

@@ -2,9 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
-export const IMEISelector = ({ isOpen, onClose, product, quantity, onConfirm }) => {
+export const IMEISelector = ({ isOpen, onClose, product, onConfirm, availableIMEIs }) => {
   const [selectedIMEIs, setSelectedIMEIs] = useState([]);
-  const [availableIMEIs, setAvailableIMEIs] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -13,38 +12,20 @@ export const IMEISelector = ({ isOpen, onClose, product, quantity, onConfirm }) 
     }
   }, [isOpen]);
 
-  useEffect(() => {
-    const fetchIMEIs = async () => {
-      if (isOpen && product) {
-        setLoading(true);
-        try {
-          const response = await axios.get(`http://localhost:8080/rest/imei/getById/${product.id}`);
-          const unusedIMEIs = response.data
-            .filter(imei => !imei.trangThai)
-            .sort((a, b) => a.imei.localeCompare(b.imei));
-          setAvailableIMEIs(unusedIMEIs);
-        } catch (error) {
-          console.error('Error fetching IMEIs:', error);
-          toast.error('Không thể tải danh sách IMEI');
-        }
-        setLoading(false);
-      }
-    };
-    fetchIMEIs();
-  }, [isOpen, product]);
-
   const handleIMEISelect = (imei) => {
     if (selectedIMEIs.includes(imei)) {
-      setSelectedIMEIs(selectedIMEIs.filter(i => i !== imei));
-    } else if (selectedIMEIs.length < quantity) {
+      setSelectedIMEIs(selectedIMEIs.filter(i => i.id !== imei.id));
+    } else {
       setSelectedIMEIs([...selectedIMEIs, imei]);
     }
   };
 
   const handleConfirm = () => {
-    if (selectedIMEIs.length === quantity) {
+    if (selectedIMEIs.length > 0) {
       onConfirm(selectedIMEIs);
       onClose();
+    } else {
+      toast.error('Vui lòng chọn ít nhất một IMEI');
     }
   };
 
@@ -56,7 +37,7 @@ export const IMEISelector = ({ isOpen, onClose, product, quantity, onConfirm }) 
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-medium">Chọn IMEI cho {product.tenSanPhamChiTiet}</h3>
           <span className="text-sm text-gray-500">
-            Đã chọn: {selectedIMEIs.length}/{quantity}
+            Đã chọn: {selectedIMEIs.length}
           </span>
         </div>
         
@@ -76,22 +57,17 @@ export const IMEISelector = ({ isOpen, onClose, product, quantity, onConfirm }) 
                 key={imei.id}
                 onClick={() => handleIMEISelect(imei)}
                 className={`p-2 border rounded mb-2 cursor-pointer transition-colors
-                  ${selectedIMEIs.includes(imei) 
+                  ${selectedIMEIs.find(selected => selected.id === imei.id)
                     ? 'bg-blue-50 border-blue-500' 
                     : 'hover:bg-gray-50'
-                  }
-                  ${selectedIMEIs.length >= quantity && !selectedIMEIs.includes(imei)
-                    ? 'opacity-50 cursor-not-allowed'
-                    : ''
                   }`}
               >
                 <div className="flex items-center">
                   <input
                     type="checkbox"
-                    checked={selectedIMEIs.includes(imei)}
+                    checked={selectedIMEIs.find(selected => selected.id === imei.id)}
                     onChange={() => {}}
                     className="mr-2"
-                    disabled={selectedIMEIs.length >= quantity && !selectedIMEIs.includes(imei)}
                   />
                   <span className="flex-1">{imei.imei}</span>
                 </div>
@@ -109,9 +85,9 @@ export const IMEISelector = ({ isOpen, onClose, product, quantity, onConfirm }) 
           </button>
           <button
             onClick={handleConfirm}
-            disabled={selectedIMEIs.length !== quantity}
+            disabled={selectedIMEIs.length === 0}
             className={`px-4 py-2 rounded ${
-              selectedIMEIs.length === quantity
+              selectedIMEIs.length > 0
                 ? 'bg-blue-500 text-white hover:bg-blue-600'
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
             }`}

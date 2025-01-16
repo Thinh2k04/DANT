@@ -1,7 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FiShoppingCart, FiUser, FiTrash2, FiCreditCard, FiMapPin, FiTag } from 'react-icons/fi';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+
+// Add validation functions
+const validatePhone = (phone) => {
+  const phoneRegex = /^(0[3|5|7|8|9])+([0-9]{8})$/;
+  return phoneRegex.test(phone);
+};
+
+const validateEmail = (email) => {
+  if (!email) return true; // Email có thể để trống
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
 
 const ShoppingCart = ({ 
   cart, 
@@ -97,6 +109,8 @@ const ShoppingCart = ({
           handleCheckout={handleCheckout}
           loading={loading}
           voucherInfo={voucherInfo}
+          customerInfo={customerInfo}
+          selectedStore={selectedStore}
         />
       </div>
     </div>
@@ -104,38 +118,96 @@ const ShoppingCart = ({
 };
 
 const CustomerInfo = ({ customerInfo, setCustomerInfo, checkCustomerInfo }) => {
+  const [errors, setErrors] = useState({
+    soDienThoai: '',
+    hoten: '',
+    email: ''
+  });
+
   const handlePhoneChange = async (e) => {
     const phoneNumber = e.target.value;
     setCustomerInfo(prev => ({...prev, soDienThoai: phoneNumber}));
-    if (phoneNumber.length === 10) {
-      await checkCustomerInfo(phoneNumber);
+    
+    if (!phoneNumber) {
+      setErrors(prev => ({...prev, soDienThoai: 'Số điện thoại là bắt buộc'}));
+    } else if (!validatePhone(phoneNumber)) {
+      setErrors(prev => ({...prev, soDienThoai: 'Số điện thoại không hợp lệ'}));
+    } else {
+      setErrors(prev => ({...prev, soDienThoai: ''}));
+      if (phoneNumber.length === 10) {
+        await checkCustomerInfo(phoneNumber);
+      }
+    }
+  };
+
+  const handleNameChange = (e) => {
+    const name = e.target.value;
+    setCustomerInfo(prev => ({...prev, hoten: name}));
+    
+    if (!name.trim()) {
+      setErrors(prev => ({...prev, hoten: 'Họ tên là bắt buộc'}));
+    } else if (name.trim().length < 2) {
+      setErrors(prev => ({...prev, hoten: 'Họ tên phải có ít nhất 2 ký tự'}));
+    } else {
+      setErrors(prev => ({...prev, hoten: ''}));
+    }
+  };
+
+  const handleEmailChange = (e) => {
+    const email = e.target.value;
+    setCustomerInfo(prev => ({...prev, email: email}));
+    
+    if (email && !validateEmail(email)) {
+      setErrors(prev => ({...prev, email: 'Email không hợp lệ'}));
+    } else {
+      setErrors(prev => ({...prev, email: ''}));
     }
   };
 
   return (
     <div className="space-y-2">
-      <input
-        type="tel"
-        placeholder="Số điện thoại"
-        value={customerInfo.soDienThoai}
-        onChange={handlePhoneChange}
-        maxLength={10}
-        className="w-full px-3 py-2 text-sm border rounded-lg bg-gray-50 focus:bg-white focus:ring-1 focus:ring-blue-400"
-      />
-      <input
-        type="text"
-        placeholder="Họ tên khách hàng"
-        value={customerInfo.hoten}
-        onChange={(e) => setCustomerInfo(prev => ({...prev, hoten: e.target.value}))}
-        className="w-full px-3 py-2 text-sm border rounded-lg bg-gray-50 focus:bg-white focus:ring-1 focus:ring-blue-400"
-      />
-      <input
-        type="email"
-        placeholder="Email"
-        value={customerInfo.email}
-        onChange={(e) => setCustomerInfo(prev => ({...prev, email: e.target.value}))}
-        className="w-full px-3 py-2 text-sm border rounded-lg bg-gray-50 focus:bg-white focus:ring-1 focus:ring-blue-400"
-      />
+      <div>
+        <input
+          type="tel"
+          placeholder="Số điện thoại"
+          value={customerInfo.soDienThoai}
+          onChange={handlePhoneChange}
+          maxLength={10}
+          className={`w-full px-3 py-2 text-sm border rounded-lg bg-gray-50 focus:bg-white focus:ring-1 focus:ring-blue-400
+            ${errors.soDienThoai ? 'border-red-500' : ''}`}
+        />
+        {errors.soDienThoai && (
+          <p className="text-red-500 text-xs mt-1">{errors.soDienThoai}</p>
+        )}
+      </div>
+
+      <div>
+        <input
+          type="text"
+          placeholder="Họ tên khách hàng"
+          value={customerInfo.hoten}
+          onChange={handleNameChange}
+          className={`w-full px-3 py-2 text-sm border rounded-lg bg-gray-50 focus:bg-white focus:ring-1 focus:ring-blue-400
+            ${errors.hoten ? 'border-red-500' : ''}`}
+        />
+        {errors.hoten && (
+          <p className="text-red-500 text-xs mt-1">{errors.hoten}</p>
+        )}
+      </div>
+
+      <div>
+        <input
+          type="email"
+          placeholder="Email"
+          value={customerInfo.email}
+          onChange={handleEmailChange}
+          className={`w-full px-3 py-2 text-sm border rounded-lg bg-gray-50 focus:bg-white focus:ring-1 focus:ring-blue-400
+            ${errors.email ? 'border-red-500' : ''}`}
+        />
+        {errors.email && (
+          <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+        )}
+      </div>
     </div>
   );
 };
@@ -241,7 +313,42 @@ const VoucherInput = ({ voucherCode, setVoucherCode, checkVoucher, voucherInfo }
   );
 };
 
-const CheckoutSection = ({ cart, calculateTotal, handleCheckout, loading, voucherInfo }) => {
+const CheckoutSection = ({ cart, calculateTotal, handleCheckout, loading, voucherInfo, customerInfo, selectedStore }) => {
+  const validateCheckout = () => {
+    if (cart.length === 0) {
+      toast.error('Giỏ hàng đang trống');
+      return false;
+    }
+
+    if (!selectedStore) {
+      toast.error('Vui lòng chọn cửa hàng');
+      return false;
+    }
+
+    if (!customerInfo.soDienThoai || !validatePhone(customerInfo.soDienThoai)) {
+      toast.error('Số điện thoại không hợp lệ');
+      return false;
+    }
+
+    if (!customerInfo.hoten || customerInfo.hoten.trim().length < 2) {
+      toast.error('Họ tên không hợp lệ');
+      return false;
+    }
+
+    if (customerInfo.email && !validateEmail(customerInfo.email)) {
+      toast.error('Email không hợp lệ');
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleCheckoutClick = () => {
+    if (validateCheckout()) {
+      handleCheckout();
+    }
+  };
+
   const subtotal = calculateTotal();
   const discount = voucherInfo 
     ? (voucherInfo.phanTramApDung 
@@ -270,7 +377,7 @@ const CheckoutSection = ({ cart, calculateTotal, handleCheckout, loading, vouche
       </div>
 
       <button 
-        onClick={handleCheckout}
+        onClick={handleCheckoutClick}
         disabled={cart.length === 0 || loading}
         className={`w-full py-2.5 rounded-lg text-white font-medium text-sm flex items-center justify-center gap-2
           ${cart.length === 0 || loading

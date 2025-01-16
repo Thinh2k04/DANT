@@ -332,7 +332,7 @@ const OrderManagement = () => {
     doc.setFontSize(16);
     doc.setFont('times', 'bold');
     doc.text("H O A   D O N   B A N   H A N G", 105, 30, { align: "center" });
-    doc.text(`#${order.id}`, 105, 37, { align: "center" });
+    doc.text(`#${order.maHoaDon}`, 105, 37, { align: "center" });
     
     // Đường kẻ phân cách
     doc.setDrawColor(0, 0, 0);
@@ -344,7 +344,7 @@ const OrderManagement = () => {
     doc.setFont('times', 'normal');
     doc.text([
       "CONG TY TNHH LAPTOP SHOP",
-      "So nha 6 ngo 134/44 Nguyen xa - Bac tu liem - Ha noi",
+      `${order.cuaHang?.soNha}, ${order.cuaHang?.phuong}, ${order.cuaHang?.huyen}, ${order.cuaHang?.tinh}`,
       "Hotline: 0123.456.789 - Email: shoplaptop@gmail.com",
       "MST: 0123456789"
     ], 105, 55, { align: "center" });
@@ -357,18 +357,22 @@ const OrderManagement = () => {
         ['Khach hang:', order.thongTinTaiKhoan?.hoTen || 'N/A'],
         ['So dien thoai:', order.thongTinTaiKhoan?.soDienThoai || 'N/A'],
         ['Email:', order.thongTinTaiKhoan?.email || 'N/A'],
-        ['Dia diem giao hang:', order.diaChiNhanHang || 'LAPTOP SHOP'],
-        ['Ngay xac nhan:', new Date(order.thoiGianLapHoaDon).toLocaleDateString('vi-VN')],
-        ['Hinh thuc thanh toan:', 'Thanh toan khi nhan hang'],
-        ['Trang thai:', order.trangThai === 0 ? 'Da huy' :
-                       order.trangThai === 1 ? 'Cho xac nhan' :
-                       order.trangThai === 2 ? 'Xac nhan don hang' :
-                       order.trangThai === 3 ? 'Don vi van chuyen dang giao' :
-                       order.trangThai === 4 ? 'Dang duoc giao toi ban' :
-                       order.trangThai === 5 ? 'Don hang da duoc giao thanh cong' :
-                       order.trangThai === 6 ? 'Xac nhan giao hang thanh cong' :
-                       order.trangThai === 7 ? 'Hoan thanh don hang' :
-                       order.trangThai === 8 ? 'Yeu cau hoan tra hang' : 'N/A']
+        ['CCCD:', order.thongTinTaiKhoan?.soCccd || 'N/A'],
+        ['Dia chi:', order.thongTinTaiKhoan?.diaChi || 'N/A'],
+        ['Dia diem giao hang:', order.diaChiNhanHang || 'N/A'],
+        ['Ngay dat hang:', new Date(order.thoiGianLapHoaDon).toLocaleDateString('vi-VN')],
+        ['Hinh thuc thanh toan:', order.hinhThucThanhToan?.tenHinhThuc || 'N/A'],
+        ['Trang thai don hang:', order.trangThai === 0 ? 'Da huy' :
+                               order.trangThai === 1 ? 'Cho xac nhan' :
+                               order.trangThai === 2 ? 'Xac nhan don hang' :
+                               order.trangThai === 3 ? 'Don vi van chuyen dang giao' :
+                               order.trangThai === 4 ? 'Dang duoc giao toi ban' :
+                               order.trangThai === 5 ? 'Don hang da duoc giao thanh cong' :
+                               order.trangThai === 6 ? 'Xac nhan giao hang thanh cong' :
+                               order.trangThai === 7 ? 'Hoan thanh don hang' :
+                               order.trangThai === 8 ? 'Yeu cau hoan tra hang' : 'N/A'],
+        ['Trang thai thanh toan:', order.trangThaiThanhToan === 1 ? 'Chua thanh toan' : 
+                                  order.trangThaiThanhToan === 2 ? 'Da thanh toan' : 'N/A']
       ],
       theme: 'plain',
       styles: { 
@@ -401,11 +405,12 @@ const OrderManagement = () => {
         index + 1,
         detail.sanPhamChiTiet?.sanPham?.tenSanPham || 'N/A',
         [
-          `CPU: ${detail.sanPhamChiTiet?.cpu?.ten || 'N/A'}`,
-          `RAM: ${detail.sanPhamChiTiet?.ram?.dungLuong || 'N/A'}GB`,
-          `O cung: ${detail.sanPhamChiTiet?.oluuTru?.dungLuong || 'N/A'}GB`,
-          `GPU: ${detail.sanPhamChiTiet?.gpu?.ten || 'N/A'}`,
-          `Man hinh: ${detail.sanPhamChiTiet?.manHinh?.doPhanGiai || 'N/A'}`
+          `CPU: ${detail.sanPhamChiTiet?.cpu?.hangSanXuat} ${detail.sanPhamChiTiet?.cpu?.ten || 'N/A'}`,
+          `RAM: ${detail.sanPhamChiTiet?.ram?.dungLuong || 'N/A'}GB ${detail.sanPhamChiTiet?.ram?.tocDo || 'N/A'}MHz`,
+          `O cung: ${detail.sanPhamChiTiet?.oLuuTru?.dungLuong || 'N/A'}GB ${detail.sanPhamChiTiet?.oLuuTru?.loaiOCung || 'N/A'}`,
+          `GPU: ${detail.sanPhamChiTiet?.gpu?.hangSanXuat} ${detail.sanPhamChiTiet?.gpu?.ten || 'N/A'}`,
+          `Man hinh: ${detail.sanPhamChiTiet?.manHinh?.doPhanGiai || 'N/A'} ${detail.sanPhamChiTiet?.manHinh?.tanSoQuet || 'N/A'}Hz`,
+          `Card do hoa: ${detail.sanPhamChiTiet?.cardDoHoa?.tenCard || 'N/A'}`
         ].join('\n'),
         detail.soLuong,
         detail.gia?.toLocaleString('vi-VN'),
@@ -440,10 +445,13 @@ const OrderManagement = () => {
 
     doc.autoTable(productDetails);
 
-    // Tổng tiền
+    // Tổng tiền và thông tin voucher
     const summaryData = {
       startY: doc.lastAutoTable.finalY + 5,
-      body: [],
+      body: [
+        ['Tong tien hang:', order.tongTien?.toLocaleString('vi-VN') || '0'],
+        ['Phi van chuyen:', order.phiVanChuyen?.toLocaleString('vi-VN') || '0']
+      ],
       theme: 'plain',
       styles: { 
         fontSize: 11,
@@ -457,9 +465,17 @@ const OrderManagement = () => {
       }
     };
 
+    // Thêm thông tin voucher nếu có
+    if (order.voucher) {
+      summaryData.body.push(
+        ['Giam gia:', `${(order.voucher.phanTramApDung * 100)}%`],
+        ['Tien giam toi da:', order.voucher.soTienToiDa?.toLocaleString('vi-VN')]
+      );
+    }
+
+    // Thêm tổng thanh toán
     summaryData.body.push(
-      ['Tong tien hang:', order.tongTien?.toLocaleString('vi-VN')],
-      ['Tong thanh toan:', order.tongTien?.toLocaleString('vi-VN')]
+      ['Tong thanh toan:', order.tongTien?.toLocaleString('vi-VN') || '0']
     );
 
     doc.autoTable(summaryData);
@@ -491,7 +507,7 @@ const OrderManagement = () => {
 
     // Lưu file PDF
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    doc.save(`hoa_don_${order.id}_${timestamp}.pdf`);
+    doc.save(`hoa_don_${order.maHoaDon}_${timestamp}.pdf`);
   };
 
   const handleAddImeis = async () => {
@@ -563,7 +579,6 @@ const OrderManagement = () => {
       });
     }
   };
-
   return (
     <div className="min-h-screen flex">
       <NavbarAdmin />
@@ -870,11 +885,12 @@ const OrderManagement = () => {
                             <p className="text-sm text-gray-600">Bảo hành: {detail.sanPhamChiTiet?.sanPham?.thoiHanBaoHanh}</p>
                           </td>
                           <td className="px-6 py-4">
-                            <p className="text-sm mb-1"><span className="font-semibold">CPU:</span> {detail.sanPhamChiTiet?.cpu?.hangSanXuat} {detail.sanPhamChiTiet?.cpu?.ten}</p>
-                            <p className="text-sm mb-1"><span className="font-semibold">RAM:</span> {detail.sanPhamChiTiet?.ram?.dungLuong}GB</p>
-                            <p className="text-sm mb-1"><span className="font-semibold">Ổ cứng:</span> {detail.sanPhamChiTiet?.oluuTru?.dungLuong}GB</p>
-                            <p className="text-sm mb-1"><span className="font-semibold">GPU:</span> {detail.sanPhamChiTiet?.gpu?.hangSanXuat} {detail.sanPhamChiTiet?.gpu?.ten}</p>
-                            <p className="text-sm"><span className="font-semibold">Màn hình:</span> {detail.sanPhamChiTiet?.manHinh?.doPhanGiai}, {detail.sanPhamChiTiet?.manHinh?.tanSoQuet}Hz</p>
+                            <p className="text-sm mb-1"><span className="font-semibold">CPU:</span> {detail.sanPhamChiTiet?.cpu?.hangSanXuat} {detail.sanPhamChiTiet?.cpu?.ten || 'N/A'}</p>
+                            <p className="text-sm mb-1"><span className="font-semibold">RAM:</span> {detail.sanPhamChiTiet?.ram?.dungLuong || 'N/A'}GB {detail.sanPhamChiTiet?.ram?.tocDo || 'N/A'}MHz</p>
+                            <p className="text-sm mb-1"><span className="font-semibold">Ổ cứng:</span> {detail.sanPhamChiTiet?.oLuuTru?.dungLuong || 'N/A'}GB {detail.sanPhamChiTiet?.oLuuTru?.loaiOCung || 'N/A'}</p>
+                            <p className="text-sm mb-1"><span className="font-semibold">GPU:</span> {detail.sanPhamChiTiet?.gpu?.hangSanXuat} {detail.sanPhamChiTiet?.gpu?.ten || 'N/A'}</p>
+                            <p className="text-sm"><span className="font-semibold">Màn hình:</span> {detail.sanPhamChiTiet?.manHinh?.doPhanGiai || 'N/A'} {detail.sanPhamChiTiet?.manHinh?.tanSoQuet || 'N/A'}Hz</p>
+                            <p className="text-sm"><span className="font-semibold">Card đồ họa:</span> {detail.sanPhamChiTiet?.cardDoHoa?.tenCard || 'N/A'}</p>
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-900">{detail.soLuong}</td>
                           <td className="px-6 py-4 text-sm text-gray-900">{detail.gia?.toLocaleString()}₫</td>

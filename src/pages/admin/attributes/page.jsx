@@ -25,7 +25,7 @@ const BanHangTaiQuay = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get('http://localhost:8080/rest/adminSPCT');
+        const response = await axios.get('http://localhost:8080/rest/discount/active');
         setProducts(response.data);
       } catch (error) {
         console.error('Error fetching products:', error);
@@ -85,6 +85,22 @@ const BanHangTaiQuay = () => {
 
   const calculateTotal = () => {
     return cart.reduce((total, item) => total + (item.donGia * item.quantity), 0);
+  };
+
+  const refreshData = async () => {
+    try {
+      const productsResponse = await axios.get('http://localhost:8080/rest/discount/active');
+      setProducts(productsResponse.data);
+
+      const storesResponse = await axios.get('http://localhost:8080/rest/cuaHang/getAll');
+      setStores(storesResponse.data);
+      if (storesResponse.data.length > 0) {
+        setSelectedStore(storesResponse.data[0]);
+      }
+    } catch (error) {
+      console.error('Error refreshing data:', error);
+      toast.error('Có lỗi khi tải lại dữ liệu');
+    }
   };
 
   const handleCheckout = async () => {
@@ -175,6 +191,7 @@ const BanHangTaiQuay = () => {
       const response = await axios.post('http://localhost:8080/rest/hoa_don/addHD', orderData);
       if (response.data.success) {
         toast.success('Thanh toán thành công!');
+        
         setCart([]);
         setCustomerInfo({
           hoten: '',
@@ -183,6 +200,8 @@ const BanHangTaiQuay = () => {
         });
         setVoucherCode('');
         setVoucherInfo(null);
+
+        await refreshData();
       } else {
         throw new Error(response.data.message || 'Thanh toán thất bại');
       }

@@ -1,10 +1,7 @@
 package com.example.aino_1.service;
 
 
-import com.example.aino_1.dto.HoaDonChiTietDTO;
-import com.example.aino_1.dto.HoaDonDTO;
-import com.example.aino_1.dto.ThongTinTaiKhoanDTO;
-import com.example.aino_1.dto.TimelineHoaDonDTO;
+import com.example.aino_1.dto.*;
 import com.example.aino_1.entity.*;
 import com.example.aino_1.repository.*;
 import jakarta.transaction.Transactional;
@@ -151,8 +148,8 @@ public class HoaDonService {
             timeline.setRole("Admin");
 
             if (listImei != null && !listImei.isEmpty()) {
-                timeline.setTrangThai(2); // Đã xác nhận
-                hd.setTrangThai(2);
+                timeline.setTrangThai(8); // Đã xác nhận
+                hd.setTrangThai(8);
                 timeline.setLyDo("Đơn hàng đã được xác nhận vì có IMEI.");
             } else {
                 timeline.setTrangThai(1); // Chờ xác nhận
@@ -284,4 +281,21 @@ public class HoaDonService {
         // Trường hợp không hợp lệ (không xảy ra nhưng để an toàn)
         throw new IllegalArgumentException("Dữ liệu đầu vào không hợp lệ.");
     }
+
+
+
+//    public HoaDonDTO getHoaDon(String maHoaDon) {
+//        HoaDon hoaDon = hdsi.findHoaDonByMaHoaDon(maHoaDon);
+//        HoaDonDTO hoaDonDTO = HoaDonDTO.fromEntity(hoaDon);
+//        List<HoaDonChiTiet> listHDCT = hdctsi.findAllByHoaDon_MaHoaDon(maHoaDon);
+//        List<HoaDonChiTietDTO> listhdctDTO = new ArrayList<>();
+//        for (HoaDonChiTiet hd : listHDCT) {
+//            HoaDonChiTietDTO hdctdto = new HoaDonChiTietDTO();
+//            hdctdto.setTenSanPham(hd.getSanPhamChiTiet().);
+//            List<ImeiDTO>lisistImei =  imeiService.getListImeiBySanPhamChiTiet(hd.getSanPhamChiTiet().getId());
+//        }
+//
+//
+//
+//    }
 }

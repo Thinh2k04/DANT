@@ -3,6 +3,7 @@ package com.example.aino_1.service;
 import com.example.aino_1.dto.TimelineHoaDonDTO;
 import com.example.aino_1.entity.HoaDon;
 import com.example.aino_1.entity.TimelineHoaDon;
+import com.example.aino_1.repository.HoaDonInterface;
 import com.example.aino_1.repository.TimelineHoaDonInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,9 @@ public class TimelineHoaDonService {
 
     @Autowired
     private TimelineHoaDonInterface timelineRepository;
+
+    @Autowired
+    private HoaDonInterface hoaDonRepository;
 
     // Danh sách trạng thái hợp lệ
     private static final List<Integer> VALID_STATES = List.of(0, 1, 2, 3, 4, 5, 6, 7, 8);
@@ -49,8 +53,11 @@ public class TimelineHoaDonService {
         }
 
         // Tạo đối tượng HoaDon từ ID trong DTO
-        HoaDon hoaDon = new HoaDon();
-        hoaDon.setId(timelineDTO.getHoaDonId());
+//        HoaDon hoaDon = new HoaDon();
+//        hoaDon.setId(timelineDTO.getHoaDonId());
+
+
+        HoaDon hoaDon = hoaDonRepository.findHoaDonById(timelineDTO.getHoaDonId());
 
         // Tạo đối tượng TimelineHoaDon và gán các giá trị từ DTO
         TimelineHoaDon timeline = new TimelineHoaDon();
@@ -60,8 +67,9 @@ public class TimelineHoaDonService {
         timeline.setNguoiCapNhat(timelineDTO.getNguoiCapNhat());
         timeline.setLyDo(timelineDTO.getLyDo());
         timeline.setRole(timelineDTO.getRole()); // Gán giá trị role từ DTO
-        hoaDon.setTrangThai(timelineDTO.getTrangThai());
 
+        hoaDon.setTrangThai(timelineDTO.getTrangThai());
+        hoaDonRepository.save(hoaDon);
         // Lưu vào cơ sở dữ liệu
         timelineRepository.save(timeline);
 

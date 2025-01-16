@@ -100,11 +100,14 @@ public class HoaDonController {
 
     @PostMapping("/xac-nhan/{maHoaDon}")
     public ResponseEntity<?> xacNhanDonHang(
-            @PathVariable String maHoaDon, // Sử dụng PathVariable thay vì RequestParam
-            @RequestBody List<Imei> imeiList
+            @PathVariable String maHoaDon,
+            @RequestBody Map<String, Object> requestData
     ) {
         try {
-            Map<String, Object> result = hdsv.xacNhanDonHang(maHoaDon, imeiList);
+            ObjectMapper objectMapper = new ObjectMapper();
+            String username = objectMapper.convertValue(requestData.get("username"),String.class);
+            List<Imei> imeiList = objectMapper.convertValue(requestData.get("listImei"), new TypeReference<List<Imei>>() {});
+            Map<String, Object> result = hdsv.xacNhanDonHang(maHoaDon, imeiList, username);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of(

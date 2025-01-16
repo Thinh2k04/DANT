@@ -65,6 +65,8 @@ public class HoaDonService {
     @Autowired
     TimelineHoaDonInterface timelineHoaDonInterface;
 
+
+
     @Transactional
     public Map<String, Object> hamXuLiHoaDon(
             String username, ThongTinTaiKhoan tttk, HoaDon hd, List<HoaDonChiTiet> lhdct, Voucher voucher, List<Imei> listImei) {
@@ -180,7 +182,7 @@ public class HoaDonService {
         }
     }
 
-    public Map<String, Object> xacNhanDonHang(String maHoaDon, List<Imei> imeiList) {
+    public Map<String, Object> xacNhanDonHang(String maHoaDon, List<Imei> imeiList, String user) {
         // Tìm hóa đơn theo mã hóa đơn
         System.out.println("================"+ maHoaDon);
         HoaDon hd = hdsi.findHoaDonByMaHoaDon(maHoaDon);
@@ -219,6 +221,7 @@ public class HoaDonService {
             lhdctdto.add(hdctDTO);
 
 
+
             // Kiểm tra và cập nhật trạng thái sản phẩm chi tiết nếu hết hàng
             if (imeiService.checkTinhTrang(idspct)) {
                 SanPhamChiTiet spct = sanPhamChiTietInterface.findById(idspct)
@@ -228,8 +231,16 @@ public class HoaDonService {
             }
         }
 
+
+
+        TimelineHoaDon timeline = new TimelineHoaDon();
+        timeline.setHoaDon(hd);
+        // Tạo và lưu timeline
+        timeline.setThoiGianCapNhat(new Timestamp(System.currentTimeMillis()));
+        timeline.setNguoiCapNhat(user);
+        timeline.setTrangThai(2);
         // Cập nhật trạng thái hóa đơn là "Đã xác nhận"
-        hd.setTrangThai(1);
+        hd.setTrangThai(2);
         hdsi.save(hd);
 
         // Trả về kết quả

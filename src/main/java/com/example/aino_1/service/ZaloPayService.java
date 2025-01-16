@@ -18,6 +18,7 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import vn.zalopay.crypto.HMACUtil;
 
@@ -36,6 +37,7 @@ public class ZaloPayService {
 
     private ZaloPayUtil zaloPayUtil;
 
+    @Autowired
     private HoaDonInterface hoaDonInterface;
 
     private final Mac HmacSHA256;
@@ -131,8 +133,7 @@ public class ZaloPayService {
         }
         return response;
     }
-
-
+    
     public JSONObject getOrderStatus(String appTransId) throws Exception {
         String data = config.get("app_id") + "|" + appTransId + "|" + config.get("key1");
         String mac = HMACUtil.HMacHexStringEncode(HMACUtil.HMACSHA256, config.get("key1"), data);

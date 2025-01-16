@@ -30,7 +30,6 @@ public class SanPhamService {
     @Autowired
     private SanPhamInterface spsi;
 
-
     @Autowired
     private SanPhamChiTietInterface spctsi;
 

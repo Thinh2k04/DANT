@@ -66,8 +66,9 @@ public class TaiKhoanService {
         try {
             // Tạo và gán giá trị cho TaiKhoanNguoiDung
             TaiKhoanNguoiDung tknd = new TaiKhoanNguoiDung();
+            tknd.setUsername(staffDTO.getUsername());
             tknd.setEmail(staffDTO.getEmail());
-            tknd.setPassword(staffDTO.getPassword());
+            tknd.setPassword(staffDTO.getPassword()); // Mã hóa mật khẩu
             tknd.setChucVu("STAFF");
             tknd.setEnabled(1);
             tknd.setCreatedAt(LocalDateTime.now());
@@ -95,6 +96,11 @@ public class TaiKhoanService {
             return false;
         }
     }
+
+    public boolean isEmailExists(String email) {
+        return taiKhoanNguoiDungInterface.existsByEmail(email);
+    }
+
 
     public List<Map<String, String>> getTaiKhoan() {
         List<TaiKhoanNguoiDung> listTaiKhoanNguoiDung = taiKhoanNguoiDungInterface.findAll();

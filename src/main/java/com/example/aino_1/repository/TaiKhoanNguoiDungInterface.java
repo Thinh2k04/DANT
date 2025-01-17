@@ -14,4 +14,5 @@ public interface TaiKhoanNguoiDungInterface extends JpaRepository<TaiKhoanNguoiD
     Optional<TaiKhoanNguoiDung> findByUsername(String username);
     List<TaiKhoanNguoiDung> findByChucVu(String chucVu);
     boolean existsByUsername(String username);
+    boolean existsByEmail(String email);
 }

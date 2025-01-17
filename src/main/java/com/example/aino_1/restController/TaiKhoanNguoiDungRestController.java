@@ -48,17 +48,25 @@ public class TaiKhoanNguoiDungRestController {
     @PostMapping("/registerForStaff")
     public ResponseEntity<?> addStaff(@RequestBody StaffDTO staffDTO) {
         try {
-            staffDTO.setPassword(passwordEncoder.encode(staffDTO.getPassword()));
+            String encodedPassword = passwordEncoder.encode(staffDTO.getPassword());
+            // Kiểm tra email đã tồn tại hay chưa
+            if (tkndsv.isEmailExists(staffDTO.getEmail())) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("Email này đã tồn tại.");
+            }
             boolean isAdded = tkndsv.addTaiKhoanNguoiDungAsStaff(staffDTO);
             if (isAdded) {
                 return ResponseEntity.ok("Thêm tài khoản nhân viên thành công.");
             } else {
-                return ResponseEntity.status(500).body("Thêm tài khoản nhân viên thất bại.");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Thêm tài khoản nhân viên thất bại.");
             }
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Lỗi: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi: " + e.getMessage());
         }
     }
+
+
+
+
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody TaiKhoanNguoiDung taiKhoanNguoiDung) {

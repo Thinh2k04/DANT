@@ -27,19 +27,25 @@ export const useOrder = () => {
   }) => {
     const now = new Date();
     
-    // Kiểm tra và lấy tên địa chỉ an toàn
+    // Hàm lấy tên địa điểm từ mã code
     const getLocationName = (array, code) => {
       if (!array || !Array.isArray(array)) return '';
       const item = array.find(item => item.code === parseInt(code));
       return item ? item.name : '';
     };
 
-    // Lấy tên địa chỉ an toàn
-    const provinceName = getLocationName(provinces, selectedProvince);
-    const districtName = getLocationName(districts, selectedDistrict);
-    
+    // Lấy tên các địa điểm
+    const provinceName = localStorage.getItem('selectedProvinceName') || getLocationName(provinces, selectedProvince);
+    const districtName = localStorage.getItem('selectedDistrictName') || getLocationName(districts, selectedDistrict);
+    const wardName = localStorage.getItem('selectedWardName') || '';
+
     // Tạo địa chỉ đầy đủ
-    const deliveryAddress = `${specificAddress || ''}, ${selectedWard || ''}, ${districtName}, ${provinceName}`.replace(/^[\s,]+|[\s,]+$/g, '');
+    const fullAddress = [
+      specificAddress,
+      wardName,
+      districtName,
+      provinceName
+    ].filter(Boolean).join(', ');
 
     // Chuẩn bị dữ liệu đơn hàng
     const orderData = {
@@ -60,7 +66,7 @@ export const useOrder = () => {
         hinhThucThanhToan: {
           id: parseInt(paymentMethod) || 1
         },
-        diaChiNhanHang: deliveryAddress,
+        diaChiNhanHang: fullAddress, // Sử dụng địa chỉ đầy đủ đã được tạo
         cuaHang: {
           id: 1,
           tinh: "Hà Nội",

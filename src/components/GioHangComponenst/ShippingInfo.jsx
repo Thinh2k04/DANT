@@ -20,44 +20,91 @@ function ShippingInfo({
   cartItems, // Danh sách sản phẩm trong giỏ hàng
   quantities, // Số lượng sản phẩm,
   totalAmount, // Tổng tiền đơn hàng
-  weight, // Trọng lượng đơn h��ng
+  weight, // Trọng lượng đơn hàng
   setSelectedProvince,
   setSelectedDistrict
 }) {
+  // State để lưu trữ tên địa chỉ đầy đủ
+  const [fullAddress, setFullAddress] = useState('');
+
+  // Hàm lấy tên địa chỉ từ mã code
+  const getLocationName = (array, code) => {
+    if (!array || !Array.isArray(array)) return '';
+    const item = array.find(item => item.code === parseInt(code));
+    return item ? item.name : '';
+  };
+
+  // Lưu danh sách địa điểm vào localStorage
+  useEffect(() => {
+    if (provinces) {
+      localStorage.setItem('provinces', JSON.stringify(provinces));
+    }
+  }, [provinces]);
+
+  useEffect(() => {
+    if (districts) {
+      localStorage.setItem('districts', JSON.stringify(districts));
+    }
+  }, [districts]);
+
+  useEffect(() => {
+    if (wards) {
+      localStorage.setItem('wards', JSON.stringify(wards));
+    }
+  }, [wards]);
+
+  // Hàm cập nhật địa chỉ đầy đủ
+  const updateFullAddress = () => {
+    const provinceName = getLocationName(provinces, selectedProvince);
+    const districtName = getLocationName(districts, selectedDistrict);
+    const wardName = getLocationName(wards, selectedWard);
+
+    // Lưu các mã code đã chọn
+    if (selectedProvince) localStorage.setItem('selectedProvinceCode', selectedProvince);
+    if (selectedDistrict) localStorage.setItem('selectedDistrictCode', selectedDistrict);
+    if (selectedWard) localStorage.setItem('selectedWardCode', selectedWard);
+
+    // Lưu tên các địa điểm đã chọn
+    if (provinceName) localStorage.setItem('selectedProvinceName', provinceName);
+    if (districtName) localStorage.setItem('selectedDistrictName', districtName);
+    if (wardName) localStorage.setItem('selectedWardName', wardName);
+
+    const addressParts = [
+      specificAddress,
+      wardName,
+      districtName,
+      provinceName
+    ].filter(part => part);
+
+    const fullAddr = addressParts.join(', ');
+    setFullAddress(fullAddr);
+    localStorage.setItem('shippingAddress', fullAddr);
+  };
+
+  // Cập nhật địa chỉ đầy đủ khi có thay đổi
+  useEffect(() => {
+    updateFullAddress();
+  }, [selectedProvince, selectedDistrict, selectedWard, specificAddress]);
 
   // Hàm tính phí vận chuyển
   const calculateShippingFee = async () => {
-    // Kiểm tra điều kiện trước khi tính phí
-    if (!selectedProvince || !selectedDistrict) {
-      return;
-    }
+    if (!selectedProvince || !selectedDistrict) return;
 
     try {
-      // Lấy tên tỉnh/thành phố từ mã code
-      const selectedProvinceName = provinces.find(
-        p => p.code === parseInt(selectedProvince)
-      )?.name;
-      
-      
-      // Lấy tên quận/huyện từ mã code
-      const selectedDistrictName = districts.find(
-        d => d.code === parseInt(selectedDistrict)
-      )?.name;
+      const provinceName = getLocationName(provinces, selectedProvince);
+      const districtName = getLocationName(districts, selectedDistrict);
 
-      // Chuẩn bị dữ liệu gửi lên API
       const requestData = {
-        pick_province: "Hà Nội", // Tỉnh/thành phố lấy hàng
-        pick_district: "Cầu Giấy", // Quận/huyện lấy hàng
-        province: selectedProvinceName, // Tỉnh/thành phố giao hàng
-        district: selectedDistrictName, // Quận/huyện giao hàng
-        address: specificAddress || "", // Địa chỉ giao hàng (có thể trống)
-        weight: weight, // Khối lượng (gram) được tính toán
-        value: totalAmount, // Giá trị đơn hàng
-        transport: "road" // Phương thức vận chuyển
+        pick_province: "Hà Nội",
+        pick_district: "Cầu Giấy",
+        province: provinceName,
+        district: districtName,
+        address: fullAddress,
+        weight: weight,
+        value: totalAmount,
+        transport: "road"
       };
-      
 
-      // Gọi API tính phí vận chuyển
       const response = await fetch('http://localhost:8080/api/ghtk/calculate-fee', {
         method: 'POST',
         headers: {
@@ -66,44 +113,36 @@ function ShippingInfo({
         body: JSON.stringify(requestData)
       });
 
-      // Xử lý kết quả từ API
       const data = await response.json();
-      console.log('GHTK response:', data);
 
-      // Nếu có phí vận chuyển thì cập nhật state và localStorage
       if (data && data.fee) {
         setShippingFee(data.fee.fee);
-        console.log(data.fee.fee);
         localStorage.setItem('shippingFee', data.fee.fee.toString());
       } else {
         setShippingFee(0);
         localStorage.setItem('shippingFee', '0');
       }
     } catch (error) {
-      // Xử lý lỗi khi gọi API
       console.error('Lỗi tính phí vận chuyển:', error);
       setShippingFee(0);
       localStorage.setItem('shippingFee', '0');
     }
   };
 
-  
-
-  // Gọi hàm tính phí vận chuyển khi chọn quận/huyện
+  // Tính lại phí vận chuyển khi địa chỉ thay đổi
   useEffect(() => {
-    if (selectedDistrict) {
+    if (fullAddress) {
       calculateShippingFee();
-      
     }
-  }, [selectedDistrict]);
+  }, [fullAddress]);
 
   // Render giao diện component
   return (
-    <>
+    <div className="space-y-6">
       {/* Phần chọn tỉnh/thành phố */}
-      <div className="mb-4">
+      <div>
         <label htmlFor="province" className="block text-lg font-semibold mb-2">
-          Chọn tỉnh thành:
+          Tỉnh/Thành phố: <span className="text-red-500">*</span>
         </label>
         <select
           id="province"
@@ -111,15 +150,16 @@ function ShippingInfo({
           onChange={(e) => {
             const value = e.target.value;
             if (!value) {
-              setErrors((prev) => ({ ...prev, province: "Vui lòng chọn tỉnh/thành" }));
+              setErrors((prev) => ({ ...prev, province: "Vui lòng chọn tỉnh/thành phố" }));
             } else {
               setErrors((prev) => ({ ...prev, province: "" }));
             }
             handleProvinceChange(e);
           }}
-          className={`border rounded p-2 w-full ${errors.province ? "border-red-500" : ""}`}
+          className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent
+            ${errors.province ? "border-red-500" : "border-gray-300"}`}
         >
-          <option value="" disabled>Chọn tỉnh thành</option>
+          <option value="">Chọn tỉnh/thành phố</option>
           {provinces.map((province) => (
             <option key={province.code} value={province.code}>
               {province.name}
@@ -132,9 +172,9 @@ function ShippingInfo({
       </div>
 
       {/* Phần chọn quận/huyện */}
-      <div className="mb-4">
+      <div>
         <label htmlFor="district" className="block text-lg font-semibold mb-2">
-          Chọn quận huyện:
+          Quận/Huyện: <span className="text-red-500">*</span>
         </label>
         <select
           id="district"
@@ -148,10 +188,11 @@ function ShippingInfo({
             }
             handleDistrictChange(e);
           }}
-          className={`border rounded p-2 w-full ${errors.district ? "border-red-500" : ""}`}
+          className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent
+            ${errors.district ? "border-red-500" : "border-gray-300"}`}
           disabled={!selectedProvince}
         >
-          <option value="" disabled>Chọn quận huyện</option>
+          <option value="">Chọn quận/huyện</option>
           {districts.map((district) => (
             <option key={district.code} value={district.code}>
               {district.name}
@@ -164,9 +205,9 @@ function ShippingInfo({
       </div>
 
       {/* Phần chọn phường/xã */}
-      <div className="mb-4">
+      <div>
         <label htmlFor="ward" className="block text-lg font-semibold mb-2">
-          Chọn phường xã:
+          Phường/Xã: <span className="text-red-500">*</span>
         </label>
         <select
           id="ward"
@@ -180,10 +221,11 @@ function ShippingInfo({
             }
             setSelectedWard(e.target.value);
           }}
-          className={`border rounded p-2 w-full ${errors.ward ? "border-red-500" : ""}`}
+          className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent
+            ${errors.ward ? "border-red-500" : "border-gray-300"}`}
           disabled={!selectedDistrict}
         >
-          <option value="" disabled>Chọn phường xã</option>
+          <option value="">Chọn phường/xã</option>
           {wards.map((ward) => (
             <option key={ward.code} value={ward.code}>
               {ward.name}
@@ -196,9 +238,9 @@ function ShippingInfo({
       </div>
 
       {/* Phần nhập địa chỉ cụ thể */}
-      <div className="mb-4">
+      <div>
         <label htmlFor="specificAddress" className="block text-lg font-semibold mb-2">
-          Nhập địa chỉ số nhà cụ thể:
+          Địa chỉ cụ thể: <span className="text-red-500">*</span>
         </label>
         <input
           type="text"
@@ -208,22 +250,29 @@ function ShippingInfo({
             const value = e.target.value;
             if (!value.trim()) {
               setErrors((prev) => ({ ...prev, address: "Vui lòng nhập địa chỉ cụ thể" }));
-            } else if (value.trim().length > 200) {
-              setErrors((prev) => ({ ...prev, address: "Địa chỉ không được vượt quá 200 ký tự" }));
             } else {
               setErrors((prev) => ({ ...prev, address: "" }));
             }
             setSpecificAddress(value);
+            localStorage.setItem('specificAddress', value);
           }}
-          className={`border rounded p-2 w-full ${errors.address ? "border-red-500" : ""}`}
-          maxLength={250}
-          placeholder="Nhập địa chỉ cụ thể"
+          placeholder="Số nhà, tên đường..."
+          className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent
+            ${errors.address ? "border-red-500" : "border-gray-300"}`}
         />
         {errors.address && (
           <p className="text-red-500 text-sm mt-1">{errors.address}</p>
         )}
       </div>
-    </>
+
+      {/* Hiển thị địa chỉ đầy đủ */}
+      {fullAddress && (
+        <div className="p-4 bg-gray-50 rounded-lg">
+          <p className="font-semibold text-gray-700">Địa chỉ giao hàng:</p>
+          <p className="text-gray-600 mt-1">{fullAddress}</p>
+        </div>
+      )}
+    </div>
   );
 }
 

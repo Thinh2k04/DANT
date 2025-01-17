@@ -145,10 +145,6 @@ const PaymentSuccess = () => {
             </h2>
             <div className="bg-gray-50 p-6 rounded-xl space-y-3">
               <div className="flex justify-between text-gray-600">
-                <span>Tổng tiền hàng:</span>
-                <span className="font-semibold">{orderInfo.hoaDon.tongTien.toLocaleString('vi-VN')}₫</span>
-              </div>
-              <div className="flex justify-between text-gray-600">
                 <span>Phí vận chuyển:</span>
                 <span className="font-semibold">{orderInfo.hoaDon.phiVanChuyen.toLocaleString('vi-VN')}₫</span>
               </div>

@@ -316,12 +316,59 @@ const OrderManagement = () => {
     });
   };
 
-  const generatePDF = (order, details) => {
+  const generatePDF = (orderData) => {
+    if (!orderData) {
+      console.error('Không có dữ liệu đơn hàng');
+      return;
+    }
+
+    // Thêm console.log để debug
+    console.log('Order Data:', orderData);
+    console.log('Thông tin tài khoản:', orderData?.thongTinTaiKhoan);
+    console.log('Hóa đơn:', orderData?.hoaDon);
+
+    // Các hàm helper để format text - Di chuyển lên đầu
+    const getTrangThaiText = (trangThai) => {
+      switch (trangThai) {
+        case 0: return 'Da huy';
+        case 1: return 'Cho xac nhan';
+        case 2: return 'Xac nhan don hang';
+        case 3: return 'Don vi van chuyen dang giao';
+        case 4: return 'Dang duoc giao toi ban';
+        case 5: return 'Don hang da duoc giao thanh cong';
+        case 6: return 'Xac nhan giao hang thanh cong';
+        case 7: return 'Hoan thanh don hang';
+        case 8: return 'Yeu cau hoan tra hang';
+        default: return 'N/A';
+      }
+    };
+
+    const getTrangThaiThanhToanText = (trangThai) => {
+      switch (trangThai) {
+        case 1: return 'Chua thanh toan';
+        case 2: return 'Da thanh toan';
+        case 3: return 'Da huy';
+        default: return 'N/A';
+      }
+    };
+
     const doc = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',
       format: 'a4'
     });
+
+    // Format thời gian
+    const formatDate = (dateArray) => {
+      if (!dateArray || !Array.isArray(dateArray)) return 'N/A';
+      const [year, month, day, hour, minute] = dateArray;
+      return new Date(year, month - 1, day, hour, minute).toLocaleString('vi-VN');
+    };
+
+    // Format tiền tệ
+    const formatCurrency = (amount) => {
+      return amount ? amount.toLocaleString('vi-VN') + ' VND' : '0 VND';
+    };
 
     // Thiết lập font Times New Roman
     doc.setFont('times', 'normal');
@@ -333,8 +380,8 @@ const OrderManagement = () => {
     
     doc.setFontSize(16);
     doc.setFont('times', 'bold');
-    doc.text("H O A   D O N   B A N   H A N G", 105, 30, { align: "center" });
-    doc.text(`#${order.maHoaDon}`, 105, 37, { align: "center" });
+    doc.text("HOA DON BAN HANG", 105, 30, { align: "center" });
+    doc.text(`#${orderData.hoaDon.maHoaDon}`, 105, 37, { align: "center" });
     
     // Đường kẻ phân cách
     doc.setDrawColor(0, 0, 0);
@@ -346,7 +393,7 @@ const OrderManagement = () => {
     doc.setFont('times', 'normal');
     doc.text([
       "CONG TY TNHH LAPTOP SHOP",
-      `${order.cuaHang?.soNha}, ${order.cuaHang?.phuong}, ${order.cuaHang?.huyen}, ${order.cuaHang?.tinh}`,
+      orderData.hoaDon.tenCuaHang || "N/A",
       "Hotline: 0123.456.789 - Email: shoplaptop@gmail.com",
       "MST: 0123456789"
     ], 105, 55, { align: "center" });
@@ -356,25 +403,15 @@ const OrderManagement = () => {
       startY: 75,
       head: [['THONG TIN KHACH HANG']], 
       body: [
-        ['Khach hang:', order.thongTinTaiKhoan?.hoTen || 'N/A'],
-        ['So dien thoai:', order.thongTinTaiKhoan?.soDienThoai || 'N/A'],
-        ['Email:', order.thongTinTaiKhoan?.email || 'N/A'],
-        ['CCCD:', order.thongTinTaiKhoan?.soCccd || 'N/A'],
-        ['Dia chi:', order.thongTinTaiKhoan?.diaChi || 'N/A'],
-        ['Dia diem giao hang:', order.diaChiNhanHang || 'N/A'],
-        ['Ngay dat hang:', new Date(order.thoiGianLapHoaDon).toLocaleDateString('vi-VN')],
-        ['Hinh thuc thanh toan:', order.hinhThucThanhToan?.tenHinhThuc || 'N/A'],
-        ['Trang thai don hang:', order.trangThai === 0 ? 'Da huy' :
-                               order.trangThai === 1 ? 'Cho xac nhan' :
-                               order.trangThai === 2 ? 'Xac nhan don hang' :
-                               order.trangThai === 3 ? 'Don vi van chuyen dang giao' :
-                               order.trangThai === 4 ? 'Dang duoc giao toi ban' :
-                               order.trangThai === 5 ? 'Don hang da duoc giao thanh cong' :
-                               order.trangThai === 6 ? 'Xac nhan giao hang thanh cong' :
-                               order.trangThai === 7 ? 'Hoan thanh don hang' :
-                               order.trangThai === 8 ? 'Yeu cau hoan tra hang' : 'N/A'],
-        ['Trang thai thanh toan:', order.trangThaiThanhToan === 1 ? 'Chua thanh toan' : 
-                                  order.trangThaiThanhToan === 2 ? 'Da thanh toan' : 'N/A']
+        ['Khach hang:', orderData?.thongTinTaiKhoan?.hoTen || 'N/A'],
+        ['So dien thoai:', orderData?.thongTinTaiKhoan?.soDienThoai || 'N/A'],
+        ['Email:', orderData?.thongTinTaiKhoan?.email || 'N/A'],
+        ['Dia chi:', orderData?.thongTinTaiKhoan?.diaChi || 'N/A'],
+        ['Dia diem giao hang:', orderData?.hoaDon?.diaChiNhanHang || 'N/A'],
+        ['Ngay dat hang:', formatDate(orderData?.hoaDon?.thoiGianLapHoaDon)],
+        ['Hinh thuc thanh toan:', orderData?.hoaDon?.hinhThucThanhToan || 'N/A'],
+        ['Trang thai don hang:', getTrangThaiText(orderData?.hoaDon?.trangThai)],
+        ['Trang thai thanh toan:', getTrangThaiThanhToanText(orderData?.hoaDon?.trangThaiThanhToan)]
       ],
       theme: 'plain',
       styles: { 
@@ -402,13 +439,13 @@ const OrderManagement = () => {
     // Chi tiết sản phẩm
     const productDetails = {
       startY: doc.lastAutoTable.finalY + 10,
-      head: [['STT', 'Sản phẩm', 'Số lượng', 'Đơn giá', 'Thành tiền']],
-      body: details.map((detail, index) => [
+      head: [['STT', 'San pham', 'So luong', 'Don gia', 'Thanh tien']],
+      body: orderData.chiTietHoaDon.map((detail, index) => [
         index + 1,
         detail.tenSanPham,
         detail.soLuong,
-        detail.donGia?.toLocaleString('vi-VN'),
-        (detail.soLuong * detail.donGia)?.toLocaleString('vi-VN')
+        formatCurrency(detail.donGia),
+        formatCurrency(detail.soLuong * detail.donGia)
       ]),
       theme: 'grid',
       headStyles: {
@@ -429,23 +466,22 @@ const OrderManagement = () => {
       },
       columnStyles: {
         0: { cellWidth: 15, halign: 'center' },
-        1: { cellWidth: 40 },
-        2: { cellWidth: 60 },
-        3: { cellWidth: 15, halign: 'center' },
-        4: { cellWidth: 30, halign: 'right' },
-        5: { cellWidth: 30, halign: 'right' }
+        1: { cellWidth: 80 },
+        2: { cellWidth: 25, halign: 'center' },
+        3: { cellWidth: 35, halign: 'right' },
+        4: { cellWidth: 35, halign: 'right' }
       }
     };
 
     doc.autoTable(productDetails);
 
-    // Tổng tiền và thông tin voucher
+    // Tổng tiền và phí vận chuyển
     const summaryData = {
       startY: doc.lastAutoTable.finalY + 5,
       body: [
-        ['Tổng tiền hàng:', order.tongTien?.toLocaleString('vi-VN') || '0'],
-        ['Phí vận chuyển:', order.phiVanChuyen?.toLocaleString('vi-VN') || '0'],
-        ['Tổng thanh toán:', order.tongTien?.toLocaleString('vi-VN') || '0']
+        ['Tong tien hang:', formatCurrency(orderData.hoaDon.tongTien)],
+        ['Phi van chuyen:', formatCurrency(orderData.hoaDon.phiVanChuyen)],
+        ['Tong thanh toan:', formatCurrency(orderData.hoaDon.tongTien + orderData.hoaDon.phiVanChuyen)]
       ],
       theme: 'plain',
       styles: { 
@@ -459,19 +495,6 @@ const OrderManagement = () => {
         1: { cellWidth: 30, halign: 'right', fontStyle: 'bold'}
       }
     };
-
-    // Thêm thông tin voucher nếu có
-    if (order.voucher) {
-      summaryData.body.push(
-        ['Giam gia:', `${(order.voucher.phanTramApDung * 100)}%`],
-        ['Tien giam toi da:', order.voucher.soTienToiDa?.toLocaleString('vi-VN')]
-      );
-    }
-
-    // Thêm tổng thanh toán
-    summaryData.body.push(
-      ['Tong thanh toan:', order.tongTien?.toLocaleString('vi-VN') || '0']
-    );
 
     doc.autoTable(summaryData);
 
@@ -502,7 +525,7 @@ const OrderManagement = () => {
 
     // Lưu file PDF
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    doc.save(`hoa_don_${order.maHoaDon}_${timestamp}.pdf`);
+    doc.save(`hoa_don_${orderData.hoaDon.maHoaDon}_${timestamp}.pdf`);
   };
 
   const handleAddImeis = async () => {
@@ -764,7 +787,17 @@ const OrderManagement = () => {
                   <div className="flex items-center gap-4">
                     <h2 className="text-3xl font-bold text-gray-800">Chi tiết đơn hàng #{selectedOrder.id}</h2>
                     <button 
-                      onClick={() => generatePDF(selectedOrder, orderDetails)}
+                      onClick={() => {
+                        console.log('OrderData before generating PDF:', orderData); // Debug log
+                        if (orderData && orderData.hoaDon && orderData.thongTinTaiKhoan) {
+                          generatePDF(orderData);
+                        } else {
+                          toast.error('Không có đủ dữ liệu đơn hàng để in', {
+                            position: "top-right",
+                            autoClose: 3000
+                          });
+                        }
+                      }}
                       className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-all duration-200 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 flex items-center gap-2"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">

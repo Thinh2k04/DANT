@@ -91,7 +91,9 @@ const HomePage = () => {
 
     } catch (error) {
       console.error('Error fetching data:', error);
-      toast.error('Có lỗi xảy ra khi tải dữ liệu!');
+      toast.error('Có lỗi xảy ra khi tải dữ liệu!', {
+        autoClose: 200
+      });
     } finally {
       setLoading(false);
     }
@@ -119,7 +121,9 @@ const HomePage = () => {
         setHasMore(searchResults.length > itemsPerPage);
       } catch (error) {
         console.error('Error searching laptops:', error);
-        toast.error('Có lỗi xảy ra khi tìm kiếm sản phẩm!');
+        toast.error('Có lỗi xảy ra khi tìm kiếm sản phẩm!', {
+          autoClose: 200
+        });
       } finally {
         setLoading(false);
       }
@@ -155,7 +159,9 @@ const HomePage = () => {
       
     } catch (error) {
       console.error('Error filtering laptops:', error);
-      toast.error('Có lỗi xảy ra khi lọc sản phẩm!');
+      toast.error('Có lỗi xảy ra khi lọc sản phẩm!', {
+        autoClose: 200
+      });
     } finally {
       setLoading(false);
     }
@@ -196,7 +202,7 @@ const HomePage = () => {
         setSelectedProduct(laptop);
         toast.success('Sản phẩm đã được thêm vào giỏ hàng!', {
           position: "top-right",
-          autoClose: 2000,
+          autoClose: 200,
           hideProgressBar: false,
           closeOnClick: true,
           pauseOnHover: true,
@@ -207,7 +213,7 @@ const HomePage = () => {
       console.error('Error adding to cart:', error);
       toast.error('Có lỗi xảy ra khi thêm vào giỏ hàng!', {
         position: "top-right",
-        autoClose: 2000,
+        autoClose: 200,
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,

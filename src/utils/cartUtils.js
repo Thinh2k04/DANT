@@ -29,7 +29,7 @@ export const addToCart = (item) => {
         </div>, 
         {
           position: "top-right",
-          autoClose: 2000,
+          autoClose: 200, // Giảm xuống 200ms
           hideProgressBar: false,
           closeOnClick: true,
           pauseOnHover: true,
@@ -37,10 +37,10 @@ export const addToCart = (item) => {
           onClose: () => {
             // Đánh dấu là thông báo đã hiển thị
             localStorage.setItem('cartToastShown', 'true');
-            // Xóa đánh dấu sau 1 giây để cho phép hiển thị thông báo tiếp theo
+            // Xóa đánh dấu sau 200ms để cho phép hiển thị thông báo tiếp theo
             setTimeout(() => {
               localStorage.removeItem('cartToastShown');
-            }, 1000);
+            }, 200);
           }
         }
       );
@@ -53,7 +53,9 @@ export const addToCart = (item) => {
     };
   } catch (error) {
     console.error('Error adding to cart:', error);
-    toast.error('Có lỗi xảy ra khi thêm sản phẩm!');
+    toast.error('Có lỗi xảy ra khi thêm sản phẩm!', {
+      autoClose: 200 // Giảm xuống 200ms cho thông báo lỗi
+    });
     return { success: false };
   }
 };
@@ -96,7 +98,9 @@ export const updateCartItemQuantity = async (id, newQuantity) => {
       const stockData = await stockResponse.json();
       
       if (newQuantity > stockData.soLuong) {
-        toast.warning(`Số lượng vượt quá hàng tồn kho (${stockData.soLuong} sản phẩm)!`);
+        toast.warning(`Số lượng vượt quá hàng tồn kho (${stockData.soLuong} sản phẩm)!`, {
+          autoClose: 200 // Giảm xuống 200ms
+        });
         return { success: false };
       }
 
@@ -126,12 +130,16 @@ export const updateCartItemQuantity = async (id, newQuantity) => {
       
       return { success: true };
     } else {
-      toast.error(result.message || 'Không thể cập nhật số lượng sản phẩm');
+      toast.error(result.message || 'Không thể cập nhật số lượng sản phẩm', {
+        autoClose: 200 // Giảm xuống 200ms
+      });
       return { success: false };
     }
   } catch (error) {
     console.error('Error updating quantity:', error);
-    toast.error('Có lỗi xảy ra khi cập nhật số lượng!');
+    toast.error('Có lỗi xảy ra khi cập nhật số lượng!', {
+      autoClose: 200 // Giảm xuống 200ms
+    });
     return { success: false };
   }
 };
@@ -184,7 +192,9 @@ export const processCheckout = (cartItems, selectedItems, quantities) => {
   try {
     const itemsToCheckout = cartItems.filter(item => selectedItems[item.id]);
     if (itemsToCheckout.length === 0) {
-      toast.error('Vui lòng chọn ít nhất một sản phẩm để thanh toán');
+      toast.error('Vui lòng chọn ít nhất một sản phẩm để thanh toán', {
+        autoClose: 200 // Giảm xuống 200ms
+      });
       return { success: false };
     }
 
@@ -209,7 +219,9 @@ export const processCheckout = (cartItems, selectedItems, quantities) => {
     return { success: true };
   } catch (error) {
     console.error('Error processing checkout:', error);
-    toast.error('Có lỗi xảy ra khi xử lý thanh toán!');
+    toast.error('Có lỗi xảy ra khi xử lý thanh toán!', {
+      autoClose: 200 // Giảm xuống 200ms
+    });
     return { success: false };
   }
 };

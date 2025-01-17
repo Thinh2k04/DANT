@@ -12,9 +12,6 @@ export const useOrder = () => {
     customerName,
     phoneNumber,
     email,
-    deliveryMethod,
-    selectedStore,
-    stores,
     selectedProvince,
     selectedDistrict,
     selectedWard,
@@ -29,48 +26,43 @@ export const useOrder = () => {
     appliedVoucher
   }) => {
     const now = new Date();
-    const selectedProvinceName = provinces.find(
-      p => p.code === parseInt(selectedProvince)
-    )?.name || '';
     
-    const selectedDistrictName = districts.find(
-      d => d.code === parseInt(selectedDistrict)
-    )?.name || '';
+    // Kiểm tra và lấy tên địa chỉ an toàn
+    const getLocationName = (array, code) => {
+      if (!array || !Array.isArray(array)) return '';
+      const item = array.find(item => item.code === parseInt(code));
+      return item ? item.name : '';
+    };
 
-    let deliveryAddress;
-    if (deliveryMethod === "pickup") {
-      const selectedStoreInfo = stores.find(store => store.id === parseInt(selectedStore));
-      if (selectedStoreInfo) {
-        deliveryAddress = `${selectedStoreInfo.soNha}, ${selectedStoreInfo.phuong}, ${selectedStoreInfo.huyen}, ${selectedStoreInfo.tinh}`;
-      }
-    } else {
-      deliveryAddress = `${specificAddress || ''}, ${selectedWard || ''}, ${selectedDistrictName}, ${selectedProvinceName}`;
-    }
+    // Lấy tên địa chỉ an toàn
+    const provinceName = getLocationName(provinces, selectedProvince);
+    const districtName = getLocationName(districts, selectedDistrict);
+    
+    // Tạo địa chỉ đầy đủ
+    const deliveryAddress = `${specificAddress || ''}, ${selectedWard || ''}, ${districtName}, ${provinceName}`.replace(/^[\s,]+|[\s,]+$/g, '');
 
-    // Tính phí vận chuyển dựa trên phương thức giao hàng
-    const calculatedShippingFee = deliveryMethod === "pickup" ? 0 : (shippingFee || 0);
-
-    return {
+    // Chuẩn bị dữ liệu đơn hàng
+    const orderData = {
       tttk: {
         id: "",
-        hoTen: customerName || '',
-        diaChi: specificAddress || '',
+        hoTen: customerName?.trim() || '',
+        diaChi: specificAddress?.trim() || '',
         soCCCD: "",
         soDienThoai: phoneNumber || '',
-        email: email || '',
+        email: email?.trim() || '',
         taiKhoanNguoiDung: null,
         trangThai: null
       },
       hd: {
         thoiGianLapHoaDon: now.toISOString(),
-        tongTien: totalAmount + calculatedShippingFee,
-        phiVanChuyen: calculatedShippingFee,
+        tongTien: (totalAmount || 0) + (shippingFee || 0),
+        phiVanChuyen: shippingFee || 0,
         hinhThucThanhToan: {
           id: parseInt(paymentMethod) || 1
         },
         diaChiNhanHang: deliveryAddress,
         cuaHang: {
-          id: deliveryMethod === "pickup" ? parseInt(selectedStore) : 1,
+          id: 1,
           tinh: "Hà Nội",
           huyen: "Hoàn Kiếm",
           phuong: "Phường 1",
@@ -94,35 +86,27 @@ export const useOrder = () => {
         trangThaiThanhToan: 2,
         trangThai: 0
       },
-      lhdct: cartItems.map(item => ({
+      lhdct: (cartItems || []).map(item => ({
         hoaDon: {
           id: ""
         },
         sanPhamChiTiet: {
           id: item?.id?.toString() || ''
         },
-        soLuong: quantities[item?.id] || 1,
+        soLuong: quantities?.[item?.id] || 1,
         gia: parseFloat(item?.donGia || 0)
       }))
     };
+
+    return orderData;
   };
 
   const clearCart = async (purchasedItems) => {
     try {
-      // Lấy danh sách sản phẩm hiện tại trong giỏ hàng
-      const currentCartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
-      
-      // Lọc ra các sản phẩm không nằm trong đơn hàng
-      const remainingItems = currentCartItems.filter(cartItem => 
-        !purchasedItems.some(purchasedItem => purchasedItem.id === cartItem.id)
-      );
-
-      // Cập nhật lại localStorage với các sản phẩm còn lại
-      if (remainingItems.length > 0) {
-        localStorage.setItem('cartItems', JSON.stringify(remainingItems));
-      } else {
-        localStorage.removeItem('cartItems');
-      }
+      // Xóa toàn bộ giỏ hàng vì chỉ có một đơn hàng
+      localStorage.removeItem('cartItems');
+      localStorage.removeItem('quantities');
+      localStorage.removeItem('shippingFee');
 
       // Trigger event để cập nhật số lượng trong navbar
       window.dispatchEvent(new Event('cartUpdated'));
@@ -156,7 +140,6 @@ export const useOrder = () => {
 
       const responseData = await orderResponse.json();
 
-      // Kiểm tra response và chuyển hướng
       if (orderResponse.ok) {
         // Xóa giỏ hàng
         await clearCart(cartItems);
@@ -173,7 +156,6 @@ export const useOrder = () => {
             phiVanChuyen: responseData.hoaDon.phiVanChuyen,
             hinhThucThanhToan: responseData.hoaDon.hinhThucThanhToan,
             diaChiNhanHang: responseData.hoaDon.diaChiNhanHang,
-            cuaHang: responseData.hoaDon.cuaHang,
             trangThaiThanhToan: responseData.hoaDon.trangThaiThanhToan,
             trangThai: responseData.hoaDon.trangThai
           },
@@ -187,7 +169,7 @@ export const useOrder = () => {
           replace: true
         });
 
-        // Gửi email xác nhận với dữ liệu từ orderInfo
+        // Gửi email xác nhận nếu có email
         if (email) {
           try {
             await sendOrderConfirmationEmail({

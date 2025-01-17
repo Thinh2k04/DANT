@@ -519,19 +519,24 @@ const OrderManagement = () => {
         }
       }
 
+      // Format dữ liệu theo yêu cầu API
+      const requestData = {
+        username: userInfo.username,
+        listImei: []
+      };
+
       // Tạo danh sách IMEI theo format mới
-      const imeiList = [];
       for (const spctId in selectedImeis) {
         const selectedImeiIds = selectedImeis[spctId];
         const imeis = availableImeis[spctId].filter(imei => selectedImeiIds.includes(imei.id));
         
         imeis.forEach(imei => {
-          imeiList.push({
+          requestData.listImei.push({
             id: imei.id,
+            imei: imei.imei,
             spct: {
               id: parseInt(spctId)
-            },
-            imei: imei.imei
+            }
           });
         });
       }
@@ -541,7 +546,7 @@ const OrderManagement = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(imeiList)
+        body: JSON.stringify(requestData)
       });
 
       if (!response.ok) throw new Error('Failed to update order');

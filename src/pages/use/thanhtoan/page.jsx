@@ -3,11 +3,9 @@ import React, { useState, useEffect } from "react";
 import Navbar from "../../../components/Layout/DefaultLayout/Navbar";
 import CustomerInformation from '../../../components/GioHangComponenst/CustomerInformation';
 import DeliveryMethod from '../../../components/GioHangComponenst/DeliveryMethod';
-import PickupInfo from '../../../components/GioHangComponenst/PickupInfo';
 import ShippingInfo from '../../../components/GioHangComponenst/ShippingInfo';
 import PaymentMethod from '../../../components/GioHangComponenst/PaymentMethod';
 import OrderSummary from '../../../components/GioHangComponenst/OrderSummary';
-import { sonnet } from "@cloudinary/url-gen/qualifiers/artisticFilter";
 import { Link, useNavigate } from 'react-router-dom';
 import { FaCheckCircle, FaBox, FaHome, FaArrowLeft, FaShoppingCart } from 'react-icons/fa';
 import { BsReceiptCutoff } from 'react-icons/bs';
@@ -39,10 +37,7 @@ function CheckoutPage() {
   const [errors, setErrors] = useState({}); // Lưu trữ các lỗi
   
   // Các state quản lý phương thức nhận/thanh toán
-  const [deliveryMethod, setDeliveryMethod] = useState("pickup"); // Phương thức nhận hàng
-  const [stores, setStores] = useState([]); // Danh sách cửa hàng
-  const [selectedStore, setSelectedStore] = useState(""); // Cửa hàng đã chọn
-  const [pickupDate, setPickupDate] = useState(""); // Ngày nhận hàng
+  const [deliveryMethod, setDeliveryMethod] = useState("shipping"); // Phương thức nhận hàng
   const [paymentMethod, setPaymentMethod] = useState("cod"); // Phương thức thanh toán
   const [shippingFee, setShippingFee] = useState(0); // Phí vận chuyển
 
@@ -78,21 +73,6 @@ function CheckoutPage() {
   // Effect hook để lấy danh sách tỉnh/thành và khởi tạo danh sách cửa hàng
   useEffect(() => {
     callAPI(`${host}?depth=1`);
-    // Gọi API lấy danh sách cửa hàng
-    fetch('http://localhost:8080/rest/cuaHang/getAll')
-      .then(response => response.json())
-      .then(data => {
-        // Map data để thêm tên cửa hàng và giờ mở/đóng cửa vào mỗi store
-        const storesWithNames = data.map(store => ({
-          ...store,
-          name: store.tenCuaHang,
-          hours: `${store.thoiGianMoCua} - ${store.thoiGianDongCua}` // Thêm giờ mở/đóng cửa
-        }));
-        setStores(storesWithNames);
-      })
-      .catch(error => {
-        console.error('Error fetching stores:', error);
-      });
   }, []);
 
   // Hàm gọi API lấy danh sách tỉnh/thành
@@ -177,37 +157,20 @@ function CheckoutPage() {
       newErrors.email = "Email không hợp lệ";
     }
 
-    // Validate phương thức nhận hàng
-    if (deliveryMethod === "pickup") {
-      // Validate thông tin nhận tại cửa hàng
-      if (!selectedStore) {
-        newErrors.store = "Vui lòng chọn cửa hàng";
-      }
-      if (!pickupDate) {
-        newErrors.pickupDate = "Vui lòng chọn ngày nhận hàng";
-      } else {
-        const selectedDate = new Date(pickupDate);
-        const today = new Date();
-        if (selectedDate < today) {
-          newErrors.pickupDate = "Ngày nhận hàng không được là ngày trong quá khứ";
-        }
-      }
-    } else if (deliveryMethod === "shipping") {
-      // Validate địa chỉ giao hàng
-      if (!selectedProvince) {
-        newErrors.province = "Vui lòng chọn tỉnh/thành";
-      }
-      if (!selectedDistrict) {
-        newErrors.district = "Vui lòng chọn quận/huyện";  
-      }
-      if (!selectedWard) {
-        newErrors.ward = "Vui lòng chọn phường/xã";
-      }
-      if (!specificAddress.trim()) {
-        newErrors.address = "Vui lòng nhập địa chỉ cụ thể";
-      } else if (specificAddress.trim().length > 200) {
-        newErrors.address = "Địa chỉ không được vượt quá 200 ký tự";
-      }
+    // Validate địa chỉ giao hàng
+    if (!selectedProvince) {
+      newErrors.province = "Vui lòng chọn tỉnh/thành";
+    }
+    if (!selectedDistrict) {
+      newErrors.district = "Vui lòng chọn quận/huyện";  
+    }
+    if (!selectedWard) {
+      newErrors.ward = "Vui lòng chọn phường/xã";
+    }
+    if (!specificAddress.trim()) {
+      newErrors.address = "Vui lòng nhập địa chỉ cụ thể";
+    } else if (specificAddress.trim().length > 200) {
+      newErrors.address = "Địa chỉ không được vượt quá 200 ký tự";
     }
 
     // Validate giỏ hàng
@@ -234,21 +197,18 @@ function CheckoutPage() {
             name: customerName.trim(),
             phone: phoneNumber,
             email: email.trim(),
-            address:
-              deliveryMethod === "pickup"
-                ? { store: selectedStore, pickupDate }
-                : {
-                    province: provinces.find(
-                      (p) => p.code === parseInt(selectedProvince)
-                    )?.name,
-                    district: districts.find(
-                      (d) => d.code === parseInt(selectedDistrict)
-                    )?.name,
-                    ward: wards.find(
-                      (w) => w.code === parseInt(selectedWard)
-                    )?.name,
-                    specificAddress: specificAddress.trim(),
-                  },
+            address: {
+              province: provinces.find(
+                (p) => p.code === parseInt(selectedProvince)
+              )?.name,
+              district: districts.find(
+                (d) => d.code === parseInt(selectedDistrict)
+              )?.name,
+              ward: wards.find(
+                (w) => w.code === parseInt(selectedWard)
+              )?.name,
+              specificAddress: specificAddress.trim(),
+            },
             paymentMethod: paymentMethod,
           },
           items: cartItems.map((item) => ({
@@ -318,48 +278,35 @@ function CheckoutPage() {
                 deliveryMethod={deliveryMethod}
                 setDeliveryMethod={setDeliveryMethod}
                 setErrors={setErrors}
-                setPickupDate={setPickupDate}
+                setPickupDate={() => {}}
               />
 
-              {deliveryMethod === "pickup" && (
-                <PickupInfo
-                  stores={stores}
-                  selectedStore={selectedStore}
-                  setSelectedStore={setSelectedStore}
-                  pickupDate={pickupDate}
-                  setPickupDate={setPickupDate}
-                  errors={errors}
-                  setErrors={setErrors}
-                />
-              )}
-
-              {deliveryMethod === "shipping" && (
-                <ShippingInfo
-                  provinces={provinces}
-                  districts={districts}
-                  wards={wards}
-                  selectedProvince={selectedProvince}
-                  selectedDistrict={selectedDistrict}
-                  selectedWard={selectedWard}
-                  specificAddress={specificAddress}
-                  handleProvinceChange={handleProvinceChange}
-                  handleDistrictChange={handleDistrictChange}
-                  setSelectedWard={setSelectedWard}
-                  setSpecificAddress={setSpecificAddress}
-                  errors={errors}
-                  setErrors={setErrors}
-                  totalAmount={totalAmount}
-                  setShippingFee={setShippingFee}
-                  weight={weight}
-                />
-              )}
+              <ShippingInfo
+                provinces={provinces}
+                districts={districts}
+                wards={wards}
+                selectedProvince={selectedProvince}
+                selectedDistrict={selectedDistrict}
+                selectedWard={selectedWard}
+                specificAddress={specificAddress}
+                handleProvinceChange={handleProvinceChange}
+                handleDistrictChange={handleDistrictChange}
+                setSelectedWard={setSelectedWard}
+                setSpecificAddress={setSpecificAddress}
+                errors={errors}
+                setErrors={setErrors}
+                setShippingFee={setShippingFee}
+                cartItems={cartItems}
+                quantities={quantities}
+                totalAmount={totalAmount}
+                weight={weight}
+              />
 
               <PaymentMethod
                 paymentMethod={paymentMethod}
                 setPaymentMethod={setPaymentMethod}
                 errors={errors}
                 setErrors={setErrors}
-                deliveryMethod={deliveryMethod}
               />
             </div>
           </div>
@@ -367,29 +314,21 @@ function CheckoutPage() {
           {/* Cột phải - Tổng quan đơn hàng */}
           <div className="w-full md:w-1/2 px-4">
             <OrderSummary
-              provinces={provinces}
-              districts={districts}
-              wards={wards}
-              selectedProvince={selectedProvince}
-              selectedDistrict={selectedDistrict}
-              selectedWard={selectedWard}
               cartItems={cartItems}
               quantities={quantities}
               totalAmount={totalAmount}
               shippingFee={shippingFee}
               errors={errors}
               setErrors={setErrors}
-              loading={loading}
-              handleCheckout={handleCheckout}
               customerName={customerName}
               phoneNumber={phoneNumber}
               email={email}
               deliveryMethod={deliveryMethod}
+              selectedProvince={selectedProvince}
+              selectedDistrict={selectedDistrict}
+              selectedWard={selectedWard}
               specificAddress={specificAddress}
               paymentMethod={paymentMethod}
-              selectedStore={selectedStore}
-              stores={stores}
-              pickupDate={pickupDate}
             />
           </div>
         </div>

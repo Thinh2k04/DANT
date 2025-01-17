@@ -6,11 +6,13 @@ import com.example.aino_1.entity.SanPhamChiTiet;
 import com.example.aino_1.repository.SanPhamChiTietInterface;
 import com.example.aino_1.service.SanPhamChiTietService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @CrossOrigin("*") //cho phép tất cả các miền khác truy cập tài nguyên server (end point api)
@@ -51,10 +53,19 @@ public class  SanPhamChiTietRestController {
         return spctsi.save(spct);
     }
 
-    @PostMapping("/del")
-    public void delete(@RequestBody SanPhamChiTiet spct) {
-        spct.setTrangThai(0);
-        spctsi.save(spct);
+    @PostMapping("/del/{id}")
+    public ResponseEntity<?> delete(@PathVariable Integer id) {
+        Optional<SanPhamChiTiet> optionalSanPhamChiTiet = spctsi.findById(id);
+
+        if (!optionalSanPhamChiTiet.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("San pham với ID " + id + " không tìm thấy");
+        }
+
+        SanPhamChiTiet sanPhamChiTiet = optionalSanPhamChiTiet.get();
+        sanPhamChiTiet.setTrangThai(0);
+        SanPhamChiTiet saved = spctsi.save(sanPhamChiTiet);
+
+        return ResponseEntity.ok(saved);
     }
 
     @GetMapping("/getSPCTByIdSP/{id}")

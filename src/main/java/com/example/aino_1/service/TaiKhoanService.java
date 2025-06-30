@@ -70,7 +70,7 @@ public class TaiKhoanService {
             tknd.setEmail(staffDTO.getEmail());
             tknd.setPassword(staffDTO.getPassword()); // Mã hóa mật khẩu
             tknd.setChucVu("STAFF");
-            tknd.setEnabled(1);
+            tknd.setEnabled(Integer.valueOf("NULL"));
             tknd.setCreatedAt(LocalDateTime.now());
             tknd.setUpdatedAt(LocalDateTime.now());
 

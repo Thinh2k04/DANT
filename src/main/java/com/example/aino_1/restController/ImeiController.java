@@ -112,7 +112,19 @@ public class ImeiController {
         }
     }
 
+    @GetMapping("/findHDByImei/{Imei}")
+    public String findHoaDonByImei(@PathVariable String imei) {
+        // Tìm HoaDon từ service imsv bằng Imei
+        HoaDon hd = imsv.findHoaDonByImei(imei);
 
+        if (hd != null) {
+            // Nếu tìm thấy hóa đơn, trả về thông tin của hóa đơn
+            return "Hóa đơn tìm thấy: " + hd.getId(); // Bạn có thể thay đổi phần này để trả về thông tin chi tiết của hóa đơn
+        } else {
+            // Nếu không tìm thấy hóa đơn, trả về thông báo
+            return "Không tìm thấy hóa đơn";
+        }
+    }
 
 //    @GetMapping("/getTopImei")
 //    public ResponseEntity<?> getTopImeiBySanPhamChiTietIdAndTrangThai(

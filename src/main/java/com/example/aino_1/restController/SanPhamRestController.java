@@ -59,8 +59,6 @@ public class SanPhamRestController {
         return spsv.getListThungRac();
     }
 
-
-
     @GetMapping("/getById/{id}")
     public SanPham getById(@PathVariable Integer id) {
         return spsi.findById(id).get();

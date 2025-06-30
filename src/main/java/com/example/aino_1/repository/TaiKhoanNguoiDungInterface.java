@@ -13,6 +13,7 @@ import java.util.Optional;
 public interface TaiKhoanNguoiDungInterface extends JpaRepository<TaiKhoanNguoiDung, Integer> {
     Optional<TaiKhoanNguoiDung> findByUsername(String username);
     List<TaiKhoanNguoiDung> findByChucVu(String chucVu);
+    List<TaiKhoanNguoiDung> findAllByEnabled(Integer id);
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);
 }

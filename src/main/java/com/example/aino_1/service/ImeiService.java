@@ -180,5 +180,29 @@ public class ImeiService {
         return listImeiDTO;
     }
 
+    public HoaDon findHoaDonByImei(String imei) {
+        // Lấy Imei từ cơ sở dữ liệu
+        Imei imeis = imif.findByImei(imei).get();  // Lưu ý sửa tên phương thức "finfByImei" thành "findByImei"
+        if (imeis == null) {
+            // Nếu không tìm thấy Imei, trả về null hoặc xử lý tùy theo yêu cầu
+            return null;
+        }
 
+        // Tìm HoaDonChiTiet liên kết với Imei này
+        HoaDonChiTiet hoaDonChiTiet = imeis.getHdct();
+        if (hoaDonChiTiet == null) {
+            // Nếu không tìm thấy HoaDonChiTiet, trả về null hoặc xử lý tùy theo yêu cầu
+            return null;
+        }
+
+        // Tìm HoaDon từ HoaDonChiTiet
+        HoaDon hoaDon = hoaDonChiTiet.getHoaDon();
+        if (hoaDon == null) {
+            // Nếu không tìm thấy HoaDon, trả về null hoặc xử lý tùy theo yêu cầu
+            return null;
+        }
+
+        // Trả về HoaDon tìm thấy
+        return hoaDon;
+    }
 }
